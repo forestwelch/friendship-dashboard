@@ -1,0 +1,64 @@
+/* Color Theme System for Friendship Dashboard */
+
+/* Daniel - Blue Theme */
+.theme-daniel {
+  --primary: #2a52be;
+  --secondary: #7cb9e8;
+  --accent: #00308f;
+  --bg: #e6f2ff;
+  --text: #001f3f;
+  /* Grid tile colors - muted versions of theme */
+  --grid-tile-bg: rgba(0, 48, 143, 0.05);
+  --grid-tile-border: rgba(124, 185, 232, 0.1);
+}
+
+/* Max - Red Theme */
+.theme-max {
+  --primary: #dc143c;
+  --secondary: #ff6b6b;
+  --accent: #8b0000;
+  --bg: #ffe6e6;
+  --text: #2d0000;
+  /* Grid tile colors - muted versions of theme */
+  --grid-tile-bg: rgba(139, 0, 0, 0.05);
+  --grid-tile-border: rgba(255, 107, 107, 0.1);
+}
+
+/* Violet Plum Theme */
+.theme-violet-plum {
+  --primary: #832161ff;
+  --secondary: #da4167ff;
+  --accent: #3d2645ff;
+  --bg: #f0eff4ff;
+  --text: #000000ff;
+  /* Grid tile colors - muted versions of theme */
+  --grid-tile-bg: rgba(61, 38, 69, 0.05);
+  --grid-tile-border: rgba(218, 65, 103, 0.1);
+}
+
+/* Gameboy Color Palette Theme */
+.theme-gameboy {
+  --primary: #306230;
+  --secondary: #8bac0f;
+  --accent: #0f380f;
+  --bg: #9bbc0f;
+  /* Use darkest green for maximum contrast on light green background */
+  --text: #0f380f;
+  /* Grid tile colors - darker for better contrast and visibility */
+  --grid-tile-bg: rgba(15, 56, 15, 0.2);
+  --grid-tile-border: rgba(48, 98, 48, 0.25);
+}
+
+/* Default theme (fallback) */
+:root {
+  --primary: #2a52be;
+  --secondary: #7cb9e8;
+  --accent: #00308f;
+  --bg: #e6f2ff;
+  --text: #001f3f;
+  /* Grid tile colors - muted versions of theme */
+  --grid-tile-bg: rgba(0, 48, 143, 0.05);
+  --grid-tile-border: rgba(124, 185, 232, 0.1);
+}
+
+

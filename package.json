@@ -9,6 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@hackernoon/pixel-icon-library": "^1.0.6",
+    "@supabase/supabase-js": "^2.84.0",
+    "heic2any": "^0.0.4",
     "next": "16.0.3",
     "react": "19.2.0",
     "react-dom": "19.2.0"
