@@ -2,8 +2,8 @@
 
 import React from "react";
 import { FriendPageClient } from "@/app/[friend]/FriendPageClient";
-import { Friend, FriendWidget } from "@/lib/types";
-import { Song } from "@/lib/types";
+import { Friend, Song } from "@/lib/types";
+import { FriendWidget } from "@/lib/queries";
 
 export default function TestDashboardPage() {
   // Mock Friend Data
@@ -22,8 +22,18 @@ export default function TestDashboardPage() {
 
   // Mock Songs
   const mockSongs: Song[] = [
-    { id: "1", title: "Test Song 1", artist: "Artist A", youtubeId: "dQw4w9WgXcQ" },
-    { id: "2", title: "Test Song 2", artist: "Artist B", youtubeId: "dQw4w9WgXcQ" },
+    {
+      id: "1",
+      title: "Test Song 1",
+      artist: "Artist A",
+      youtubeId: "dQw4w9WgXcQ",
+    },
+    {
+      id: "2",
+      title: "Test Song 2",
+      artist: "Artist B",
+      youtubeId: "dQw4w9WgXcQ",
+    },
   ];
 
   // Mock Widgets - One of each type
@@ -48,8 +58,13 @@ export default function TestDashboardPage() {
       position_y: 0,
       config: {
         events: [
-          { id: "e1", title: "Test Event", date: new Date().toISOString(), type: "hangout" }
-        ]
+          {
+            id: "e1",
+            title: "Test Event",
+            date: new Date().toISOString(),
+            type: "hangout",
+          },
+        ],
       },
     },
     {
@@ -61,7 +76,13 @@ export default function TestDashboardPage() {
       position_x: 4,
       position_y: 0,
       config: {
-        notes: [{ id: "n1", content: "This is a test note.", created_at: new Date().toISOString() }]
+        notes: [
+          {
+            id: "n1",
+            content: "This is a test note.",
+            created_at: new Date().toISOString(),
+          },
+        ],
       },
     },
     {
@@ -74,8 +95,13 @@ export default function TestDashboardPage() {
       position_y: 2,
       config: {
         links: [
-          { id: "l1", title: "Google", url: "https://google.com", icon: "hn-globe" }
-        ]
+          {
+            id: "l1",
+            title: "Google",
+            url: "https://google.com",
+            icon: "hn-globe",
+          },
+        ],
       },
     },
     {
@@ -88,8 +114,8 @@ export default function TestDashboardPage() {
       position_y: 2,
       config: {
         recommendations: [
-          { id: "m1", title: "Inception", type: "Movie", rating: 5 }
-        ]
+          { id: "m1", title: "Inception", type: "Movie", rating: 5 },
+        ],
       },
     },
     {
@@ -114,5 +140,3 @@ export default function TestDashboardPage() {
     />
   );
 }
-
-

@@ -719,6 +719,11 @@ export function FriendPageClient({
                     pixelArtImageUrl={pixelArtImageUrl}
                     onUploadImage={(file) => handleUploadImage(file, widget.id)}
                     friendId={friend.id}
+                    themeColors={{
+                      primary: localColors.primary,
+                      secondary: localColors.secondary,
+                      accent: localColors.accent,
+                    }}
                     onUpdateWidgetConfig={async (widgetId, config) => {
                       // Update widget config in database
                       try {

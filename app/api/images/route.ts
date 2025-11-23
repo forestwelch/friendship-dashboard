@@ -12,9 +12,10 @@ export async function GET() {
     console.log("[API] Fetching global images...");
     const startTime = Date.now();
     
+    // Only fetch pixel_data (not base_image_data) for performance - 4KB vs MB
     const { data, error } = await supabase
       .from("pixel_art_images")
-      .select("id, base_image_data, size, created_at")
+      .select("id, pixel_data, size, width, height, created_at")
       .is("friend_id", null) // Only global images
       .order("created_at", { ascending: false })
       .limit(100); // Limit to prevent huge payloads
@@ -27,16 +28,17 @@ export async function GET() {
       return NextResponse.json({ error: "Failed to fetch images" }, { status: 500 });
     }
 
-    // Create thumbnails for faster loading (first 1000 chars of base64)
-    const imagesWithThumbnails = (data || []).map((img) => ({
+    // Return only pixel_data (new format, 4KB) - skip base_image_data for performance
+    const images = (data || []).map((img) => ({
       id: img.id,
-      base_image_data: img.base_image_data, // Keep full image for processing
-      thumbnail: img.base_image_data.substring(0, 100) + "...", // Thumbnail for preview
+      pixel_data: img.pixel_data || null, // New format: base64-encoded Uint8Array (4KB)
       size: img.size,
+      width: img.width || 128, // Default to 128x128
+      height: img.height || 128,
       created_at: img.created_at,
     }));
 
-    return NextResponse.json({ images: imagesWithThumbnails });
+    return NextResponse.json({ images });
   } catch (error) {
     console.error("[API] Error in GET /api/images:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -47,20 +49,25 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
+    const pixelData = formData.get("pixel_data") as string | null; // New format: pre-processed pixel data
 
-    if (!file) {
-      return NextResponse.json({ error: "Missing file" }, { status: 400 });
+    if (!file && !pixelData) {
+      return NextResponse.json({ error: "Missing file or pixel_data" }, { status: 400 });
     }
 
-    // Convert file to base64
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const base64 = buffer.toString("base64");
-    const base64DataUrl = `data:${file.type};base64,${base64}`;
+    let imageId: string | null = null;
 
-    // Save to database - use "2x2" as default size since images work for all sizes
-    // The size field is kept for backward compatibility but images are flexible
-    const imageId = await savePixelArtImage(null, null, "2x2", base64DataUrl);
+    if (pixelData) {
+      // New format: pixel_data is already processed client-side
+      imageId = await savePixelArtImage(null, null, "2x2", undefined, pixelData);
+    } else if (file) {
+      // Old format: convert file to base64 (for backward compatibility)
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const base64 = buffer.toString("base64");
+      const base64DataUrl = `data:${file.type};base64,${base64}`;
+      imageId = await savePixelArtImage(null, null, "2x2", base64DataUrl);
+    }
 
     if (!imageId) {
       return NextResponse.json({ error: "Failed to save image" }, { status: 500 });
@@ -70,7 +77,7 @@ export async function POST(request: NextRequest) {
     if (isSupabaseConfigured()) {
       const { data, error } = await supabase
         .from("pixel_art_images")
-        .select("id, base_image_data, size, created_at")
+        .select("id, pixel_data, base_image_data, size, width, height, created_at")
         .eq("id", imageId)
         .single();
 
@@ -78,17 +85,28 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Failed to fetch saved image" }, { status: 500 });
       }
 
-      return NextResponse.json({ image: data });
+      return NextResponse.json({ 
+        image: {
+          id: data.id,
+          pixel_data: data.pixel_data || null,
+          size: data.size,
+          width: data.width || 128,
+          height: data.height || 128,
+          created_at: data.created_at,
+        }
+      });
     }
 
-      return NextResponse.json({ 
-        image: { 
-          id: imageId, 
-          base_image_data: base64DataUrl, 
-          size: "2x2", // Default for compatibility
-          created_at: new Date().toISOString() 
-        } 
-      });
+    return NextResponse.json({ 
+      image: { 
+        id: imageId, 
+        pixel_data: pixelData || null,
+        size: "2x2",
+        width: 128,
+        height: 128,
+        created_at: new Date().toISOString() 
+      } 
+    });
   } catch (error) {
     console.error("Error in POST /api/images:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

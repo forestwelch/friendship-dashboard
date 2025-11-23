@@ -3,12 +3,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FriendWidget } from "@/lib/queries";
 import { playSound } from "@/lib/sounds";
-import { cropImageToSize, getThemePalette } from "@/lib/image-processing";
+import { processImageToPixelData, pixelDataToBase64 } from "@/lib/pixel-data-processing";
 
 interface ImageItem {
   id: string;
-  base_image_data: string;
+  pixel_data?: string | null; // New format: base64-encoded Uint8Array
+  base_image_data?: string | null; // Old format: base64 image (for backward compatibility)
   size: string;
+  width?: number;
+  height?: number;
   created_at: string;
 }
 
@@ -220,17 +223,32 @@ export function WidgetConfigModal({
         );
 
       case "pixel_art":
-        // Get selected image IDs - check both imageIds and imageUrls (for backward compatibility)
+        // Get selected image IDs - check pixelData (new format) or imageIds/imageUrls (backward compatibility)
         let selectedImageIds: string[] = config.imageIds || [];
 
-        // If we have imageUrls but no imageIds, try to match them to available images
+        // If we have pixelData but no imageIds, extract IDs from pixelData array
+        if (
+          selectedImageIds.length === 0 &&
+          config.pixelData &&
+          config.pixelData.length > 0
+        ) {
+          // Try to match pixelData to available images (this is a simplified approach)
+          // In a real scenario, you'd want to store image IDs alongside pixelData
+          selectedImageIds = availableImages
+            .filter((img) => img.pixel_data && config.pixelData.includes(img.pixel_data))
+            .map((img) => img.id);
+        }
+
+        // Backward compatibility: if we have imageUrls but no imageIds
         if (
           selectedImageIds.length === 0 &&
           config.imageUrls &&
           config.imageUrls.length > 0
         ) {
           selectedImageIds = availableImages
-            .filter((img) => config.imageUrls.includes(img.base_image_data))
+            .filter((img) => 
+              img.base_image_data && config.imageUrls.includes(img.base_image_data)
+            )
             .map((img) => img.id);
         }
         return (
@@ -276,6 +294,13 @@ export function WidgetConfigModal({
               >
                 {availableImages.map((img) => {
                   const isSelected = selectedImageIds.includes(img.id);
+                  const isProcessing = processingImages.has(img.id);
+                  
+                  // Use pixel_data if available (new format), otherwise fall back to base_image_data (old format)
+                  const imageSrc = img.pixel_data 
+                    ? null // Will render programmatically
+                    : img.base_image_data || null;
+                  
                   return (
                     <div
                       key={img.id}
@@ -292,132 +317,74 @@ export function WidgetConfigModal({
                           const remainingImages = availableImages.filter((i) =>
                             newIds.includes(i.id)
                           );
+                          
+                          // Update config with remaining pixel_data (new format) or imageUrls (old format)
+                          const existingPixelData = config.pixelData || [];
+                          const existingImageUrls = config.imageUrls || [];
+                          
                           setConfig({
                             ...config,
                             imageIds: newIds,
-                            imageUrls: remainingImages.map((i) => {
-                              // Keep processed URLs if they exist in config
-                              const existingUrls = config.imageUrls || [];
-                              const existingIndex = existingUrls.findIndex(
-                                (url: string) =>
-                                  url.includes(
-                                    i.base_image_data.substring(0, 50)
-                                  ) // Match by first part
-                              );
-                              return existingIndex >= 0
-                                ? existingUrls[existingIndex]
-                                : i.base_image_data;
-                            }),
+                            pixelData: remainingImages
+                              .map((i) => i.pixel_data)
+                              .filter((pd): pd is string => pd !== null && pd !== undefined),
+                            imageUrls: remainingImages
+                              .map((i) => i.base_image_data)
+                              .filter((url): url is string => url !== null && url !== undefined),
                           });
                           return;
                         }
 
-                        // If selecting, process the image through pixelation (async, non-blocking)
-                        if (!processingImages.has(img.id)) {
+                        // If selecting and image doesn't have pixel_data, process it
+                        if (!img.pixel_data && img.base_image_data && !isProcessing) {
                           setProcessingImages((prev) =>
                             new Set(prev).add(img.id)
                           );
 
-                          // Process in background
+                          // Process image to pixel data (async, non-blocking)
                           (async () => {
                             try {
                               console.log(
-                                `[WidgetConfig] Processing image ${img.id}...`
+                                `[WidgetConfig] Processing image ${img.id} to pixel data...`
                               );
                               const processStartTime = Date.now();
 
                               // Convert base64 to File for processing
-                              const response = await fetch(img.base_image_data);
+                              const response = await fetch(img.base_image_data!);
                               const blob = await response.blob();
                               const file = new File([blob], "image.png", {
                                 type: "image/png",
                               });
 
-                              // Get widget size dimensions
-                              const rootFontSize =
-                                typeof window !== "undefined"
-                                  ? parseFloat(
-                                      getComputedStyle(document.documentElement)
-                                        .fontSize
-                                    )
-                                  : 16;
-                              const tileSize = 5 * rootFontSize; // 5rem
-                              const gap = 0.5 * rootFontSize; // 0.5rem
-
-                              // Determine size based on widget (default to 2x2)
-                              const widgetSize = widget?.size || "2x2";
-                              let width = tileSize;
-                              let height = tileSize;
-
-                              if (widgetSize === "2x2") {
-                                width = tileSize * 2 + gap;
-                                height = tileSize * 2 + gap;
-                              } else if (widgetSize === "3x3") {
-                                width = tileSize * 3 + gap * 2;
-                                height = tileSize * 3 + gap * 2;
-                              }
-
-                              // Use friend's colors if provided, otherwise fall back to CSS variables
-                              const palette = friendColors
-                                ? {
-                                    primary: friendColors.primary,
-                                    secondary: friendColors.secondary,
-                                    accent: friendColors.accent,
-                                    bg: friendColors.bg,
-                                    text: friendColors.text,
-                                  }
-                                : getThemePalette();
-
-                              console.log(
-                                `[WidgetConfig] Processing with palette:`,
-                                palette
-                              );
-                              const pixelated = await cropImageToSize(
-                                file,
-                                width,
-                                height,
-                                4,
-                                palette
-                              );
+                              // Process to 64x64 pixel data
+                              const pixelDataArray = await processImageToPixelData(file);
+                              const pixelDataBase64 = pixelDataToBase64(pixelDataArray);
 
                               const processTime = Date.now() - processStartTime;
                               console.log(
                                 `[WidgetConfig] Image ${img.id} processed in ${processTime}ms`
                               );
 
-                              // Update config with processed image (use functional update to avoid stale closure)
+                              // Update config with pixel_data
                               setConfig((prevConfig) => {
                                 const selectedImages = availableImages.filter(
                                   (i) => newIds.includes(i.id)
                                 );
-                                const existingUrls = prevConfig.imageUrls || [];
-
-                                // Map to processed URLs
-                                const processedUrls = selectedImages.map(
-                                  (imageItem) => {
+                                
+                                // Collect pixel_data from selected images
+                                const pixelDataArray = selectedImages
+                                  .map((imageItem) => {
                                     if (imageItem.id === img.id) {
-                                      return pixelated; // Use newly processed image
+                                      return pixelDataBase64; // Use newly processed data
                                     }
-                                    // For other images, check if already processed
-                                    const existingIndex =
-                                      existingUrls.findIndex((url: string) =>
-                                        url.includes(
-                                          imageItem.base_image_data.substring(
-                                            0,
-                                            50
-                                          )
-                                        )
-                                      );
-                                    return existingIndex >= 0
-                                      ? existingUrls[existingIndex]
-                                      : imageItem.base_image_data;
-                                  }
-                                );
+                                    return imageItem.pixel_data || null;
+                                  })
+                                  .filter((pd): pd is string => pd !== null);
 
                                 return {
                                   ...prevConfig,
                                   imageIds: newIds,
-                                  imageUrls: processedUrls,
+                                  pixelData: pixelDataArray,
                                 };
                               });
                             } catch (error) {
@@ -425,7 +392,7 @@ export function WidgetConfigModal({
                                 `[WidgetConfig] Error processing image ${img.id}:`,
                                 error
                               );
-                              // Fallback to original image if processing fails
+                              // Fallback: use base_image_data if processing fails
                               setConfig((prevConfig) => {
                                 const selectedImages = availableImages.filter(
                                   (i) => newIds.includes(i.id)
@@ -433,9 +400,9 @@ export function WidgetConfigModal({
                                 return {
                                   ...prevConfig,
                                   imageIds: newIds,
-                                  imageUrls: selectedImages.map(
-                                    (i) => i.base_image_data
-                                  ),
+                                  imageUrls: selectedImages
+                                    .map((i) => i.base_image_data)
+                                    .filter((url): url is string => url !== null && url !== undefined),
                                 };
                               });
                             } finally {
@@ -446,6 +413,22 @@ export function WidgetConfigModal({
                               });
                             }
                           })();
+                        } else if (img.pixel_data) {
+                          // Image already has pixel_data, just add it to config
+                          setConfig((prevConfig) => {
+                            const selectedImages = availableImages.filter(
+                              (i) => newIds.includes(i.id)
+                            );
+                            const pixelDataArray = selectedImages
+                              .map((i) => i.pixel_data)
+                              .filter((pd): pd is string => pd !== null && pd !== undefined);
+                            
+                            return {
+                              ...prevConfig,
+                              imageIds: newIds,
+                              pixelData: pixelDataArray,
+                            };
+                          });
                         }
                       }}
                       style={{
@@ -461,17 +444,53 @@ export function WidgetConfigModal({
                         transition: "all 0.2s",
                       }}
                     >
-                      <img
-                        src={img.base_image_data}
-                        alt=""
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          imageRendering: "pixelated",
-                        }}
-                      />
-                      {isSelected && (
+                      {imageSrc ? (
+                        <img
+                          src={imageSrc}
+                          alt=""
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            imageRendering: "pixelated",
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: "var(--game-surface)",
+                            fontSize: "var(--font-size-xs)",
+                            color: "var(--text)",
+                          }}
+                        >
+                          Pixel Data
+                        </div>
+                      )}
+                      {isProcessing && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: "rgba(0, 0, 0, 0.5)",
+                            color: "white",
+                            fontSize: "var(--font-size-xs)",
+                          }}
+                        >
+                          Processing...
+                        </div>
+                      )}
+                      {isSelected && !isProcessing && (
                         <div
                           style={{
                             position: "absolute",

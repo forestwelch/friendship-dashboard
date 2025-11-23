@@ -58,10 +58,13 @@ export async function getAllFriends(): Promise<Friend[]> {
   }
 
   try {
+    console.time("[DB] getAllFriends");
     const { data, error } = await supabase
       .from("friends")
       .select("*")
       .order("display_name");
+
+    console.timeEnd("[DB] getAllFriends");
 
     if (error) {
       console.error("Error fetching friends:", error);
@@ -85,36 +88,54 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
   }
 
   try {
+    console.time("[DB] getFriendPage");
+    
     // Fetch friend
+    console.time("[DB] getFriendPage - friend");
     const { data: friend, error: friendError } = await supabase
       .from("friends")
       .select("*")
       .eq("slug", slug)
       .single();
+    console.timeEnd("[DB] getFriendPage - friend");
 
     if (friendError || !friend) {
       console.error("Error fetching friend:", friendError);
+      console.timeEnd("[DB] getFriendPage");
       return null;
     }
 
-    // Fetch friend's widgets with widget type info
-    const { data: widgets, error: widgetsError } = await supabase
-      .from("friend_widgets")
-      .select(`
-        id,
-        widget_id,
-        size,
-        position_x,
-        position_y,
-        config,
-        widgets:widget_id (
-          type,
-          name
-        )
-      `)
-      .eq("friend_id", friend.id)
-      .order("position_y")
-      .order("position_x");
+    // Parallelize queries for better performance
+    const [widgetsResult, pixelArtResult] = await Promise.all([
+      // Fetch friend's widgets with widget type info
+      supabase
+        .from("friend_widgets")
+        .select(`
+          id,
+          widget_id,
+          size,
+          position_x,
+          position_y,
+          config,
+          widgets:widget_id (
+            type,
+            name
+          )
+        `)
+        .eq("friend_id", friend.id)
+        .order("position_y")
+        .order("position_x"),
+      // Fetch pixel art images for this friend (lazy load - don't fetch full image data here)
+      supabase
+        .from("pixel_art_images")
+        .select("id, widget_id, size")
+        .eq("friend_id", friend.id)
+    ]);
+
+    console.timeEnd("[DB] getFriendPage");
+
+    const { data: widgets, error: widgetsError } = widgetsResult;
+    const { data: pixelArtImages } = pixelArtResult;
 
     if (widgetsError) {
       console.error("Error fetching widgets:", widgetsError);
@@ -133,12 +154,6 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
       config: w.config || {},
     }));
 
-    // Fetch pixel art images for this friend
-    const { data: pixelArtImages } = await supabase
-      .from("pixel_art_images")
-      .select("id, widget_id, size, base_image_data") // Changed from image_data to base_image_data
-      .eq("friend_id", friend.id);
-
     return {
       friend: {
         id: friend.id,
@@ -152,10 +167,10 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
         color_text: friend.color_text,
       },
       widgets: transformedWidgets,
-      // Map back to expected interface
+      // Map back to expected interface (without full image data for performance)
       pixelArtImages: (pixelArtImages || []).map((img: any) => ({
         ...img,
-        image_data: img.base_image_data
+        image_data: "" // Will be fetched separately if needed
       })) || [],
     };
   } catch (error) {
@@ -173,11 +188,14 @@ export async function getGlobalContent(contentType: string): Promise<any> {
   }
 
   try {
+    console.time(`[DB] getGlobalContent - ${contentType}`);
     const { data, error } = await supabase
       .from("global_content")
       .select("data")
       .eq("content_type", contentType)
       .single();
+
+    console.timeEnd(`[DB] getGlobalContent - ${contentType}`);
 
     if (error || !data) {
       console.error("Error fetching global content:", error);
@@ -222,13 +240,14 @@ export async function getPersonalContent(
 }
 
 /**
- * Save pixel art image
+ * Save pixel art image (supports both old base_image_data and new pixel_data)
  */
 export async function savePixelArtImage(
   friendId: string | null, // Allow null for global images
   widgetId: string | null,
   size: WidgetSize,
-  imageData: string
+  imageData?: string, // Old format: base64 image data
+  pixelData?: string // New format: base64-encoded Uint8Array
 ): Promise<string | null> {
   if (!isSupabaseConfigured()) {
     console.log("Mock: Would save pixel art image");
@@ -236,14 +255,27 @@ export async function savePixelArtImage(
   }
 
   try {
+    const insertData: any = {
+      friend_id: friendId,
+      widget_id: widgetId,
+      size,
+    };
+
+    // Use pixel_data if provided (new format), otherwise fall back to base_image_data (old format)
+    if (pixelData) {
+      insertData.pixel_data = pixelData;
+      insertData.width = 128; // Updated to match PIXEL_GRID_SIZE
+      insertData.height = 128;
+    } else if (imageData) {
+      insertData.base_image_data = imageData;
+    } else {
+      console.error("Error saving pixel art: No imageData or pixelData provided");
+      return null;
+    }
+
     const { data, error } = await supabase
       .from("pixel_art_images")
-      .insert({
-        friend_id: friendId,
-        widget_id: widgetId,
-        size,
-        base_image_data: imageData, // Changed from image_data
-      })
+      .insert(insertData)
       .select("id")
       .single();
 

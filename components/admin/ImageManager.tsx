@@ -3,11 +3,15 @@
 import React, { useState, useRef, useEffect } from "react";
 import { playSound } from "@/lib/sounds";
 import { WidgetSize } from "@/lib/types";
+import { base64ToPixelData, renderPixelDataAsSVG, PIXEL_GRID_SIZE } from "@/lib/pixel-data-processing";
 
 interface ImageItem {
   id: string;
-  base_image_data: string; // Base64 or URL
+  pixel_data?: string | null; // New format: base64-encoded Uint8Array
+  base_image_data?: string | null; // Old format: base64 image (for backward compatibility)
   size: WidgetSize;
+  width?: number;
+  height?: number;
   created_at: string;
 }
 
@@ -43,9 +47,13 @@ export function ImageManager({
 
     try {
       const uploadPromises = Array.from(files).map(async (file) => {
+        // Process image to pixel_data client-side
+        const { processImageToPixelData, pixelDataToBase64 } = await import("@/lib/pixel-data-processing");
+        const pixelDataArray = await processImageToPixelData(file);
+        const pixelDataBase64 = pixelDataToBase64(pixelDataArray);
+        
         const formData = new FormData();
-        formData.append("file", file);
-        // No size parameter - images work for all sizes
+        formData.append("pixel_data", pixelDataBase64);
 
         const response = await fetch("/api/images", {
           method: "POST",
@@ -181,62 +189,143 @@ export function ImageManager({
           alignContent: "start",
         }}
       >
-        {images.map((img) => (
-          <div
-            key={img.id}
-            onClick={() => toggleSelection(img.id)}
-            style={{
-              position: "relative",
-              aspectRatio: "1/1",
-              border: selectedImages.has(img.id)
-                ? "0.125rem solid var(--game-accent-blue)"
-                : "0.0625rem solid var(--game-border)",
-              borderRadius: "var(--radius-sm)",
-              overflow: "hidden",
-              cursor: "pointer",
-              transition: "all 0.2s",
-              transform: selectedImages.has(img.id)
-                ? "scale(0.95)"
-                : "scale(1)",
-              boxShadow: selectedImages.has(img.id)
-                ? "var(--game-glow-blue)"
-                : "none",
-            }}
-          >
-            <img
-              src={img.base_image_data}
-              alt="Asset"
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                imageRendering: "pixelated",
-                opacity: selectedImages.has(img.id) ? 0.8 : 1,
-              }}
-            />
-            {selectedImages.has(img.id) && (
+        {images.map((img) => {
+          // Render pixel_data as SVG preview, or fall back to base_image_data
+          let imagePreview: React.ReactNode;
+          
+          if (img.pixel_data) {
+            try {
+              const pixelData = base64ToPixelData(img.pixel_data);
+              const gridSize = img.width || PIXEL_GRID_SIZE;
+              // Use default theme colors for preview (can be any colors)
+              const themeColors = {
+                primary: "#2a52be",
+                secondary: "#7cb9e8",
+                accent: "#00308f",
+              };
+              // Calculate pixel size for preview (smaller for grid display)
+              const previewSize = 150; // Fixed preview size
+              const pixelSize = previewSize / gridSize;
+              const svgContent = renderPixelDataAsSVG(pixelData, themeColors, gridSize, gridSize, pixelSize);
+              imagePreview = (
+                <div
+                  dangerouslySetInnerHTML={{ __html: svgContent }}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                />
+              );
+            } catch (error) {
+              console.error("Error rendering pixel data preview:", error);
+              imagePreview = (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "var(--game-surface)",
+                    color: "var(--text)",
+                    fontSize: "var(--font-size-xs)",
+                  }}
+                >
+                  Pixel Data
+                </div>
+              );
+            }
+          } else if (img.base_image_data) {
+            imagePreview = (
+              <img
+                src={img.base_image_data}
+                alt="Asset"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  imageRendering: "pixelated",
+                }}
+              />
+            );
+          } else {
+            imagePreview = (
               <div
                 style={{
-                  position: "absolute",
-                  top: "var(--space-xs)",
-                  right: "var(--space-xs)",
-                  background: "var(--game-accent-blue)",
-                  color: "white",
-                  borderRadius: "50%",
-                  width: "1.25rem",
-                  height: "1.25rem",
+                  width: "100%",
+                  height: "100%",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "var(--font-size-sm)",
-                  fontWeight: "bold",
+                  background: "var(--game-surface)",
+                  color: "var(--text)",
+                  fontSize: "var(--font-size-xs)",
                 }}
               >
-                ✓
+                No preview
               </div>
-            )}
-          </div>
-        ))}
+            );
+          }
+
+          return (
+            <div
+              key={img.id}
+              onClick={() => toggleSelection(img.id)}
+              style={{
+                position: "relative",
+                aspectRatio: "1/1",
+                border: selectedImages.has(img.id)
+                  ? "0.125rem solid var(--game-accent-blue)"
+                  : "0.0625rem solid var(--game-border)",
+                borderRadius: "var(--radius-sm)",
+                overflow: "hidden",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                transform: selectedImages.has(img.id)
+                  ? "scale(0.95)"
+                  : "scale(1)",
+                boxShadow: selectedImages.has(img.id)
+                  ? "var(--game-glow-blue)"
+                  : "none",
+                background: "var(--game-surface)",
+              }}
+            >
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  opacity: selectedImages.has(img.id) ? 0.8 : 1,
+                }}
+              >
+                {imagePreview}
+              </div>
+              {selectedImages.has(img.id) && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "var(--space-xs)",
+                    right: "var(--space-xs)",
+                    background: "var(--game-accent-blue)",
+                    color: "white",
+                    borderRadius: "50%",
+                    width: "1.25rem",
+                    height: "1.25rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "var(--font-size-sm)",
+                    fontWeight: "bold",
+                  }}
+                >
+                  ✓
+                </div>
+              )}
+            </div>
+          );
+        })}
 
         {images.length === 0 && (
           <div

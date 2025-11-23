@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from "./supabase";
+import { createInboxItem } from "./queries";
 
 export async function proposeHangout(
   friendId: string,

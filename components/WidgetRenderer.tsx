@@ -8,11 +8,11 @@ import {
   Notes,
   Links,
   MediaRecommendations,
-  ImageWidget,
 } from "@/components/widgets";
 import { FriendWidget } from "@/lib/queries";
 import { Song } from "@/lib/types";
 import { createInboxItem } from "@/lib/queries-inbox";
+import { ThemeColors } from "@/lib/pixel-data-processing";
 
 interface WidgetRendererProps {
   widget: FriendWidget;
@@ -21,6 +21,7 @@ interface WidgetRendererProps {
   onUploadImage?: (file: File) => Promise<void>;
   friendId?: string;
   onUpdateWidgetConfig?: (widgetId: string, config: Record<string, any>) => Promise<void>;
+  themeColors?: ThemeColors; // Theme colors for programmatic pixel rendering
 }
 
 /**
@@ -33,6 +34,7 @@ export function WidgetRenderer({
   onUploadImage,
   friendId,
   onUpdateWidgetConfig,
+  themeColors,
 }: WidgetRendererProps) {
   const handleProposeHangout = async (date: string, time: string, message?: string) => {
     if (!friendId) {
@@ -85,10 +87,22 @@ export function WidgetRenderer({
       return <MusicPlayer size={widget.size} songs={songs} />;
 
     case "pixel_art":
-      // Check if widget config has imageUrls for slideshow
+      // Check if widget config has pixelData (new programmatic approach) or imageUrls (backward compatibility)
+      const pixelData = widget.config?.pixelData;
       const imageUrls = widget.config?.imageUrls;
       
-      // Fallback to single image if no imageUrls configured
+      // Use programmatic rendering if pixelData is available
+      if (pixelData && pixelData.length > 0 && themeColors) {
+        return (
+          <PixelArt 
+            size={widget.size}
+            pixelData={pixelData}
+            themeColors={themeColors}
+          />
+        );
+      }
+      
+      // Fallback to image-based rendering (backward compatibility)
       if (!imageUrls && !pixelArtImageUrl) {
         return (
           <div
@@ -116,11 +130,26 @@ export function WidgetRenderer({
       );
 
     case "image":
+      // Route "image" widgets to PixelArt for backward compatibility
+      const imageImageUrls = widget.config?.imageUrls;
+      const imagePixelData = widget.config?.pixelData;
+      
+      // Use programmatic rendering if pixelData is available
+      if (imagePixelData && imagePixelData.length > 0 && themeColors) {
+        return (
+          <PixelArt 
+            size={widget.size}
+            pixelData={imagePixelData}
+            themeColors={themeColors}
+          />
+        );
+      }
+      
       return (
-        <ImageWidget 
+        <PixelArt 
           size={widget.size} 
-          imageUrl={pixelArtImageUrl} 
-          onUpload={onUploadImage} 
+          imageUrl={imageImageUrls ? undefined : pixelArtImageUrl}
+          imageUrls={imageImageUrls}
         />
       );
 

@@ -14,7 +14,6 @@ INSERT INTO widgets (type, name, description)
 VALUES
   ('music_player', 'Music Player', 'Play your top 10 songs'),
   ('pixel_art', 'Pixel Art', 'Display pixelated images with slideshow'),
-  ('image', 'Image', 'Display uploaded images'),
   ('media_recommendations', 'Media Recommendations', 'Share movies, shows, books'),
   ('calendar', 'Calendar', 'Show availability and events'),
   ('notes', 'Notes', 'Leave messages for friends'),
