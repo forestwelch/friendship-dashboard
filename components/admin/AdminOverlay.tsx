@@ -1,0 +1,89 @@
+"use client";
+
+import React from "react";
+
+interface AdminOverlayProps {
+  widgetId: string;
+  onDelete: () => void;
+  onDragStart: (e: React.DragEvent) => void;
+}
+
+export function AdminOverlay({ widgetId, onDelete, onDragStart }: AdminOverlayProps) {
+  return (
+    <div
+      data-widget-item={widgetId}
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: "rgba(0, 0, 0, 0.7)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 100,
+        cursor: "grab",
+        border: "var(--border-width-lg) dashed var(--game-accent-blue)",
+        borderRadius: "var(--radius-sm)",
+        userSelect: "none",
+        WebkitUserSelect: "none",
+      }}
+      draggable={true}
+      onDragStart={onDragStart}
+      onDragEnd={(e) => {
+        // Reset opacity
+        if (e.currentTarget instanceof HTMLElement) {
+          e.currentTarget.style.opacity = "";
+        }
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "var(--space-xs)",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          style={{
+            padding: "var(--space-xs) var(--space-sm)",
+            background: "var(--game-accent-red)",
+            color: "white",
+            border: "none",
+            borderRadius: "var(--radius-sm)",
+            cursor: "pointer",
+            fontSize: "var(--font-size-xs)",
+            fontWeight: "bold",
+            textTransform: "uppercase",
+            boxShadow: "var(--game-shadow-md)",
+            minWidth: "60px",
+          }}
+        >
+          <i className="hn hn-trash-solid" style={{ fontSize: "var(--font-size-xs)", marginRight: "var(--space-xs)" }} />
+          DEL
+        </button>
+        <div
+          style={{
+            color: "var(--game-text-primary)",
+            fontSize: "var(--font-size-xs)",
+            fontWeight: "bold",
+            textShadow: `calc(var(--border-width-md) * 1) calc(var(--border-width-md) * 1) 0 rgba(0, 0, 0, 0.8)`,
+            textAlign: "center",
+          }}
+        >
+          DRAG
+        </div>
+      </div>
+    </div>
+  );
+}
+

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import { createYouTubePlayer, getPlayerInstance, YouTubePlayer } from "@/lib/youtube";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { createYouTubePlayer, YouTubePlayer } from "@/lib/youtube";
 
 interface YouTubePlayerContextValue {
   player: YouTubePlayer | null;
@@ -13,27 +13,35 @@ interface YouTubePlayerContextValue {
   setPlaylist: (songs: Array<{ youtubeId: string }>) => void;
 }
 
-export const YouTubePlayerContext = React.createContext<YouTubePlayerContextValue>({
-  player: null,
-  isPlaying: false,
-  currentVideoId: null,
-  play: () => {},
-  pause: () => {},
-  next: () => {},
-  setPlaylist: () => {},
-});
+export const YouTubePlayerContext =
+  React.createContext<YouTubePlayerContextValue>({
+    player: null,
+    isPlaying: false,
+    currentVideoId: null,
+    play: () => {},
+    pause: () => {},
+    next: () => {},
+    setPlaylist: () => {},
+  });
 
-export function YouTubePlayerProvider({ children }: { children: React.ReactNode }) {
+// Global singleton to ensure only one player instance exists
+let globalPlayerInstance: YouTubePlayer | null = null;
+let globalInitialized = false;
+
+export function YouTubePlayerProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [player, setPlayer] = useState<YouTubePlayer | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   const [playlist, setPlaylist] = useState<Array<{ youtubeId: string }>>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  const initializedRef = useRef(false);
   const playlistRef = useRef<Array<{ youtubeId: string }>>([]);
   const currentIndexRef = useRef(0);
-  const playerRef = useRef<YouTubePlayer | null>(null);
+  const initPromiseRef = useRef<Promise<YouTubePlayer | null> | null>(null);
 
   // Keep refs in sync with state
   useEffect(() => {
@@ -44,101 +52,157 @@ export function YouTubePlayerProvider({ children }: { children: React.ReactNode 
     currentIndexRef.current = currentIndex;
   }, [currentIndex]);
 
+  // Use global singleton if available
   useEffect(() => {
-    playerRef.current = player;
+    if (globalPlayerInstance && !player) {
+      setPlayer(globalPlayerInstance);
+    }
   }, [player]);
 
-  useEffect(() => {
-    if (initializedRef.current || !containerRef.current || typeof window === "undefined") return;
-    initializedRef.current = true;
+  const initPlayer = useCallback(async (): Promise<YouTubePlayer | null> => {
+    // Return existing promise if initialization is in progress
+    if (initPromiseRef.current) {
+      return initPromiseRef.current;
+    }
 
-    const initPlayer = async () => {
-      if (!containerRef.current || typeof window === "undefined") return;
-      
-      // Ensure container exists and has ID
-      const containerId = "youtube-player-container";
-      if (!containerRef.current.id) {
-        containerRef.current.id = containerId;
-      }
-      
-      const handleStateChange = (event: any) => {
-        // YT.PlayerState.PLAYING = 1
-        // YT.PlayerState.PAUSED = 2
-        // YT.PlayerState.ENDED = 0
-        if (event.data === 1) {
-          setIsPlaying(true);
-        } else if (event.data === 2 || event.data === 0) {
-          setIsPlaying(false);
-          if (event.data === 0) {
-            // Video ended, play next
-            setTimeout(() => {
-              const currentPlaylist = playlistRef.current;
-              const currentIdx = currentIndexRef.current;
-              const currentPlayer = playerRef.current;
-              
-              if (currentPlaylist.length > 0 && currentPlayer) {
-                const nextIndex = (currentIdx + 1) % currentPlaylist.length;
-                const nextSong = currentPlaylist[nextIndex];
-                if (nextSong) {
-                  setCurrentIndex(nextIndex);
-                  currentPlayer.loadVideoById(nextSong.youtubeId);
-                  currentPlayer.playVideo();
+    // Return existing player if already initialized
+    if (globalPlayerInstance) {
+      setPlayer(globalPlayerInstance);
+      return globalPlayerInstance;
+    }
+
+    if (typeof window === "undefined" || globalInitialized) {
+      return null;
+    }
+
+    // Create initialization promise
+    initPromiseRef.current = (async () => {
+      try {
+        // Wait for container to be ready
+        let retries = 0;
+        while (
+          (!containerRef.current || !containerRef.current.isConnected) &&
+          retries < 20
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          retries++;
+        }
+
+        if (!containerRef.current || !containerRef.current.isConnected) {
+          throw new Error("Container not available");
+        }
+
+        // CRITICAL: Ensure container is completely empty
+        // YouTube API uses insertBefore internally - container MUST be empty
+        const container = containerRef.current;
+        while (container.firstChild) {
+          container.removeChild(container.firstChild);
+        }
+
+        // Ensure container has ID
+        const containerId = "youtube-player-container";
+        if (!container.id) {
+          container.id = containerId;
+        }
+
+        // Wait for YouTube API to be ready
+        let apiRetries = 0;
+        while ((!window.YT || !window.YT.Player) && apiRetries < 50) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          apiRetries++;
+        }
+
+        if (!window.YT || !window.YT.Player) {
+          throw new Error("YouTube API not loaded");
+        }
+
+        globalInitialized = true;
+
+        const handleStateChange = (event: any) => {
+          if (event.data === 1) {
+            setIsPlaying(true);
+          } else if (event.data === 2 || event.data === 0) {
+            setIsPlaying(false);
+            if (event.data === 0) {
+              // Video ended, play next
+              setTimeout(() => {
+                const currentPlaylist = playlistRef.current;
+                const currentIdx = currentIndexRef.current;
+                const currentPlayer = globalPlayerInstance;
+
+                if (currentPlaylist.length > 0 && currentPlayer) {
+                  const nextIndex = (currentIdx + 1) % currentPlaylist.length;
+                  const nextSong = currentPlaylist[nextIndex];
+                  if (nextSong) {
+                    setCurrentIndex(nextIndex);
+                    currentPlayer.loadVideoById(nextSong.youtubeId);
+                    currentPlayer.playVideo();
+                  }
                 }
-              }
-            }, 100);
+              }, 100);
+            }
           }
-        }
-      };
+        };
 
-      const ytPlayer = await createYouTubePlayer(containerId, {
-        width: 1,
-        height: 1,
-        onStateChange: handleStateChange,
-      });
+        // Create player - container is guaranteed to be empty
+        const ytPlayer = await createYouTubePlayer(containerId, {
+          width: 1,
+          height: 1,
+          onStateChange: handleStateChange,
+        });
 
-      setPlayer(ytPlayer);
-    };
-
-    initPlayer();
-
-    // Cleanup function to destroy player on unmount
-    return () => {
-      if (playerRef.current && typeof playerRef.current.destroy === "function") {
-        try {
-          playerRef.current.destroy();
-        } catch (error) {
-          // Ignore cleanup errors
-          console.warn("Error destroying YouTube player:", error);
-        }
+        globalPlayerInstance = ytPlayer;
+        setPlayer(ytPlayer);
+        initPromiseRef.current = null;
+        return ytPlayer;
+      } catch (error) {
+        console.error("Error initializing YouTube player:", error);
+        globalInitialized = false;
+        initPromiseRef.current = null;
+        return null;
       }
-      // Reset initialization flag so player can be recreated if component remounts
-      initializedRef.current = false;
-    };
+    })();
+
+    return initPromiseRef.current;
   }, []);
 
-  const handlePlay = (videoId: string) => {
-    if (!player || !videoId) return;
-    try {
-      setCurrentVideoId(videoId);
-      player.loadVideoById(videoId);
-      player.playVideo();
-      setIsPlaying(true);
-    } catch (error) {
-      console.error("Error playing video:", error);
-    }
-  };
+  const handlePlay = useCallback(
+    async (videoId: string) => {
+      if (!videoId) return;
 
-  const handlePause = () => {
-    if (!player) return;
+      // Initialize player lazily on first play
+      if (!globalPlayerInstance) {
+        await initPlayer();
+      }
+
+      if (!globalPlayerInstance) {
+        console.error("Failed to initialize YouTube player");
+        return;
+      }
+
+      try {
+        setCurrentVideoId(videoId);
+        globalPlayerInstance.loadVideoById(videoId);
+        globalPlayerInstance.playVideo();
+        setIsPlaying(true);
+      } catch (error) {
+        console.error("Error playing video:", error);
+      }
+    },
+    [initPlayer]
+  );
+
+  const handlePause = useCallback(() => {
+    if (!globalPlayerInstance) return;
     try {
-      player.pauseVideo();
+      globalPlayerInstance.pauseVideo();
       setIsPlaying(false);
     } catch (error) {
       console.error("Error pausing video:", error);
     }
-  };
+  }, []);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (playlist.length === 0) return;
     const nextIndex = (currentIndex + 1) % playlist.length;
     setCurrentIndex(nextIndex);
@@ -146,21 +210,24 @@ export function YouTubePlayerProvider({ children }: { children: React.ReactNode 
     if (nextSong && nextSong.youtubeId) {
       handlePlay(nextSong.youtubeId);
     }
-  };
+  }, [playlist, currentIndex, handlePlay]);
 
-  const handleSetPlaylist = (songs: Array<{ youtubeId: string }>) => {
-    if (!songs || !Array.isArray(songs)) return;
-    setPlaylist(songs);
-    setCurrentIndex(0);
-    if (songs.length > 0 && songs[0] && songs[0].youtubeId) {
-      handlePlay(songs[0].youtubeId);
-    }
-  };
+  const handleSetPlaylist = useCallback(
+    (songs: Array<{ youtubeId: string }>) => {
+      if (!songs || !Array.isArray(songs)) return;
+      setPlaylist(songs);
+      setCurrentIndex(0);
+      if (songs.length > 0 && songs[0] && songs[0].youtubeId) {
+        handlePlay(songs[0].youtubeId);
+      }
+    },
+    [handlePlay]
+  );
 
   return (
     <YouTubePlayerContext.Provider
       value={{
-        player,
+        player: globalPlayerInstance,
         isPlaying,
         currentVideoId,
         play: handlePlay,
@@ -170,9 +237,11 @@ export function YouTubePlayerProvider({ children }: { children: React.ReactNode 
       }}
     >
       {children}
+      {/* Container MUST be empty - YouTube API will insert iframe here */}
       <div
         ref={containerRef}
         id="youtube-player-container"
+        data-youtube-container="true"
         style={{
           position: "fixed",
           top: "-9999px",
@@ -181,9 +250,10 @@ export function YouTubePlayerProvider({ children }: { children: React.ReactNode 
           height: "1px",
           opacity: 0,
           pointerEvents: "none",
+          zIndex: -1,
         }}
+        suppressHydrationWarning
       />
     </YouTubePlayerContext.Provider>
   );
 }
-

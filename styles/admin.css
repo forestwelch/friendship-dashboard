@@ -1,0 +1,175 @@
+/* Admin Dark Mode Styles - 6-Color Grayscale Palette */
+
+/* Admin 6-Color Palette:
+   1. bg - #000000 (black)
+   2. surface - #1a1a1a (dark gray)
+   3. primary - #404040 (medium gray)
+   4. secondary - #606060 (lighter gray)
+   5. accent - #808080 (border gray)
+   6. text - #e0e0e0 (light gray)
+*/
+
+:root {
+  --admin-bg: #000000;
+  --admin-surface: #1a1a1a;
+  --admin-primary: #404040;
+  --admin-secondary: #606060;
+  --admin-accent: #808080;
+  --admin-text: #e0e0e0;
+}
+
+/* Admin pages dark mode */
+.admin-page {
+  background: var(--admin-bg) !important;
+  color: var(--admin-text) !important;
+}
+
+/* Admin buttons now use .game-button classes from design-system.css */
+/* Keeping these for backward compatibility - they're aliases */
+.admin-button {
+  /* Same as .game-button - use game-button directly in new code */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  font-family: "Dogica", "PixelFallback", monospace;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--game-text-primary);
+  background: var(--game-surface);
+  border: 2px solid var(--game-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 2px 2px 0 var(--game-border-dark),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.3);
+  min-height: 32px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.admin-button-primary {
+  background: var(--game-accent-blue);
+  color: white;
+  border-color: var(--game-accent-blue-dark);
+  box-shadow: 2px 2px 0 var(--game-accent-blue-dark),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2), var(--game-glow-blue);
+}
+
+.admin-button-success {
+  background: var(--game-accent-green);
+  color: white;
+  border-color: var(--game-accent-green-dark);
+  box-shadow: 2px 2px 0 var(--game-accent-green-dark),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2), var(--game-glow-green);
+}
+
+.admin-button-danger {
+  background: var(--game-accent-red);
+  color: white;
+  border-color: var(--game-accent-red-dark);
+  box-shadow: 2px 2px 0 var(--game-accent-red-dark),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Spacious sections */
+.admin-section {
+  margin-bottom: 48px;
+}
+
+.admin-section h2 {
+  font-size: 28px;
+  margin-bottom: 24px;
+  color: var(--admin-text);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.admin-section h3 {
+  font-size: 20px;
+  margin-bottom: 16px;
+  color: var(--admin-text);
+}
+
+/* Card/container styling uses game-card */
+.admin-card {
+  background: var(--game-surface);
+  border: 2px solid var(--game-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-lg);
+  box-shadow: 2px 2px 0 var(--game-border-dark),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Input fields use game-input */
+.admin-input {
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  font-family: "Dogica", "PixelFallback", monospace;
+  font-size: 12px;
+  color: var(--game-text-primary);
+  background: var(--game-bg-secondary);
+  border: 2px solid var(--game-border);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.3);
+  transition: all var(--transition-fast);
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: var(--game-accent-blue);
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.3), var(--game-glow-blue);
+}
+
+/* Links use game-link from design system */
+.admin-link {
+  /* Use game-link styles */
+  color: var(--game-accent-blue);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all var(--transition-fast);
+  font-weight: bold;
+}
+
+.admin-link:hover {
+  color: var(--game-accent-blue-hover);
+  border-bottom-color: var(--game-accent-blue);
+}
+
+/* Save button uses game-button-success */
+.save-button {
+  /* Already handled by .game-button-success */
+}
+
+/* Spacing utilities */
+.admin-spacing-sm {
+  margin-bottom: 16px;
+}
+.admin-spacing-md {
+  margin-bottom: 24px;
+}
+.admin-spacing-lg {
+  margin-bottom: 32px;
+}
+.admin-spacing-xl {
+  margin-bottom: 48px;
+}
+
+/* Grid gaps */
+.admin-grid {
+  gap: 24px;
+}
+
+/* Text readability */
+.admin-text {
+  color: var(--admin-text);
+  line-height: 1.6;
+}
+
+.admin-text-muted {
+  color: var(--admin-text-muted);
+  font-size: 14px;
+}

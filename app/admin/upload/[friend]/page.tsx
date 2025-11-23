@@ -2,13 +2,15 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { Navigation } from "@/components/Navigation";
+import Link from "next/link";
 import {
   cropImageToSize,
   getThemePalette,
   ColorPalette,
 } from "@/lib/image-processing";
 import { WidgetSize } from "@/lib/types";
-import heic2any from "heic2any";
+import { savePixelArtImage } from "@/lib/queries";
 
 // Get theme class helper (same as friend page)
 function getThemeClass(slug: string): string {
@@ -79,7 +81,15 @@ export default function AdminUploadPage() {
       return file; // Return original file if not HEIC
     }
 
+    // Only import heic2any in the browser when needed
+    if (typeof window === "undefined") {
+      throw new Error("HEIC conversion is only available in the browser.");
+    }
+
     try {
+      // Dynamically import heic2any only when needed (browser-only)
+      const heic2any = (await import("heic2any")).default;
+      
       // Convert HEIC to PNG using heic2any
       const convertedBlob = await heic2any({
         blob: file,
@@ -148,45 +158,78 @@ export default function AdminUploadPage() {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!preview) return;
-    // For now, just log the base64 data
-    // Later: Save to database/storage
-    console.log("Saving pixel art:", {
-      friend,
-      size: selectedSize,
-      imageData: preview,
-    });
-    alert("Pixel art saved! (Currently just logged to console)");
+    
+    setProcessing(true);
+    try {
+      // Fetch friend data to get friend_id - use fetch API since we're in client component
+      const response = await fetch(`/api/friends/${friend}`);
+      if (!response.ok) {
+        throw new Error("Friend not found");
+      }
+      const pageData = await response.json();
+      
+      if (!pageData || !pageData.friend) {
+        alert("Error: Friend not found");
+        return;
+      }
+
+      // Save pixel art image to Supabase
+      const imageId = await savePixelArtImage(
+        pageData.friend.id,
+        null, // widget_id - can be set later when linking to a widget
+        selectedSize,
+        preview // base64 image data
+      );
+
+      if (imageId) {
+        alert("Pixel art saved successfully!");
+        // Optionally reset the form
+        setPreview(null);
+        setSelectedFile(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      } else {
+        alert("Error: Failed to save pixel art");
+      }
+    } catch (error) {
+      console.error("Error saving pixel art:", error);
+      alert("Error saving pixel art. Please try again.");
+    } finally {
+      setProcessing(false);
+    }
   };
 
   return (
-    <div className={themeClass} style={{ width: "100vw", height: "100vh" }}>
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "24px",
-          padding: "32px",
-          background: "var(--bg)",
-          color: "var(--text)",
-        }}
-      >
-      <h1 style={{ fontSize: "24px", marginBottom: "16px" }}>
-        Upload Pixel Art for {friend}
-      </h1>
+    <>
+      <Navigation />
+      <div className="admin-page" style={{ paddingTop: `calc(var(--height-button) + var(--space-md))`, width: "100vw", minHeight: "100vh", background: "var(--admin-bg)", color: "var(--admin-text)" }}>
+        <div className="game-container" style={{ paddingTop: "var(--space-2xl)", paddingBottom: "var(--space-2xl)" }}>
+          <div className="game-breadcrumb" style={{ marginBottom: "var(--space-xl)" }}>
+            <Link href="/" className="game-link">Home</Link>
+            <span className="game-breadcrumb-separator">/</span>
+            <span className="game-breadcrumb-current">Upload Pixel Art</span>
+            <span style={{ marginLeft: "auto" }}>
+              <Link href={`/${friend}`} className="game-link">
+                View {friend}'s page →
+              </Link>
+            </span>
+          </div>
+          <h1 className="game-heading-1" style={{ marginBottom: "var(--space-xl)" }}>
+            Upload Pixel Art for {friend}
+          </h1>
 
       <div
+        className="game-card"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "16px",
+          gap: "var(--space-lg)",
           maxWidth: "600px",
           width: "100%",
+          margin: "0 auto",
         }}
       >
         {/* File input */}
@@ -199,27 +242,24 @@ export default function AdminUploadPage() {
             style={{ display: "none" }}
           />
           <button
-            className="widget-button"
+            className="game-button game-button-primary"
             onClick={() => fileInputRef.current?.click()}
             disabled={processing}
-            style={{ width: "100%", padding: "16px" }}
+            style={{ width: "100%" }}
           >
             {processing ? "Processing..." : "Choose Image (PNG, JPG, HEIC)"}
           </button>
         </div>
 
         {/* Size selector */}
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div className="game-flex game-flex-gap-md">
           {(["1x1", "2x2", "3x3"] as WidgetSize[]).map((size) => (
             <button
               key={size}
-              className="widget-button"
+              className={`game-button ${selectedSize === size ? "game-button-primary" : ""}`}
               onClick={() => handleSizeChange(size)}
               style={{
                 flex: 1,
-                padding: "12px",
-                backgroundColor:
-                  selectedSize === size ? "var(--primary)" : "var(--secondary)",
               }}
             >
               {size}
@@ -230,23 +270,15 @@ export default function AdminUploadPage() {
         {/* Preview */}
         {preview && (
           <div
+            className="game-card"
             style={{
-              border: "4px solid var(--accent)",
-              padding: "16px",
-              background: "var(--bg)",
               display: "flex",
               flexDirection: "column",
-              gap: "16px",
+              gap: "var(--space-lg)",
               alignItems: "center",
             }}
           >
-            <div
-              style={{
-                fontSize: "14px",
-                marginBottom: "8px",
-                color: "var(--text)",
-              }}
-            >
+            <div className="game-heading-3" style={{ margin: 0 }}>
               Preview ({selectedSize})
             </div>
             <img
@@ -255,16 +287,17 @@ export default function AdminUploadPage() {
               style={{
                 maxWidth: "100%",
                 imageRendering: "pixelated",
-                border: "2px solid var(--accent)",
+                border: "var(--border-width-lg) solid var(--admin-accent)",
+                borderRadius: "var(--radius-sm)",
               }}
             />
             <button
-              className="widget-button"
+              className="game-button game-button-success"
               onClick={handleSave}
               disabled={processing}
-              style={{ width: "100%", padding: "12px" }}
+              style={{ width: "100%" }}
             >
-              {processing ? "Processing..." : "Save Pixel Art"}
+              {processing ? "Processing..." : "💾 Save Pixel Art"}
             </button>
           </div>
         )}
@@ -272,43 +305,41 @@ export default function AdminUploadPage() {
         {/* Color palette display */}
         {palette && (
           <div
+            className="game-card"
             style={{
-              marginTop: "16px",
-              padding: "12px",
-              border: "2px solid var(--accent)",
-              fontSize: "12px",
+              marginTop: "var(--space-lg)",
             }}
           >
-            <div style={{ marginBottom: "8px", fontWeight: "bold" }}>
-              Theme Palette:
+            <div className="game-heading-3" style={{ marginBottom: "var(--space-md)" }}>
+              Theme Palette
             </div>
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <div className="game-flex game-flex-gap-md" style={{ flexWrap: "wrap" }}>
               {Object.entries(palette).map(([name, color]) => (
                 <div
                   key={name}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                  }}
+                  className="game-flex game-flex-gap-sm"
+                  style={{ alignItems: "center" }}
                 >
                   <div
                     style={{
-                      width: "24px",
-                      height: "24px",
+                      width: "32px",
+                      height: "32px",
                       backgroundColor: color,
-                      border: "2px solid var(--text)",
+                      border: "var(--border-width-md) solid var(--admin-accent)",
+                      borderRadius: "var(--radius-sm)",
+                      boxShadow: "var(--game-shadow-sm)",
                     }}
                   />
-                  <span>{name}</span>
+                  <span className="game-text-muted" style={{ textTransform: "capitalize" }}>{name}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
+          </div>
+        </div>
       </div>
-    </div>
-    </div>
+    </>
   );
 }
 

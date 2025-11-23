@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
+import { YouTubePlayerProvider } from "@/components/YouTubePlayer";
+import { ScaleProvider } from "@/lib/scale-context";
 
 export const metadata: Metadata = {
   title: "Friendship Dashboard",
@@ -13,7 +16,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+      </head>
+      <body>
+        {/* Load YouTube API using Next.js Script component - safer than manual DOM manipulation */}
+        <Script
+          src="https://www.youtube.com/iframe_api"
+          strategy="lazyOnload"
+          id="youtube-api-script"
+        />
+        <ScaleProvider>
+          <YouTubePlayerProvider>{children}</YouTubePlayerProvider>
+        </ScaleProvider>
+      </body>
     </html>
   );
 }

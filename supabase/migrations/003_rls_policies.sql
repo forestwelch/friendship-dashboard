@@ -69,3 +69,4 @@ CREATE POLICY "Only admins can manage pixel art images"
 -- Note: For now, these policies allow public read access.
 -- Once authentication is set up, you can restrict reads to authenticated users only.
 
+

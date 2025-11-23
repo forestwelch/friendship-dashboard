@@ -18,6 +18,7 @@ export function Widget({ size, children, className = "" }: WidgetProps) {
         height: "100%",
         position: "relative",
         zIndex: 2,
+        pointerEvents: "auto", // Allow interactions within widget
       }}
     >
       {children}

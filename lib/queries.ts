@@ -26,6 +26,55 @@ export interface FriendPageData {
 }
 
 /**
+ * Get all friends
+ */
+export async function getAllFriends(): Promise<Friend[]> {
+  if (!isSupabaseConfigured()) {
+    return [
+      {
+        id: "mock-daniel",
+        name: "daniel",
+        slug: "daniel",
+        display_name: "Daniel",
+        color_primary: "#2a52be",
+        color_secondary: "#7cb9e8",
+        color_accent: "#00308f",
+        color_bg: "#e6f2ff",
+        color_text: "#001f3f",
+      },
+      {
+        id: "mock-max",
+        name: "max",
+        slug: "max",
+        display_name: "Max",
+        color_primary: "#dc143c",
+        color_secondary: "#ff6b6b",
+        color_accent: "#8b0000",
+        color_bg: "#ffe6e6",
+        color_text: "#2d0000",
+      },
+    ];
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("friends")
+      .select("*")
+      .order("display_name");
+
+    if (error) {
+      console.error("Error fetching friends:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Error in getAllFriends:", error);
+    return [];
+  }
+}
+
+/**
  * Get friend page data including widgets and layout
  */
 export async function getFriendPage(slug: string): Promise<FriendPageData | null> {

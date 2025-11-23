@@ -1,75 +1,72 @@
-"use client";
-
+import React from "react";
 import Link from "next/link";
+import { getAllFriends } from "@/lib/queries";
+import { Navigation } from "@/components/Navigation";
 
-export default function Home() {
+export default async function Home() {
+  const friends = await getAllFriends();
+
   return (
-    <div className="theme-daniel" style={{ width: "100vw", height: "100vh" }}>
+    <>
+      <Navigation themeColors={undefined} />
       <div
+        className="admin-page"
         style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "24px",
-          background: "var(--bg)",
-          color: "var(--text)",
+          paddingTop: `calc(var(--height-button) + var(--space-md))`,
+          width: "100vw",
+          minHeight: "100vh",
+          background: "var(--admin-bg)",
+          color: "var(--admin-text)",
         }}
       >
-        <h1 style={{ fontSize: "32px", marginBottom: "16px" }}>Friendship Dashboard</h1>
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          <Link
-            href="/daniel"
-            className="widget-button"
+        <div className="game-container" style={{ paddingTop: "var(--space-3xl)", paddingBottom: "var(--space-3xl)" }}>
+          <h1 className="game-heading-1" style={{ marginBottom: "var(--space-3xl)", fontSize: "var(--font-size-3xl)" }}>
+            FRIENDSHIP DASHBOARD
+          </h1>
+          <div
             style={{
-              padding: "16px 32px",
-              textDecoration: "none",
-              fontSize: "24px",
-              textAlign: "center",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              gap: "var(--space-xl)",
+              marginBottom: "var(--space-3xl)",
             }}
           >
-            Daniel
-          </Link>
-          <Link
-            href="/max"
-            className="widget-button"
-            style={{
-              padding: "16px 32px",
-              textDecoration: "none",
-              fontSize: "24px",
-              textAlign: "center",
-            }}
-          >
-            Max
-          </Link>
-          <Link
-            href="/violet"
-            className="widget-button"
-            style={{
-              padding: "16px 32px",
-              textDecoration: "none",
-              fontSize: "24px",
-              textAlign: "center",
-            }}
-          >
-            Violet
-          </Link>
-          <Link
-            href="/gameboy"
-            className="widget-button"
-            style={{
-              padding: "16px 32px",
-              textDecoration: "none",
-              fontSize: "24px",
-              textAlign: "center",
-            }}
-          >
-            Gameboy
-          </Link>
+            {friends.map((friend) => (
+              <Link
+                key={friend.id}
+                href={`/${friend.slug}`}
+                className="game-card game-card-hover"
+                style={{
+                  textDecoration: "none",
+                  padding: "var(--space-2xl)",
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "var(--space-lg)",
+                  borderColor: "var(--admin-accent)",
+                  background: "var(--admin-surface)",
+                  borderWidth: "var(--border-width-lg)",
+                }}
+              >
+                <div
+                  style={{
+                    width: "64px",
+                    height: "64px",
+                    borderRadius: "var(--radius-sm)",
+                    background: friend.color_primary || "var(--game-accent-blue)",
+                    border: `var(--border-width-lg) solid var(--admin-accent)`,
+                    boxShadow: "var(--game-shadow-md)",
+                  }}
+                />
+                <span className="game-heading-2" style={{ margin: 0, color: "var(--admin-text)", fontSize: "var(--font-size-xl)" }}>
+                  {friend.display_name.toUpperCase()}
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

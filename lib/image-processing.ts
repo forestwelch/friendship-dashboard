@@ -80,19 +80,37 @@ function findNearestColor(
 
 /**
  * Get theme colors from CSS variables
+ * Only works in browser - returns defaults if called server-side
  */
 export function getThemePalette(): ColorPalette {
-  const root = document.documentElement;
-  const computedStyle = getComputedStyle(root);
-
-  return {
-    primary: computedStyle.getPropertyValue("--primary").trim() || "#2a52be",
-    secondary:
-      computedStyle.getPropertyValue("--secondary").trim() || "#7cb9e8",
-    accent: computedStyle.getPropertyValue("--accent").trim() || "#00308f",
-    bg: computedStyle.getPropertyValue("--bg").trim() || "#e6f2ff",
-    text: computedStyle.getPropertyValue("--text").trim() || "#001f3f",
+  // Default palette for SSR or when document is not available
+  const defaults: ColorPalette = {
+    primary: "#2a52be",
+    secondary: "#7cb9e8",
+    accent: "#00308f",
+    bg: "#e6f2ff",
+    text: "#001f3f",
   };
+
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    return defaults;
+  }
+
+  try {
+    const root = document.documentElement;
+    const computedStyle = getComputedStyle(root);
+
+    return {
+      primary: computedStyle.getPropertyValue("--primary").trim() || defaults.primary,
+      secondary: computedStyle.getPropertyValue("--secondary").trim() || defaults.secondary,
+      accent: computedStyle.getPropertyValue("--accent").trim() || defaults.accent,
+      bg: computedStyle.getPropertyValue("--bg").trim() || defaults.bg,
+      text: computedStyle.getPropertyValue("--text").trim() || defaults.text,
+    };
+  } catch (error) {
+    console.warn("Error getting theme palette:", error);
+    return defaults;
+  }
 }
 
 /**

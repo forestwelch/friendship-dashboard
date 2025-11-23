@@ -89,12 +89,12 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
             <i
               className={isPlaying ? "hn hn-pause-solid" : "hn hn-play-solid"}
               style={{
-                fontSize: "32px",
+                fontSize: "var(--font-size-2xl)",
                 animation: isPlaying ? "pulse 1s infinite" : "none",
                 display: "inline-block",
-                width: "32px",
-                height: "32px",
-                lineHeight: "32px",
+                width: "var(--font-size-2xl)",
+                height: "var(--font-size-2xl)",
+                lineHeight: "var(--font-size-2xl)",
               }}
             />
           </div>
@@ -115,8 +115,8 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
             height: "100%",
             display: "flex",
             flexDirection: "column",
-            padding: "4px",
-            gap: "4px",
+            padding: "var(--space-md)",
+            gap: "var(--space-sm)",
           }}
         >
           <div
@@ -132,17 +132,17 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
             <i
               className="hn hn-music-solid"
               style={{
-                fontSize: "48px",
+                fontSize: "var(--font-size-3xl)",
                 display: "inline-block",
-                width: "48px",
-                height: "48px",
-                lineHeight: "48px",
+                width: "var(--font-size-3xl)",
+                height: "var(--font-size-3xl)",
+                lineHeight: "var(--font-size-3xl)",
               }}
             />
           </div>
           <div
             style={{
-              fontSize: "12px",
+              fontSize: "var(--font-size-sm)",
               color: "var(--text)",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -153,7 +153,7 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
           </div>
           <div
             style={{
-              fontSize: "10px",
+              fontSize: "var(--font-size-xs)",
               color: "var(--text)",
               opacity: 0.8,
               overflow: "hidden",
@@ -201,16 +201,18 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          padding: "4px",
-          gap: "4px",
+          padding: "var(--space-md)",
+          gap: "var(--space-sm)",
         }}
       >
         <div
           style={{
-            fontSize: "16px",
+            fontSize: "14px",
             fontWeight: "bold",
             color: "var(--text)",
-            marginBottom: "0",
+            marginBottom: "var(--space-xs)",
+            textTransform: "uppercase",
+            letterSpacing: "0.5px",
           }}
         >
           Top 10 Songs
@@ -221,7 +223,7 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
             overflowY: "auto",
             display: "flex",
             flexDirection: "column",
-            gap: "4px",
+            gap: "var(--space-xs)",
           }}
         >
           {songs && songs.length > 0 ? (
@@ -247,7 +249,7 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
                   </div>
                   <div
                     style={{
-                      fontSize: "10px",
+                      fontSize: "var(--font-size-xs)",
                       opacity: 0.8,
                       marginTop: "2px",
                     }}
@@ -263,7 +265,7 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
             </div>
           )}
         </div>
-        <div style={{ display: "flex", gap: "4px", marginTop: "4px", minHeight: "40px" }}>
+        <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-sm)", minHeight: "36px" }}>
           <button
             className="widget-button"
             onClick={() => {
@@ -273,9 +275,9 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
                 handlePlayClick();
               }
             }}
-            style={{ flex: 1, fontSize: "12px", padding: "6px" }}
+            style={{ flex: 1, fontSize: "11px", padding: "var(--space-sm)" }}
           >
-            <i className={isPlaying ? "hn hn-pause" : "hn hn-play"} style={{ fontSize: "12px", marginRight: "4px" }} />
+            <i className={isPlaying ? "hn hn-pause" : "hn hn-play"} style={{ fontSize: "12px", marginRight: "var(--space-xs)" }} />
             {isPlaying ? "Pause" : "Play"}
           </button>
           <button
@@ -283,9 +285,9 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
             onClick={() => {
               if (next) next();
             }}
-            style={{ flex: 1, fontSize: "12px", padding: "6px" }}
+            style={{ flex: 1, fontSize: "11px", padding: "var(--space-sm)" }}
           >
-            <i className="hn hn-arrow-circle-right" style={{ fontSize: "12px", marginRight: "4px" }} />
+            <i className="hn hn-arrow-circle-right" style={{ fontSize: "12px", marginRight: "var(--space-xs)" }} />
             Next
           </button>
         </div>

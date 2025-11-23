@@ -1,9 +1,9 @@
 import React from "react";
-import { Grid, GridItem } from "@/components/Grid";
-import { Widget } from "@/components/Widget";
-import { MusicPlayer } from "@/components/widgets";
-import { YouTubePlayerProvider } from "@/components/YouTubePlayer";
+import { Navigation } from "@/components/Navigation";
 import { notFound } from "next/navigation";
+import { getFriendPage, getGlobalContent } from "@/lib/queries";
+import { Song } from "@/lib/types";
+import { FriendPageClient } from "./FriendPageClient";
 
 interface FriendPageProps {
   params: Promise<{
@@ -13,59 +13,66 @@ interface FriendPageProps {
 
 export default async function FriendPage({ params }: FriendPageProps) {
   const resolvedParams = await params;
-  const friend = resolvedParams?.friend;
+  const friendSlug = resolvedParams?.friend;
 
   // Validate friend parameter
-  if (!friend || typeof friend !== "string") {
+  if (!friendSlug || typeof friendSlug !== "string") {
     notFound();
   }
 
-  // Determine theme based on friend slug
-  const getThemeClass = (slug: string) => {
-    if (!slug || typeof slug !== "string") {
-      return "theme-daniel"; // Default fallback
-    }
-    
-    switch (slug.toLowerCase()) {
-      case "daniel":
-        return "theme-daniel";
-      case "max":
-        return "theme-max";
-      case "violet":
-      case "plum":
-        return "theme-violet-plum";
-      case "gameboy":
-      case "gb":
-        return "theme-gameboy";
-      default:
-        return "theme-daniel";
-    }
+  // Fetch friend data from Supabase
+  const pageData = await getFriendPage(friendSlug);
+
+  if (!pageData || !pageData.friend) {
+    notFound();
+  }
+
+  const { friend, widgets, pixelArtImages } = pageData;
+
+  // Fetch global content (e.g., top 10 songs)
+  const songsData = await getGlobalContent("top_10_songs");
+  const songs: Song[] = songsData?.songs || [];
+
+  // Create a map of pixel art images by widget_id for quick lookup
+  // Also create a fallback map by size for images without widget_id
+  const pixelArtMap = new Map<string, string>();
+  const pixelArtBySize = new Map<string, string>();
+
+  if (pixelArtImages && pixelArtImages.length > 0) {
+    pixelArtImages.forEach((img) => {
+      // Match by widget_id if set (links to friend_widgets.id)
+      if (img.widget_id) {
+        pixelArtMap.set(img.widget_id, img.image_data);
+      }
+      // Store by size as fallback (use first image of each size)
+      // This allows matching pixel art to widgets even if widget_id is null
+      if (!pixelArtBySize.has(img.size)) {
+        pixelArtBySize.set(img.size, img.image_data);
+      }
+    });
+    // Debug: Log available pixel art
+    console.log(`Found ${pixelArtImages.length} pixel art images for ${friend.display_name}`);
+    console.log(`Available sizes:`, Array.from(pixelArtBySize.keys()));
+  }
+
+  // Pass theme colors to Navigation
+  const navThemeColors = {
+    bg: friend.color_bg || "#0a1a2e",
+    text: friend.color_text || "#c8e0ff",
+    border: friend.color_accent || "#2a7fff",
+    active: friend.color_primary || "#4a9eff",
   };
 
-  const themeClass = getThemeClass(friend);
-
   return (
-    <YouTubePlayerProvider>
-      <div className={themeClass} style={{ width: "100vw", height: "100vh", background: "var(--bg)" }}>
-        <Grid>
-          {/* Music Player 1x1 at position (0, 0) */}
-          <GridItem position={{ x: 0, y: 0 }} size="1x1">
-            <MusicPlayer size="1x1" />
-          </GridItem>
-
-          {/* Music Player 2x2 at position (2, 0) */}
-          <GridItem position={{ x: 2, y: 0 }} size="2x2">
-            <MusicPlayer size="2x2" />
-          </GridItem>
-
-          {/* Music Player 3x3 at position (0, 2) */}
-          <GridItem position={{ x: 0, y: 2 }} size="3x3">
-            <MusicPlayer size="3x3" />
-          </GridItem>
-        </Grid>
-      </div>
-    </YouTubePlayerProvider>
+    <>
+      <Navigation themeColors={navThemeColors} />
+      <FriendPageClient
+        friend={friend}
+        initialWidgets={widgets}
+        songs={songs}
+        pixelArtMap={pixelArtMap}
+        pixelArtBySize={pixelArtBySize}
+      />
+    </>
   );
 }
-
-
