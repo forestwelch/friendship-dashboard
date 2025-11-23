@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { playSound } from "@/lib/sounds";
 import { WidgetSize } from "@/lib/types";
 
@@ -13,13 +13,26 @@ interface ImageItem {
 
 interface ImageManagerProps {
   initialImages: ImageItem[];
+  onImagesChange?: (images: ImageItem[]) => void;
 }
 
-export function ImageManager({ initialImages }: ImageManagerProps) {
+export function ImageManager({
+  initialImages,
+  onImagesChange,
+}: ImageManagerProps) {
   const [images, setImages] = useState<ImageItem[]>(initialImages);
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setImages(initialImages);
+  }, [initialImages]);
+
+  const updateImages = (newImages: ImageItem[]) => {
+    setImages(newImages);
+    onImagesChange?.(newImages);
+  };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -28,36 +41,38 @@ export function ImageManager({ initialImages }: ImageManagerProps) {
     setIsUploading(true);
     playSound("select");
 
-    // TODO: Implement actual upload to API
-    // For now, mock it
-    const newImages: ImageItem[] = [];
-    
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const reader = new FileReader();
-      
-      await new Promise<void>((resolve) => {
-        reader.onload = (ev) => {
-          if (ev.target?.result) {
-            newImages.push({
-              id: `temp-${Date.now()}-${i}`,
-              base_image_data: ev.target.result as string,
-              size: "2x2", // Default size, maybe prompt?
-              created_at: new Date().toISOString(),
-            });
-          }
-          resolve();
-        };
-        reader.readAsDataURL(file);
-      });
-    }
+    try {
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        // No size parameter - images work for all sizes
 
-    setImages((prev) => [...newImages, ...prev]);
-    setIsUploading(false);
-    playSound("success");
-    
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+        const response = await fetch("/api/images", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to upload ${file.name}`);
+        }
+
+        const data = await response.json();
+        return data.image;
+      });
+
+      const uploadedImages = await Promise.all(uploadPromises);
+      const newImages = [...uploadedImages, ...images];
+      updateImages(newImages);
+      playSound("success");
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      playSound("error");
+      alert("Failed to upload images. Please try again.");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -73,53 +88,97 @@ export function ImageManager({ initialImages }: ImageManagerProps) {
     setSelectedImages(newSelected);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (selectedImages.size === 0) return;
-    
+
     if (confirm(`Delete ${selectedImages.size} images?`)) {
-      setImages((prev) => prev.filter((img) => !selectedImages.has(img.id)));
-      setSelectedImages(new Set());
-      playSound("cancel");
+      try {
+        const idsToDelete = Array.from(selectedImages);
+        const response = await fetch(
+          `/api/images?ids=${idsToDelete.join(",")}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to delete images");
+        }
+
+        const newImages = images.filter((img) => !selectedImages.has(img.id));
+        updateImages(newImages);
+        setSelectedImages(new Set());
+        playSound("cancel");
+      } catch (error) {
+        console.error("Error deleting images:", error);
+        playSound("error");
+        alert("Failed to delete images. Please try again.");
+      }
     }
   };
 
   return (
-    <div className="game-container" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <div
+      className="game-container"
+      style={{ height: "100%", display: "flex", flexDirection: "column" }}
+    >
       {/* Toolbar */}
-      <div className="game-card" style={{ marginBottom: "var(--space-md)", padding: "var(--space-md)", display: "flex", gap: "var(--space-md)", alignItems: "center" }}>
+      <div
+        className="game-card"
+        style={{
+          marginBottom: "var(--space-md)",
+          padding: "var(--space-md)",
+          display: "flex",
+          gap: "var(--space-md)",
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+      >
         <button
           className="game-button game-button-primary"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
         >
-          <i className="hn hn-upload-solid" style={{ marginRight: "var(--space-sm)" }} />
+          <i
+            className="hn hn-upload-solid"
+            style={{ marginRight: "var(--space-sm)" }}
+          />
           {isUploading ? "UPLOADING..." : "UPLOAD IMAGES"}
         </button>
-        
+
         <button
           className="game-button game-button-danger"
           onClick={handleDelete}
           disabled={selectedImages.size === 0}
         >
-          <i className="hn hn-trash-solid" style={{ marginRight: "var(--space-sm)" }} />
+          <i
+            className="hn hn-trash-solid"
+            style={{ marginRight: "var(--space-sm)" }}
+          />
           DELETE SELECTED ({selectedImages.size})
         </button>
-        
-        <div style={{ marginLeft: "auto", fontSize: "var(--font-size-xs)", color: "var(--game-text-muted)" }}>
+
+        <div
+          style={{
+            marginLeft: "auto",
+            fontSize: "var(--font-size-xs)",
+            color: "var(--game-text-muted)",
+          }}
+        >
           Total Images: {images.length}
         </div>
       </div>
 
       {/* Image Grid */}
-      <div 
-        className="game-card" 
-        style={{ 
-          flex: 1, 
-          overflowY: "auto", 
-          display: "grid", 
-          gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", 
+      <div
+        className="game-card"
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(9.375rem, 1fr))",
           gap: "var(--space-md)",
-          alignContent: "start"
+          alignContent: "start",
         }}
       >
         {images.map((img) => (
@@ -129,15 +188,19 @@ export function ImageManager({ initialImages }: ImageManagerProps) {
             style={{
               position: "relative",
               aspectRatio: "1/1",
-              border: selectedImages.has(img.id) 
-                ? "2px solid var(--game-accent-blue)" 
-                : "1px solid var(--game-border)",
+              border: selectedImages.has(img.id)
+                ? "0.125rem solid var(--game-accent-blue)"
+                : "0.0625rem solid var(--game-border)",
               borderRadius: "var(--radius-sm)",
               overflow: "hidden",
               cursor: "pointer",
               transition: "all 0.2s",
-              transform: selectedImages.has(img.id) ? "scale(0.95)" : "scale(1)",
-              boxShadow: selectedImages.has(img.id) ? "var(--game-glow-blue)" : "none",
+              transform: selectedImages.has(img.id)
+                ? "scale(0.95)"
+                : "scale(1)",
+              boxShadow: selectedImages.has(img.id)
+                ? "var(--game-glow-blue)"
+                : "none",
             }}
           >
             <img
@@ -152,7 +215,7 @@ export function ImageManager({ initialImages }: ImageManagerProps) {
               }}
             />
             {selectedImages.has(img.id) && (
-              <div 
+              <div
                 style={{
                   position: "absolute",
                   top: "var(--space-xs)",
@@ -160,50 +223,38 @@ export function ImageManager({ initialImages }: ImageManagerProps) {
                   background: "var(--game-accent-blue)",
                   color: "white",
                   borderRadius: "50%",
-                  width: "20px",
-                  height: "20px",
+                  width: "1.25rem",
+                  height: "1.25rem",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "12px",
-                  fontWeight: "bold"
+                  fontSize: "var(--font-size-sm)",
+                  fontWeight: "bold",
                 }}
               >
                 ✓
               </div>
             )}
-            <div 
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                background: "rgba(0,0,0,0.7)",
-                padding: "4px",
-                fontSize: "8px",
-                color: "white",
-                textAlign: "center"
-              }}
-            >
-              {img.size}
-            </div>
           </div>
         ))}
-        
+
         {images.length === 0 && (
-          <div 
-            style={{ 
-              gridColumn: "1 / -1", 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "center", 
-              height: "200px",
+          <div
+            style={{
+              gridColumn: "1 / -1",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "12.5rem",
               color: "var(--game-text-muted)",
               flexDirection: "column",
-              gap: "var(--space-md)"
+              gap: "var(--space-md)",
             }}
           >
-            <i className="hn hn-image" style={{ fontSize: "32px", opacity: 0.5 }} />
+            <i
+              className="hn hn-image"
+              style={{ fontSize: "2rem", opacity: 0.5 }}
+            />
             <span>No images found. Upload some!</span>
           </div>
         )}
@@ -220,5 +271,3 @@ export function ImageManager({ initialImages }: ImageManagerProps) {
     </div>
   );
 }
-
-

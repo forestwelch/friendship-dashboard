@@ -227,7 +227,7 @@ export default function AdminUploadPage() {
           display: "flex",
           flexDirection: "column",
           gap: "var(--space-lg)",
-          maxWidth: "600px",
+          maxWidth: "37.5rem",
           width: "100%",
           margin: "0 auto",
         }}
@@ -322,8 +322,8 @@ export default function AdminUploadPage() {
                 >
                   <div
                     style={{
-                      width: "32px",
-                      height: "32px",
+                      width: "2rem",
+                      height: "2rem",
                       backgroundColor: color,
                       border: "var(--border-width-md) solid var(--admin-accent)",
                       borderRadius: "var(--radius-sm)",

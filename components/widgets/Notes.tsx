@@ -62,9 +62,9 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
         >
           <i
             className="hn hn-sticky-note-solid"
-            style={{ fontSize: "32px", opacity: 0.8 }}
+            style={{ fontSize: "var(--font-size-2xl)", opacity: 0.8 }}
           />
-          <div style={{ fontSize: "10px", textAlign: "center" }}>
+          <div style={{ fontSize: "var(--font-size-xs)", textAlign: "center" }}>
             {notes.length} {notes.length === 1 ? "note" : "notes"}
           </div>
         </div>
@@ -89,7 +89,7 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
             style={{
               fontSize: "var(--font-size-sm)",
               fontWeight: "bold",
-              marginBottom: "4px",
+              marginBottom: "var(--space-xs)",
             }}
           >
             Notes
@@ -107,10 +107,10 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
             {notes.length === 0 ? (
               <div
                 style={{
-                  fontSize: "10px",
+                  fontSize: "var(--font-size-xs)",
                   opacity: 0.6,
                   textAlign: "center",
-                  padding: "8px",
+                  padding: "var(--space-sm)",
                 }}
               >
                 No notes yet
@@ -120,10 +120,10 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
                 <div
                   key={index}
                   style={{
-                    fontSize: "11px",
+                    fontSize: "var(--font-size-xs)",
                     padding: "var(--space-sm)",
                     background: "var(--secondary)",
-                    border: "2px solid var(--accent)",
+                    border: "var(--border-width-md) solid var(--accent)",
                     borderRadius: "var(--radius-sm)",
                     cursor: "pointer",
                     display: "flex",
@@ -153,9 +153,9 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
                       deleteNote(index);
                     }}
                     style={{
-                      padding: "2px 4px",
-                      fontSize: "8px",
-                      marginLeft: "4px",
+                      padding: "var(--space-xs) var(--space-xs)",
+                      fontSize: "var(--font-size-xs)",
+                      marginLeft: "var(--space-xs)",
                     }}
                   >
                     ×
@@ -169,12 +169,12 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
             <button
               className="widget-button"
               onClick={addNote}
-              style={{ fontSize: "10px", padding: "4px" }}
+              style={{ fontSize: "var(--font-size-xs)", padding: "var(--space-xs)" }}
             >
               + Add Note
             </button>
           ) : (
-            <div style={{ display: "flex", gap: "4px" }}>
+            <div style={{ display: "flex", gap: "var(--space-xs)" }}>
               <input
                 ref={inputRef}
                 type="text"
@@ -191,11 +191,11 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
                 onBlur={saveNote}
                 style={{
                   flex: 1,
-                  fontSize: "10px",
-                  padding: "4px",
+                  fontSize: "var(--font-size-xs)",
+                  padding: "var(--space-xs)",
                   background: "var(--bg)",
                   color: "var(--text)",
-                  border: "2px solid var(--accent)",
+                  border: "var(--border-width-md) solid var(--accent)",
                   fontFamily: "inherit",
                 }}
               />
@@ -215,22 +215,22 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          padding: "4px",
-          gap: "4px",
+          padding: "var(--space-xs)",
+          gap: "var(--space-xs)",
         }}
       >
         <div
           style={{
-            fontSize: "14px",
+            fontSize: "var(--font-size-sm)",
             fontWeight: "bold",
-            marginBottom: "4px",
+            marginBottom: "var(--space-xs)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
           }}
         >
           <span>Notes</span>
-          <span style={{ fontSize: "10px", opacity: 0.7 }}>
+          <span style={{ fontSize: "var(--font-size-xs)", opacity: 0.7 }}>
             {notes.length}
           </span>
         </div>
@@ -250,16 +250,16 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
                 fontSize: "var(--font-size-sm)",
                 opacity: 0.6,
                 textAlign: "center",
-                padding: "16px",
+                padding: "var(--space-xl)",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: "8px",
+                gap: "var(--space-sm)",
               }}
             >
               <i
                 className="hn hn-sticky-note-solid"
-                style={{ fontSize: "32px", opacity: 0.5 }}
+                style={{ fontSize: "var(--font-size-2xl)", opacity: 0.5 }}
               />
               <div>No notes yet. Click "Add Note" to get started!</div>
             </div>
@@ -268,16 +268,16 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
               <div
                 key={index}
                 style={{
-                  fontSize: "11px",
+                  fontSize: "var(--font-size-xs)",
                   padding: "var(--space-md)",
                   background: "var(--secondary)",
-                  border: "2px solid var(--accent)",
+                  border: "var(--border-width-md) solid var(--accent)",
                   borderRadius: "var(--radius-sm)",
                   cursor: "pointer",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "flex-start",
-                  minHeight: "44px",
+                  minHeight: "2.75rem",
                   transition: "all var(--transition-fast)",
                 }}
                 onClick={() => {
@@ -305,14 +305,14 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
                       onBlur={saveNote}
                       style={{
                         width: "100%",
-                        fontSize: "11px",
-                        padding: "4px",
+                        fontSize: "var(--font-size-xs)",
+                        padding: "var(--space-xs)",
                         background: "var(--bg)",
                         color: "var(--text)",
-                        border: "2px solid var(--primary)",
+                        border: "var(--border-width-md) solid var(--primary)",
                         fontFamily: "inherit",
                         resize: "none",
-                        minHeight: "60px",
+                        minHeight: "3.75rem",
                       }}
                       autoFocus
                     />
@@ -328,9 +328,9 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
                       deleteNote(index);
                     }}
                     style={{
-                      padding: "2px 6px",
-                      fontSize: "10px",
-                      marginLeft: "4px",
+                      padding: "var(--space-xs) var(--space-sm)",
+                      fontSize: "var(--font-size-xs)",
+                      marginLeft: "var(--space-xs)",
                     }}
                   >
                     ×
@@ -345,7 +345,7 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
           <button
             className="widget-button"
             onClick={addNote}
-            style={{ fontSize: "var(--font-size-sm)", padding: "6px" }}
+            style={{ fontSize: "var(--font-size-sm)", padding: "var(--space-sm)" }}
           >
             + Add Note
           </button>

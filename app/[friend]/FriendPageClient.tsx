@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef } from "react";
-import { useScale } from "@/lib/scale-context";
+import React, { useState, useCallback, useRef } from "react";
 import { Grid, GridItem } from "@/components/Grid";
 import { WidgetRenderer } from "@/components/WidgetRenderer";
 import { ViewEditToggle } from "@/components/admin/ViewEditToggle";
 import { AdminOverlay } from "@/components/admin/AdminOverlay";
 import { ColorSettings } from "@/components/admin/ColorSettings";
 import { WidgetLibrary } from "@/components/admin/WidgetLibrary";
+import { WidgetConfigModal } from "@/components/admin/WidgetConfigModal";
 import { Friend, WidgetSize, WidgetPosition } from "@/lib/types";
 import { FriendWidget } from "@/lib/queries";
 import { Song } from "@/lib/types";
@@ -37,6 +37,8 @@ export function FriendPageClient({
   const [dragOverPosition, setDragOverPosition] =
     useState<WidgetPosition | null>(null);
   const [showWidgetLibrary, setShowWidgetLibrary] = useState(false);
+  const [configuringWidget, setConfiguringWidget] =
+    useState<FriendWidget | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const [localColors, setLocalColors] = useState({
     primary: friend.color_primary || "#4a9eff",
@@ -45,12 +47,10 @@ export function FriendPageClient({
     bg: friend.color_bg || "#0a1a2e",
     text: friend.color_text || "#c8e0ff",
   });
-  
-  // State for pixel art/images map to allow updates
-  const [pixelArtMap, setPixelArtMap] = useState<Map<string, string>>(initialPixelArtMap);
 
-  // Get scale from global context (no local state needed)
-  const { scale } = useScale();
+  // State for pixel art/images map to allow updates
+  const [pixelArtMap, setPixelArtMap] =
+    useState<Map<string, string>>(initialPixelArtMap);
 
   const handleDragStart = useCallback(
     (e: React.DragEvent, widgetId: string) => {
@@ -89,11 +89,15 @@ export function FriendPageClient({
       clientY: number,
       widgetSize?: WidgetSize
     ): WidgetPosition | null => {
-      // Grid constants (must match Grid.tsx)
-      const BASE_TILE_SIZE = 60;
-      const BASE_GAP = 6;
-      const tileSize = BASE_TILE_SIZE * scale;
-      const gap = BASE_GAP * scale;
+      // Grid constants in rem (must match Grid.tsx)
+      // Convert rem to pixels using computed font size
+      const rootFontSize = parseFloat(
+        getComputedStyle(document.documentElement).fontSize
+      );
+      const TILE_SIZE_REM = 5; // 80px at 16px base - must match Grid.tsx
+      const GAP_REM = 0.5; // 8px at 16px base - must match Grid.tsx
+      const tileSize = TILE_SIZE_REM * rootFontSize;
+      const gap = GAP_REM * rootFontSize;
 
       // Find the grid container
       const gridElement = document.querySelector("[data-grid-container]");
@@ -102,8 +106,8 @@ export function FriendPageClient({
       const gridRect = gridElement.getBoundingClientRect();
 
       // Account for grid being centered (transform: translate(-50%, -50%))
-      const gridWidth = 8 * tileSize + 7 * gap;
-      const gridHeight = 6 * tileSize + 5 * gap;
+      const gridWidth = 6 * tileSize + 5 * gap; // 6 cols
+      const gridHeight = 8 * tileSize + 7 * gap; // 8 rows
 
       const gridLeft = gridRect.left + (gridRect.width - gridWidth) / 2;
       const gridTop = gridRect.top + (gridRect.height - gridHeight) / 2;
@@ -116,18 +120,18 @@ export function FriendPageClient({
       const x = Math.floor(relativeX / (tileSize + gap));
       const y = Math.floor(relativeY / (tileSize + gap));
 
-      // Validate bounds
-      if (x < 0 || x >= 8 || y < 0 || y >= 6) return null;
+      // Validate bounds - 6 cols, 8 rows
+      if (x < 0 || x >= 6 || y < 0 || y >= 8) return null;
 
       // If widget size provided, ensure it fits
       if (widgetSize) {
         const [cols, rows] = widgetSize.split("x").map(Number);
-        if (x + cols > 8 || y + rows > 6) return null;
+        if (x + cols > 6 || y + rows > 8) return null;
       }
 
       return { x, y };
     },
-    [scale]
+    []
   );
 
   const handleDragOver = useCallback(
@@ -230,7 +234,7 @@ export function FriendPageClient({
 
           // Check if widget fits at this position
           const [cols, rows] = widget.size.split("x").map(Number);
-          if (tryPosition.x + cols <= 8 && tryPosition.y + rows <= 6) {
+          if (tryPosition.x + cols <= 6 && tryPosition.y + rows <= 8) {
             if (
               canPlaceWidget(widgets, draggedWidget, tryPosition, widget.size)
             ) {
@@ -455,24 +459,27 @@ export function FriendPageClient({
     }
   }, [friend.slug]);
 
-  const handleUploadImage = useCallback(async (file: File, widgetId: string) => {
-    // Mock upload for now or real implementation if API existed
-    // For now, just use local object URL to preview
-    const objectUrl = URL.createObjectURL(file);
-    
-    // Update local state
-    setPixelArtMap(prev => {
-      const newMap = new Map(prev);
-      newMap.set(widgetId, objectUrl);
-      return newMap;
-    });
-    
-    // TODO: Implement real upload
-    // const formData = new FormData();
-    // formData.append("file", file);
-    // formData.append("widgetId", widgetId);
-    // await fetch("/api/images/upload", { method: "POST", body: formData });
-  }, []);
+  const handleUploadImage = useCallback(
+    async (file: File, widgetId: string) => {
+      // Mock upload for now or real implementation if API existed
+      // For now, just use local object URL to preview
+      const objectUrl = URL.createObjectURL(file);
+
+      // Update local state
+      setPixelArtMap((prev) => {
+        const newMap = new Map(prev);
+        newMap.set(widgetId, objectUrl);
+        return newMap;
+      });
+
+      // TODO: Implement real upload
+      // const formData = new FormData();
+      // formData.append("file", file);
+      // formData.append("widgetId", widgetId);
+      // await fetch("/api/images/upload", { method: "POST", body: formData });
+    },
+    []
+  );
 
   // Gamepad button handlers
   const handleGamepadButton = useCallback(
@@ -520,7 +527,7 @@ export function FriendPageClient({
     <div
       style={{
         ...themeStyle,
-        paddingTop: "36px",
+        paddingTop: "2.25rem",
         width: "100vw",
         minHeight: "100vh",
         background: localColors.bg,
@@ -577,7 +584,7 @@ export function FriendPageClient({
                 setShowWidgetLibrary(true);
                 playSound("open");
               }}
-              style={{ 
+              style={{
                 fontSize: "var(--font-size-sm)",
                 padding: "var(--space-xs) var(--space-sm)",
                 height: "var(--height-button)",
@@ -595,7 +602,10 @@ export function FriendPageClient({
                 gap: "var(--space-xs)",
               }}
             >
-              <i className="hn hn-plus-solid" style={{ fontSize: "var(--font-size-xs)" }} />
+              <i
+                className="hn hn-plus-solid"
+                style={{ fontSize: "var(--font-size-xs)" }}
+              />
               ADD
             </button>
             <button
@@ -603,7 +613,7 @@ export function FriendPageClient({
                 playSound("select");
                 handleSave();
               }}
-              style={{ 
+              style={{
                 fontSize: "var(--font-size-sm)",
                 padding: "var(--space-xs) var(--space-sm)",
                 height: "var(--height-button)",
@@ -621,7 +631,10 @@ export function FriendPageClient({
                 gap: "var(--space-xs)",
               }}
             >
-              <i className="hn hn-save-solid" style={{ fontSize: "var(--font-size-xs)" }} />
+              <i
+                className="hn hn-save-solid"
+                style={{ fontSize: "var(--font-size-xs)" }}
+              />
               SAVE
             </button>
           </div>
@@ -648,7 +661,7 @@ export function FriendPageClient({
           position: "relative",
           overflow: "hidden",
           width: "100vw",
-          height: "calc(100vh - 36px - 60px)", // Full height minus nav and header
+          height: "calc(100vh - 2.25rem - 3.75rem)", // Full height minus nav and header
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -673,7 +686,10 @@ export function FriendPageClient({
           {widgets.map((widget) => {
             let pixelArtImageUrl: string | undefined;
             // Handle both pixel_art and image widgets for the image URL
-            if (widget.widget_type === "pixel_art" || widget.widget_type === "image") {
+            if (
+              widget.widget_type === "pixel_art" ||
+              widget.widget_type === "image"
+            ) {
               pixelArtImageUrl =
                 pixelArtMap.get(widget.id) || pixelArtBySize.get(widget.size);
             }
@@ -706,23 +722,26 @@ export function FriendPageClient({
                     onUpdateWidgetConfig={async (widgetId, config) => {
                       // Update widget config in database
                       try {
-                        const response = await fetch(`/api/widgets/${friend.id}`, {
-                          method: "PUT",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            widgets: widgets.map((w) =>
-                              w.id === widgetId
-                                ? { ...w, config }
-                                : w
-                            ).map((w) => ({
-                              widget_type: w.widget_type,
-                              size: w.size,
-                              position_x: w.position_x,
-                              position_y: w.position_y,
-                              config: w.config || {},
-                            })),
-                          }),
-                        });
+                        const response = await fetch(
+                          `/api/widgets/${friend.id}`,
+                          {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              widgets: widgets
+                                .map((w) =>
+                                  w.id === widgetId ? { ...w, config } : w
+                                )
+                                .map((w) => ({
+                                  widget_type: w.widget_type,
+                                  size: w.size,
+                                  position_x: w.position_x,
+                                  position_y: w.position_y,
+                                  config: w.config || {},
+                                })),
+                            }),
+                          }
+                        );
                         if (response.ok) {
                           setWidgets((prev) =>
                             prev.map((w) =>
@@ -740,6 +759,10 @@ export function FriendPageClient({
                       widgetId={widget.id}
                       onDelete={() => handleDelete(widget.id)}
                       onDragStart={(e) => handleDragStart(e, widget.id)}
+                      onEdit={() => {
+                        setConfiguringWidget(widget);
+                        playSound("open");
+                      }}
                     />
                   )}
                 </div>
@@ -748,6 +771,78 @@ export function FriendPageClient({
           })}
         </Grid>
       </div>
+
+      {/* Widget Configuration Modal */}
+      {configuringWidget && (
+        <WidgetConfigModal
+          widget={configuringWidget}
+          friendColors={localColors}
+          onClose={() => {
+            setConfiguringWidget(null);
+            playSound("close");
+          }}
+          onSave={async (newConfig) => {
+            console.log("[FriendPage] Saving widget config:", {
+              widgetId: configuringWidget.id,
+              config: newConfig,
+            });
+
+            // Update widget config locally first for immediate feedback
+            const updatedWidgets = widgets.map((w) =>
+              w.id === configuringWidget.id ? { ...w, config: newConfig } : w
+            );
+            setWidgets(updatedWidgets);
+
+            // Save to database - only update the specific widget, not all widgets
+            try {
+              console.log(
+                "[FriendPage] Sending PUT request to /api/widgets/" + friend.id
+              );
+              const response = await fetch(`/api/widgets/${friend.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  widgets: updatedWidgets.map((w) => ({
+                    widget_type: w.widget_type,
+                    size: w.size,
+                    position_x: w.position_x,
+                    position_y: w.position_y,
+                    config: w.config || {},
+                  })),
+                }),
+              });
+
+              if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error(
+                  "[FriendPage] Failed to save widget config:",
+                  errorData
+                );
+                alert(`Failed to save: ${errorData.error || "Unknown error"}`);
+                playSound("error");
+                return;
+              }
+
+              const result = await response.json();
+              console.log(
+                "[FriendPage] Widget config saved successfully:",
+                result
+              );
+              playSound("success");
+            } catch (error) {
+              console.error("[FriendPage] Error saving widget config:", error);
+              alert(
+                `Error: ${
+                  error instanceof Error ? error.message : "Unknown error"
+                }`
+              );
+              playSound("error");
+            }
+
+            setConfiguringWidget(null);
+          }}
+        />
+      )}
 
       {/* Widget Library - Navigate to page instead of modal */}
       {showWidgetLibrary && (
@@ -779,7 +874,10 @@ export function FriendPageClient({
               >
                 <i
                   className="hn hn-arrow-left-solid"
-                  style={{ fontSize: "10px", marginRight: "4px" }}
+                  style={{
+                    fontSize: "var(--font-size-xs)",
+                    marginRight: "var(--space-xs)",
+                  }}
                 />
                 BACK
               </button>

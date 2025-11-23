@@ -26,7 +26,7 @@ export default async function Home() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(17.5rem, 1fr))",
               gap: "var(--space-xl)",
               marginBottom: "var(--space-3xl)",
             }}
@@ -51,8 +51,8 @@ export default async function Home() {
               >
                 <div
                   style={{
-                    width: "64px",
-                    height: "64px",
+                    width: "4rem",
+                    height: "4rem",
                     borderRadius: "var(--radius-sm)",
                     background: friend.color_primary || "var(--game-accent-blue)",
                     border: `var(--border-width-lg) solid var(--admin-accent)`,

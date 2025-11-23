@@ -15,22 +15,15 @@ interface GridItemProps {
   onDrop?: (e: React.DragEvent) => void;
 }
 
-// Base tile size (1x scale) - smaller to fit better
-const BASE_TILE_SIZE = 60; // pixels (reduced from 80)
-const BASE_GAP = 6; // pixels (reduced from 8)
+// Base tile size in rem (assuming 16px = 1rem base) - made bigger
+const TILE_SIZE_REM = 5; // 80px at 16px base (increased from 60px)
+const GAP_REM = 0.5; // 8px at 16px base (increased from 6px)
+const TILE_SIZE = `${TILE_SIZE_REM}rem`;
+const GAP = `${GAP_REM}rem`;
 
-// Grid dimensions
-const GRID_COLS = 8;
-const GRID_ROWS = 6;
-
-// Calculate tile size based on scale
-function getTileSize(scale: 1 | 2 | 4): number {
-  return BASE_TILE_SIZE * scale;
-}
-
-function getGap(scale: 1 | 2 | 4): number {
-  return BASE_GAP * scale;
-}
+// Grid dimensions - changed to 6x8 (6 cols, 8 rows)
+const GRID_COLS = 6;
+const GRID_ROWS = 8;
 
 interface GridProps {
   children: React.ReactNode;
@@ -39,15 +32,8 @@ interface GridProps {
 }
 
 export function Grid({ children, dragOverPosition, draggedWidgetSize }: GridProps) {
-  // Get scale from CSS variable (set by ScaleProvider)
-  const scale = typeof window !== "undefined" 
-    ? parseInt(document.documentElement.getAttribute("data-scale") || "2") as 1 | 2 | 4
-    : 2;
-  
-  const tileSize = getTileSize(scale);
-  const gap = getGap(scale);
-  const gridWidth = GRID_COLS * tileSize + (GRID_COLS - 1) * gap;
-  const gridHeight = GRID_ROWS * tileSize + (GRID_ROWS - 1) * gap;
+  const gridWidth = `calc(${GRID_COLS} * ${TILE_SIZE} + ${GRID_COLS - 1} * ${GAP})`;
+  const gridHeight = `calc(${GRID_ROWS} * ${TILE_SIZE} + ${GRID_ROWS - 1} * ${GAP})`;
   // Create array of all grid positions for background tiles
   const allTiles: Array<{ x: number; y: number }> = [];
   for (let y = 0; y < GRID_ROWS; y++) {
@@ -69,11 +55,11 @@ export function Grid({ children, dragOverPosition, draggedWidgetSize }: GridProp
 
   const gridStyle: React.CSSProperties = {
     display: "grid",
-    gridTemplateColumns: `repeat(${GRID_COLS}, ${tileSize}px)`,
-    gridTemplateRows: `repeat(${GRID_ROWS}, ${tileSize}px)`,
-    gap: `${gap}px`,
-    width: `${gridWidth}px`,
-    height: `${gridHeight}px`,
+    gridTemplateColumns: `repeat(${GRID_COLS}, ${TILE_SIZE})`,
+    gridTemplateRows: `repeat(${GRID_ROWS}, ${TILE_SIZE})`,
+    gap: GAP,
+    width: gridWidth,
+    height: gridHeight,
     position: "absolute",
     top: "50%",
     left: "50%",
@@ -94,8 +80,8 @@ export function Grid({ children, dragOverPosition, draggedWidgetSize }: GridProp
             style={{
               gridColumn: tile.x + 1,
               gridRow: tile.y + 1,
-              width: `${tileSize}px`,
-              height: `${tileSize}px`,
+              width: TILE_SIZE,
+              height: TILE_SIZE,
               pointerEvents: "none",
               zIndex: 0,
               position: "relative",
@@ -124,19 +110,14 @@ interface GridItemProps {
 
 export function GridItem({ position, size, children, onDragOver, onDrop }: GridItemProps) {
   const [cols, rows] = size.split("x").map(Number);
-  const scale = typeof window !== "undefined" 
-    ? parseInt(document.documentElement.getAttribute("data-scale") || "2") as 1 | 2 | 4
-    : 2;
-  const tileSize = getTileSize(scale);
-  const gap = getGap(scale);
-  const itemWidth = cols * tileSize + (cols - 1) * gap;
-  const itemHeight = rows * tileSize + (rows - 1) * gap;
+  const itemWidth = `calc(${cols} * ${TILE_SIZE} + ${cols - 1} * ${GAP})`;
+  const itemHeight = `calc(${rows} * ${TILE_SIZE} + ${rows - 1} * ${GAP})`;
 
   const itemStyle: React.CSSProperties = {
     gridColumn: `${position.x + 1} / span ${cols}`,
     gridRow: `${position.y + 1} / span ${rows}`,
-    width: `${itemWidth}px`,
-    height: `${itemHeight}px`,
+    width: itemWidth,
+    height: itemHeight,
     position: "relative",
     zIndex: 1,
   };

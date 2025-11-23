@@ -1,12 +1,15 @@
 -- Row Level Security Policies
+-- NOTE: RLS is enabled here but will be DISABLED in migration 004 for development
+-- This allows you to easily re-enable RLS later by removing migration 004
 
--- Enable RLS on all tables
+-- Enable RLS on all tables (will be disabled in next migration)
 ALTER TABLE friends ENABLE ROW LEVEL SECURITY;
 ALTER TABLE widgets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE friend_widgets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE global_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE personal_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pixel_art_images ENABLE ROW LEVEL SECURITY;
+ALTER TABLE inbox_items ENABLE ROW LEVEL SECURITY;
 
 -- Friends: Public read, admin write
 CREATE POLICY "Friends are viewable by everyone"
@@ -66,7 +69,14 @@ CREATE POLICY "Only admins can manage pixel art images"
   ON pixel_art_images FOR ALL
   USING (auth.role() = 'authenticated');
 
+-- Inbox items: Public read, admin write
+CREATE POLICY "Inbox items are viewable by everyone"
+  ON inbox_items FOR SELECT
+  USING (true);
+
+CREATE POLICY "Only admins can manage inbox items"
+  ON inbox_items FOR ALL
+  USING (auth.role() = 'authenticated');
+
 -- Note: For now, these policies allow public read access.
 -- Once authentication is set up, you can restrict reads to authenticated users only.
-
-

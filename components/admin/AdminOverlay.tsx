@@ -6,9 +6,15 @@ interface AdminOverlayProps {
   widgetId: string;
   onDelete: () => void;
   onDragStart: (e: React.DragEvent) => void;
+  onEdit?: () => void;
 }
 
-export function AdminOverlay({ widgetId, onDelete, onDragStart }: AdminOverlayProps) {
+export function AdminOverlay({
+  widgetId,
+  onDelete,
+  onDragStart,
+  onEdit,
+}: AdminOverlayProps) {
   return (
     <div
       data-widget-item={widgetId}
@@ -49,6 +55,36 @@ export function AdminOverlay({ widgetId, onDelete, onDragStart }: AdminOverlayPr
           height: "100%",
         }}
       >
+        {onEdit && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+            style={{
+              padding: "var(--space-xs) var(--space-sm)",
+              background: "var(--game-accent-blue)",
+              color: "white",
+              border: "none",
+              borderRadius: "var(--radius-sm)",
+              cursor: "pointer",
+              fontSize: "var(--font-size-xs)",
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              boxShadow: "var(--game-shadow-md)",
+              minWidth: "60px",
+            }}
+          >
+            <i
+              className="hn hn-cog-solid"
+              style={{
+                fontSize: "var(--font-size-xs)",
+                marginRight: "var(--space-xs)",
+              }}
+            />
+            EDIT
+          </button>
+        )}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -68,7 +104,13 @@ export function AdminOverlay({ widgetId, onDelete, onDragStart }: AdminOverlayPr
             minWidth: "60px",
           }}
         >
-          <i className="hn hn-trash-solid" style={{ fontSize: "var(--font-size-xs)", marginRight: "var(--space-xs)" }} />
+          <i
+            className="hn hn-trash-solid"
+            style={{
+              fontSize: "var(--font-size-xs)",
+              marginRight: "var(--space-xs)",
+            }}
+          />
           DEL
         </button>
         <div
@@ -86,4 +128,3 @@ export function AdminOverlay({ widgetId, onDelete, onDragStart }: AdminOverlayPr
     </div>
   );
 }
-

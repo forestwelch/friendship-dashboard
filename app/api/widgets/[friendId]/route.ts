@@ -55,6 +55,8 @@ export async function PUT(
       );
     }
 
+    console.log(`[API] Saving ${widgets.length} widgets for friend ${friendId}`);
+    
     // Delete all existing widgets for this friend
     const { error: deleteError } = await adminClient
       .from("friend_widgets")
@@ -62,12 +64,14 @@ export async function PUT(
       .eq("friend_id", friendId);
 
     if (deleteError) {
-      console.error("Error deleting widgets:", deleteError);
+      console.error("[API] Error deleting widgets:", deleteError);
       return NextResponse.json(
         { error: `Failed to delete existing widgets: ${deleteError.message}` },
         { status: 500 }
       );
     }
+    
+    console.log("[API] Deleted existing widgets, inserting new ones...");
 
     // Insert new widgets
     const widgetsToInsert = widgets.map((w: FriendWidget) => {
@@ -92,12 +96,15 @@ export async function PUT(
         .insert(widgetsToInsert);
 
       if (insertError) {
-        console.error("Error inserting widgets:", insertError);
+        console.error("[API] Error inserting widgets:", insertError);
+        console.error("[API] Widgets that failed:", JSON.stringify(widgetsToInsert, null, 2));
         return NextResponse.json(
-          { error: `Failed to save widgets: ${insertError.message}` },
+          { error: `Failed to save widgets: ${insertError.message}`, details: insertError },
           { status: 500 }
         );
       }
+      
+      console.log(`[API] Successfully saved ${widgetsToInsert.length} widgets`);
     }
 
     return NextResponse.json({ success: true, saved: widgetsToInsert.length });

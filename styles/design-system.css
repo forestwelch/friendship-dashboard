@@ -59,65 +59,38 @@
   --game-glow-green: 0 0 8px rgba(74, 222, 128, 0.4);
   --game-glow-red: 0 0 8px rgba(248, 113, 113, 0.4);
 
-  /* Base values (1x scale) - all values will be multiplied by scale */
-  --base-space-xs: 4px;
-  --base-space-sm: 6px;
-  --base-space-md: 10px;
-  --base-space-lg: 12px;
-  --base-space-xl: 16px;
-  --base-space-2xl: 24px;
-  --base-space-3xl: 32px;
+  /* Spacing values in rem (assuming 16px = 1rem base) */
+  --space-xs: 0.25rem;   /* 4px */
+  --space-sm: 0.375rem;  /* 6px */
+  --space-md: 0.625rem;  /* 10px */
+  --space-lg: 0.75rem;   /* 12px */
+  --space-xl: 1rem;      /* 16px */
+  --space-2xl: 1.5rem;   /* 24px */
+  --space-3xl: 2rem;     /* 32px */
 
-  --base-radius-sm: 1px;
-  --base-radius-md: 2px;
-
-  --base-height-button: 20px;
-  --base-height-input: 20px;
-  --base-height-card-min: 32px;
-
-  --base-font-size-xs: 8px;
-  --base-font-size-sm: 10px;
-  --base-font-size-md: 12px;
-  --base-font-size-lg: 14px;
-  --base-font-size-xl: 16px;
-  --base-font-size-2xl: 20px;
-  --base-font-size-3xl: 24px;
-
-  --base-border-width: 1px;
-  --base-border-width-md: 2px;
-  --base-border-width-lg: 3px;
-
-  /* Scale multiplier - set via data-scale attribute */
-  --scale: 2; /* Default to 2x */
-
-  /* Scaled values - multiply base by scale */
-  --space-xs: calc(var(--base-space-xs) * var(--scale));
-  --space-sm: calc(var(--base-space-sm) * var(--scale));
-  --space-md: calc(var(--base-space-md) * var(--scale));
-  --space-lg: calc(var(--base-space-lg) * var(--scale));
-  --space-xl: calc(var(--base-space-xl) * var(--scale));
-  --space-2xl: calc(var(--base-space-2xl) * var(--scale));
-  --space-3xl: calc(var(--base-space-3xl) * var(--scale));
-
-  --radius-sm: calc(var(--base-radius-sm) * var(--scale));
-  --radius-md: calc(var(--base-radius-md) * var(--scale));
+  /* Border radius in rem */
+  --radius-sm: 0.0625rem; /* 1px */
+  --radius-md: 0.125rem;   /* 2px */
   --radius-none: 0;
 
-  --height-button: calc(var(--base-height-button) * var(--scale));
-  --height-input: calc(var(--base-height-input) * var(--scale));
-  --height-card-min: calc(var(--base-height-card-min) * var(--scale));
+  /* Heights in rem */
+  --height-button: 1.25rem;  /* 20px */
+  --height-input: 1.25rem;   /* 20px */
+  --height-card-min: 2rem;    /* 32px */
 
-  --font-size-xs: calc(var(--base-font-size-xs) * var(--scale));
-  --font-size-sm: calc(var(--base-font-size-sm) * var(--scale));
-  --font-size-md: calc(var(--base-font-size-md) * var(--scale));
-  --font-size-lg: calc(var(--base-font-size-lg) * var(--scale));
-  --font-size-xl: calc(var(--base-font-size-xl) * var(--scale));
-  --font-size-2xl: calc(var(--base-font-size-2xl) * var(--scale));
-  --font-size-3xl: calc(var(--base-font-size-3xl) * var(--scale));
+  /* Font sizes in rem */
+  --font-size-xs: 0.5rem;    /* 8px */
+  --font-size-sm: 0.625rem;  /* 10px */
+  --font-size-md: 0.75rem;   /* 12px */
+  --font-size-lg: 0.875rem;  /* 14px */
+  --font-size-xl: 1rem;      /* 16px */
+  --font-size-2xl: 1.25rem;  /* 20px */
+  --font-size-3xl: 1.5rem;   /* 24px */
 
-  --border-width: calc(var(--base-border-width) * var(--scale));
-  --border-width-md: calc(var(--base-border-width-md) * var(--scale));
-  --border-width-lg: calc(var(--base-border-width-lg) * var(--scale));
+  /* Border widths in rem */
+  --border-width: 0.0625rem;      /* 1px */
+  --border-width-md: 0.125rem;    /* 2px */
+  --border-width-lg: 0.1875rem;   /* 3px */
 
   /* Transitions */
   --transition-fast: 0.1s ease-out;
@@ -125,17 +98,9 @@
   --transition-slow: 0.3s ease-out;
 }
 
-/* Scale-specific overrides */
-[data-scale="1"] {
-  --scale: 1;
-}
-
-[data-scale="2"] {
-  --scale: 2;
-}
-
-[data-scale="4"] {
-  --scale: 4;
+/* Base font size - ensures rem calculations are consistent */
+html {
+  font-size: 16px; /* Base for rem calculations */
 }
 
 /* ============================================

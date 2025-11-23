@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 import { YouTubePlayerProvider } from "@/components/YouTubePlayer";
-import { ScaleProvider } from "@/lib/scale-context";
 
 export const metadata: Metadata = {
   title: "Friendship Dashboard",
@@ -28,9 +27,7 @@ export default function RootLayout({
           strategy="lazyOnload"
           id="youtube-api-script"
         />
-        <ScaleProvider>
-          <YouTubePlayerProvider>{children}</YouTubePlayerProvider>
-        </ScaleProvider>
+        <YouTubePlayerProvider>{children}</YouTubePlayerProvider>
       </body>
     </html>
   );

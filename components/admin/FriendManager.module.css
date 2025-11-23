@@ -1,0 +1,78 @@
+/* Example CSS Module - you can use these instead of inline styles */
+
+.container {
+  padding-top: calc(var(--height-button) + var(--space-md));
+  width: 100vw;
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  padding: var(--space-md);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.breadcrumb {
+  margin-bottom: var(--space-md);
+  flex-shrink: 0;
+}
+
+.heading {
+  margin-bottom: var(--space-md);
+  flex-shrink: 0;
+}
+
+.addButton {
+  margin-bottom: var(--space-md);
+  flex-shrink: 0;
+}
+
+.form {
+  margin-bottom: var(--space-md);
+  padding: var(--space-lg);
+  flex-shrink: 0;
+}
+
+.formFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.grid {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
+  gap: var(--space-xl);
+}
+
+.friendCard {
+  text-decoration: none;
+  padding: var(--space-xl);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  border-width: var(--border-width-lg);
+}
+
+.friendAvatar {
+  width: 4rem;
+  height: 4rem;
+  border-radius: var(--radius-sm);
+  border-width: var(--border-width-lg);
+  box-shadow: var(--game-shadow-md);
+}
+
+.friendName {
+  margin: 0;
+  font-size: var(--font-size-xl);
+}
+

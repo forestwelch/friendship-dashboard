@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useScale } from "@/lib/scale-context";
 import { playSound } from "@/lib/sounds";
 
 interface NavigationProps {
@@ -22,12 +21,11 @@ interface NavigationProps {
 
 export function Navigation({ themeColors, actions }: NavigationProps = {} as NavigationProps) {
   const pathname = usePathname();
-  const { scale, setScale } = useScale();
 
   const navLinks = [
     { href: "/", label: "HOME" },
-    { href: "/admin/content", label: "MANAGE CONTENT" },
-    { href: "/admin/images", label: "IMAGES" },
+    { href: "/admin/friends", label: "MANAGE FRIENDS" },
+    { href: "/admin/content", label: "MANAGE GLOBAL CONTENT" },
   ];
 
   const navStyle: React.CSSProperties = {
@@ -59,7 +57,7 @@ export function Navigation({ themeColors, actions }: NavigationProps = {} as Nav
       
       {/* Contextual Actions */}
       {actions && actions.length > 0 && (
-        <div style={{ display: "flex", gap: "var(--space-sm)", marginLeft: "var(--space-md)", borderLeft: "1px solid var(--game-border)", paddingLeft: "var(--space-md)" }}>
+        <div style={{ display: "flex", gap: "var(--space-sm)", marginLeft: "var(--space-md)", borderLeft: "var(--border-width-sm) solid var(--game-border)", paddingLeft: "var(--space-md)" }}>
           {actions.map((action, index) => (
             <button
               key={index}
@@ -68,56 +66,14 @@ export function Navigation({ themeColors, actions }: NavigationProps = {} as Nav
                 playSound(action.primary ? "select" : "click");
               }}
               className={`game-button ${action.primary ? "game-button-primary" : ""}`}
-              style={{ fontSize: "var(--font-size-xs)", height: "24px", minHeight: "24px" }}
+              style={{ fontSize: "var(--font-size-xs)", height: "1.5rem", minHeight: "1.5rem" }}
             >
-              {action.icon && <i className={`hn ${action.icon}`} style={{ marginRight: "4px" }} />}
+              {action.icon && <i className={`hn ${action.icon}`} style={{ marginRight: "0.25rem" }} />}
               {action.label}
             </button>
           ))}
         </div>
       )}
-
-      {/* Global Scale Selector */}
-      <div
-        style={{
-          marginLeft: "auto",
-          display: "flex",
-          gap: "var(--space-xs)",
-          alignItems: "center",
-          border: `var(--border-width-md) solid ${themeColors?.border || "var(--admin-accent)"}`,
-          borderRadius: "var(--radius-sm)",
-          padding: "2px",
-        }}
-      >
-        {([1, 2, 4] as const).map((s) => (
-          <button
-            key={s}
-            onClick={() => {
-              setScale(s);
-              playSound("select");
-            }}
-            style={{
-              padding: "var(--space-xs) var(--space-sm)",
-              fontSize: "var(--font-size-xs)",
-              fontWeight: "bold",
-              background: scale === s ? (themeColors?.active || "var(--admin-primary)") : "transparent",
-              color: scale === s ? (themeColors?.bg || "var(--admin-bg)") : (themeColors?.text || "var(--admin-text)"),
-              border: "none",
-              borderRadius: "var(--radius-sm)",
-              cursor: "pointer",
-              transition: "all var(--transition-fast)",
-              textTransform: "uppercase",
-              height: "var(--height-button)",
-              minHeight: "var(--height-button)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {s}x
-          </button>
-        ))}
-      </div>
     </nav>
   );
 }

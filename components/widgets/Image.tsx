@@ -84,7 +84,7 @@ export function ImageWidget({ size, imageUrl, onUpload, className }: ImageWidget
                   className="game-button game-button-primary"
                   style={{ fontSize: "var(--font-size-xs)" }}
                 >
-                  <i className="hn hn-upload-solid" style={{ marginRight: "4px" }} />
+                  <i className="hn hn-upload-solid" style={{ marginRight: "var(--space-xs)" }} />
                   UPLOAD
                 </button>
                 <div style={{ fontSize: "var(--font-size-xs)", opacity: 0.7 }}>

@@ -85,7 +85,11 @@ export function WidgetRenderer({
       return <MusicPlayer size={widget.size} songs={songs} />;
 
     case "pixel_art":
-      if (!pixelArtImageUrl) {
+      // Check if widget config has imageUrls for slideshow
+      const imageUrls = widget.config?.imageUrls;
+      
+      // Fallback to single image if no imageUrls configured
+      if (!imageUrls && !pixelArtImageUrl) {
         return (
           <div
             style={{
@@ -102,7 +106,14 @@ export function WidgetRenderer({
           </div>
         );
       }
-      return <PixelArt size={widget.size} imageUrl={pixelArtImageUrl} />;
+      
+      return (
+        <PixelArt 
+          size={widget.size} 
+          imageUrl={imageUrls ? undefined : pixelArtImageUrl}
+          imageUrls={imageUrls}
+        />
+      );
 
     case "image":
       return (

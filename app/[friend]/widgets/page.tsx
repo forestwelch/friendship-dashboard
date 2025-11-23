@@ -23,7 +23,7 @@ export default function WidgetLibraryPage() {
       <Navigation />
       <div
         style={{
-          paddingTop: "36px",
+          paddingTop: "2.25rem",
           width: "100vw",
           minHeight: "100vh",
           background: "var(--game-bg-primary)",

@@ -11,20 +11,20 @@ export default function NotFound() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: "24px",
+          gap: "var(--space-2xl)",
           background: "var(--bg)",
           color: "var(--text)",
         }}
       >
-        <h1 style={{ fontSize: "32px" }}>404 - Friend Not Found</h1>
-        <p style={{ fontSize: "16px" }}>This friend doesn't have a dashboard yet.</p>
+        <h1 style={{ fontSize: "var(--font-size-2xl)" }}>404 - Friend Not Found</h1>
+        <p style={{ fontSize: "var(--font-size-base)" }}>This friend doesn't have a dashboard yet.</p>
         <Link
           href="/"
           className="widget-button"
           style={{
-            padding: "16px 32px",
+            padding: "var(--space-xl) var(--space-2xl)",
             textDecoration: "none",
-            fontSize: "24px",
+            fontSize: "var(--font-size-xl)",
             textAlign: "center",
           }}
         >
