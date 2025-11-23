@@ -88,20 +88,18 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
   }
 
   try {
-    console.time("[DB] getFriendPage");
-    
+    const pageStartTime = Date.now();
     // Fetch friend
-    console.time("[DB] getFriendPage - friend");
+    const friendStartTime = Date.now();
     const { data: friend, error: friendError } = await supabase
       .from("friends")
       .select("*")
       .eq("slug", slug)
       .single();
-    console.timeEnd("[DB] getFriendPage - friend");
+    console.log(`[DB] getFriendPage - friend: ${Date.now() - friendStartTime}ms`);
 
     if (friendError || !friend) {
       console.error("Error fetching friend:", friendError);
-      console.timeEnd("[DB] getFriendPage");
       return null;
     }
 
@@ -132,8 +130,6 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
         .eq("friend_id", friend.id)
     ]);
 
-    console.timeEnd("[DB] getFriendPage");
-
     const { data: widgets, error: widgetsError } = widgetsResult;
     const { data: pixelArtImages } = pixelArtResult;
 
@@ -154,7 +150,7 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
       config: w.config || {},
     }));
 
-    return {
+    const result = {
       friend: {
         id: friend.id,
         name: friend.name,
@@ -173,6 +169,9 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
         image_data: "" // Will be fetched separately if needed
       })) || [],
     };
+    
+    console.log(`[DB] getFriendPage: ${Date.now() - pageStartTime}ms`);
+    return result;
   } catch (error) {
     console.error("Error in getFriendPage:", error);
     return null;
@@ -188,14 +187,14 @@ export async function getGlobalContent(contentType: string): Promise<any> {
   }
 
   try {
-    console.time(`[DB] getGlobalContent - ${contentType}`);
+    const startTime = Date.now();
     const { data, error } = await supabase
       .from("global_content")
       .select("data")
       .eq("content_type", contentType)
       .single();
 
-    console.timeEnd(`[DB] getGlobalContent - ${contentType}`);
+    console.log(`[DB] getGlobalContent - ${contentType}: ${Date.now() - startTime}ms`);
 
     if (error || !data) {
       console.error("Error fetching global content:", error);
@@ -266,8 +265,10 @@ export async function savePixelArtImage(
       insertData.pixel_data = pixelData;
       insertData.width = 128; // Updated to match PIXEL_GRID_SIZE
       insertData.height = 128;
+      insertData.base_image_data = null; // Explicitly set to null for new format
     } else if (imageData) {
       insertData.base_image_data = imageData;
+      // Old format - no pixel_data
     } else {
       console.error("Error saving pixel art: No imageData or pixelData provided");
       return null;
