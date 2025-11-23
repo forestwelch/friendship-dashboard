@@ -115,7 +115,7 @@ export function Calendar({
         >
           <div
             style={{
-              fontSize: "12px",
+              fontSize: "var(--font-size-sm)",
               fontWeight: "bold",
               textAlign: "center",
               marginBottom: "4px",

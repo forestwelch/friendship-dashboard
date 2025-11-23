@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { playSound } from "@/lib/sounds";
+import { ColorPicker } from "./ColorPicker";
 
 interface ColorSettingsProps {
   friendId: string;
@@ -31,6 +32,7 @@ export function ColorSettings({
   themeColors = currentColors,
 }: ColorSettingsProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeColorKey, setActiveColorKey] = useState<string | null>(null);
 
   const colorKeys = [
     { key: "primary", label: "Primary" },
@@ -59,6 +61,7 @@ export function ColorSettings({
       <button
         onClick={() => {
           setIsOpen(!isOpen);
+          setActiveColorKey(null); // Reset on open/close toggle
           playSound("open");
         }}
         style={{
@@ -107,12 +110,17 @@ export function ColorSettings({
               }}
             >
               <h3 className="game-heading-2" style={{ margin: 0, color: themeColors.text }}>
-                COLOR SETTINGS
+                {activeColorKey ? `EDIT ${activeColorKey.toUpperCase()}` : "COLOR SETTINGS"}
               </h3>
               <button
                 onClick={() => {
-                  setIsOpen(false);
-                  playSound("close");
+                  if (activeColorKey) {
+                    setActiveColorKey(null);
+                    playSound("close");
+                  } else {
+                    setIsOpen(false);
+                    playSound("close");
+                  }
                 }}
                 style={{
                   background: "transparent",
@@ -123,106 +131,124 @@ export function ColorSettings({
                   padding: "var(--space-xs)",
                 }}
               >
-                <i className="hn hn-times-solid" />
+                {activeColorKey ? (
+                  <i className="hn hn-arrow-left-solid" style={{ fontSize: "16px" }} />
+                ) : (
+                  <i className="hn hn-times-solid" />
+                )}
               </button>
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--space-md)",
-                marginBottom: "var(--space-lg)",
-              }}
-            >
-              {colorKeys.map(({ key, label }) => (
+            {activeColorKey ? (
+              // Color Picker View
+              <ColorPicker 
+                currentColor={currentColors[activeColorKey as keyof typeof currentColors]}
+                onColorChange={(color) => {
+                  // Optional: Live preview or wait for confirm? 
+                  // User asked for "Hover preview click to confirm".
+                  // So we can update immediately on hover/change for preview.
+                  onColorChange(activeColorKey, color);
+                }}
+                onColorConfirm={(color) => {
+                  onColorChange(activeColorKey, color);
+                  setActiveColorKey(null); // Go back to list
+                }}
+              />
+            ) : (
+              // List View
+              <>
                 <div
-                  key={key}
                   style={{
                     display: "flex",
-                    alignItems: "center",
+                    flexDirection: "column",
                     gap: "var(--space-md)",
+                    marginBottom: "var(--space-lg)",
                   }}
                 >
-                  <div
-                    style={{
-                      width: "60px",
-                      height: "32px",
-                      background: currentColors[key as keyof typeof currentColors],
-                      border: "var(--border-width-md) solid var(--game-border)",
-                      borderRadius: "var(--radius-sm)",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      const input = document.createElement("input");
-                      input.type = "color";
-                      input.value = currentColors[key as keyof typeof currentColors];
-                      input.onchange = (e) => {
-                        const target = e.target as HTMLInputElement;
-                        onColorChange(key, target.value);
-                      };
-                      input.click();
-                    }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "var(--font-size-xs)", color: themeColors.text, opacity: 0.7 }}>
-                      {label}
+                  {colorKeys.map(({ key, label }) => (
+                    <div
+                      key={key}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "var(--space-md)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "60px",
+                          height: "32px",
+                          background: currentColors[key as keyof typeof currentColors],
+                          border: "var(--border-width-md) solid var(--game-border)",
+                          borderRadius: "var(--radius-sm)",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          setActiveColorKey(key);
+                          playSound("select");
+                        }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: "var(--font-size-xs)", color: themeColors.text, opacity: 0.7 }}>
+                          {label}
+                        </div>
+                        <div style={{ fontSize: "var(--font-size-xs)", color: themeColors.text }}>
+                          {currentColors[key as keyof typeof currentColors]}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          randomizeOne(key);
+                          playSound("blip");
+                        }}
+                        style={{
+                          padding: "var(--space-xs)",
+                          background: themeColors.secondary,
+                          border: `var(--border-width-md) solid ${themeColors.accent}`,
+                          borderRadius: "var(--radius-sm)",
+                          color: themeColors.text,
+                          cursor: "pointer",
+                          fontSize: "var(--font-size-xs)",
+                          minWidth: "32px",
+                          minHeight: "32px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <i className="hn hn-dice-solid" style={{ fontSize: "12px" }} />
+                      </button>
                     </div>
-                    <div style={{ fontSize: "var(--font-size-xs)", color: themeColors.text }}>
-                      {currentColors[key as keyof typeof currentColors]}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      randomizeOne(key);
-                      playSound("blip");
-                    }}
-                    style={{
-                      padding: "var(--space-xs)",
-                      background: themeColors.secondary,
-                      border: `var(--border-width-md) solid ${themeColors.accent}`,
-                      borderRadius: "var(--radius-sm)",
-                      color: themeColors.text,
-                      cursor: "pointer",
-                      fontSize: "var(--font-size-xs)",
-                      minWidth: "32px",
-                      minHeight: "32px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <i className="hn hn-dice-solid" style={{ fontSize: "12px" }} />
-                  </button>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            <button
-              onClick={() => {
-                onRandomizeAll?.();
-                playSound("select");
-              }}
-              style={{ 
-                width: "100%",
-                padding: "var(--space-sm) var(--space-md)",
-                background: themeColors.primary,
-                color: themeColors.bg,
-                border: `var(--border-width-md) solid ${themeColors.accent}`,
-                borderRadius: "var(--radius-sm)",
-                cursor: "pointer",
-                fontSize: "var(--font-size-xs)",
-                fontWeight: "bold",
-                textTransform: "uppercase",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "var(--space-xs)",
-              }}
-            >
-              <i className="hn hn-dice-solid" style={{ fontSize: "12px" }} />
-              RANDOMIZE ALL
-            </button>
+                <button
+                  onClick={() => {
+                    onRandomizeAll?.();
+                    playSound("select");
+                  }}
+                  style={{ 
+                    width: "100%",
+                    padding: "var(--space-sm) var(--space-md)",
+                    background: themeColors.primary,
+                    color: themeColors.bg,
+                    border: `var(--border-width-md) solid ${themeColors.accent}`,
+                    borderRadius: "var(--radius-sm)",
+                    cursor: "pointer",
+                    fontSize: "var(--font-size-xs)",
+                    fontWeight: "bold",
+                    textTransform: "uppercase",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "var(--space-xs)",
+                  }}
+                >
+                  <i className="hn hn-dice-solid" style={{ fontSize: "12px" }} />
+                  RANDOMIZE ALL
+                </button>
+              </>
+            )}
           </div>
 
           {/* Backdrop */}
@@ -243,4 +269,3 @@ export function ColorSettings({
     </>
   );
 }
-

@@ -4,3 +4,4 @@ export { Calendar } from "./Calendar";
 export { Notes } from "./Notes";
 export { Links } from "./Links";
 export { MediaRecommendations } from "./MediaRecommendations";
+export { ImageWidget } from "./Image";

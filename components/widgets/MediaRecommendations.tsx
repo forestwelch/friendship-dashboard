@@ -73,7 +73,7 @@ export function MediaRecommendations({
           {unwatchedCount > 0 && (
             <div
               style={{
-                fontSize: "12px",
+                fontSize: "var(--font-size-sm)",
                 background: "var(--accent)",
                 color: "var(--bg)",
                 padding: "2px 6px",
@@ -104,7 +104,7 @@ export function MediaRecommendations({
         >
           <div
             style={{
-              fontSize: "12px",
+              fontSize: "var(--font-size-sm)",
               fontWeight: "bold",
               marginBottom: "4px",
             }}
@@ -241,7 +241,7 @@ export function MediaRecommendations({
           {recommendations.length === 0 ? (
             <div
               style={{
-                fontSize: "12px",
+                fontSize: "var(--font-size-sm)",
                 opacity: 0.6,
                 textAlign: "center",
                 padding: "16px",
@@ -288,7 +288,7 @@ export function MediaRecommendations({
                         marginBottom: "2px",
                       }}
                     >
-                      <span style={{ fontSize: "12px" }}>
+                      <span style={{ fontSize: "var(--font-size-sm)" }}>
                         {getTypeIcon(item.type)}
                       </span>
                       <span style={{ fontWeight: "bold" }}>{item.title}</span>
@@ -339,7 +339,7 @@ export function MediaRecommendations({
               onAddRecommendation();
             }
           }}
-          style={{ fontSize: "12px", padding: "6px" }}
+          style={{ fontSize: "var(--font-size-sm)", padding: "6px" }}
         >
           + Add Recommendation
         </button>

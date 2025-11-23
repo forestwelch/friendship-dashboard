@@ -173,18 +173,18 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
                   handlePlayClick();
                 }
               }}
-              style={{ flex: 1, fontSize: "12px", padding: "4px" }}
+              style={{ flex: 1, fontSize: "var(--font-size-sm)", padding: "4px" }}
             >
-              <i className={isPlaying ? "hn hn-pause-solid" : "hn hn-play-solid"} style={{ fontSize: "12px" }} />
+              <i className={isPlaying ? "hn hn-pause-solid" : "hn hn-play-solid"} style={{ fontSize: "var(--font-size-sm)" }} />
             </button>
             <button
               className="widget-button"
               onClick={() => {
                 if (next) next();
               }}
-              style={{ flex: 1, fontSize: "12px", padding: "4px" }}
+              style={{ flex: 1, fontSize: "var(--font-size-sm)", padding: "4px" }}
             >
-              <i className="hn hn-arrow-alt-circle-right-solid" style={{ fontSize: "12px" }} />
+              <i className="hn hn-arrow-alt-circle-right-solid" style={{ fontSize: "var(--font-size-sm)" }} />
             </button>
           </div>
         </div>
@@ -244,7 +244,7 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
                     color: isCurrent ? "var(--bg)" : "var(--text)",
                   }}
                 >
-                  <div style={{ fontSize: "12px" }}>
+                  <div style={{ fontSize: "var(--font-size-sm)" }}>
                     {song.title || "Unknown"}
                   </div>
                   <div
@@ -260,7 +260,7 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
               );
             })
           ) : (
-            <div style={{ padding: "6px", fontSize: "12px", color: "var(--text)", minHeight: "40px", display: "flex", alignItems: "center" }}>
+            <div style={{ padding: "6px", fontSize: "var(--font-size-sm)", color: "var(--text)", minHeight: "40px", display: "flex", alignItems: "center" }}>
               No songs available
             </div>
           )}
@@ -277,7 +277,7 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
             }}
             style={{ flex: 1, fontSize: "11px", padding: "var(--space-sm)" }}
           >
-            <i className={isPlaying ? "hn hn-pause" : "hn hn-play"} style={{ fontSize: "12px", marginRight: "var(--space-xs)" }} />
+            <i className={isPlaying ? "hn hn-pause" : "hn hn-play"} style={{ fontSize: "var(--font-size-sm)", marginRight: "var(--space-xs)" }} />
             {isPlaying ? "Pause" : "Play"}
           </button>
           <button
@@ -287,7 +287,7 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
             }}
             style={{ flex: 1, fontSize: "11px", padding: "var(--space-sm)" }}
           >
-            <i className="hn hn-arrow-circle-right" style={{ fontSize: "12px", marginRight: "var(--space-xs)" }} />
+            <i className="hn hn-arrow-circle-right" style={{ fontSize: "var(--font-size-sm)", marginRight: "var(--space-xs)" }} />
             Next
           </button>
         </div>

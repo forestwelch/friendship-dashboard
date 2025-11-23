@@ -87,7 +87,7 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
         >
           <div
             style={{
-              fontSize: "12px",
+              fontSize: "var(--font-size-sm)",
               fontWeight: "bold",
               marginBottom: "4px",
             }}
@@ -247,7 +247,7 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
           {notes.length === 0 ? (
             <div
               style={{
-                fontSize: "12px",
+                fontSize: "var(--font-size-sm)",
                 opacity: 0.6,
                 textAlign: "center",
                 padding: "16px",
@@ -345,7 +345,7 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
           <button
             className="widget-button"
             onClick={addNote}
-            style={{ fontSize: "12px", padding: "6px" }}
+            style={{ fontSize: "var(--font-size-sm)", padding: "6px" }}
           >
             + Add Note
           </button>

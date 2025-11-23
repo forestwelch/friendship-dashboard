@@ -8,14 +8,19 @@ import {
   Notes,
   Links,
   MediaRecommendations,
+  ImageWidget,
 } from "@/components/widgets";
 import { FriendWidget } from "@/lib/queries";
 import { Song } from "@/lib/types";
+import { createInboxItem } from "@/lib/queries-inbox";
 
 interface WidgetRendererProps {
   widget: FriendWidget;
   songs?: Song[];
   pixelArtImageUrl?: string;
+  onUploadImage?: (file: File) => Promise<void>;
+  friendId?: string;
+  onUpdateWidgetConfig?: (widgetId: string, config: Record<string, any>) => Promise<void>;
 }
 
 /**
@@ -25,7 +30,56 @@ export function WidgetRenderer({
   widget,
   songs = [],
   pixelArtImageUrl,
+  onUploadImage,
+  friendId,
+  onUpdateWidgetConfig,
 }: WidgetRendererProps) {
+  const handleProposeHangout = async (date: string, time: string, message?: string) => {
+    if (!friendId) {
+      console.error("No friend ID provided for hangout proposal");
+      return;
+    }
+
+    const success = await createInboxItem(friendId, "hangout_proposal", {
+      date,
+      time,
+      message,
+    });
+
+    if (success) {
+      alert(`Hangout proposal sent: ${date} at ${time}`);
+    } else {
+      alert("Failed to send hangout proposal");
+    }
+  };
+
+  const handleMarkWatched = async (recommendationId: string) => {
+    if (!onUpdateWidgetConfig) {
+      console.log("Mark as watched:", recommendationId);
+      return;
+    }
+
+    const currentRecommendations = widget.config?.recommendations || [];
+    const updated = currentRecommendations.map((rec: any) =>
+      rec.id === recommendationId ? { ...rec, watched: true } : rec
+    );
+
+    await onUpdateWidgetConfig(widget.id, {
+      ...widget.config,
+      recommendations: updated,
+    });
+  };
+
+  const handleAddRecommendation = async () => {
+    // For now, just log - could open a modal or navigate to a form
+    console.log("Add recommendation - would open modal");
+    // In a real implementation, this would:
+    // 1. Open a modal/form
+    // 2. Collect recommendation data
+    // 3. Add to widget config via onUpdateWidgetConfig
+    // 4. Or send to inbox if it's a recommendation from a friend
+  };
+
   switch (widget.widget_type) {
     case "music_player":
       return <MusicPlayer size={widget.size} songs={songs} />;
@@ -41,7 +95,7 @@ export function WidgetRenderer({
               alignItems: "center",
               justifyContent: "center",
               color: "var(--text)",
-              fontSize: "12px",
+              fontSize: "var(--font-size-sm)",
             }}
           >
             No image
@@ -50,40 +104,53 @@ export function WidgetRenderer({
       }
       return <PixelArt size={widget.size} imageUrl={pixelArtImageUrl} />;
 
+    case "image":
+      return (
+        <ImageWidget 
+          size={widget.size} 
+          imageUrl={pixelArtImageUrl} 
+          onUpload={onUploadImage} 
+        />
+      );
+
     case "calendar":
       return (
         <Calendar
           size={widget.size}
           events={widget.config?.events || []}
-          onProposeHangout={(date, time) => {
-            // TODO: Send to inbox
-            console.log("Propose hangout:", date, time);
-            alert(`Hangout proposal sent: ${date} at ${time}`);
-          }}
+          onProposeHangout={handleProposeHangout}
         />
       );
 
     case "notes":
+      // Notes widget expects string[] but config stores objects with {id, content, created_at}
+      const notesArray = widget.config?.notes || [];
+      const notesStrings = Array.isArray(notesArray) && notesArray.length > 0 && typeof notesArray[0] === 'object'
+        ? notesArray.map((n: any) => n.content || n)
+        : notesArray;
+      
       return (
-        <Notes size={widget.size} initialNotes={widget.config?.notes || []} />
+        <Notes 
+          size={widget.size} 
+          initialNotes={notesStrings}
+        />
       );
 
     case "links":
-      return <Links size={widget.size} links={widget.config?.links || []} />;
+      return (
+        <Links 
+          size={widget.size} 
+          links={widget.config?.links || []}
+        />
+      );
 
     case "media_recommendations":
       return (
         <MediaRecommendations
           size={widget.size}
           recommendations={widget.config?.recommendations || []}
-          onMarkWatched={(id) => {
-            // TODO: Update in database
-            console.log("Mark as watched:", id);
-          }}
-          onAddRecommendation={() => {
-            // TODO: Open add recommendation modal
-            console.log("Add recommendation");
-          }}
+          onMarkWatched={handleMarkWatched}
+          onAddRecommendation={handleAddRecommendation}
         />
       );
 
@@ -97,7 +164,7 @@ export function WidgetRenderer({
             alignItems: "center",
             justifyContent: "center",
             color: "var(--text)",
-            fontSize: "12px",
+            fontSize: "var(--font-size-sm)",
           }}
         >
           Unknown widget: {widget.widget_type}

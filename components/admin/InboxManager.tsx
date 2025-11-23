@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { playSound } from "@/lib/sounds";
 import Link from "next/link";
+import { getInboxItems, updateInboxItemStatus } from "@/lib/queries";
 
 interface InboxItem {
   id: string;
@@ -22,49 +23,42 @@ export function InboxManager() {
   >("all");
 
   useEffect(() => {
-    // TODO: Fetch from Supabase
-    // For now, use mock data
-    setItems([
-      {
-        id: "1",
-        type: "recommendation",
-        friend_id: "daniel",
-        friend_name: "Daniel",
-        data: {
-          title: "The Matrix",
-          type: "movie",
-          description: "You have to watch this!",
-        },
-        created_at: new Date().toISOString(),
-        status: "pending",
-      },
-    ]);
-    setLoading(false);
-  }, []);
+    const fetchItems = async () => {
+      setLoading(true);
+      const data = await getInboxItems(filter);
+      setItems(data);
+      setLoading(false);
+    };
+    fetchItems();
+  }, [filter]);
 
-  const handleApprove = (itemId: string) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, status: "approved" as const } : item
-      )
-    );
-    playSound("success");
-    // TODO: Save to Supabase
+  const handleApprove = async (itemId: string) => {
+    const success = await updateInboxItemStatus(itemId, "approved");
+    if (success) {
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === itemId ? { ...item, status: "approved" as const } : item
+        )
+      );
+      playSound("success");
+    } else {
+      playSound("error");
+    }
   };
 
-  const handleReject = (itemId: string) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, status: "rejected" as const } : item
-      )
-    );
-    playSound("click");
-    // TODO: Save to Supabase
+  const handleReject = async (itemId: string) => {
+    const success = await updateInboxItemStatus(itemId, "rejected");
+    if (success) {
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === itemId ? { ...item, status: "rejected" as const } : item
+        )
+      );
+      playSound("click");
+    } else {
+      playSound("error");
+    }
   };
-
-  const filteredItems = items.filter(
-    (item) => filter === "all" || item.status === filter
-  );
 
   return (
     <div
@@ -113,8 +107,7 @@ export function InboxManager() {
               playSound("click");
             }}
           >
-            {f.charAt(0).toUpperCase() + f.slice(1)} (
-            {items.filter((i) => f === "all" || i.status === f).length})
+            {f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
         ))}
       </div>
@@ -127,7 +120,7 @@ export function InboxManager() {
         >
           Loading...
         </div>
-      ) : filteredItems.length === 0 ? (
+      ) : items.length === 0 ? (
         <div
           className="game-card"
           style={{ padding: "var(--space-2xl)", textAlign: "center" }}
@@ -144,7 +137,7 @@ export function InboxManager() {
             gap: "var(--space-md)",
           }}
         >
-          {filteredItems.map((item) => (
+          {items.map((item) => (
             <div
               key={item.id}
               className="game-card"

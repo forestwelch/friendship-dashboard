@@ -65,7 +65,7 @@ export function Links({ size, links = [] }: LinksProps) {
         >
           <div
             style={{
-              fontSize: "12px",
+              fontSize: "var(--font-size-sm)",
               fontWeight: "bold",
               marginBottom: "4px",
             }}
@@ -110,7 +110,7 @@ export function Links({ size, links = [] }: LinksProps) {
                   }}
                 >
                   {link.icon && (
-                    <i className={link.icon} style={{ fontSize: "12px" }} />
+                    <i className={link.icon} style={{ fontSize: "var(--font-size-sm)" }} />
                   )}
                   <span
                     style={{
@@ -174,7 +174,7 @@ export function Links({ size, links = [] }: LinksProps) {
             <div
               style={{
                 gridColumn: "1 / -1",
-                fontSize: "12px",
+                fontSize: "var(--font-size-sm)",
                 opacity: 0.6,
                 textAlign: "center",
                 padding: "16px",

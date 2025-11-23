@@ -27,7 +27,7 @@ export function FriendPageClient({
   friend,
   initialWidgets,
   songs,
-  pixelArtMap,
+  pixelArtMap: initialPixelArtMap,
   pixelArtBySize,
 }: FriendPageClientProps) {
   const [isEditMode, setIsEditMode] = useState(false);
@@ -46,6 +46,9 @@ export function FriendPageClient({
     text: friend.color_text || "#c8e0ff",
   });
   
+  // State for pixel art/images map to allow updates
+  const [pixelArtMap, setPixelArtMap] = useState<Map<string, string>>(initialPixelArtMap);
+
   // Get scale from global context (no local state needed)
   const { scale } = useScale();
 
@@ -452,6 +455,25 @@ export function FriendPageClient({
     }
   }, [friend.slug]);
 
+  const handleUploadImage = useCallback(async (file: File, widgetId: string) => {
+    // Mock upload for now or real implementation if API existed
+    // For now, just use local object URL to preview
+    const objectUrl = URL.createObjectURL(file);
+    
+    // Update local state
+    setPixelArtMap(prev => {
+      const newMap = new Map(prev);
+      newMap.set(widgetId, objectUrl);
+      return newMap;
+    });
+    
+    // TODO: Implement real upload
+    // const formData = new FormData();
+    // formData.append("file", file);
+    // formData.append("widgetId", widgetId);
+    // await fetch("/api/images/upload", { method: "POST", body: formData });
+  }, []);
+
   // Gamepad button handlers
   const handleGamepadButton = useCallback(
     (button: string) => {
@@ -650,7 +672,8 @@ export function FriendPageClient({
         >
           {widgets.map((widget) => {
             let pixelArtImageUrl: string | undefined;
-            if (widget.widget_type === "pixel_art") {
+            // Handle both pixel_art and image widgets for the image URL
+            if (widget.widget_type === "pixel_art" || widget.widget_type === "image") {
               pixelArtImageUrl =
                 pixelArtMap.get(widget.id) || pixelArtBySize.get(widget.size);
             }
@@ -678,6 +701,39 @@ export function FriendPageClient({
                     widget={widget}
                     songs={songs}
                     pixelArtImageUrl={pixelArtImageUrl}
+                    onUploadImage={(file) => handleUploadImage(file, widget.id)}
+                    friendId={friend.id}
+                    onUpdateWidgetConfig={async (widgetId, config) => {
+                      // Update widget config in database
+                      try {
+                        const response = await fetch(`/api/widgets/${friend.id}`, {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            widgets: widgets.map((w) =>
+                              w.id === widgetId
+                                ? { ...w, config }
+                                : w
+                            ).map((w) => ({
+                              widget_type: w.widget_type,
+                              size: w.size,
+                              position_x: w.position_x,
+                              position_y: w.position_y,
+                              config: w.config || {},
+                            })),
+                          }),
+                        });
+                        if (response.ok) {
+                          setWidgets((prev) =>
+                            prev.map((w) =>
+                              w.id === widgetId ? { ...w, config } : w
+                            )
+                          );
+                        }
+                      } catch (error) {
+                        console.error("Failed to update widget config:", error);
+                      }
+                    }}
                   />
                   {isHovered && (
                     <AdminOverlay

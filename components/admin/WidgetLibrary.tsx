@@ -21,10 +21,17 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
       sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
     },
     {
+      type: "image",
+      name: "Image",
+      description: "Display uploaded images",
+      icon: "📷",
+      sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
+    },
+    {
       type: "pixel_art",
       name: "Pixel Art",
-      description: "Display pixelated images",
-      icon: "🖼️",
+      description: "Display pixelated animations",
+      icon: "👾",
       sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
     },
     {
@@ -119,4 +126,3 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
     </div>
   );
 }
-

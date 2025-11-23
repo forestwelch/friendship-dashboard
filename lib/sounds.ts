@@ -1,7 +1,7 @@
 // Retro sound effects for the dashboard
 
 export function playSound(
-  type: "click" | "success" | "error" | "pop" | "blip" | "move" | "select" | "cancel" | "open" | "close"
+  type: "click" | "success" | "error" | "pop" | "blip" | "move" | "select" | "cancel" | "open" | "close" | "hover" | "upload" | "delete" | "focus" | "navigate"
 ) {
   if (typeof window === "undefined" || typeof AudioContext === "undefined") {
     return;
@@ -27,6 +27,11 @@ export function playSound(
       cancel: { frequency: 200, duration: 0.1, type: "sawtooth" },
       open: { frequency: 700, duration: 0.12, type: "sine" },
       close: { frequency: 300, duration: 0.1, type: "sawtooth" },
+      hover: { frequency: 450, duration: 0.03, type: "square" },
+      upload: { frequency: 550, duration: 0.1, type: "sine" },
+      delete: { frequency: 250, duration: 0.15, type: "sawtooth" },
+      focus: { frequency: 500, duration: 0.05, type: "square" },
+      navigate: { frequency: 350, duration: 0.04, type: "square" },
     };
 
     const sound = sounds[type];

@@ -12,15 +12,22 @@ interface NavigationProps {
     border?: string;
     active?: string;
   };
+  actions?: {
+    label: string;
+    onClick: () => void;
+    icon?: string;
+    primary?: boolean;
+  }[];
 }
 
-export function Navigation({ themeColors }: NavigationProps = {} as NavigationProps) {
+export function Navigation({ themeColors, actions }: NavigationProps = {} as NavigationProps) {
   const pathname = usePathname();
   const { scale, setScale } = useScale();
 
   const navLinks = [
     { href: "/", label: "HOME" },
     { href: "/admin/content", label: "MANAGE CONTENT" },
+    { href: "/admin/images", label: "IMAGES" },
   ];
 
   const navStyle: React.CSSProperties = {
@@ -43,11 +50,33 @@ export function Navigation({ themeColors }: NavigationProps = {} as NavigationPr
                 ? (themeColors?.active || "var(--admin-text)")
                 : (themeColors?.text || "var(--admin-secondary)"),
             }}
+            onClick={() => playSound("click")}
           >
             {link.label}
           </Link>
         );
       })}
+      
+      {/* Contextual Actions */}
+      {actions && actions.length > 0 && (
+        <div style={{ display: "flex", gap: "var(--space-sm)", marginLeft: "var(--space-md)", borderLeft: "1px solid var(--game-border)", paddingLeft: "var(--space-md)" }}>
+          {actions.map((action, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                action.onClick();
+                playSound(action.primary ? "select" : "click");
+              }}
+              className={`game-button ${action.primary ? "game-button-primary" : ""}`}
+              style={{ fontSize: "var(--font-size-xs)", height: "24px", minHeight: "24px" }}
+            >
+              {action.icon && <i className={`hn ${action.icon}`} style={{ marginRight: "4px" }} />}
+              {action.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Global Scale Selector */}
       <div
         style={{

@@ -1,5 +1,3 @@
-// Database query functions
-
 import { supabase, isSupabaseConfigured } from "./supabase";
 import { Friend, WidgetSize, Song } from "./types";
 
@@ -24,6 +22,9 @@ export interface FriendPageData {
     image_data: string;
   }>;
 }
+
+// Re-export common functions
+export { getInboxItems, updateInboxItemStatus, createInboxItem } from "./queries-inbox";
 
 /**
  * Get all friends
@@ -135,7 +136,7 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
     // Fetch pixel art images for this friend
     const { data: pixelArtImages } = await supabase
       .from("pixel_art_images")
-      .select("id, widget_id, size, image_data")
+      .select("id, widget_id, size, base_image_data") // Changed from image_data to base_image_data
       .eq("friend_id", friend.id);
 
     return {
@@ -151,7 +152,11 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
         color_text: friend.color_text,
       },
       widgets: transformedWidgets,
-      pixelArtImages: pixelArtImages || [],
+      // Map back to expected interface
+      pixelArtImages: (pixelArtImages || []).map((img: any) => ({
+        ...img,
+        image_data: img.base_image_data
+      })) || [],
     };
   } catch (error) {
     console.error("Error in getFriendPage:", error);
@@ -220,7 +225,7 @@ export async function getPersonalContent(
  * Save pixel art image
  */
 export async function savePixelArtImage(
-  friendId: string,
+  friendId: string | null, // Allow null for global images
   widgetId: string | null,
   size: WidgetSize,
   imageData: string
@@ -237,7 +242,7 @@ export async function savePixelArtImage(
         friend_id: friendId,
         widget_id: widgetId,
         size,
-        image_data: imageData,
+        base_image_data: imageData, // Changed from image_data
       })
       .select("id")
       .single();
@@ -338,4 +343,3 @@ function getMockGlobalContent(contentType: string): any {
   }
   return null;
 }
-
