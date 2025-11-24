@@ -19,7 +19,8 @@ import {
   useResetGame,
   ConnectFourData,
 } from "@/lib/queries-connect-four";
-import { useUserContext, getUserIdForFriend } from "@/lib/use-user-context";
+import { useUserContext, getUserIdForFriend, getUserDisplayName } from "@/lib/use-user-context";
+import { ADMIN_USER_ID } from "@/lib/constants";
 import styles from "./ConnectFourModal.module.css";
 
 interface ConnectFourModalProps {
@@ -54,7 +55,7 @@ export function ConnectFourModal({
   const moves = game?.moves || [];
 
   // Get player IDs and determine current turn
-  const playerOneId = game?.player_one_id || "admin";
+  const playerOneId = game?.player_one_id || ADMIN_USER_ID;
   const playerTwoId = game?.player_two_id || friendId;
   const currentTurnId = game?.current_turn_id || playerOneId;
   const isMyTurn = currentTurnId === currentUserId;
@@ -66,21 +67,11 @@ export function ConnectFourModal({
   const theirColor = currentUserId === playerOneId ? playerTwoColor : playerOneColor;
 
   // Get player display names
-  const getPlayerDisplayName = useCallback(
-    (playerId: string): string => {
-      if (playerId === "admin") {
-        return "YOU";
-      }
-      return friendName.toUpperCase();
-    },
-    [friendName]
-  );
-
-  const myDisplayName = getPlayerDisplayName(currentUserId);
+  const myDisplayName = getUserDisplayName(currentUserId, friendName);
   const theirDisplayName = useMemo(() => {
     const otherPlayerId = currentUserId === playerOneId ? playerTwoId : playerOneId;
-    return getPlayerDisplayName(otherPlayerId);
-  }, [currentUserId, playerOneId, playerTwoId, getPlayerDisplayName]);
+    return getUserDisplayName(otherPlayerId, friendName);
+  }, [currentUserId, playerOneId, playerTwoId, friendName]);
 
   // Determine if I won/lost
   const winnerId = game?.winner_id;
@@ -152,23 +143,43 @@ export function ConnectFourModal({
           <div className={styles.resultScreen}>
             {iWon && (
               <>
-                <div className={styles.resultEmoji}>🎉</div>
-                <h2 className={styles.resultTitle}>YOU WON!</h2>
-                <p className={styles.resultMessage}>Congratulations!</p>
+                <div className={styles.resultIcon}>
+                  <i className="hn hn-trophy-solid" style={{ fontSize: "4rem" }} />
+                </div>
+                <h2 className={styles.resultTitle}>{myDisplayName} WON!</h2>
+                <p className={styles.resultMessage}>Victory achieved!</p>
+                <div className={styles.resultDetails}>
+                  <p>Winner: {myDisplayName}</p>
+                  <p>Opponent: {theirDisplayName}</p>
+                </div>
               </>
             )}
             {iLost && (
               <>
-                <div className={styles.resultEmoji}>😔</div>
-                <h2 className={styles.resultTitle}>YOU LOST</h2>
-                <p className={styles.resultMessage}>Better luck next time!</p>
+                <div className={styles.resultIcon}>
+                  <i className="hn hn-times-circle-solid" style={{ fontSize: "4rem" }} />
+                </div>
+                <h2 className={styles.resultTitle}>{myDisplayName} LOST</h2>
+                <p className={styles.resultMessage}>Defeat...</p>
+                <div className={styles.resultDetails}>
+                  <p>Winner: {theirDisplayName}</p>
+                  <p>Loser: {myDisplayName}</p>
+                </div>
               </>
             )}
             {status === "draw" && (
               <>
-                <div className={styles.resultEmoji}>🤝</div>
+                <div className={styles.resultIcon}>
+                  <i className="hn hn-equals-solid" style={{ fontSize: "4rem" }} />
+                </div>
                 <h2 className={styles.resultTitle}>DRAW</h2>
                 <p className={styles.resultMessage}>It&apos;s a tie!</p>
+                <div className={styles.resultDetails}>
+                  <p>
+                    Players: {myDisplayName} vs {theirDisplayName}
+                  </p>
+                  <p>No winner this round</p>
+                </div>
               </>
             )}
             <button
@@ -176,6 +187,7 @@ export function ConnectFourModal({
               onClick={handlePlayAgain}
               style={{ minHeight: "44px" }}
             >
+              <i className="hn hn-redo-solid" style={{ marginRight: "var(--space-sm)" }} />
               PLAY AGAIN
             </button>
           </div>
@@ -255,7 +267,9 @@ export function ConnectFourModal({
         </div>
 
         <div className={styles.gameStatus}>
-          {status === "active" && isMyTurn && <div className={styles.turnIndicator}>YOUR TURN</div>}
+          {status === "active" && isMyTurn && (
+            <div className={styles.turnIndicator}>{myDisplayName}&apos;S TURN</div>
+          )}
           {status === "active" && !isMyTurn && (
             <div className={styles.turnIndicator}>Waiting for {theirDisplayName}...</div>
           )}

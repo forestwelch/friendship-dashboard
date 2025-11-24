@@ -6,8 +6,9 @@ import { useUIStore } from "@/lib/store/ui-store";
 import { ThemeColors } from "@/lib/types";
 import { ConnectFourModal } from "./ConnectFourModal";
 import { createEmptyBoard, BOARD_ROWS, BOARD_COLS } from "@/lib/connect-four-logic";
-import { useUserContext, getUserIdForFriend } from "@/lib/use-user-context";
+import { useUserContext, getUserIdForFriend, getUserDisplayName } from "@/lib/use-user-context";
 import { ConnectFourData } from "@/lib/queries-connect-four";
+import { ADMIN_USER_ID } from "@/lib/constants";
 import styles from "./ConnectFour.module.css";
 
 interface ConnectFourProps {
@@ -30,10 +31,11 @@ export function ConnectFour({
   const { setOpenModal } = useUIStore();
   const userContext = useUserContext();
   const currentUserId = getUserIdForFriend(userContext, friendId);
+  const myDisplayName = getUserDisplayName(currentUserId, friendName);
   
   const board = config?.board || createEmptyBoard();
   const status = config?.status || "active";
-  const playerOneId = config?.player_one_id || "admin";
+  const playerOneId = config?.player_one_id || ADMIN_USER_ID;
   const _playerTwoId = config?.player_two_id || friendId;
   const currentTurnId = config?.current_turn_id || playerOneId;
   const isMyTurn = currentTurnId === currentUserId;
@@ -125,7 +127,7 @@ export function ConnectFour({
           <div className={styles.title}>C4 GAME</div>
           {renderFullBoard()}
           {status === "active" && isMyTurn && (
-            <div className={styles.turnIndicator}>YOUR TURN</div>
+            <div className={styles.turnIndicator}>{myDisplayName}&apos;S TURN</div>
           )}
         </div>
         <ConnectFourModal
@@ -147,7 +149,7 @@ export function ConnectFour({
           <div className={styles.title}>CONNECT FOUR</div>
           {renderFullBoard()}
           {status === "active" && isMyTurn && (
-            <div className={styles.turnIndicator}>YOUR TURN</div>
+            <div className={styles.turnIndicator}>{myDisplayName}&apos;S TURN</div>
           )}
         </div>
         <ConnectFourModal

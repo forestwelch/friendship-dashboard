@@ -38,6 +38,8 @@ export interface ConnectFourData {
 /**
  * Convert legacy format to new format
  */
+import { ADMIN_USER_ID } from "./constants";
+
 function convertLegacyGame(game: Partial<ConnectFourData>, friendId: string): ConnectFourData {
   // If already in new format, return as-is
   if (game.player_one_id && game.player_two_id && game.current_turn_id) {
@@ -45,7 +47,7 @@ function convertLegacyGame(game: Partial<ConnectFourData>, friendId: string): Co
   }
 
   // Convert from legacy format
-  const playerOneId = "admin";
+  const playerOneId = ADMIN_USER_ID;
   const playerTwoId = friendId;
   
   // Map "you" -> admin, "them" -> friend
@@ -78,7 +80,7 @@ function convertLegacyGame(game: Partial<ConnectFourData>, friendId: string): Co
  * Initialize a new Connect Four game with coin flip for starting player
  */
 function initializeGame(friendId: string): ConnectFourData {
-  const playerOneId = "admin";
+  const playerOneId = ADMIN_USER_ID;
   const playerTwoId = friendId;
   
   // Coin flip: 50/50 chance

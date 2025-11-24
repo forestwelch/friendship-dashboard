@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { ADMIN_NAME, ADMIN_USER_ID } from "./constants";
 
 export type UserType = "admin" | "friend";
 
@@ -19,7 +20,7 @@ export function useUserContext(): UserContext {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith("/admin/") ?? false;
   const userType: UserType = isAdmin ? "admin" : "friend";
-  const userId = isAdmin ? "admin" : null; // Will be set per friend page using friendId
+  const userId = isAdmin ? ADMIN_USER_ID : null; // Will be set per friend page using friendId
 
   return {
     isAdmin,
@@ -38,8 +39,23 @@ export function getUserIdForFriend(
   friendId: string
 ): string {
   if (userContext.isAdmin) {
-    return "admin";
+    return ADMIN_USER_ID;
   }
   return friendId;
+}
+
+/**
+ * Get the display name for a user
+ * - Admin returns "FOREST"
+ * - Friend returns their display name in uppercase
+ */
+export function getUserDisplayName(
+  userId: string,
+  friendName: string
+): string {
+  if (userId === ADMIN_USER_ID) {
+    return ADMIN_NAME;
+  }
+  return friendName.toUpperCase();
 }
 
