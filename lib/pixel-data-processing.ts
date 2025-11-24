@@ -13,7 +13,7 @@ export interface ThemeColors {
 
 // Configuration constants
 export const PIXEL_GRID_SIZE = 128; // Increased from 64 for more detail
-export const QUANTIZATION_LEVELS = 32; // Increased from 16 for more granularity and color variety
+export const QUANTIZATION_LEVELS = 64; // Increased from 32 for smoother gradients and more granularity
 
 /**
  * Process image file to 128x128 pixel data array
@@ -100,30 +100,34 @@ export function quantizeIntensity(intensity: number, levels: number): number {
 }
 
 /**
- * Map quantized intensity level (0-31) to theme color with more granularity
- * Uses 5-6 colors from theme palette for smoother gradients:
- * Levels 0-5 → Primary (darkest)
- * Levels 6-11 → Secondary (medium-dark)
- * Levels 12-17 → Accent (medium)
- * Levels 18-23 → Text or Secondary light (medium-light)
- * Levels 24-31 → Bg or Accent light (lightest)
+ * Map quantized intensity level (0-63) to theme color with high granularity
+ * Uses 6 colors from theme palette for smooth gradients:
+ * Levels 0-10 → Primary (darkest)
+ * Levels 11-21 → Secondary (medium-dark)
+ * Levels 22-32 → Accent (medium)
+ * Levels 33-43 → Text (medium-light)
+ * Levels 44-53 → Bg (light)
+ * Levels 54-63 → Lightest (bg or accent variant)
  */
 export function mapIntensityToThemeColor(
   intensityLevel: number,
   themeColors: ThemeColors
 ): string {
-  // Map 32 levels to 5-6 colors for more granularity
-  if (intensityLevel <= 5) {
+  // Map 64 levels to 6 colors for maximum granularity
+  if (intensityLevel <= 10) {
     return themeColors.primary; // Darkest
-  } else if (intensityLevel <= 11) {
+  } else if (intensityLevel <= 21) {
     return themeColors.secondary; // Medium-dark
-  } else if (intensityLevel <= 17) {
+  } else if (intensityLevel <= 32) {
     return themeColors.accent; // Medium
-  } else if (intensityLevel <= 23) {
+  } else if (intensityLevel <= 43) {
     // Use text color if available, otherwise lighter secondary
     return themeColors.text || themeColors.secondary; // Medium-light
-  } else {
+  } else if (intensityLevel <= 53) {
     // Use bg color if available, otherwise lighter accent
+    return themeColors.bg || themeColors.accent; // Light
+  } else {
+    // Lightest - use bg if available, otherwise accent
     return themeColors.bg || themeColors.accent; // Lightest
   }
 }
@@ -149,6 +153,21 @@ export function base64ToPixelData(base64: string): Uint8Array {
     bytes[i] = binaryString.charCodeAt(i);
   }
   return bytes;
+}
+
+/**
+ * Generate scanline order for CRT-style animation
+ * Returns array of pixel positions in scanline order (row by row, left to right)
+ */
+export function generateScanlineOrder(width: number, height: number): Array<{row: number, col: number, index: number}> {
+  const order: Array<{row: number, col: number, index: number}> = [];
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      const index = row * width + col;
+      order.push({ row, col, index });
+    }
+  }
+  return order;
 }
 
 /**

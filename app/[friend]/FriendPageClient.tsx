@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useMemo } from "react";
 import { Grid, GridItem } from "@/components/Grid";
 import { WidgetRenderer } from "@/components/WidgetRenderer";
 import { ViewEditToggle } from "@/components/admin/ViewEditToggle";
@@ -523,6 +523,56 @@ export function FriendPageClient({
     [isEditMode, handleSave]
   );
 
+  // Memoize themeColors at component level (not inside map)
+  const themeColors = useMemo(
+    () => ({
+      primary: localColors.primary,
+      secondary: localColors.secondary,
+      accent: localColors.accent,
+      bg: localColors.bg,
+      text: localColors.text,
+    }),
+    [
+      localColors.primary,
+      localColors.secondary,
+      localColors.accent,
+      localColors.bg,
+      localColors.text,
+    ]
+  );
+
+  // Define onUpdateWidgetConfig callback at component level (not inside map)
+  const handleUpdateWidgetConfig = useCallback(
+    async (widgetId: string, config: Record<string, any>) => {
+      // Update widget config in database
+      try {
+        const response = await fetch(`/api/widgets/${friend.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            widgets: widgets
+              .map((w) => (w.id === widgetId ? { ...w, config } : w))
+              .map((w) => ({
+                widget_type: w.widget_type,
+                size: w.size,
+                position_x: w.position_x,
+                position_y: w.position_y,
+                config: w.config || {},
+              })),
+          }),
+        });
+        if (response.ok) {
+          setWidgets((prev) =>
+            prev.map((w) => (w.id === widgetId ? { ...w, config } : w))
+          );
+        }
+      } catch (error) {
+        console.error("Failed to update widget config:", error);
+      }
+    },
+    [friend.id, widgets]
+  );
+
   return (
     <div
       style={{
@@ -719,47 +769,8 @@ export function FriendPageClient({
                     pixelArtImageUrl={pixelArtImageUrl}
                     onUploadImage={(file) => handleUploadImage(file, widget.id)}
                     friendId={friend.id}
-                    themeColors={{
-                      primary: localColors.primary,
-                      secondary: localColors.secondary,
-                      accent: localColors.accent,
-                      bg: localColors.bg,
-                      text: localColors.text,
-                    }}
-                    onUpdateWidgetConfig={async (widgetId, config) => {
-                      // Update widget config in database
-                      try {
-                        const response = await fetch(
-                          `/api/widgets/${friend.id}`,
-                          {
-                            method: "PUT",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                              widgets: widgets
-                                .map((w) =>
-                                  w.id === widgetId ? { ...w, config } : w
-                                )
-                                .map((w) => ({
-                                  widget_type: w.widget_type,
-                                  size: w.size,
-                                  position_x: w.position_x,
-                                  position_y: w.position_y,
-                                  config: w.config || {},
-                                })),
-                            }),
-                          }
-                        );
-                        if (response.ok) {
-                          setWidgets((prev) =>
-                            prev.map((w) =>
-                              w.id === widgetId ? { ...w, config } : w
-                            )
-                          );
-                        }
-                      } catch (error) {
-                        console.error("Failed to update widget config:", error);
-                      }
-                    }}
+                    themeColors={themeColors}
+                    onUpdateWidgetConfig={handleUpdateWidgetConfig}
                   />
                   {isHovered && (
                     <AdminOverlay

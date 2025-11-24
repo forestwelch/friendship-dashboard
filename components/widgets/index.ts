@@ -1,5 +1,5 @@
 export { MusicPlayer } from "./MusicPlayer";
-export { PixelArt } from "./PixelArt";
+export { PixelArt, PixelArtMemo } from "./PixelArt";
 export { Calendar } from "./Calendar";
 export { Notes } from "./Notes";
 export { Links } from "./Links";

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Widget } from "@/components/Widget";
 import { WidgetSize } from "@/lib/types";
 import { 
@@ -8,7 +8,8 @@ import {
   renderPixelDataAsSVG, 
   ThemeColors,
   PIXEL_GRID_SIZE,
-  mapIntensityToThemeColor
+  mapIntensityToThemeColor,
+  generateScanlineOrder
 } from "@/lib/pixel-data-processing";
 
 interface PixelArtProps {
@@ -33,12 +34,15 @@ export function PixelArt({
   const [isAnimating, setIsAnimating] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [scanlineProgress, setScanlineProgress] = useState(0); // 0 to 1, tracks scanline position
   
   // Use refs to track previous values and prevent loops
   const prevImagesRef = useRef<string[]>([]);
   const isMountedRef = useRef(true);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const slideshowTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const scanlineStartTimeRef = useRef<number | null>(null);
   
   // Determine rendering mode: programmatic (pixelData) or image-based (backward compatibility)
   const useProgrammaticRendering = pixelData && pixelData.length > 0 && themeColors;
@@ -128,6 +132,7 @@ export function PixelArt({
       isMountedRef.current = false;
       if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
       if (slideshowTimeoutRef.current) clearTimeout(slideshowTimeoutRef.current);
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     };
   }, []);
 
@@ -171,12 +176,9 @@ export function PixelArt({
     if (!imageLoaded && !useProgrammaticRendering) return; // For image-based, wait for load
     if (isAnimating) return; // Don't cycle during animation
 
-    // Calculate animation duration
-    const animationDuration = useProgrammaticRendering
-      ? (PIXEL_GRID_SIZE * 2) * 5 + 500 // For 128x128 grid
-      : (cols + rows) * 20 + 500; // For image-based
-    
-    const showDuration = Math.max(transitionDelay - animationDuration, 2000); // Minimum 2 seconds
+    // For programmatic rendering: wait 3 seconds after animation completes, then start next
+    // For image-based: wait transitionDelay
+    const waitDuration = useProgrammaticRendering ? 3000 : transitionDelay;
 
     if (slideshowTimeoutRef.current) clearTimeout(slideshowTimeoutRef.current);
     slideshowTimeoutRef.current = setTimeout(() => {
@@ -189,10 +191,9 @@ export function PixelArt({
           console.log(`[PixelArt] Cycling to ${useProgrammaticRendering ? 'pixel data' : 'image'} ${next} of ${maxIndex + 1}`);
           return next;
         });
-        setIsAnimating(true); // Trigger cascade animation
         setImageLoaded(false); // For image-based rendering
       }
-    }, showDuration);
+    }, waitDuration);
 
     return () => {
       if (slideshowTimeoutRef.current) {
@@ -202,27 +203,56 @@ export function PixelArt({
     };
   }, [currentImageIndex, images.length, pixelData?.length, cols, rows, transitionDelay, imageLoaded, isAnimating, useProgrammaticRendering]);
   
-  // Trigger cascade animation for programmatic rendering when image changes
+  // CRT Scanline animation for programmatic rendering
+  // Only trigger when transitioning to a new image (nextPixelData exists)
   useEffect(() => {
-    if (!useProgrammaticRendering || !currentPixelData) return;
+    if (!useProgrammaticRendering || !currentPixelData || !nextPixelData) {
+      // No transition needed - reset animation state
+      setIsAnimating(false);
+      setScanlineProgress(0);
+      return;
+    }
     
-    setIsAnimating(true);
-    const animationDuration = (PIXEL_GRID_SIZE * 2) * 5 + 500;
-    
-    if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
-    animationTimeoutRef.current = setTimeout(() => {
-      if (isMountedRef.current) {
-        setIsAnimating(false);
-      }
-    }, animationDuration);
+    // Small delay to ensure state is ready, then start scanline animation
+    const startDelay = setTimeout(() => {
+      if (!isMountedRef.current) return;
+      
+      setIsAnimating(true);
+      setScanlineProgress(0);
+      scanlineStartTimeRef.current = Date.now();
+      
+      const SCANLINE_DURATION = 1000; // Fixed 1 second duration
+      
+      const animate = () => {
+        if (!scanlineStartTimeRef.current || !isMountedRef.current) return;
+        
+        const elapsed = Date.now() - scanlineStartTimeRef.current;
+        const progress = Math.min(elapsed / SCANLINE_DURATION, 1);
+        
+        setScanlineProgress(progress);
+        
+        if (progress < 1) {
+          animationFrameRef.current = requestAnimationFrame(animate);
+        } else {
+          // Animation complete - update to new image
+          setIsAnimating(false);
+          setScanlineProgress(0);
+          scanlineStartTimeRef.current = null;
+        }
+      };
+      
+      animationFrameRef.current = requestAnimationFrame(animate);
+    }, 50); // Small delay to ensure smooth transition
     
     return () => {
-      if (animationTimeoutRef.current) {
-        clearTimeout(animationTimeoutRef.current);
-        animationTimeoutRef.current = null;
+      clearTimeout(startDelay);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
+      scanlineStartTimeRef.current = null;
     };
-  }, [currentImageIndex, useProgrammaticRendering, currentPixelData]);
+  }, [currentImageIndex, useProgrammaticRendering, currentPixelData, nextPixelData]);
 
   const handleImageLoad = () => {
     setImageLoaded(true);
@@ -258,32 +288,132 @@ export function PixelArt({
     return widgetSize / PIXEL_GRID_SIZE;
   };
   
-  // Generate cascade animation tiles for programmatic rendering
-  const programmaticTiles = useMemo(() => {
+  // Generate scanline order for CRT animation
+  const scanlineOrder = useMemo(() => {
     if (!useProgrammaticRendering) return [];
-    const tiles = [];
-    const gridSize = PIXEL_GRID_SIZE;
-    for (let y = 0; y < gridSize; y++) {
-      for (let x = 0; x < gridSize; x++) {
-        const delay = (x + y) * 5; // Faster stagger for 128x128 grid
-        tiles.push({ x, y, delay });
-      }
-    }
-    return tiles;
+    return generateScanlineOrder(PIXEL_GRID_SIZE, PIXEL_GRID_SIZE);
   }, [useProgrammaticRendering]);
+  
+  // Calculate which pixels should show new image based on scanline progress
+  // Optimized: use direct index calculation instead of findIndex
+  const scannedPixelIndex = useMemo(() => {
+    if (!useProgrammaticRendering || !isAnimating) return -1;
+    const totalPixels = PIXEL_GRID_SIZE * PIXEL_GRID_SIZE;
+    return Math.floor(scanlineProgress * totalPixels);
+  }, [useProgrammaticRendering, isAnimating, scanlineProgress]);
+  
+  const getPixelState = useCallback((row: number, col: number) => {
+    if (!useProgrammaticRendering || !isAnimating || scannedPixelIndex < 0) return 'old';
+    
+    // Calculate pixel index in scanline order (row-major: row * width + col)
+    const pixelIndex = row * PIXEL_GRID_SIZE + col;
+    
+    if (pixelIndex < scannedPixelIndex) {
+      return 'new'; // Already scanned - show new image
+    } else if (pixelIndex === scannedPixelIndex) {
+      return 'scanning'; // Currently being scanned - animate
+    } else {
+      return 'old'; // Not yet scanned - show old image
+    }
+  }, [useProgrammaticRendering, isAnimating, scannedPixelIndex]);
 
-  // Render programmatic SVG with cascade animation
+  // Render programmatic Canvas with CRT scanline animation (much faster than 16K DOM elements)
   if (useProgrammaticRendering && currentPixelData && themeColors) {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
     const svgPixelSize = getSVGPixelSize();
     const gridSize = PIXEL_GRID_SIZE;
+    const canvasSize = gridSize * svgPixelSize;
     
-    // Render base SVG (current image)
-    const baseSvg = renderPixelDataAsSVG(currentPixelData, themeColors, gridSize, gridSize, svgPixelSize);
-    
-    // Render next SVG for cascade animation
-    const nextSvg = nextPixelData && isAnimating
-      ? renderPixelDataAsSVG(nextPixelData, themeColors, gridSize, gridSize, svgPixelSize)
-      : null;
+    // Render to canvas - optimized with requestAnimationFrame for smooth 60fps updates
+    useEffect(() => {
+      if (!canvasRef.current || !currentPixelData) return;
+      
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d', { alpha: false }); // Disable alpha for performance
+      if (!ctx) return;
+      
+      // Use image smoothing for better quality
+      ctx.imageSmoothingEnabled = false;
+      
+      let animationFrameId: number | null = null;
+      let lastScannedPixel = -1;
+      
+      const render = () => {
+        if (!ctx || !currentPixelData) return;
+        
+        // Calculate current scanline position
+        const totalPixels = gridSize * gridSize;
+        const currentScannedPixel = Math.floor(scanlineProgress * totalPixels);
+        
+        // Only re-render if scanline has progressed (optimization)
+        if (currentScannedPixel === lastScannedPixel && !isAnimating) {
+          return;
+        }
+        
+        lastScannedPixel = currentScannedPixel;
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, canvasSize, canvasSize);
+        
+        // Render pixels based on scanline progress
+        // Optimize: batch color changes
+        let currentColor = '';
+        ctx.fillStyle = '';
+        
+        for (let row = 0; row < gridSize; row++) {
+          for (let col = 0; col < gridSize; col++) {
+            const pixelIndex = row * gridSize + col;
+            const pixelState = pixelIndex < currentScannedPixel ? 'new' : 
+                              pixelIndex === currentScannedPixel ? 'scanning' : 'old';
+            
+            // Determine which pixel data to show
+            let intensityLevel: number;
+            if (pixelState === 'new' && nextPixelData) {
+              intensityLevel = nextPixelData[pixelIndex];
+            } else {
+              intensityLevel = currentPixelData[pixelIndex];
+            }
+            
+            const color = mapIntensityToThemeColor(intensityLevel, themeColors);
+            
+            // Only update fillStyle if color changed (optimization)
+            if (color !== currentColor) {
+              ctx.fillStyle = color;
+              currentColor = color;
+            }
+            
+            // Draw pixel
+            ctx.fillRect(col * svgPixelSize, row * svgPixelSize, svgPixelSize, svgPixelSize);
+            
+            // Add visual effect for scanning pixels (slight brightness)
+            if (pixelState === 'scanning') {
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+              ctx.fillRect(col * svgPixelSize, row * svgPixelSize, svgPixelSize, svgPixelSize);
+              ctx.fillStyle = currentColor; // Reset
+            }
+          }
+        }
+        
+        // Continue animation if scanning
+        if (isAnimating && scanlineProgress < 1) {
+          animationFrameId = requestAnimationFrame(render);
+        }
+      };
+      
+      // Initial render
+      render();
+      
+      // Start animation loop if animating
+      if (isAnimating) {
+        animationFrameId = requestAnimationFrame(render);
+      }
+      
+      return () => {
+        if (animationFrameId !== null) {
+          cancelAnimationFrame(animationFrameId);
+        }
+      };
+    }, [currentPixelData, nextPixelData, scanlineProgress, isAnimating, themeColors, gridSize, svgPixelSize, canvasSize]);
     
     return (
       <Widget size={size}>
@@ -298,54 +428,18 @@ export function PixelArt({
             justifyContent: "center",
           }}
         >
-          {/* Base image (hidden during animation) */}
-          <div
+          {/* Canvas-based CRT scanline animation - much faster than 16K DOM elements */}
+          <canvas
+            ref={canvasRef}
+            width={canvasSize}
+            height={canvasSize}
             style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
               width: "100%",
               height: "100%",
-              opacity: isAnimating ? 0 : 1,
-              transition: "opacity 0.3s",
+              imageRendering: "pixelated",
+              objectFit: "contain",
             }}
-            dangerouslySetInnerHTML={{ __html: baseSvg }}
           />
-          
-          {/* Cascade animation tiles */}
-          {isAnimating && nextSvg && (
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                display: "grid",
-                gridTemplateColumns: `repeat(${gridSize}, ${svgPixelSize}px)`,
-                gridTemplateRows: `repeat(${gridSize}, ${svgPixelSize}px)`,
-              }}
-            >
-              {programmaticTiles.map((tile) => {
-                const index = tile.y * gridSize + tile.x;
-                const intensityLevel = nextPixelData![index];
-                const color = mapIntensityToThemeColor(intensityLevel, themeColors);
-                
-                return (
-                  <div
-                    key={`${tile.x}-${tile.y}`}
-                    className="pixel-tile"
-                    style={{
-                      width: `${svgPixelSize}px`,
-                      height: `${svgPixelSize}px`,
-                      backgroundColor: color,
-                      animationDelay: `${tile.delay}ms`,
-                    }}
-                  />
-                );
-              })}
-            </div>
-          )}
         </div>
       </Widget>
     );
@@ -420,3 +514,5 @@ export function PixelArt({
   );
 }
 
+// Memoize PixelArt to prevent unnecessary re-renders
+export const PixelArtMemo = React.memo(PixelArt);

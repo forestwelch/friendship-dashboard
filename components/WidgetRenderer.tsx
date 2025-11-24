@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { memo } from "react";
 import {
   MusicPlayer,
   PixelArt,
@@ -20,14 +20,17 @@ interface WidgetRendererProps {
   pixelArtImageUrl?: string;
   onUploadImage?: (file: File) => Promise<void>;
   friendId?: string;
-  onUpdateWidgetConfig?: (widgetId: string, config: Record<string, any>) => Promise<void>;
+  onUpdateWidgetConfig?: (
+    widgetId: string,
+    config: Record<string, any>
+  ) => Promise<void>;
   themeColors?: ThemeColors; // Theme colors for programmatic pixel rendering
 }
 
 /**
  * Dynamically renders widgets based on widget_type from database
  */
-export function WidgetRenderer({
+export const WidgetRenderer = memo(function WidgetRenderer({
   widget,
   songs = [],
   pixelArtImageUrl,
@@ -36,7 +39,11 @@ export function WidgetRenderer({
   onUpdateWidgetConfig,
   themeColors,
 }: WidgetRendererProps) {
-  const handleProposeHangout = async (date: string, time: string, message?: string) => {
+  const handleProposeHangout = async (
+    date: string,
+    time: string,
+    message?: string
+  ) => {
     if (!friendId) {
       console.error("No friend ID provided for hangout proposal");
       return;
@@ -90,18 +97,18 @@ export function WidgetRenderer({
       // Check if widget config has pixelData (new programmatic approach) or imageUrls (backward compatibility)
       const pixelData = widget.config?.pixelData;
       const imageUrls = widget.config?.imageUrls;
-      
+
       // Use programmatic rendering if pixelData is available
       if (pixelData && pixelData.length > 0 && themeColors) {
         return (
-          <PixelArt 
+          <PixelArt
             size={widget.size}
             pixelData={pixelData}
             themeColors={themeColors}
           />
         );
       }
-      
+
       // Fallback to image-based rendering (backward compatibility)
       if (!imageUrls && !pixelArtImageUrl) {
         return (
@@ -120,10 +127,10 @@ export function WidgetRenderer({
           </div>
         );
       }
-      
+
       return (
-        <PixelArt 
-          size={widget.size} 
+        <PixelArt
+          size={widget.size}
           imageUrl={imageUrls ? undefined : pixelArtImageUrl}
           imageUrls={imageUrls}
         />
@@ -133,21 +140,21 @@ export function WidgetRenderer({
       // Route "image" widgets to PixelArt for backward compatibility
       const imageImageUrls = widget.config?.imageUrls;
       const imagePixelData = widget.config?.pixelData;
-      
+
       // Use programmatic rendering if pixelData is available
       if (imagePixelData && imagePixelData.length > 0 && themeColors) {
         return (
-          <PixelArt 
+          <PixelArt
             size={widget.size}
             pixelData={imagePixelData}
             themeColors={themeColors}
           />
         );
       }
-      
+
       return (
-        <PixelArt 
-          size={widget.size} 
+        <PixelArt
+          size={widget.size}
           imageUrl={imageImageUrls ? undefined : pixelArtImageUrl}
           imageUrls={imageImageUrls}
         />
@@ -165,24 +172,17 @@ export function WidgetRenderer({
     case "notes":
       // Notes widget expects string[] but config stores objects with {id, content, created_at}
       const notesArray = widget.config?.notes || [];
-      const notesStrings = Array.isArray(notesArray) && notesArray.length > 0 && typeof notesArray[0] === 'object'
-        ? notesArray.map((n: any) => n.content || n)
-        : notesArray;
-      
-      return (
-        <Notes 
-          size={widget.size} 
-          initialNotes={notesStrings}
-        />
-      );
+      const notesStrings =
+        Array.isArray(notesArray) &&
+        notesArray.length > 0 &&
+        typeof notesArray[0] === "object"
+          ? notesArray.map((n: any) => n.content || n)
+          : notesArray;
+
+      return <Notes size={widget.size} initialNotes={notesStrings} />;
 
     case "links":
-      return (
-        <Links 
-          size={widget.size} 
-          links={widget.config?.links || []}
-        />
-      );
+      return <Links size={widget.size} links={widget.config?.links || []} />;
 
     case "media_recommendations":
       return (
@@ -211,4 +211,4 @@ export function WidgetRenderer({
         </div>
       );
   }
-}
+});
