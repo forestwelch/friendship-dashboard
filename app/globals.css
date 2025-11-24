@@ -150,3 +150,4 @@ p, div, span, h1, h2, h3, h4, h5, h6, button, input, textarea, label, a {
 @import "../styles/responsive.css";
 /* Import admin styles (will use design system variables) */
 @import "../styles/admin.css";
+@import "../styles/friend-page.css";

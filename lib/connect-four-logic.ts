@@ -35,6 +35,18 @@ export function validateMove(board: Board, column: number): boolean {
 }
 
 export function checkWin(board: Board, player: "you" | "them"): boolean {
+  return getWinningPositions(board, player).length > 0;
+}
+
+export interface WinningPosition {
+  row: number;
+  col: number;
+}
+
+export function getWinningPositions(
+  board: Board,
+  player: "you" | "them"
+): WinningPosition[] {
   // Check horizontal
   for (let row = 0; row < BOARD_ROWS; row++) {
     for (let col = 0; col <= BOARD_COLS - 4; col++) {
@@ -44,7 +56,12 @@ export function checkWin(board: Board, player: "you" | "them"): boolean {
         board[row][col + 2] === player &&
         board[row][col + 3] === player
       ) {
-        return true;
+        return [
+          { row, col },
+          { row, col: col + 1 },
+          { row, col: col + 2 },
+          { row, col: col + 3 },
+        ];
       }
     }
   }
@@ -58,7 +75,12 @@ export function checkWin(board: Board, player: "you" | "them"): boolean {
         board[row + 2][col] === player &&
         board[row + 3][col] === player
       ) {
-        return true;
+        return [
+          { row, col },
+          { row: row + 1, col },
+          { row: row + 2, col },
+          { row: row + 3, col },
+        ];
       }
     }
   }
@@ -72,7 +94,12 @@ export function checkWin(board: Board, player: "you" | "them"): boolean {
         board[row + 2][col + 2] === player &&
         board[row + 3][col + 3] === player
       ) {
-        return true;
+        return [
+          { row, col },
+          { row: row + 1, col: col + 1 },
+          { row: row + 2, col: col + 2 },
+          { row: row + 3, col: col + 3 },
+        ];
       }
     }
   }
@@ -86,12 +113,17 @@ export function checkWin(board: Board, player: "you" | "them"): boolean {
         board[row + 2][col - 2] === player &&
         board[row + 3][col - 3] === player
       ) {
-        return true;
+        return [
+          { row, col },
+          { row: row + 1, col: col - 1 },
+          { row: row + 2, col: col - 2 },
+          { row: row + 3, col: col - 3 },
+        ];
       }
     }
   }
 
-  return false;
+  return [];
 }
 
 export function checkDraw(board: Board): boolean {

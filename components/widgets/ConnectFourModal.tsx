@@ -9,6 +9,7 @@ import {
   createEmptyBoard,
   validateMove,
   calculateDropRow,
+  getWinningPositions,
   BOARD_COLS,
   BOARD_ROWS,
 } from "@/lib/connect-four-logic";
@@ -60,11 +61,7 @@ export function ConnectFourModal({
   const currentTurnId = game?.current_turn_id || playerOneId;
   const isMyTurn = currentTurnId === currentUserId;
 
-  // Get player colors
-  const playerOneColor = game?.player_one_color || "⚫";
-  const playerTwoColor = game?.player_two_color || "⚪";
-  const myColor = currentUserId === playerOneId ? playerOneColor : playerTwoColor;
-  const theirColor = currentUserId === playerOneId ? playerTwoColor : playerOneColor;
+  // Player colors are determined by themeColors (primary/secondary)
 
   // Get player display names
   const myDisplayName = getUserDisplayName(currentUserId, friendName);
@@ -75,11 +72,28 @@ export function ConnectFourModal({
 
   // Determine if I won/lost
   const winnerId = game?.winner_id;
+  // If status is "won" and winnerId matches current user, I won
+  // If status is "won" and winnerId doesn't match current user, I lost
   const iWon = status === "won" && winnerId === currentUserId;
-  const iLost = status === "lost" && winnerId !== currentUserId && winnerId !== undefined;
+  const iLost = status === "won" && winnerId !== currentUserId && winnerId !== undefined;
+
+  // Get winning positions for highlighting
+  const winningPositions = useMemo(() => {
+    if (status !== "won" || !winnerId) return [];
+    const winnerPiece = winnerId === playerOneId ? "you" : "them";
+    return getWinningPositions(board, winnerPiece);
+  }, [status, winnerId, board, playerOneId]);
+
+  const isWinningCell = useCallback(
+    (row: number, col: number) => {
+      return winningPositions.some((pos) => pos.row === row && pos.col === col);
+    },
+    [winningPositions]
+  );
 
   const [hoveredColumn, setHoveredColumn] = useState<number | null>(null);
   const [animatingColumn, setAnimatingColumn] = useState<number | null>(null);
+  const [previousHoveredColumn, setPreviousHoveredColumn] = useState<number | null>(null);
 
   const handleColumnClick = useCallback(
     (column: number) => {
@@ -141,55 +155,74 @@ export function ConnectFourModal({
       <Modal id={modalId} title="CONNECT FOUR" onClose={() => setOpenModal(null)}>
         <div className={styles.gameModal}>
           <div className={styles.resultScreen}>
-            {iWon && (
-              <>
-                <div className={styles.resultIcon}>
-                  <i className="hn hn-trophy-solid" style={{ fontSize: "4rem" }} />
-                </div>
-                <h2 className={styles.resultTitle}>{myDisplayName} WON!</h2>
-                <p className={styles.resultMessage}>Victory achieved!</p>
-                <div className={styles.resultDetails}>
-                  <p>Winner: {myDisplayName}</p>
-                  <p>Opponent: {theirDisplayName}</p>
-                </div>
-              </>
-            )}
-            {iLost && (
-              <>
-                <div className={styles.resultIcon}>
-                  <i className="hn hn-times-circle-solid" style={{ fontSize: "4rem" }} />
-                </div>
-                <h2 className={styles.resultTitle}>{myDisplayName} LOST</h2>
-                <p className={styles.resultMessage}>Defeat...</p>
-                <div className={styles.resultDetails}>
-                  <p>Winner: {theirDisplayName}</p>
-                  <p>Loser: {myDisplayName}</p>
-                </div>
-              </>
-            )}
-            {status === "draw" && (
-              <>
-                <div className={styles.resultIcon}>
-                  <i className="hn hn-equals-solid" style={{ fontSize: "4rem" }} />
-                </div>
-                <h2 className={styles.resultTitle}>DRAW</h2>
-                <p className={styles.resultMessage}>It&apos;s a tie!</p>
-                <div className={styles.resultDetails}>
-                  <p>
-                    Players: {myDisplayName} vs {theirDisplayName}
-                  </p>
-                  <p>No winner this round</p>
-                </div>
-              </>
-            )}
-            <button
-              className={styles.playAgainButton}
-              onClick={handlePlayAgain}
-              style={{ minHeight: "44px" }}
-            >
-              <i className="hn hn-redo-solid" style={{ marginRight: "var(--space-sm)" }} />
-              PLAY AGAIN
-            </button>
+            {/* Show board with winning positions highlighted */}
+            <div className={styles.boardContainer}>
+              <div className={styles.board}>
+                {Array.from({ length: BOARD_ROWS }).map((_, row) => (
+                  <div key={row} className={styles.boardRow}>
+                    {Array.from({ length: BOARD_COLS }).map((_, col) => {
+                      const cell = board[row][col];
+                      // Colors are consistent: "you" = player_one (primary), "them" = player_two (secondary)
+                      const isWinning = isWinningCell(row, col);
+
+                      return (
+                        <div
+                          key={col}
+                          className={`${styles.cell} ${isWinning ? styles.winningCell : ""}`}
+                        >
+                          {cell === "you" ? (
+                            <div
+                              className={`${styles.piece} ${isWinning ? styles.winningPiece : ""}`}
+                              style={{ backgroundColor: themeColors.primary }}
+                            />
+                          ) : cell === "them" ? (
+                            <div
+                              className={`${styles.piece} ${isWinning ? styles.winningPiece : ""}`}
+                              style={{ backgroundColor: themeColors.secondary }}
+                            />
+                          ) : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Result message and button in a row */}
+            <div className={styles.resultRow}>
+              {iWon && (
+                <>
+                  <div className={styles.resultIcon}>
+                    <i className="hn hn-trophy-solid" style={{ fontSize: "2rem" }} />
+                  </div>
+                  <h2 className={styles.resultTitle}>YOU WON!</h2>
+                </>
+              )}
+              {iLost && (
+                <>
+                  <div className={styles.resultIcon}>
+                    <i className="hn hn-times-circle-solid" style={{ fontSize: "2rem" }} />
+                  </div>
+                  <h2 className={styles.resultTitle}>YOU LOST :(</h2>
+                </>
+              )}
+              {status === "draw" && (
+                <>
+                  <div className={styles.resultIcon}>
+                    <i className="hn hn-equals-solid" style={{ fontSize: "2rem" }} />
+                  </div>
+                  <h2 className={styles.resultTitle}>DRAW</h2>
+                </>
+              )}
+              <button
+                className={styles.playAgainButton}
+                onClick={handlePlayAgain}
+                style={{ minHeight: "44px" }}
+              >
+                PLAY AGAIN
+              </button>
+            </div>
           </div>
         </div>
       </Modal>
@@ -202,7 +235,27 @@ export function ConnectFourModal({
       <div className={styles.gameModal}>
         <div className={styles.gameHeader}>
           <div className={styles.playerInfo}>
-            {myDisplayName} ({myColor}) vs {theirDisplayName} ({theirColor})
+            <span className={styles.playerName}>
+              {currentUserId === playerOneId ? myDisplayName : theirDisplayName}
+            </span>
+            <span
+              className={styles.playerCircle}
+              style={{
+                backgroundColor:
+                  currentUserId === playerOneId ? themeColors.primary : themeColors.secondary,
+              }}
+            />
+            <span className={styles.vs}>vs</span>
+            <span className={styles.playerName}>
+              {currentUserId === playerOneId ? theirDisplayName : myDisplayName}
+            </span>
+            <span
+              className={styles.playerCircle}
+              style={{
+                backgroundColor:
+                  currentUserId === playerOneId ? themeColors.secondary : themeColors.primary,
+              }}
+            />
           </div>
         </div>
 
@@ -216,46 +269,61 @@ export function ConnectFourModal({
                   const isAnimating =
                     animatingColumn === col && row === calculateDropRow(board, col);
                   const isHoveredColumn = hoveredColumn === col;
-                  const isHoveredCell =
-                    isHoveredColumn &&
-                    status === "active" &&
-                    isMyTurn &&
-                    cell === null &&
-                    row === calculateDropRow(board, col);
+                  const dropRow = calculateDropRow(board, col);
                   const isEmpty = cell === null;
+                  const showGhostPiece =
+                    isHoveredColumn && isEmpty && status === "active" && isMyTurn;
+                  const ghostOpacity = showGhostPiece && row === dropRow ? 0.8 : 0.2;
 
-                  // Determine piece color based on which player it belongs to
-                  const isMyPiece = cell === (currentUserId === playerOneId ? "you" : "them");
-                  const isTheirPiece = cell === (currentUserId === playerOneId ? "them" : "you");
+                  // Colors are consistent: "you" = player_one (primary), "them" = player_two (secondary)
+                  const isWinning = isWinningCell(row, col);
 
                   return (
                     <div
                       key={col}
-                      className={`${styles.cell} ${isAnimating ? styles.animating : ""} ${isHoveredCell ? styles.ghost : ""} ${isHoveredColumn && isEmpty ? styles.hoveredColumn : ""}`}
+                      className={`${styles.cell} ${isAnimating ? styles.animating : ""} ${isWinning ? styles.winningCell : ""}`}
                       onClick={() => handleColumnClick(col)}
                       onMouseEnter={() => {
                         if (status === "active" && isMyTurn) {
-                          setHoveredColumn(col);
-                          playSound("game_hover");
+                          // Only trigger sound/state change if column actually changed
+                          if (previousHoveredColumn !== col) {
+                            setHoveredColumn(col);
+                            setPreviousHoveredColumn(col);
+                            playSound("game_hover");
+                          } else {
+                            // Same column, just update state without sound
+                            setHoveredColumn(col);
+                          }
                         }
                       }}
-                      onMouseLeave={() => setHoveredColumn(null)}
-                      style={{ cursor: status === "active" && isMyTurn ? "pointer" : "default" }}
+                      onMouseLeave={() => {
+                        setHoveredColumn(null);
+                        setPreviousHoveredColumn(null);
+                      }}
+                      style={{
+                        cursor: status === "active" && isMyTurn ? "pointer" : "default",
+                      }}
                     >
-                      {isMyPiece ? (
+                      {cell === "you" ? (
                         <div
-                          className={styles.piece}
+                          className={`${styles.piece} ${isWinning ? styles.winningPiece : ""}`}
                           style={{ backgroundColor: themeColors.primary }}
                         />
-                      ) : isTheirPiece ? (
+                      ) : cell === "them" ? (
                         <div
-                          className={styles.piece}
+                          className={`${styles.piece} ${isWinning ? styles.winningPiece : ""}`}
                           style={{ backgroundColor: themeColors.secondary }}
                         />
-                      ) : isHoveredCell ? (
+                      ) : showGhostPiece ? (
                         <div
                           className={styles.ghostPiece}
-                          style={{ backgroundColor: themeColors.primary }}
+                          style={{
+                            backgroundColor:
+                              currentUserId === playerOneId
+                                ? themeColors.primary
+                                : themeColors.secondary,
+                            opacity: ghostOpacity,
+                          }}
                         />
                       ) : null}
                     </div>

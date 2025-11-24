@@ -64,7 +64,7 @@ export default async function FriendPage({ params }: FriendPageProps) {
 
   return (
     <>
-      <Navigation themeColors={navThemeColors} />
+      <Navigation themeColors={navThemeColors} className="friend-page-nav" />
       <FriendPageClient
         friend={friend}
         initialWidgets={widgets}

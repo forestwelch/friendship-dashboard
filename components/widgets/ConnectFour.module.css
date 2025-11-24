@@ -27,7 +27,8 @@
 
 /* 1x1 Tile */
 .tile1x1 {
-  gap: var(--space-sm);
+  gap: var(--space-xs);
+  padding: var(--space-xs);
 }
 
 .circles {
@@ -76,15 +77,18 @@
 .fullBoard {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   width: 100%;
   flex: 1;
   min-height: 0;
+  background: var(--secondary);
+  padding: 2px;
+  border-radius: 0;
 }
 
 .boardRow {
   display: flex;
-  gap: 2px;
+  gap: 1px;
   flex: 1;
 }
 
@@ -98,20 +102,71 @@
   border: 1px solid var(--secondary);
   min-width: 0;
   min-height: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
 .boardCell.emptyCell {
   background: var(--bg);
 }
 
-.boardCell.youPiece {
-  background: var(--primary);
-  border-color: var(--primary);
+.piecePreview {
+  width: 80%;
+  height: 80%;
+  border-radius: 0;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
 }
 
-.boardCell.themPiece {
+/* Static board for 1x1 tile */
+.staticBoard {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+  height: 100%;
   background: var(--secondary);
-  border-color: var(--secondary);
+  padding: 2px;
+  border-radius: 0;
+}
+
+.staticBoardRow {
+  display: flex;
+  gap: 1px;
+  flex: 1;
+}
+
+.staticBoardCell {
+  flex: 1;
+  aspect-ratio: 1;
+  border-radius: 0;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  border: 1px solid var(--secondary);
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+}
+
+.staticPiece {
+  width: 70%;
+  height: 70%;
+  border-radius: 0;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
 }
 
 /* 3x3 Tile */

@@ -54,23 +54,31 @@
 
 .closeButton {
   background: transparent;
-  border: none;
+  border: 2px solid var(--secondary);
   color: var(--text);
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-xxl);
+  font-weight: bold;
   cursor: pointer;
-  padding: var(--space-xs);
+  padding: var(--space-sm);
   line-height: 1;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 3rem;
+  min-height: 3rem;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  font-family: "Press Start 2P", "Dogica", "PixelFallback", "Courier New", "Courier", monospace;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
 }
 
 .closeButton:hover {
-  color: var(--accent);
-  background: var(--secondary);
+  color: var(--text);
+  background: var(--primary);
+  border-color: var(--primary);
 }
 
 .closeButton:focus {

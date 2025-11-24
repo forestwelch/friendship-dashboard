@@ -11,9 +11,10 @@ interface NavigationProps {
     icon?: string;
     primary?: boolean;
   }[];
+  className?: string;
 }
 
-export function Navigation({ actions }: NavigationProps = {} as NavigationProps) {
+export function Navigation({ actions, className }: NavigationProps = {} as NavigationProps) {
   const pathname = usePathname();
 
   const navLinks = [
@@ -28,7 +29,7 @@ export function Navigation({ actions }: NavigationProps = {} as NavigationProps)
   };
 
   return (
-    <nav className="game-nav" style={navStyle}>
+    <nav className={`game-nav ${className || ""}`} style={navStyle}>
       {navLinks.map((link) => {
         const isActive = pathname === link.href || 
           (link.href !== "/" && pathname?.startsWith(link.href));

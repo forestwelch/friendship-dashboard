@@ -73,11 +73,7 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
     };
   }, [isOpen, handleClose]);
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      handleClose();
-    }
-  };
+  // Removed backdrop click handler - modals can only be closed via X button or ESC key
 
   if (!isOpen) return null;
 
@@ -87,7 +83,7 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
     : null;
 
   const modalContent = (
-    <div className={styles.backdrop} onClick={handleBackdropClick}>
+    <div className={styles.backdrop}>
       <div className={styles.modal} ref={modalRef} role="dialog" aria-modal="true" aria-labelledby={title ? `${id}-title` : undefined}>
         <div className={styles.header}>
           {title && (

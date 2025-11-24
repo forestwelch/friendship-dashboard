@@ -313,10 +313,15 @@ export function useGameSubscription(friendId: string, widgetId: string) {
         (payload) => {
           const rawConfig = payload.new.config as Partial<ConnectFourData>;
           const newConfig = convertLegacyGame(rawConfig, friendId);
+          // Update query cache and invalidate to trigger re-render
           queryClient.setQueryData<ConnectFourData>(
             ["connect_four", friendId, widgetId],
             newConfig
           );
+          // Also invalidate to ensure all components using this query re-render
+          queryClient.invalidateQueries({
+            queryKey: ["connect_four", friendId, widgetId],
+          });
           playSound("opponent_move");
         }
       )

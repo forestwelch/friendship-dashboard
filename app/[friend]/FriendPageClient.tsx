@@ -528,7 +528,7 @@ export function FriendPageClient({
     <div
       style={{
         ...themeStyle,
-        paddingTop: "2.25rem",
+        paddingTop: userContext.isAdmin ? "2.25rem" : "0",
         width: "100vw",
         minHeight: "100vh",
         background: themeColors.bg,
@@ -544,8 +544,9 @@ export function FriendPageClient({
           }
         }}
       />
-      {/* Top bar with toggle - always present, just visibility changes */}
+      {/* Top bar with toggle - hidden on non-admin pages */}
       <div
+        className={userContext.isAdmin ? "" : "friend-page-header"}
         style={{
           display: "flex",
           justifyContent: "space-between",

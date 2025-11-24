@@ -14,6 +14,32 @@
   font-size: var(--font-size-md);
   color: var(--text);
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.playerName {
+  font-size: var(--font-size-md);
+  color: var(--text);
+}
+
+.playerCircle {
+  width: 1rem;
+  height: 1rem;
+  background: currentColor;
+  border-radius: 0;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  /* Force pixelated rendering */
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+}
+
+.vs {
+  margin: 0 var(--space-xs);
+  opacity: 0.8;
 }
 
 .boardContainer {
@@ -27,7 +53,7 @@
 .board {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   background: var(--secondary);
   padding: var(--space-md);
   border-radius: 0; /* Pixelated */
@@ -44,7 +70,7 @@
   flex: 1;
   aspect-ratio: 1;
   background: var(--bg);
-  border-radius: 0; /* Pixelated - square */
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,21 +80,32 @@
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
   transition: background-color 0.15s ease;
-}
-
-.cell.hoveredColumn {
-  background: var(--secondary);
-  opacity: 0.6;
+  /* Force pixelated rendering */
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
 }
 
 .piece {
   width: 80%;
   height: 80%;
-  border-radius: 0; /* Pixelated - square */
+  background: var(--primary);
+  border-radius: 0;
   animation: dropPiece 0.3s ease-out;
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
+  /* Force pixelated rendering */
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+}
+
+.winningPiece {
+  border: 3px solid var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.winningCell {
+  border-color: var(--accent) !important;
 }
 
 @keyframes dropPiece {
@@ -85,11 +122,15 @@
 .ghostPiece {
   width: 80%;
   height: 80%;
-  border-radius: 0; /* Pixelated - square */
-  opacity: 0.5;
+  background: var(--primary);
+  border-radius: 0;
+  /* Opacity set inline based on position (0.2 for cells above drop, 0.8 for drop cell) */
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
+  /* Force pixelated rendering */
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
 }
 
 .cell.animating {
@@ -142,41 +183,31 @@
   align-items: center;
   gap: var(--space-lg);
   padding: var(--space-xl);
-  text-align: center;
+}
+
+.resultScreen .boardContainer {
+  width: 100%;
+  max-width: 500px;
+}
+
+.resultRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .resultIcon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 6rem;
-  height: 6rem;
-  margin: 0 auto;
   color: var(--primary);
 }
 
-.resultDetails {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  margin-top: var(--space-md);
-  padding: var(--space-md);
-  background: var(--secondary);
-  border: 2px solid var(--accent);
-  border-radius: var(--radius-sm);
-  width: 100%;
-  max-width: 400px;
-}
-
-.resultDetails p {
-  font-size: var(--font-size-sm);
-  margin: 0;
-  color: var(--text);
-  opacity: 0.9;
-}
-
 .resultTitle {
-  font-size: var(--font-size-xxl);
+  font-size: var(--font-size-xl);
   color: var(--text);
   font-weight: bold;
   margin: 0;
@@ -199,6 +230,11 @@
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .playAgainButton:hover {
@@ -213,4 +249,3 @@
     gap: 2px;
   }
 }
-
