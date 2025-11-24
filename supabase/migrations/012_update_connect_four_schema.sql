@@ -1,0 +1,32 @@
+-- Migration to update Connect Four game structure
+-- Changes from "you"/"them" to player IDs (admin vs friend.id)
+
+-- This migration doesn't modify the database schema itself,
+-- but documents the new Connect Four config structure:
+-- 
+-- OLD FORMAT:
+-- {
+--   board: Board,
+--   current_turn: "you" | "them",
+--   your_color: "⚫",
+--   their_color: "⚪",
+--   status: "active" | "won" | "lost" | "draw",
+--   moves: [{ player: "you" | "them", column: number, timestamp: string }]
+-- }
+--
+-- NEW FORMAT:
+-- {
+--   board: Board,
+--   player_one_id: string,  -- "admin" or friend.id
+--   player_two_id: string,  -- friend.id or "admin"
+--   current_turn_id: string, -- Which player's turn
+--   player_one_color: "⚫",
+--   player_two_color: "⚪",
+--   status: "active" | "won" | "lost" | "draw",
+--   winner_id?: string,  -- Who won (if status is "won")
+--   moves: [{ player_id: string, column: number, timestamp: string }]
+-- }
+
+-- Note: The actual migration happens in application code when games are initialized
+-- Existing games will be converted on-the-fly when accessed
+

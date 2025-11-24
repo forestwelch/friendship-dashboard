@@ -28,7 +28,6 @@ export function usePersonalityQuizWidget(friendId: string, widgetId: string) {
         .select("config")
         .eq("friend_id", friendId)
         .eq("id", widgetId)
-        .eq("widget_type", "personality_quiz")
         .single();
 
       if (error) throw error;

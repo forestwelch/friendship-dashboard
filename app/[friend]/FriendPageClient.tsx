@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { Grid, GridItem } from "@/components/Grid";
 import { WidgetRenderer } from "@/components/WidgetRenderer";
 import { ViewEditToggle } from "@/components/admin/ViewEditToggle";
@@ -8,12 +8,14 @@ import { AdminOverlay } from "@/components/admin/AdminOverlay";
 import { ColorSettings } from "@/components/admin/ColorSettings";
 import { WidgetLibrary } from "@/components/admin/WidgetLibrary";
 import { WidgetConfigModal } from "@/components/admin/WidgetConfigModal";
-import { Friend, WidgetSize, WidgetPosition } from "@/lib/types";
+import { Friend, WidgetSize, WidgetPosition, Song } from "@/lib/types";
+import { ThemeColors } from "@/lib/theme-context";
 import { FriendWidget } from "@/lib/queries";
 import { canPlaceWidget, findAvailablePosition } from "@/lib/widget-utils";
 import { playSound } from "@/lib/sounds";
 import { GamepadNavigation } from "@/components/GamepadNavigation";
 import { useThemeContext } from "@/lib/theme-context";
+import { useUserContext } from "@/lib/use-user-context";
 
 interface FriendPageClientProps {
   friend: Friend;
@@ -30,7 +32,12 @@ export function FriendPageClient({
   pixelArtMap: initialPixelArtMap,
   pixelArtBySize,
 }: FriendPageClientProps) {
-  const [isEditMode, setIsEditMode] = useState(false);
+  const userContext = useUserContext();
+  // Only allow edit mode if user is admin (detected from URL path)
+  const [isEditMode, setIsEditMode] = useState(userContext.isAdmin);
+  
+  // If admin route, start in edit mode by default
+  // If friend route, always stay in view mode
   const [widgets, setWidgets] = useState<FriendWidget[]>(initialWidgets);
   const [draggedWidget, setDraggedWidget] = useState<string | null>(null);
   const [hoveredWidget, setHoveredWidget] = useState<string | null>(null);
@@ -39,6 +46,18 @@ export function FriendPageClient({
   const [configuringWidget, setConfiguringWidget] = useState<FriendWidget | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const { colors: themeColors, setTheme } = useThemeContext();
+
+  // Initialize theme with friend's colors on mount
+  useEffect(() => {
+    const friendTheme: ThemeColors = {
+      primary: friend.color_primary,
+      secondary: friend.color_secondary,
+      accent: friend.color_accent,
+      bg: friend.color_bg,
+      text: friend.color_text,
+    };
+    setTheme(friendTheme);
+  }, [friend, setTheme]);
 
   // State for pixel art/images map to allow updates
   const [pixelArtMap, setPixelArtMap] = useState<Map<string, string>>(initialPixelArtMap);
@@ -431,6 +450,11 @@ export function FriendPageClient({
   // Gamepad button handlers
   const handleGamepadButton = useCallback(
     (button: string) => {
+      // Only allow edit mode toggle for admin routes
+      if (!userContext.isAdmin) {
+        return;
+      }
+      
       if (!isEditMode) {
         if (button === "a" || button === "start") {
           // Toggle edit mode
@@ -467,7 +491,7 @@ export function FriendPageClient({
         }
       }
     },
-    [isEditMode, handleSave]
+    [isEditMode, handleSave, userContext]
   );
 
   // Define onUpdateWidgetConfig callback at component level (not inside map)
@@ -606,13 +630,16 @@ export function FriendPageClient({
               SAVE
             </button>
           </div>
-          <ViewEditToggle
-            isEditMode={isEditMode}
-            onToggle={(edit) => {
-              setIsEditMode(edit);
-              playSound(edit ? "open" : "close");
-            }}
-          />
+          {/* Only show edit toggle for admin routes */}
+          {userContext.isAdmin && (
+            <ViewEditToggle
+              isEditMode={isEditMode}
+              onToggle={(edit) => {
+                setIsEditMode(edit);
+                playSound(edit ? "open" : "close");
+              }}
+            />
+          )}
         </div>
       </div>
 
@@ -676,6 +703,7 @@ export function FriendPageClient({
                     pixelArtImageUrl={pixelArtImageUrl}
                     onUploadImage={(file) => handleUploadImage(file, widget.id)}
                     friendId={friend.id}
+                    friendName={friend.display_name}
                     onUpdateWidgetConfig={handleUpdateWidgetConfig}
                   />
                   {isHovered && (

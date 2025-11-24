@@ -24,6 +24,7 @@ interface WidgetRendererProps {
   pixelArtImageUrl?: string;
   onUploadImage?: (file: File) => Promise<void>;
   friendId?: string;
+  friendName?: string;
   onUpdateWidgetConfig?: (widgetId: string, config: Record<string, unknown>) => Promise<void>;
 }
 
@@ -36,6 +37,7 @@ export const WidgetRenderer = memo(function WidgetRenderer({
   pixelArtImageUrl,
   onUploadImage: _onUploadImage,
   friendId,
+  friendName = "Friend",
   onUpdateWidgetConfig,
 }: WidgetRendererProps) {
   const themeColors = useTheme();
@@ -221,6 +223,7 @@ export const WidgetRenderer = memo(function WidgetRenderer({
         <ConnectFour
           size={connectFourSize}
           friendId={friendId || ""}
+          friendName={friendName}
           widgetId={widget.id}
           themeColors={themeColors}
           config={widget.config as Record<string, unknown>}

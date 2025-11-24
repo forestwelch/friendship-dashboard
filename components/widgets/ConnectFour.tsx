@@ -6,26 +6,14 @@ import { useUIStore } from "@/lib/store/ui-store";
 import { ThemeColors } from "@/lib/types";
 import { ConnectFourModal } from "./ConnectFourModal";
 import { createEmptyBoard, BOARD_ROWS, BOARD_COLS } from "@/lib/connect-four-logic";
+import { useUserContext, getUserIdForFriend } from "@/lib/use-user-context";
+import { ConnectFourData } from "@/lib/queries-connect-four";
 import styles from "./ConnectFour.module.css";
-
-interface GameMove {
-  player: "you" | "them";
-  column: number;
-  timestamp: string;
-}
-
-interface ConnectFourData {
-  board?: (("you" | "them" | null)[])[];
-  current_turn?: "you" | "them";
-  your_color?: string;
-  their_color?: string;
-  status?: "active" | "won" | "lost" | "draw";
-  moves?: GameMove[];
-}
 
 interface ConnectFourProps {
   size: 1 | 2 | 3;
   friendId: string;
+  friendName: string;
   widgetId: string;
   themeColors: ThemeColors;
   config?: ConnectFourData;
@@ -34,30 +22,39 @@ interface ConnectFourProps {
 export function ConnectFour({
   size,
   friendId,
+  friendName,
   widgetId,
   themeColors,
   config,
 }: ConnectFourProps) {
   const { setOpenModal } = useUIStore();
+  const userContext = useUserContext();
+  const currentUserId = getUserIdForFriend(userContext, friendId);
+  
   const board = config?.board || createEmptyBoard();
-  const currentTurn = config?.current_turn || "you";
-  const _yourColor = config?.your_color || "⚫";
-  const _theirColor = config?.their_color || "⚪";
   const status = config?.status || "active";
+  const playerOneId = config?.player_one_id || "admin";
+  const _playerTwoId = config?.player_two_id || friendId;
+  const currentTurnId = config?.current_turn_id || playerOneId;
+  const isMyTurn = currentTurnId === currentUserId;
 
   // Determine who won last (for 1x1 tile color assignment)
   // Winner gets primary color, loser gets secondary
   const lastWinner = useMemo(() => {
     const gameMoves = config?.moves || [];
-    if (status === "won") return "you";
-    if (status === "lost") return "them";
+    const winnerId = config?.winner_id;
+    
+    if (status === "won" && winnerId) {
+      return winnerId === currentUserId ? "you" : "them";
+    }
     // If game is active, check last move
     if (gameMoves.length > 0) {
-      return gameMoves[gameMoves.length - 1].player;
+      const lastMove = gameMoves[gameMoves.length - 1];
+      return lastMove.player_id === currentUserId ? "you" : "them";
     }
     // Default: current turn player
-    return currentTurn === "you" ? "you" : "them";
-  }, [status, config?.moves, currentTurn]);
+    return isMyTurn ? "you" : "them";
+  }, [status, config?.moves, config?.winner_id, currentUserId, isMyTurn]);
 
   const handleClick = () => {
     setOpenModal(`connectfour-${widgetId}`);
@@ -105,12 +102,13 @@ export function ConnectFour({
               style={{ backgroundColor: themColor }}
             />
           </div>
-          {status === "active" && currentTurn === "you" && (
+          {status === "active" && isMyTurn && (
             <div className={styles.cta}>PLAY</div>
           )}
         </div>
         <ConnectFourModal
           friendId={friendId}
+          friendName={friendName}
           widgetId={widgetId}
           themeColors={themeColors}
           config={config}
@@ -126,12 +124,13 @@ export function ConnectFour({
         <div className={styles.tile2x2} onClick={handleClick}>
           <div className={styles.title}>C4 GAME</div>
           {renderFullBoard()}
-          {status === "active" && currentTurn === "you" && (
+          {status === "active" && isMyTurn && (
             <div className={styles.turnIndicator}>YOUR TURN</div>
           )}
         </div>
         <ConnectFourModal
           friendId={friendId}
+          friendName={friendName}
           widgetId={widgetId}
           themeColors={themeColors}
           config={config}
@@ -147,12 +146,13 @@ export function ConnectFour({
         <div className={styles.tile3x3} onClick={handleClick}>
           <div className={styles.title}>CONNECT FOUR</div>
           {renderFullBoard()}
-          {status === "active" && currentTurn === "you" && (
+          {status === "active" && isMyTurn && (
             <div className={styles.turnIndicator}>YOUR TURN</div>
           )}
         </div>
         <ConnectFourModal
           friendId={friendId}
+          friendName={friendName}
           widgetId={widgetId}
           themeColors={themeColors}
           config={config}

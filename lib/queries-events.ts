@@ -26,7 +26,6 @@ export function useEventCountdownWidget(friendId: string, widgetId: string) {
         .select("config")
         .eq("friend_id", friendId)
         .eq("id", widgetId)
-        .eq("widget_type", "event_countdown")
         .single();
 
       if (error) throw error;

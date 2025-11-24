@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { playSound } from "@/lib/sounds";
 import { useUIStore } from "@/lib/store/ui-store";
 import { ThemeColors } from "@/lib/types";
@@ -9,7 +9,6 @@ import {
   createEmptyBoard,
   validateMove,
   calculateDropRow,
-  Board,
   BOARD_COLS,
   BOARD_ROWS,
 } from "@/lib/connect-four-logic";
@@ -17,26 +16,15 @@ import {
   useConnectFourGame,
   useMakeMove,
   useGameSubscription,
+  useResetGame,
+  ConnectFourData,
 } from "@/lib/queries-connect-four";
+import { useUserContext, getUserIdForFriend } from "@/lib/use-user-context";
 import styles from "./ConnectFourModal.module.css";
-
-interface GameMove {
-  player: "you" | "them";
-  column: number;
-  timestamp: string;
-}
-
-interface ConnectFourData {
-  board?: Board;
-  current_turn?: "you" | "them";
-  your_color?: string;
-  their_color?: string;
-  status?: "active" | "won" | "lost" | "draw";
-  moves?: GameMove[];
-}
 
 interface ConnectFourModalProps {
   friendId: string;
+  friendName: string;
   widgetId: string;
   themeColors: ThemeColors;
   config?: ConnectFourData;
@@ -44,6 +32,7 @@ interface ConnectFourModalProps {
 
 export function ConnectFourModal({
   friendId,
+  friendName,
   widgetId,
   themeColors,
   config,
@@ -51,24 +40,59 @@ export function ConnectFourModal({
   const { openModal, setOpenModal } = useUIStore();
   const modalId = `connectfour-${widgetId}`;
   const isOpen = openModal === modalId;
+  const userContext = useUserContext();
+  const currentUserId = getUserIdForFriend(userContext, friendId);
 
   const { data: gameData } = useConnectFourGame(friendId, widgetId);
-  const makeMoveMutation = useMakeMove(friendId, widgetId);
+  const makeMoveMutation = useMakeMove(friendId, widgetId, currentUserId);
+  const resetGameMutation = useResetGame(friendId, widgetId);
   useGameSubscription(friendId, widgetId);
 
-  const board = gameData?.board || config?.board || createEmptyBoard();
-  const currentTurn = gameData?.current_turn || config?.current_turn || "you";
-  const yourColor = gameData?.your_color || config?.your_color || "⚫";
-  const theirColor = gameData?.their_color || config?.their_color || "⚪";
-  const status = gameData?.status || config?.status || "active";
-  const moves = gameData?.moves || config?.moves || [];
+  const game = gameData || config;
+  const board = game?.board || createEmptyBoard();
+  const status = game?.status || "active";
+  const moves = game?.moves || [];
+
+  // Get player IDs and determine current turn
+  const playerOneId = game?.player_one_id || "admin";
+  const playerTwoId = game?.player_two_id || friendId;
+  const currentTurnId = game?.current_turn_id || playerOneId;
+  const isMyTurn = currentTurnId === currentUserId;
+
+  // Get player colors
+  const playerOneColor = game?.player_one_color || "⚫";
+  const playerTwoColor = game?.player_two_color || "⚪";
+  const myColor = currentUserId === playerOneId ? playerOneColor : playerTwoColor;
+  const theirColor = currentUserId === playerOneId ? playerTwoColor : playerOneColor;
+
+  // Get player display names
+  const getPlayerDisplayName = useCallback(
+    (playerId: string): string => {
+      if (playerId === "admin") {
+        return "YOU";
+      }
+      return friendName.toUpperCase();
+    },
+    [friendName]
+  );
+
+  const myDisplayName = getPlayerDisplayName(currentUserId);
+  const theirDisplayName = useMemo(() => {
+    const otherPlayerId = currentUserId === playerOneId ? playerTwoId : playerOneId;
+    return getPlayerDisplayName(otherPlayerId);
+  }, [currentUserId, playerOneId, playerTwoId, getPlayerDisplayName]);
+
+  // Determine if I won/lost
+  const winnerId = game?.winner_id;
+  const iWon = status === "won" && winnerId === currentUserId;
+  const iLost = status === "lost" && winnerId !== currentUserId && winnerId !== undefined;
 
   const [hoveredColumn, setHoveredColumn] = useState<number | null>(null);
   const [animatingColumn, setAnimatingColumn] = useState<number | null>(null);
 
   const handleColumnClick = useCallback(
     (column: number) => {
-      if (status !== "active" || currentTurn !== "you") {
+      if (status !== "active" || !isMyTurn) {
         playSound("error");
         return;
       }
@@ -85,7 +109,7 @@ export function ConnectFourModal({
       // Make move
       makeMoveMutation.mutate(column);
     },
-    [board, currentTurn, status, makeMoveMutation]
+    [board, isMyTurn, status, makeMoveMutation]
   );
 
   // Keyboard navigation - removed column button navigation, keep Escape to close
@@ -104,9 +128,7 @@ export function ConnectFourModal({
   }, [isOpen, setOpenModal]);
 
   const handlePlayAgain = () => {
-    // Reset game (would need a mutation)
-    playSound("retake");
-    // TODO: Implement reset game mutation
+    resetGameMutation.mutate();
   };
 
   const formatTimeAgo = (timestamp: string) => {
@@ -128,14 +150,14 @@ export function ConnectFourModal({
       <Modal id={modalId} title="CONNECT FOUR" onClose={() => setOpenModal(null)}>
         <div className={styles.gameModal}>
           <div className={styles.resultScreen}>
-            {status === "won" && (
+            {iWon && (
               <>
                 <div className={styles.resultEmoji}>🎉</div>
                 <h2 className={styles.resultTitle}>YOU WON!</h2>
                 <p className={styles.resultMessage}>Congratulations!</p>
               </>
             )}
-            {status === "lost" && (
+            {iLost && (
               <>
                 <div className={styles.resultEmoji}>😔</div>
                 <h2 className={styles.resultTitle}>YOU LOST</h2>
@@ -168,7 +190,7 @@ export function ConnectFourModal({
       <div className={styles.gameModal}>
         <div className={styles.gameHeader}>
           <div className={styles.playerInfo}>
-            YOU ({yourColor}) vs THEM ({theirColor})
+            {myDisplayName} ({myColor}) vs {theirDisplayName} ({theirColor})
           </div>
         </div>
 
@@ -185,10 +207,14 @@ export function ConnectFourModal({
                   const isHoveredCell =
                     isHoveredColumn &&
                     status === "active" &&
-                    currentTurn === "you" &&
+                    isMyTurn &&
                     cell === null &&
                     row === calculateDropRow(board, col);
                   const isEmpty = cell === null;
+
+                  // Determine piece color based on which player it belongs to
+                  const isMyPiece = cell === (currentUserId === playerOneId ? "you" : "them");
+                  const isTheirPiece = cell === (currentUserId === playerOneId ? "them" : "you");
 
                   return (
                     <div
@@ -196,20 +222,29 @@ export function ConnectFourModal({
                       className={`${styles.cell} ${isAnimating ? styles.animating : ""} ${isHoveredCell ? styles.ghost : ""} ${isHoveredColumn && isEmpty ? styles.hoveredColumn : ""}`}
                       onClick={() => handleColumnClick(col)}
                       onMouseEnter={() => {
-                        if (status === "active" && currentTurn === "you") {
+                        if (status === "active" && isMyTurn) {
                           setHoveredColumn(col);
                           playSound("game_hover");
                         }
                       }}
                       onMouseLeave={() => setHoveredColumn(null)}
-                      style={{ cursor: status === "active" && currentTurn === "you" ? "pointer" : "default" }}
+                      style={{ cursor: status === "active" && isMyTurn ? "pointer" : "default" }}
                     >
-                      {cell === "you" ? (
-                        <div className={styles.piece} style={{ backgroundColor: themeColors.primary }} />
-                      ) : cell === "them" ? (
-                        <div className={styles.piece} style={{ backgroundColor: themeColors.secondary }} />
+                      {isMyPiece ? (
+                        <div
+                          className={styles.piece}
+                          style={{ backgroundColor: themeColors.primary }}
+                        />
+                      ) : isTheirPiece ? (
+                        <div
+                          className={styles.piece}
+                          style={{ backgroundColor: themeColors.secondary }}
+                        />
                       ) : isHoveredCell ? (
-                        <div className={styles.ghostPiece} style={{ backgroundColor: themeColors.primary }} />
+                        <div
+                          className={styles.ghostPiece}
+                          style={{ backgroundColor: themeColors.primary }}
+                        />
                       ) : null}
                     </div>
                   );
@@ -220,20 +255,14 @@ export function ConnectFourModal({
         </div>
 
         <div className={styles.gameStatus}>
-          {status === "active" && currentTurn === "you" && (
-            <div className={styles.turnIndicator}>
-              YOUR TURN
-            </div>
-          )}
-          {status === "active" && currentTurn === "them" && (
-            <div className={styles.turnIndicator}>
-              Waiting for them...
-            </div>
+          {status === "active" && isMyTurn && <div className={styles.turnIndicator}>YOUR TURN</div>}
+          {status === "active" && !isMyTurn && (
+            <div className={styles.turnIndicator}>Waiting for {theirDisplayName}...</div>
           )}
           {lastMove && (
             <div className={styles.moveHistory}>
-              Last move: {lastMove.player === "you" ? "You" : "They"} played column{" "}
-              {lastMove.column + 1} ({formatTimeAgo(lastMove.timestamp)})
+              Last move: {lastMove.player_id === currentUserId ? myDisplayName : theirDisplayName}{" "}
+              played column {lastMove.column + 1} ({formatTimeAgo(lastMove.timestamp)})
             </div>
           )}
         </div>
@@ -241,4 +270,3 @@ export function ConnectFourModal({
     </Modal>
   );
 }
-

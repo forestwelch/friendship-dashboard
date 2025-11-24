@@ -1,8 +1,9 @@
 import React from "react";
-import { notFound } from "next/navigation";
-import { getFriendPage } from "@/lib/queries";
 import { Navigation } from "@/components/Navigation";
-import { WidgetManager } from "@/components/admin/WidgetManager";
+import { notFound } from "next/navigation";
+import { getFriendPage, getGlobalContent } from "@/lib/queries";
+import { Song } from "@/lib/types";
+import { FriendPageClient } from "@/app/[friend]/FriendPageClient";
 
 interface AdminFriendPageProps {
   params: Promise<{
@@ -10,61 +11,66 @@ interface AdminFriendPageProps {
   }>;
 }
 
-export default async function AdminFriendPage({
-  params,
-}: AdminFriendPageProps) {
+export default async function AdminFriendPage({ params }: AdminFriendPageProps) {
   const resolvedParams = await params;
   const friendSlug = resolvedParams?.friend;
 
+  // Validate friend parameter
   if (!friendSlug || typeof friendSlug !== "string") {
     notFound();
   }
 
+  // Fetch friend data from Supabase
   const pageData = await getFriendPage(friendSlug);
 
   if (!pageData || !pageData.friend) {
     notFound();
   }
 
-  const { friend, widgets } = pageData;
+  const { friend, widgets, pixelArtImages } = pageData;
 
-  // Apply theme colors dynamically
-  const hexToRgba = (hex: string, alpha: number): string => {
-    const cleanHex = hex.replace("#", "");
-    const hexLength = cleanHex.length;
-    const rgbHex = hexLength === 8 ? cleanHex.slice(0, 6) : cleanHex;
-    const r = parseInt(rgbHex.slice(0, 2), 16);
-    const g = parseInt(rgbHex.slice(2, 4), 16);
-    const b = parseInt(rgbHex.slice(4, 6), 16);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  // Fetch global content (e.g., top 10 songs)
+  const songsData = await getGlobalContent("top_10_songs");
+  const songs: Song[] = songsData?.songs || [];
+
+  // Create a map of pixel art images by widget_id for quick lookup
+  // Also create a fallback map by size for images without widget_id
+  const pixelArtMap = new Map<string, string>();
+  const pixelArtBySize = new Map<string, string>();
+
+  if (pixelArtImages && pixelArtImages.length > 0) {
+    pixelArtImages.forEach((img) => {
+      // Match by widget_id if set (links to friend_widgets.id)
+      if (img.widget_id) {
+        pixelArtMap.set(img.widget_id, img.image_data);
+      }
+      // Store by size as fallback (use first image of each size)
+      // This allows matching pixel art to widgets even if widget_id is null
+      if (!pixelArtBySize.has(img.size)) {
+        pixelArtBySize.set(img.size, img.image_data);
+      }
+    });
+  }
+
+  // Pass theme colors to Navigation
+  const navThemeColors = {
+    bg: friend.color_bg || "#0a1a2e",
+    text: friend.color_text || "#c8e0ff",
+    border: friend.color_accent || "#2a7fff",
+    active: friend.color_primary || "#4a9eff",
   };
-
-  const gridTileBg = hexToRgba(friend.color_accent, 0.05);
-  const gridTileBorder = hexToRgba(friend.color_secondary, 0.1);
-
-  const _themeStyle: React.CSSProperties = {
-    "--primary": friend.color_primary,
-    "--secondary": friend.color_secondary,
-    "--accent": friend.color_accent,
-    "--bg": friend.color_bg,
-    "--text": friend.color_text,
-    "--grid-tile-bg": gridTileBg,
-    "--grid-tile-border": gridTileBorder,
-  } as React.CSSProperties;
 
   return (
     <>
-      <Navigation />
-      <div
-        style={{
-          paddingTop: `calc(var(--height-button) + var(--space-md))`,
-          width: "100vw",
-          height: "100vh",
-          overflow: "hidden",
-        }}
-      >
-        <WidgetManager friend={friend} initialWidgets={widgets} />
-      </div>
+      <Navigation themeColors={navThemeColors} />
+      <FriendPageClient
+        friend={friend}
+        initialWidgets={widgets}
+        songs={songs}
+        pixelArtMap={pixelArtMap}
+        pixelArtBySize={pixelArtBySize}
+      />
     </>
   );
 }
+

@@ -13,19 +13,88 @@ import {
   Board,
 } from "./connect-four-logic";
 
-interface GameMove {
-  player: "you" | "them";
+export interface GameMove {
+  player_id: string; // "admin" or friend.id
   column: number;
   timestamp: string;
 }
 
-interface ConnectFourData {
+export interface ConnectFourData {
   board: Board;
-  current_turn: "you" | "them";
-  your_color: string;
-  their_color: string;
+  player_one_id: string; // "admin" or friend.id
+  player_two_id: string; // friend.id or "admin"
+  current_turn_id: string; // Which player's turn
+  player_one_color: string;
+  player_two_color: string;
   status: "active" | "won" | "lost" | "draw";
+  winner_id?: string; // Who won (if status is "won")
   moves: GameMove[];
+  // Legacy fields for backward compatibility (will be converted on access)
+  current_turn?: "you" | "them";
+  your_color?: string;
+  their_color?: string;
+}
+
+/**
+ * Convert legacy format to new format
+ */
+function convertLegacyGame(game: Partial<ConnectFourData>, friendId: string): ConnectFourData {
+  // If already in new format, return as-is
+  if (game.player_one_id && game.player_two_id && game.current_turn_id) {
+    return game as ConnectFourData;
+  }
+
+  // Convert from legacy format
+  const playerOneId = "admin";
+  const playerTwoId = friendId;
+  
+  // Map "you" -> admin, "them" -> friend
+  const currentTurnId = game.current_turn === "you" ? playerOneId : playerTwoId;
+  
+  return {
+    board: game.board || createEmptyBoard(),
+    player_one_id: playerOneId,
+    player_two_id: playerTwoId,
+    current_turn_id: currentTurnId,
+    player_one_color: game.your_color || game.player_one_color || "⚫",
+    player_two_color: game.their_color || game.player_two_color || "⚪",
+    status: game.status || "active",
+    winner_id: game.winner_id,
+    moves: (game.moves || []).map((move) => {
+      // Convert legacy moves
+      if ("player" in move) {
+        return {
+          player_id: move.player === "you" ? playerOneId : playerTwoId,
+          column: move.column,
+          timestamp: move.timestamp,
+        };
+      }
+      return move as GameMove;
+    }),
+  };
+}
+
+/**
+ * Initialize a new Connect Four game with coin flip for starting player
+ */
+function initializeGame(friendId: string): ConnectFourData {
+  const playerOneId = "admin";
+  const playerTwoId = friendId;
+  
+  // Coin flip: 50/50 chance
+  const coinFlip = Math.random() < 0.5;
+  const currentTurnId = coinFlip ? playerOneId : playerTwoId;
+  
+  return {
+    board: createEmptyBoard(),
+    player_one_id: playerOneId,
+    player_two_id: playerTwoId,
+    current_turn_id: currentTurnId,
+    player_one_color: "⚫",
+    player_two_color: "⚪",
+    status: "active",
+    moves: [],
+  };
 }
 
 export function useConnectFourGame(friendId: string, widgetId: string) {
@@ -37,27 +106,31 @@ export function useConnectFourGame(friendId: string, widgetId: string) {
         .select("config")
         .eq("friend_id", friendId)
         .eq("id", widgetId)
-        .eq("widget_type", "connect_four")
         .single();
 
       if (error) throw error;
 
-      const config = (data?.config as ConnectFourData) || {
-        board: createEmptyBoard(),
-        current_turn: "you",
-        your_color: "⚫",
-        their_color: "⚪",
-        status: "active",
-        moves: [],
-      };
+      const rawConfig = (data?.config as Partial<ConnectFourData>) || {};
+      
+      // If no game exists, initialize new one
+      if (!rawConfig.board && !rawConfig.player_one_id) {
+        const newGame = initializeGame(friendId);
+        // Save initialized game to database
+        await supabase
+          .from("friend_widgets")
+          .update({ config: newGame })
+          .eq("id", widgetId);
+        return newGame;
+      }
 
-      return config;
+      // Convert legacy format if needed
+      return convertLegacyGame(rawConfig, friendId);
     },
     staleTime: 1000 * 60 * 1, // 1 minute (shorter for real-time game)
   });
 }
 
-export function useMakeMove(friendId: string, widgetId: string) {
+export function useMakeMove(friendId: string, widgetId: string, currentUserId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -68,42 +141,52 @@ export function useMakeMove(friendId: string, widgetId: string) {
         .eq("id", widgetId)
         .single();
 
-      const currentConfig = (currentData?.config as ConnectFourData) || {
-        board: createEmptyBoard(),
-        current_turn: "you",
-        your_color: "⚫",
-        their_color: "⚪",
-        status: "active",
-        moves: [],
-      };
+      const rawConfig = (currentData?.config as Partial<ConnectFourData>) || {};
+      const currentConfig = convertLegacyGame(rawConfig, friendId);
+
+      // Check if it's the current user's turn
+      if (currentConfig.current_turn_id !== currentUserId) {
+        throw new Error("Not your turn");
+      }
 
       if (!validateMove(currentConfig.board, column)) {
         throw new Error("Invalid move");
       }
 
-      const newBoard = makeMove(currentConfig.board, column, currentConfig.current_turn);
+      // Determine which player piece to place
+      const playerPiece: "you" | "them" = currentUserId === currentConfig.player_one_id ? "you" : "them";
+      
+      const newBoard = makeMove(currentConfig.board, column, playerPiece);
       if (!newBoard) {
         throw new Error("Failed to make move");
       }
 
       // Check for win
-      const youWon = checkWin(newBoard, "you");
-      const theyWon = checkWin(newBoard, "them");
+      const currentPlayerWon = checkWin(newBoard, playerPiece);
+      const otherPlayerPiece: "you" | "them" = playerPiece === "you" ? "them" : "you";
+      const otherPlayerWon = checkWin(newBoard, otherPlayerPiece);
       const isDraw = checkDraw(newBoard);
 
       let newStatus: "active" | "won" | "lost" | "draw" = "active";
-      const nextTurn: "you" | "them" = currentConfig.current_turn === "you" ? "them" : "you";
+      const nextTurnId = currentConfig.current_turn_id === currentConfig.player_one_id 
+        ? currentConfig.player_two_id 
+        : currentConfig.player_one_id;
+      let winnerId: string | undefined;
 
-      if (youWon) {
+      if (currentPlayerWon) {
         newStatus = "won";
-      } else if (theyWon) {
+        winnerId = currentUserId;
+      } else if (otherPlayerWon) {
         newStatus = "lost";
+        winnerId = currentUserId === currentConfig.player_one_id 
+          ? currentConfig.player_two_id 
+          : currentConfig.player_one_id;
       } else if (isDraw) {
         newStatus = "draw";
       }
 
       const newMove: GameMove = {
-        player: currentConfig.current_turn,
+        player_id: currentUserId,
         column,
         timestamp: new Date().toISOString(),
       };
@@ -111,8 +194,9 @@ export function useMakeMove(friendId: string, widgetId: string) {
       const updatedConfig: ConnectFourData = {
         ...currentConfig,
         board: newBoard,
-        current_turn: newStatus === "active" ? nextTurn : currentConfig.current_turn,
+        current_turn_id: newStatus === "active" ? nextTurnId : currentConfig.current_turn_id,
         status: newStatus,
+        winner_id: winnerId,
         moves: [...currentConfig.moves, newMove],
       };
 
@@ -124,7 +208,7 @@ export function useMakeMove(friendId: string, widgetId: string) {
         .single();
 
       if (error) throw error;
-      return data.config as ConnectFourData;
+      return convertLegacyGame(data.config as Partial<ConnectFourData>, friendId);
     },
     onMutate: async (column) => {
       await queryClient.cancelQueries({
@@ -139,21 +223,32 @@ export function useMakeMove(friendId: string, widgetId: string) {
 
       if (!previousData) return { previousData };
 
-      const newBoard = makeMove(previousData.board, column, previousData.current_turn);
+      // Determine which player piece to place
+      const playerPiece: "you" | "them" = currentUserId === previousData.player_one_id ? "you" : "them";
+      
+      const newBoard = makeMove(previousData.board, column, playerPiece);
       if (!newBoard) return { previousData };
 
-      const youWon = checkWin(newBoard, "you");
-      const theyWon = checkWin(newBoard, "them");
+      const currentPlayerWon = checkWin(newBoard, playerPiece);
+      const otherPlayerPiece: "you" | "them" = playerPiece === "you" ? "them" : "you";
+      const otherPlayerWon = checkWin(newBoard, otherPlayerPiece);
       const isDraw = checkDraw(newBoard);
 
       let newStatus: "active" | "won" | "lost" | "draw" = "active";
-      const nextTurn: "you" | "them" = previousData.current_turn === "you" ? "them" : "you";
+      const nextTurnId = previousData.current_turn_id === previousData.player_one_id 
+        ? previousData.player_two_id 
+        : previousData.player_one_id;
+      let winnerId: string | undefined;
 
-      if (youWon) {
+      if (currentPlayerWon) {
         newStatus = "won";
+        winnerId = currentUserId;
         playSound("game_win");
-      } else if (theyWon) {
+      } else if (otherPlayerWon) {
         newStatus = "lost";
+        winnerId = currentUserId === previousData.player_one_id 
+          ? previousData.player_two_id 
+          : previousData.player_one_id;
         playSound("game_lose");
       } else if (isDraw) {
         newStatus = "draw";
@@ -161,7 +256,7 @@ export function useMakeMove(friendId: string, widgetId: string) {
       }
 
       const newMove: GameMove = {
-        player: previousData.current_turn,
+        player_id: currentUserId,
         column,
         timestamp: new Date().toISOString(),
       };
@@ -169,8 +264,9 @@ export function useMakeMove(friendId: string, widgetId: string) {
       const optimisticData: ConnectFourData = {
         ...previousData,
         board: newBoard,
-        current_turn: newStatus === "active" ? nextTurn : previousData.current_turn,
+        current_turn_id: newStatus === "active" ? nextTurnId : previousData.current_turn_id,
         status: newStatus,
+        winner_id: winnerId,
         moves: [...previousData.moves, newMove],
       };
 
@@ -213,7 +309,8 @@ export function useGameSubscription(friendId: string, widgetId: string) {
           filter: `id=eq.${widgetId}`,
         },
         (payload) => {
-          const newConfig = payload.new.config as ConnectFourData;
+          const rawConfig = payload.new.config as Partial<ConnectFourData>;
+          const newConfig = convertLegacyGame(rawConfig, friendId);
           queryClient.setQueryData<ConnectFourData>(
             ["connect_four", friendId, widgetId],
             newConfig
@@ -227,5 +324,35 @@ export function useGameSubscription(friendId: string, widgetId: string) {
       channel.unsubscribe();
     };
   }, [friendId, widgetId, queryClient]);
+}
+
+export function useResetGame(friendId: string, widgetId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const newGame = initializeGame(friendId);
+      
+      const { data, error } = await supabase
+        .from("friend_widgets")
+        .update({ config: newGame })
+        .eq("id", widgetId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return convertLegacyGame(data.config as Partial<ConnectFourData>, friendId);
+    },
+    onSuccess: (newGame) => {
+      queryClient.setQueryData<ConnectFourData>(
+        ["connect_four", friendId, widgetId],
+        newGame
+      );
+      playSound("retake");
+    },
+    onError: () => {
+      playSound("error");
+    },
+  });
 }
 

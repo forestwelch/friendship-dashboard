@@ -103,8 +103,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     let shouldFetch = false;
     let friendSlug: string | null = null;
 
-    if (pathname === "/" || pathname?.startsWith("/admin")) {
-      // Home page or admin pages: use grayscale theme
+    if (pathname === "/") {
+      // Home page: use grayscale theme
       newColors = DEFAULT_THEME_COLORS;
     } else if (pathname?.match(/^\/([^/]+)$/)) {
       // Friend page: check cache first, then fetch if needed
@@ -118,6 +118,21 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         // Need to fetch
         shouldFetch = true;
       }
+    } else if (pathname?.match(/^\/admin\/([^/]+)$/)) {
+      // Admin friend page: use friend's theme
+      friendSlug = pathname.split("/")[2];
+
+      // Check cache first for instant theme switch
+      const cachedTheme = themeCache.get(friendSlug);
+      if (cachedTheme) {
+        newColors = cachedTheme;
+      } else {
+        // Need to fetch
+        shouldFetch = true;
+      }
+    } else if (pathname?.startsWith("/admin")) {
+      // Other admin pages: use grayscale theme
+      newColors = DEFAULT_THEME_COLORS;
     }
 
     // Set cached theme immediately (useLayoutEffect allows synchronous updates)

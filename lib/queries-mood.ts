@@ -26,7 +26,6 @@ export function useMoodWidget(friendId: string, widgetId: string) {
         .select("config")
         .eq("friend_id", friendId)
         .eq("id", widgetId)
-        .eq("widget_type", "mood")
         .single();
 
       if (error) throw error;
