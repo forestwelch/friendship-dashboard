@@ -11,3 +11,5 @@ ALTER PUBLICATION supabase_realtime ADD TABLE friend_widgets;
 -- Verify the table has REPLICA IDENTITY set (should be DEFAULT for tables with primary key)
 -- If needed, run: ALTER TABLE friend_widgets REPLICA IDENTITY FULL;
 
+
+

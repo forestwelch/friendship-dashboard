@@ -7,3 +7,5 @@ VALUES
   ('connect_four', 'Connect Four', 'Play async turn-based game')
 ON CONFLICT (type) DO NOTHING;
 
+
+

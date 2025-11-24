@@ -15,3 +15,5 @@ CREATE INDEX IF NOT EXISTS idx_widget_events_created_at ON widget_events(created
 -- Note: RLS policies can be added later if needed
 -- For now, following the pattern of allowing public access
 
+
+

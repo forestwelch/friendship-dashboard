@@ -10,3 +10,5 @@ export const useUIStore = create<UIStore>((set) => ({
   setOpenModal: (modalId) => set({ openModal: modalId }),
 }));
 
+
+

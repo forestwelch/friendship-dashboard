@@ -253,3 +253,5 @@ export function useDeleteEvent(friendId: string, widgetId: string) {
   });
 }
 
+
+

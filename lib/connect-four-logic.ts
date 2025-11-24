@@ -108,3 +108,5 @@ export function calculateDropRow(board: Board, column: number): number {
   return -1; // Column is full
 }
 
+
+
