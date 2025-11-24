@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from "./supabase";
-import { Friend, WidgetSize, Song } from "./types";
+import { Friend, WidgetSize } from "./types";
 
 export interface FriendWidget {
   id: string;
@@ -9,7 +9,7 @@ export interface FriendWidget {
   size: WidgetSize;
   position_x: number;
   position_y: number;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 export interface FriendPageData {
@@ -58,13 +58,10 @@ export async function getAllFriends(): Promise<Friend[]> {
   }
 
   try {
-    console.time("[DB] getAllFriends");
     const { data, error } = await supabase
       .from("friends")
       .select("*")
       .order("display_name");
-
-    console.timeEnd("[DB] getAllFriends");
 
     if (error) {
       console.error("Error fetching friends:", error);
@@ -88,15 +85,13 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
   }
 
   try {
-    const pageStartTime = Date.now();
     // Fetch friend
-    const friendStartTime = Date.now();
     const { data: friend, error: friendError } = await supabase
       .from("friends")
       .select("*")
       .eq("slug", slug)
       .single();
-    console.log(`[DB] getFriendPage - friend: ${Date.now() - friendStartTime}ms`);
+    // Performance: getFriendPage - friend query
 
     if (friendError || !friend) {
       console.error("Error fetching friend:", friendError);
@@ -139,16 +134,21 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
     }
 
     // Transform widgets data
-    const transformedWidgets: FriendWidget[] = (widgets || []).map((w: any) => ({
-      id: w.id,
-      widget_id: w.widget_id,
-      widget_type: w.widgets?.type || "",
-      widget_name: w.widgets?.name || "",
-      size: w.size,
-      position_x: w.position_x,
-      position_y: w.position_y,
-      config: w.config || {},
-    }));
+    const transformedWidgets: FriendWidget[] = (widgets || []).map((w: Record<string, unknown>) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'queries.ts:142',message:'Transforming widget',data:{widgetId:w.id,widgetType:w.widgets?.type,widgetName:w.widgets?.name,hasWidgets:!!w.widgets},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      return {
+        id: w.id,
+        widget_id: w.widget_id,
+        widget_type: w.widgets?.type || "",
+        widget_name: w.widgets?.name || "",
+        size: w.size,
+        position_x: w.position_x,
+        position_y: w.position_y,
+        config: w.config || {},
+      };
+    });
 
     const result = {
       friend: {
@@ -164,13 +164,13 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
       },
       widgets: transformedWidgets,
       // Map back to expected interface (without full image data for performance)
-      pixelArtImages: (pixelArtImages || []).map((img: any) => ({
+      pixelArtImages: (pixelArtImages || []).map((img: Record<string, unknown>) => ({
         ...img,
         image_data: "" // Will be fetched separately if needed
       })) || [],
     };
     
-    console.log(`[DB] getFriendPage: ${Date.now() - pageStartTime}ms`);
+    // Performance: getFriendPage completed
     return result;
   } catch (error) {
     console.error("Error in getFriendPage:", error);
@@ -181,20 +181,19 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
 /**
  * Get global content (shared across all friends)
  */
-export async function getGlobalContent(contentType: string): Promise<any> {
+export async function getGlobalContent(contentType: string): Promise<unknown> {
   if (!isSupabaseConfigured()) {
     return getMockGlobalContent(contentType);
   }
 
   try {
-    const startTime = Date.now();
     const { data, error } = await supabase
       .from("global_content")
       .select("data")
       .eq("content_type", contentType)
       .single();
 
-    console.log(`[DB] getGlobalContent - ${contentType}: ${Date.now() - startTime}ms`);
+    // Performance: getGlobalContent completed
 
     if (error || !data) {
       console.error("Error fetching global content:", error);
@@ -214,7 +213,7 @@ export async function getGlobalContent(contentType: string): Promise<any> {
 export async function getPersonalContent(
   friendId: string,
   contentType: string
-): Promise<any> {
+): Promise<unknown> {
   if (!isSupabaseConfigured()) {
     return null;
   }
@@ -249,12 +248,12 @@ export async function savePixelArtImage(
   pixelData?: string // New format: base64-encoded Uint8Array
 ): Promise<string | null> {
   if (!isSupabaseConfigured()) {
-    console.log("Mock: Would save pixel art image");
+    // Mock: Would save pixel art image
     return "mock-id";
   }
 
   try {
-    const insertData: any = {
+    const insertData: Record<string, unknown> = {
       friend_id: friendId,
       widget_id: widgetId,
       size,
@@ -294,7 +293,7 @@ export async function savePixelArtImage(
 
 // Mock data functions for development without Supabase
 function getMockFriendPage(slug: string): FriendPageData | null {
-  const themes: Record<string, any> = {
+  const themes: Record<string, Record<string, unknown>> = {
     daniel: {
       id: "mock-daniel",
       name: "daniel",
@@ -359,7 +358,7 @@ function getMockFriendPage(slug: string): FriendPageData | null {
   };
 }
 
-function getMockGlobalContent(contentType: string): any {
+function getMockGlobalContent(contentType: string): unknown {
   if (contentType === "top_10_songs") {
     return [
       { id: "1", title: "Bohemian Rhapsody", artist: "Queen", youtubeId: "fJ9rUzIMcZQ" },

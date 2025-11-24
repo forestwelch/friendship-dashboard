@@ -261,7 +261,7 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
                 className="hn hn-sticky-note-solid"
                 style={{ fontSize: "var(--font-size-2xl)", opacity: 0.5 }}
               />
-              <div>No notes yet. Click "Add Note" to get started!</div>
+              <div>No notes yet. Click &quot;Add Note&quot; to get started!</div>
             </div>
           ) : (
             notes.map((note, index) => (

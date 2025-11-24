@@ -3,6 +3,8 @@ import Script from "next/script";
 import "./globals.css";
 import { YouTubePlayerProvider } from "@/components/YouTubePlayer";
 import { ThemeProvider } from "@/lib/theme-context";
+import { QueryProvider } from "@/lib/providers";
+import { WebVitals } from "@/components/WebVitals";
 
 export const metadata: Metadata = {
   title: "Friendship Dashboard",
@@ -36,7 +38,12 @@ export default function RootLayout({
           id="youtube-api-script"
         />
         <ThemeProvider>
-          <YouTubePlayerProvider>{children}</YouTubePlayerProvider>
+          <QueryProvider>
+            <YouTubePlayerProvider>
+              {children}
+              <WebVitals />
+            </YouTubePlayerProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -75,15 +75,24 @@ const DEFAULT_SONGS: Song[] = [
 ];
 
 export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
-  const { player, isPlaying, currentVideoId, play, pause, next, setPlaylist } =
-    useContext(YouTubePlayerContext);
+  const {
+    player: _player,
+    isPlaying,
+    currentVideoId,
+    play,
+    pause,
+    next,
+    setPlaylist,
+  } = useContext(YouTubePlayerContext);
   const [shuffledSongs, setShuffledSongs] = useState<Song[]>([]);
 
   useEffect(() => {
-    // Shuffle songs on mount
+    // Shuffle songs on mount - defer to avoid sync setState
     if (songs && songs.length > 0) {
-      const shuffled = [...songs].sort(() => Math.random() - 0.5);
-      setShuffledSongs(shuffled);
+      setTimeout(() => {
+        const shuffled = [...songs].sort(() => Math.random() - 0.5);
+        setShuffledSongs(shuffled);
+      }, 0);
     }
   }, [songs]);
 
@@ -155,8 +164,7 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
 
   // 2x2 version: Album art, song info, controls
   if (size === "2x2") {
-    const currentSong =
-      songs.find((s) => s.youtubeId === currentVideoId) || songs[0] || null;
+    const currentSong = songs.find((s) => s.youtubeId === currentVideoId) || songs[0] || null;
 
     return (
       <Widget size={size}>
@@ -305,15 +313,11 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
                     }
                   }}
                   style={{
-                    backgroundColor: isCurrent
-                      ? "var(--primary)"
-                      : "transparent",
+                    backgroundColor: isCurrent ? "var(--primary)" : "transparent",
                     color: isCurrent ? "var(--bg)" : "var(--text)",
                   }}
                 >
-                  <div style={{ fontSize: "var(--font-size-sm)" }}>
-                    {song.title || "Unknown"}
-                  </div>
+                  <div style={{ fontSize: "var(--font-size-sm)" }}>{song.title || "Unknown"}</div>
                   <div
                     style={{
                       fontSize: "var(--font-size-xs)",

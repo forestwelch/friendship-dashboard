@@ -10,7 +10,7 @@ interface HistoryState {
 }
 
 export function useUndoRedo(initialWidgets: FriendWidget[]) {
-  const [history, setHistory] = useState<HistoryState[]>([
+  const [history, setHistory] = useState<HistoryState[]>(() => [
     { widgets: initialWidgets, timestamp: Date.now() },
   ]);
   const [historyIndex, setHistoryIndex] = useState(0);
@@ -55,8 +55,15 @@ export function useUndoRedo(initialWidgets: FriendWidget[]) {
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
 
+  // Use state instead of ref for currentState to avoid ref access during render
+  const [currentState, setCurrentState] = useState<FriendWidget[]>(initialWidgets);
+  
+  useEffect(() => {
+    setCurrentState(widgetsRef.current);
+  }, [historyIndex, history]);
+
   return {
-    currentState: widgetsRef.current,
+    currentState,
     saveState,
     undo,
     redo,

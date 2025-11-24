@@ -1,0 +1,108 @@
+.backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  /* Ensure backdrop covers entire grid container */
+  margin: 0;
+}
+
+.modal {
+  background: var(--bg);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  /* Exact grid dimensions: 6 cols * 5rem + 5 gaps * 0.5rem = 32.5rem */
+  width: calc(6 * 5rem + 5 * 0.5rem);
+  /* Exact grid height: 8 rows * 5rem + 7 gaps * 0.5rem = 43.5rem */
+  height: calc(8 * 5rem + 7 * 0.5rem);
+  max-width: none;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  animation: none;
+}
+
+/* No animation - instant full-screen transition like MS-DOS/Windows file explorer */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 2px solid var(--primary);
+  flex-shrink: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--text);
+  font-weight: bold;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: var(--font-size-xl);
+  cursor: pointer;
+  padding: var(--space-xs);
+  line-height: 1;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.closeButton:hover {
+  color: var(--accent);
+  background: var(--secondary);
+}
+
+.closeButton:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.content {
+  padding: var(--space-lg);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0; /* Allow flex item to shrink below content size */
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .backdrop {
+    padding: 0;
+  }
+
+  .modal {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .header {
+    padding: var(--space-md);
+  }
+
+  .content {
+    padding: var(--space-md);
+  }
+}
+

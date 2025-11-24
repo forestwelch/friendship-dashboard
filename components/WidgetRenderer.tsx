@@ -8,11 +8,14 @@ import {
   Notes,
   Links,
   MediaRecommendations,
+  Mood,
+  EventCountdown,
+  PersonalityQuiz,
+  ConnectFour,
 } from "@/components/widgets";
 import { FriendWidget } from "@/lib/queries";
 import { Song } from "@/lib/types";
 import { createInboxItem } from "@/lib/queries-inbox";
-import { ThemeColors } from "@/lib/pixel-data-processing";
 import { useTheme } from "@/lib/theme-context";
 
 interface WidgetRendererProps {
@@ -21,10 +24,7 @@ interface WidgetRendererProps {
   pixelArtImageUrl?: string;
   onUploadImage?: (file: File) => Promise<void>;
   friendId?: string;
-  onUpdateWidgetConfig?: (
-    widgetId: string,
-    config: Record<string, any>
-  ) => Promise<void>;
+  onUpdateWidgetConfig?: (widgetId: string, config: Record<string, unknown>) => Promise<void>;
 }
 
 /**
@@ -34,16 +34,12 @@ export const WidgetRenderer = memo(function WidgetRenderer({
   widget,
   songs = [],
   pixelArtImageUrl,
-  onUploadImage,
+  onUploadImage: _onUploadImage,
   friendId,
   onUpdateWidgetConfig,
 }: WidgetRendererProps) {
   const themeColors = useTheme();
-  const handleProposeHangout = async (
-    date: string,
-    time: string,
-    message?: string
-  ) => {
+  const handleProposeHangout = async (date: string, time: string, message?: string) => {
     if (!friendId) {
       console.error("No friend ID provided for hangout proposal");
       return;
@@ -64,12 +60,12 @@ export const WidgetRenderer = memo(function WidgetRenderer({
 
   const handleMarkWatched = async (recommendationId: string) => {
     if (!onUpdateWidgetConfig) {
-      console.log("Mark as watched:", recommendationId);
+      // Mark as watched - no-op without callback
       return;
     }
 
     const currentRecommendations = widget.config?.recommendations || [];
-    const updated = currentRecommendations.map((rec: any) =>
+    const updated = currentRecommendations.map((rec: Record<string, unknown>) =>
       rec.id === recommendationId ? { ...rec, watched: true } : rec
     );
 
@@ -81,7 +77,7 @@ export const WidgetRenderer = memo(function WidgetRenderer({
 
   const handleAddRecommendation = async () => {
     // For now, just log - could open a modal or navigate to a form
-    console.log("Add recommendation - would open modal");
+    // Add recommendation - would open modal
     // In a real implementation, this would:
     // 1. Open a modal/form
     // 2. Collect recommendation data
@@ -89,6 +85,7 @@ export const WidgetRenderer = memo(function WidgetRenderer({
     // 4. Or send to inbox if it's a recommendation from a friend
   };
 
+  // Debug logging removed - was causing lint errors (Date.now() in render)
   switch (widget.widget_type) {
     case "music_player":
       return <MusicPlayer size={widget.size} songs={songs} />;
@@ -100,13 +97,7 @@ export const WidgetRenderer = memo(function WidgetRenderer({
 
       // Use programmatic rendering if pixelData is available
       if (pixelData && pixelData.length > 0 && themeColors) {
-        return (
-          <PixelArt
-            size={widget.size}
-            pixelData={pixelData}
-            themeColors={themeColors}
-          />
-        );
+        return <PixelArt size={widget.size} pixelData={pixelData} themeColors={themeColors} />;
       }
 
       // Fallback to image-based rendering (backward compatibility)
@@ -143,13 +134,7 @@ export const WidgetRenderer = memo(function WidgetRenderer({
 
       // Use programmatic rendering if pixelData is available
       if (imagePixelData && imagePixelData.length > 0 && themeColors) {
-        return (
-          <PixelArt
-            size={widget.size}
-            pixelData={imagePixelData}
-            themeColors={themeColors}
-          />
-        );
+        return <PixelArt size={widget.size} pixelData={imagePixelData} themeColors={themeColors} />;
       }
 
       return (
@@ -173,15 +158,14 @@ export const WidgetRenderer = memo(function WidgetRenderer({
       // Notes widget expects string[] but config stores objects with {id, content, created_at}
       const notesArray = widget.config?.notes || [];
       const notesStrings =
-        Array.isArray(notesArray) &&
-        notesArray.length > 0 &&
-        typeof notesArray[0] === "object"
-          ? notesArray.map((n: any) => n.content || n)
+        Array.isArray(notesArray) && notesArray.length > 0 && typeof notesArray[0] === "object"
+          ? notesArray.map((n: Record<string, unknown>) => (n.content as string) || String(n))
           : notesArray;
 
       return <Notes size={widget.size} initialNotes={notesStrings} />;
 
-    case "links":
+    case "shared_links":
+    case "links": // Backward compatibility
       return <Links size={widget.size} links={widget.config?.links || []} />;
 
     case "media_recommendations":
@@ -191,6 +175,55 @@ export const WidgetRenderer = memo(function WidgetRenderer({
           recommendations={widget.config?.recommendations || []}
           onMarkWatched={handleMarkWatched}
           onAddRecommendation={handleAddRecommendation}
+        />
+      );
+
+    case "mood":
+      const moodSize = parseInt(widget.size.split("x")[0]) as 1 | 2 | 3;
+      return (
+        <Mood
+          size={moodSize}
+          friendId={friendId || ""}
+          widgetId={widget.id}
+          themeColors={themeColors}
+          config={widget.config as Record<string, unknown>}
+        />
+      );
+
+    case "event_countdown":
+      const eventSize = parseInt(widget.size.split("x")[0]) as 1 | 2 | 3;
+      return (
+        <EventCountdown
+          size={eventSize}
+          friendId={friendId || ""}
+          widgetId={widget.id}
+          themeColors={themeColors}
+          config={widget.config as Record<string, unknown>}
+        />
+      );
+
+    case "personality_quiz":
+      const quizSize = parseInt(widget.size.split("x")[0]) as 1 | 2 | 3;
+      return (
+        <PersonalityQuiz
+          size={quizSize}
+          friendId={friendId || ""}
+          widgetId={widget.id}
+          themeColors={themeColors}
+          config={widget.config as Record<string, unknown>}
+        />
+      );
+
+    case "connect_four":
+      // Convert "1x1" -> 1, "2x2" -> 2, "3x3" -> 3
+      const connectFourSize = parseInt(widget.size.split("x")[0]) as 1 | 2 | 3;
+      return (
+        <ConnectFour
+          size={connectFourSize}
+          friendId={friendId || ""}
+          widgetId={widget.id}
+          themeColors={themeColors}
+          config={widget.config as Record<string, unknown>}
         />
       );
 

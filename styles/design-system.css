@@ -196,10 +196,9 @@ body {
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: calc(var(--border-width-md) * 1) calc(var(--border-width-md) * 1)
-      0 var(--game-border-dark),
-    inset calc(var(--border-width) * -1) calc(var(--border-width) * -1) 0
-      rgba(0, 0, 0, 0.3);
+  box-shadow:
+    calc(var(--border-width-md) * 1) calc(var(--border-width-md) * 1) 0 var(--game-border-dark),
+    inset calc(var(--border-width) * -1) calc(var(--border-width) * -1) 0 rgba(0, 0, 0, 0.3);
   min-height: var(--height-button);
   height: var(--height-button);
   user-select: none;
@@ -209,15 +208,14 @@ body {
 .game-button:hover {
   background: var(--primary);
   border-color: var(--primary);
-  transform: translate(1px, 1px);
-  box-shadow: var(--border-width) var(--border-width) 0 var(--accent),
-    inset calc(var(--border-width) * -1) calc(var(--border-width) * -1) 0
-      rgba(0, 0, 0, 0.3);
+  box-shadow:
+    var(--border-width) var(--border-width) 0 var(--accent),
+    inset calc(var(--border-width) * -1) calc(var(--border-width) * -1) 0 rgba(0, 0, 0, 0.3);
 }
 
 .game-button:active {
-  transform: translate(2px, 2px);
-  box-shadow: 0 0 0 var(--accent),
+  box-shadow:
+    0 0 0 var(--accent),
     inset var(--border-width) var(--border-width) 0 rgba(0, 0, 0, 0.5);
 }
 
@@ -233,14 +231,18 @@ body {
   background: var(--primary);
   color: var(--bg);
   border-color: var(--accent);
-  box-shadow: 2px 2px 0 var(--accent), inset -1px -1px 0 rgba(0, 0, 0, 0.2),
+  box-shadow:
+    2px 2px 0 var(--accent),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2),
     var(--game-glow-primary);
 }
 
 .game-button-primary:hover {
   background: var(--primary);
   border-color: var(--primary);
-  box-shadow: 1px 1px 0 var(--accent), inset -1px -1px 0 rgba(0, 0, 0, 0.2),
+  box-shadow:
+    1px 1px 0 var(--accent),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2),
     var(--game-glow-primary);
 }
 
@@ -249,14 +251,18 @@ body {
   background: var(--secondary);
   color: var(--text);
   border-color: var(--accent);
-  box-shadow: 2px 2px 0 var(--accent), inset -1px -1px 0 rgba(0, 0, 0, 0.2),
+  box-shadow:
+    2px 2px 0 var(--accent),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2),
     var(--game-glow-secondary);
 }
 
 .game-button-secondary:hover {
   background: var(--primary);
   border-color: var(--primary);
-  box-shadow: 1px 1px 0 var(--accent), inset -1px -1px 0 rgba(0, 0, 0, 0.2),
+  box-shadow:
+    1px 1px 0 var(--accent),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2),
     var(--game-glow-secondary);
 }
 
@@ -265,13 +271,17 @@ body {
   background: var(--accent);
   color: var(--text);
   border-color: var(--accent);
-  box-shadow: 2px 2px 0 var(--accent), inset -1px -1px 0 rgba(0, 0, 0, 0.2);
+  box-shadow:
+    2px 2px 0 var(--accent),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2);
 }
 
 .game-button-accent:hover {
   background: var(--primary);
   border-color: var(--primary);
-  box-shadow: 1px 1px 0 var(--accent), inset -1px -1px 0 rgba(0, 0, 0, 0.2);
+  box-shadow:
+    1px 1px 0 var(--accent),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2);
 }
 
 /* Icon-only buttons */
@@ -295,8 +305,8 @@ body {
   background: var(--bg);
   border: var(--border-width-md) solid var(--accent);
   border-radius: var(--radius-sm);
-  box-shadow: inset calc(var(--border-width-md) * 1)
-    calc(var(--border-width-md) * 1) 0 rgba(0, 0, 0, 0.3);
+  box-shadow: inset calc(var(--border-width-md) * 1) calc(var(--border-width-md) * 1) 0
+    rgba(0, 0, 0, 0.3);
   transition: all var(--transition-fast);
   min-height: var(--height-input);
   height: var(--height-input);
@@ -305,7 +315,9 @@ body {
 .game-input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.3), var(--game-glow-primary);
+  box-shadow:
+    inset 2px 2px 0 rgba(0, 0, 0, 0.3),
+    var(--game-glow-primary);
 }
 
 .game-input::placeholder {
@@ -321,10 +333,9 @@ body {
   border: var(--border-width-md) solid var(--accent);
   border-radius: var(--radius-sm);
   padding: var(--space-lg);
-  box-shadow: calc(var(--border-width-md) * 1) calc(var(--border-width-md) * 1)
-      0 var(--accent),
-    inset calc(var(--border-width) * -1) calc(var(--border-width) * -1) 0
-      rgba(0, 0, 0, 0.2);
+  box-shadow:
+    calc(var(--border-width-md) * 1) calc(var(--border-width-md) * 1) 0 var(--accent),
+    inset calc(var(--border-width) * -1) calc(var(--border-width) * -1) 0 rgba(0, 0, 0, 0.2);
 }
 
 .game-card-hover {
@@ -333,8 +344,10 @@ body {
 
 .game-card-hover:hover {
   border-color: var(--primary);
-  box-shadow: 3px 3px 0 var(--accent), inset -1px -1px 0 rgba(0, 0, 0, 0.2);
-  transform: translate(-1px, -1px);
+  box-shadow:
+    3px 3px 0 var(--accent),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2);
+  background: var(--secondary);
 }
 
 /* ============================================

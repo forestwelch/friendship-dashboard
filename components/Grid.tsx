@@ -2,6 +2,8 @@
 
 import React from "react";
 import { WidgetPosition } from "@/lib/types";
+import { useIsMobile } from "@/lib/useMediaQuery";
+import styles from "./Grid.module.css";
 
 interface GridProps {
   children: React.ReactNode;
@@ -32,19 +34,23 @@ interface GridProps {
 }
 
 export function Grid({ children, dragOverPosition, draggedWidgetSize }: GridProps) {
+  const isMobile = useIsMobile();
   const gridWidth = `calc(${GRID_COLS} * ${TILE_SIZE} + ${GRID_COLS - 1} * ${GAP})`;
   const gridHeight = `calc(${GRID_ROWS} * ${TILE_SIZE} + ${GRID_ROWS - 1} * ${GAP})`;
-  // Create array of all grid positions for background tiles
+  
+  // Create array of all grid positions for background tiles (desktop only)
   const allTiles: Array<{ x: number; y: number }> = [];
-  for (let y = 0; y < GRID_ROWS; y++) {
-    for (let x = 0; x < GRID_COLS; x++) {
-      allTiles.push({ x, y });
+  if (!isMobile) {
+    for (let y = 0; y < GRID_ROWS; y++) {
+      for (let x = 0; x < GRID_COLS; x++) {
+        allTiles.push({ x, y });
+      }
     }
   }
 
   // Calculate which tiles would be occupied by dragged widget
   const dragOverTiles: Set<string> = new Set();
-  if (dragOverPosition && draggedWidgetSize) {
+  if (dragOverPosition && draggedWidgetSize && !isMobile) {
     const [cols, rows] = draggedWidgetSize.split("x").map(Number);
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
@@ -53,6 +59,16 @@ export function Grid({ children, dragOverPosition, draggedWidgetSize }: GridProp
     }
   }
 
+  // Mobile: Stack layout
+  if (isMobile) {
+    return (
+      <div className={styles.mobileGrid} data-grid-container>
+        {children}
+      </div>
+    );
+  }
+
+  // Desktop: Grid layout
   const gridStyle: React.CSSProperties = {
     display: "grid",
     gridTemplateColumns: `repeat(${GRID_COLS}, ${TILE_SIZE})`,
@@ -109,10 +125,21 @@ interface GridItemProps {
 }
 
 export function GridItem({ position, size, children, onDragOver, onDrop }: GridItemProps) {
+  const isMobile = useIsMobile();
   const [cols, rows] = size.split("x").map(Number);
   const itemWidth = `calc(${cols} * ${TILE_SIZE} + ${cols - 1} * ${GAP})`;
   const itemHeight = `calc(${rows} * ${TILE_SIZE} + ${rows - 1} * ${GAP})`;
 
+  // Mobile: Full-width stacked cards
+  if (isMobile) {
+    return (
+      <div className={styles.mobileItem} onDragOver={onDragOver} onDrop={onDrop}>
+        {children}
+      </div>
+    );
+  }
+
+  // Desktop: Grid positioning
   const itemStyle: React.CSSProperties = {
     gridColumn: `${position.x + 1} / span ${cols}`,
     gridRow: `${position.y + 1} / span ${rows}`,

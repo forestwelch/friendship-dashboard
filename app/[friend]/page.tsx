@@ -51,8 +51,7 @@ export default async function FriendPage({ params }: FriendPageProps) {
       }
     });
     // Debug: Log available pixel art
-    console.log(`Found ${pixelArtImages.length} pixel art images for ${friend.display_name}`);
-    console.log(`Available sizes:`, Array.from(pixelArtBySize.keys()));
+    // Debug: Found pixel art images
   }
 
   // Pass theme colors to Navigation

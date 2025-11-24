@@ -118,7 +118,7 @@ export function YouTubePlayerProvider({
 
         globalInitialized = true;
 
-        const handleStateChange = (event: any) => {
+        const handleStateChange = (event: { data: number }) => {
           if (event.data === 1) {
             setIsPlaying(true);
           } else if (event.data === 2 || event.data === 0) {

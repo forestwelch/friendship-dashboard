@@ -1,6 +1,4 @@
 "use client";
-
-import React, { useEffect, useRef } from "react";
 import { useKeyboardShortcuts } from "@/lib/keyboard";
 
 interface KeyboardNavigationProps {

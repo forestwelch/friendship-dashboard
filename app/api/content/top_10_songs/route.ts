@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
-import { Song } from "@/lib/types";
 
 export async function PUT(request: NextRequest) {
   if (!isSupabaseConfigured()) {

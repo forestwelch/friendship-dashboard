@@ -25,10 +25,7 @@ interface ImageManagerProps {
   onImagesChange?: (images: ImageItem[]) => void;
 }
 
-export function ImageManager({
-  initialImages,
-  onImagesChange,
-}: ImageManagerProps) {
+export function ImageManager({ initialImages, onImagesChange }: ImageManagerProps) {
   const [images, setImages] = useState<ImageItem[]>(initialImages);
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
   const [isUploading, setIsUploading] = useState(false);
@@ -106,29 +103,31 @@ export function ImageManager({
   const handleDelete = async () => {
     if (selectedImages.size === 0) return;
 
-    if (confirm(`Delete ${selectedImages.size} images?`)) {
-      try {
-        const idsToDelete = Array.from(selectedImages);
-        const response = await fetch(
-          `/api/images?ids=${idsToDelete.join(",")}`,
-          {
-            method: "DELETE",
-          }
-        );
+    // Instant delete - no confirmation (optimistic update pattern)
+    const idsToDelete = Array.from(selectedImages);
+    const originalImages = images;
 
-        if (!response.ok) {
-          throw new Error("Failed to delete images");
-        }
+    // Optimistic update: remove from UI immediately
+    const newImages = images.filter((img) => !selectedImages.has(img.id));
+    updateImages(newImages);
+    setSelectedImages(new Set());
+    playSound("delete");
 
-        const newImages = images.filter((img) => !selectedImages.has(img.id));
-        updateImages(newImages);
-        setSelectedImages(new Set());
-        playSound("cancel");
-      } catch (error) {
-        console.error("Error deleting images:", error);
-        playSound("error");
-        alert("Failed to delete images. Please try again.");
+    // Sync to DB in background
+    try {
+      const response = await fetch(`/api/images?ids=${idsToDelete.join(",")}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete images");
       }
+    } catch (error) {
+      // Revert on failure
+      console.error("Error deleting images:", error);
+      updateImages(originalImages);
+      playSound("error");
+      // TODO: Show error toast instead of alert
     }
   };
 
@@ -154,10 +153,7 @@ export function ImageManager({
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
         >
-          <i
-            className="hn hn-upload-solid"
-            style={{ marginRight: "var(--space-sm)" }}
-          />
+          <i className="hn hn-upload-solid" style={{ marginRight: "var(--space-sm)" }} />
           {isUploading ? "UPLOADING..." : "UPLOAD IMAGES"}
         </button>
 
@@ -166,10 +162,7 @@ export function ImageManager({
           onClick={handleDelete}
           disabled={selectedImages.size === 0}
         >
-          <i
-            className="hn hn-trash-solid"
-            style={{ marginRight: "var(--space-sm)" }}
-          />
+          <i className="hn hn-trash-solid" style={{ marginRight: "var(--space-sm)" }} />
           DELETE SELECTED ({selectedImages.size})
         </button>
 
@@ -299,12 +292,8 @@ export function ImageManager({
                 overflow: "hidden",
                 cursor: "pointer",
                 transition: "all 0.2s",
-                transform: selectedImages.has(img.id)
-                  ? "scale(0.95)"
-                  : "scale(1)",
-                boxShadow: selectedImages.has(img.id)
-                  ? "var(--game-glow-blue)"
-                  : "none",
+                opacity: selectedImages.has(img.id) ? 0.8 : 1,
+                boxShadow: selectedImages.has(img.id) ? "var(--game-glow-blue)" : "none",
                 background: "var(--game-surface)",
               }}
             >
@@ -355,10 +344,7 @@ export function ImageManager({
               gap: "var(--space-md)",
             }}
           >
-            <i
-              className="hn hn-image"
-              style={{ fontSize: "2rem", opacity: 0.5 }}
-            />
+            <i className="hn hn-image" style={{ fontSize: "2rem", opacity: 0.5 }} />
             <span>No images found. Upload some!</span>
           </div>
         )}

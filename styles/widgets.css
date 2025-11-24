@@ -61,13 +61,11 @@
 
 .widget-button:hover {
   background: var(--secondary);
-  transform: translateY(-1px);
   box-shadow: inset -2px -2px 0 var(--secondary), inset 2px 2px 0 var(--accent),
     3px 3px 0 rgba(0, 0, 0, 0.2);
 }
 
 .widget-button:active {
-  transform: translateY(0);
   box-shadow: inset -2px -2px 0 var(--secondary), inset 2px 2px 0 var(--accent),
     1px 1px 0 rgba(0, 0, 0, 0.3);
 }
@@ -191,11 +189,11 @@
 }
 
 .widget-button:hover {
-  transform: translateY(-2px);
+  /* No transform - only color/shadow changes */
 }
 
 .widget-button:active {
-  transform: translateY(0);
+  /* No transform - only color/shadow changes */
 }
 
 /* Music player pulse */

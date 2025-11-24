@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 
 type FocusDirection = 'up' | 'down' | 'left' | 'right';
 

@@ -77,10 +77,10 @@ export function SongManager({ initialSongs = [], onSave }: SongManagerProps) {
   };
 
   const handleDeleteSong = (index: number) => {
-    if (confirm("Delete this song?")) {
-      setSongs((prev) => prev.filter((_, i) => i !== index));
-      playSound("click");
-    }
+    // Instant delete - no confirmation (optimistic update pattern)
+    setSongs((prev) => prev.filter((_, i) => i !== index));
+    playSound("delete");
+    // TODO: Sync to DB in background (will be handled by TanStack Query mutation)
   };
 
   const handleSave = async () => {
@@ -245,7 +245,7 @@ export function SongManager({ initialSongs = [], onSave }: SongManagerProps) {
             color: "var(--admin-text)",
             opacity: 0.6,
           }}>
-            No songs yet. Click "Add Song" to get started!
+            No songs yet. Click &quot;Add Song&quot; to get started!
           </div>
         ) : (
           <div style={{ 

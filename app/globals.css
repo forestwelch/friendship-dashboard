@@ -147,5 +147,6 @@ p, div, span, h1, h2, h3, h4, h5, h6, button, input, textarea, label, a {
 
 /* Import design system first */
 @import "../styles/design-system.css";
+@import "../styles/responsive.css";
 /* Import admin styles (will use design system variables) */
 @import "../styles/admin.css";

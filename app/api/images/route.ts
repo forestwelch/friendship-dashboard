@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { savePixelArtImage } from "@/lib/queries";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
-import { WidgetSize } from "@/lib/types";
 
 export async function GET() {
   if (!isSupabaseConfigured()) {
@@ -9,9 +8,7 @@ export async function GET() {
   }
 
   try {
-    console.log("[API] Fetching global images...");
-    const startTime = Date.now();
-    
+    // Fetching global images
     // Only fetch pixel_data (not base_image_data) for performance - 4KB vs MB
     const { data, error } = await supabase
       .from("pixel_art_images")
@@ -20,8 +17,7 @@ export async function GET() {
       .order("created_at", { ascending: false })
       .limit(100); // Limit to prevent huge payloads
 
-    const fetchTime = Date.now() - startTime;
-    console.log(`[API] Fetched ${data?.length || 0} images in ${fetchTime}ms`);
+    // Fetched images
 
     if (error) {
       console.error("[API] Error fetching images:", error);

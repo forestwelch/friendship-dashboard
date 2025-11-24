@@ -19,12 +19,14 @@ export function measurePerformance(label: string, fn: () => void | Promise<void>
       performance.mark(endMark);
       performance.measure(label, startMark, endMark);
       const measure = performance.getEntriesByName(label)[0];
+      // eslint-disable-next-line no-console
       console.log(`[Performance] ${label}: ${measure.duration.toFixed(2)}ms`);
     });
   } else {
     performance.mark(endMark);
     performance.measure(label, startMark, endMark);
     const measure = performance.getEntriesByName(label)[0];
+    // eslint-disable-next-line no-console
     console.log(`[Performance] ${label}: ${measure.duration.toFixed(2)}ms`);
     return result;
   }
@@ -49,7 +51,7 @@ export function measureRender(componentName: string, renderFn: () => void) {
     if (measure.duration > 16) { // Only log if slower than 60fps (16ms)
       console.warn(`[Performance] Slow render: ${componentName} took ${measure.duration.toFixed(2)}ms`);
     }
-  } catch (e) {
+  } catch {
     // Ignore if measure already exists
   }
   

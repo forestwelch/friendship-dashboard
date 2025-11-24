@@ -141,20 +141,14 @@ export function FriendManager() {
           overflow: "hidden",
         }}
       >
-        <div
-          className="game-breadcrumb"
-          style={{ marginBottom: "var(--space-md)", flexShrink: 0 }}
-        >
+        <div className="game-breadcrumb" style={{ marginBottom: "var(--space-md)", flexShrink: 0 }}>
           <Link href="/" className="game-link">
             Home
           </Link>
           <span className="game-breadcrumb-separator">/</span>
           <span className="game-breadcrumb-current">Manage Friends</span>
         </div>
-        <h1
-          className="game-heading-1"
-          style={{ marginBottom: "var(--space-md)", flexShrink: 0 }}
-        >
+        <h1 className="game-heading-1" style={{ marginBottom: "var(--space-md)", flexShrink: 0 }}>
           Manage Friends
         </h1>
 
@@ -168,10 +162,7 @@ export function FriendManager() {
                 playSound("open");
               }}
             >
-              <i
-                className="hn hn-plus-solid"
-                style={{ marginRight: "var(--space-sm)" }}
-              />
+              <i className="hn hn-plus-solid" style={{ marginRight: "var(--space-sm)" }} />
               ADD FRIEND
             </button>
           </div>
@@ -187,10 +178,7 @@ export function FriendManager() {
               flexShrink: 0,
             }}
           >
-            <h2
-              className="game-heading-2"
-              style={{ marginBottom: "var(--space-md)" }}
-            >
+            <h2 className="game-heading-2" style={{ marginBottom: "var(--space-md)" }}>
               Add New Friend
             </h2>
 
@@ -261,10 +249,7 @@ export function FriendManager() {
                       padding: "var(--space-xs) var(--space-sm)",
                     }}
                   >
-                    <i
-                      className="hn hn-dice-solid"
-                      style={{ marginRight: "var(--space-xs)" }}
-                    />
+                    <i className="hn hn-dice-solid" style={{ marginRight: "var(--space-xs)" }} />
                     RANDOMIZE
                   </button>
                 </div>
@@ -296,8 +281,7 @@ export function FriendManager() {
                           width: "3rem",
                           height: "1.5rem",
                           background: newFriend[key as keyof typeof newFriend],
-                          border:
-                            "var(--border-width-md) solid var(--game-border)",
+                          border: "var(--border-width-md) solid var(--game-border)",
                           borderRadius: "var(--radius-sm)",
                           cursor: "pointer",
                         }}
@@ -345,10 +329,7 @@ export function FriendManager() {
                 >
                   CANCEL
                 </button>
-                <button
-                  className="game-button game-button-success"
-                  onClick={handleAddFriend}
-                >
+                <button className="game-button game-button-success" onClick={handleAddFriend}>
                   CREATE FRIEND
                 </button>
               </div>
@@ -407,8 +388,10 @@ export function FriendManager() {
                 }}
                 onMouseEnter={() => {
                   // Prefetch theme on hover
-                  if ((window as any).__prefetchTheme) {
-                    (window as any).__prefetchTheme(friend.slug);
+                  if ((window as { __prefetchTheme?: (slug: string) => void }).__prefetchTheme) {
+                    (window as { __prefetchTheme: (slug: string) => void }).__prefetchTheme(
+                      friend.slug
+                    );
                   }
                 }}
               >
@@ -445,12 +428,12 @@ export function FriendManager() {
             selectedColor === "text"
               ? newFriend.color_text
               : selectedColor === "primary"
-              ? newFriend.color_primary
-              : selectedColor === "secondary"
-              ? newFriend.color_secondary
-              : selectedColor === "accent"
-              ? newFriend.color_accent
-              : newFriend.color_bg
+                ? newFriend.color_primary
+                : selectedColor === "secondary"
+                  ? newFriend.color_secondary
+                  : selectedColor === "accent"
+                    ? newFriend.color_accent
+                    : newFriend.color_bg
           }
           onColorChange={(color) => {
             handleColorChange(selectedColor, color);

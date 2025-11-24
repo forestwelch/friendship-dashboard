@@ -18,7 +18,7 @@ export interface GamepadState {
   };
 }
 
-let gamepadState: GamepadState = {
+const gamepadState: GamepadState = {
   connected: false,
   buttons: {
     a: false,
@@ -54,13 +54,13 @@ export function initGamepad() {
   if (typeof window === "undefined") return;
 
   const handleGamepadConnected = (e: GamepadEvent) => {
-    console.log("Gamepad connected:", e.gamepad.id);
+    console.warn("Gamepad connected:", e.gamepad.id);
     gamepadState.connected = true;
     startPolling();
   };
 
   const handleGamepadDisconnected = (e: GamepadEvent) => {
-    console.log("Gamepad disconnected:", e.gamepad.id);
+    console.warn("Gamepad disconnected:", e.gamepad.id);
     gamepadState.connected = false;
     stopPolling();
   };

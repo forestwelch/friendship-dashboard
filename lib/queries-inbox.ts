@@ -5,7 +5,7 @@ import { supabase, isSupabaseConfigured } from "./supabase";
  */
 export async function getInboxItems(
   status: "all" | "pending" | "approved" | "rejected" = "all"
-): Promise<any[]> {
+): Promise<Array<Record<string, unknown>>> {
   if (!isSupabaseConfigured()) {
     return [
       {
@@ -46,7 +46,7 @@ export async function getInboxItems(
       return [];
     }
 
-    return data.map((item: any) => ({
+    return data.map((item: Record<string, unknown>) => ({
       ...item,
       friend_name: item.friend?.display_name || "Unknown",
     }));
@@ -64,7 +64,7 @@ export async function updateInboxItemStatus(
   status: "approved" | "rejected"
 ): Promise<boolean> {
   if (!isSupabaseConfigured()) {
-    console.log("Mock: Updated inbox item status to", status);
+    // Mock: Updated inbox item status
     return true;
   }
 
@@ -92,10 +92,10 @@ export async function updateInboxItemStatus(
 export async function createInboxItem(
   friendId: string,
   type: "recommendation" | "hangout_proposal",
-  data: any
+  data: Record<string, unknown>
 ): Promise<boolean> {
   if (!isSupabaseConfigured()) {
-    console.log("Mock: Created inbox item", { friendId, type, data });
+    // Mock: Created inbox item
     return true;
   }
 

@@ -3,10 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FriendWidget } from "@/lib/queries";
 import { playSound } from "@/lib/sounds";
-import {
-  processImageToPixelData,
-  pixelDataToBase64,
-} from "@/lib/pixel-data-processing";
+import { processImageToPixelData, pixelDataToBase64 } from "@/lib/pixel-data-processing";
 
 interface ImageItem {
   id: string;
@@ -21,7 +18,7 @@ interface ImageItem {
 interface WidgetConfigModalProps {
   widget: FriendWidget | null;
   onClose: () => void;
-  onSave: (config: Record<string, any>) => void;
+  onSave: (config: Record<string, unknown>) => void;
   friendColors?: {
     primary: string;
     secondary: string;
@@ -35,14 +32,12 @@ export function WidgetConfigModal({
   widget,
   onClose,
   onSave,
-  friendColors,
+  friendColors: _friendColors,
 }: WidgetConfigModalProps) {
-  const [config, setConfig] = useState<Record<string, any>>({});
+  const [config, setConfig] = useState<Record<string, unknown>>({});
   const [availableImages, setAvailableImages] = useState<ImageItem[]>([]);
   const [loadingImages, setLoadingImages] = useState(false);
-  const [processingImages, setProcessingImages] = useState<Set<string>>(
-    new Set()
-  );
+  const [processingImages, setProcessingImages] = useState<Set<string>>(new Set());
   const widgetIdRef = useRef<string | null>(null);
   const imagesFetchedRef = useRef(false);
 
@@ -53,7 +48,7 @@ export function WidgetConfigModal({
       setConfig(widget.config || {});
       imagesFetchedRef.current = false; // Reset fetch flag for new widget
     }
-  }, [widget?.id]);
+  }, [widget]);
 
   // Fetch available images for pixel_art widgets (only once per widget type)
   useEffect(() => {
@@ -111,7 +106,8 @@ export function WidgetConfigModal({
           </div>
         );
 
-      case "links":
+      case "shared_links":
+      case "links": // Backward compatibility
         return (
           <div
             style={{
@@ -139,12 +135,8 @@ export function WidgetConfigModal({
                 minHeight: "9.375rem",
               }}
             />
-            <div
-              className="game-text-muted"
-              style={{ fontSize: "var(--font-size-xs)" }}
-            >
-              Format: [{"{"}"id": "1", "title": "Example", "url": "https://...",
-              "icon": "hn-link-solid"{"}"}]
+            <div className="game-text-muted" style={{ fontSize: "var(--font-size-xs)" }}>
+              Format: JSON array of link objects with id, title, url, icon
             </div>
           </div>
         );
@@ -177,12 +169,8 @@ export function WidgetConfigModal({
                 minHeight: "9.375rem",
               }}
             />
-            <div
-              className="game-text-muted"
-              style={{ fontSize: "var(--font-size-xs)" }}
-            >
-              Format: [{"{"}"id": "1", "title": "Event", "date": "2024-01-15",
-              "time": "3:00 PM"{"}"}]
+            <div className="game-text-muted" style={{ fontSize: "var(--font-size-xs)" }}>
+              Format: JSON array of event objects with id, title, date, time
             </div>
           </div>
         );
@@ -215,12 +203,8 @@ export function WidgetConfigModal({
                 minHeight: "9.375rem",
               }}
             />
-            <div
-              className="game-text-muted"
-              style={{ fontSize: "var(--font-size-xs)" }}
-            >
-              Format: [{"{"}"id": "1", "title": "Movie", "type": "movie",
-              "description": "..."{"}"}]
+            <div className="game-text-muted" style={{ fontSize: "var(--font-size-xs)" }}>
+              Format: JSON array of recommendation objects with id, title, type, description
             </div>
           </div>
         );
@@ -230,33 +214,18 @@ export function WidgetConfigModal({
         let selectedImageIds: string[] = config.imageIds || [];
 
         // If we have pixelData but no imageIds, extract IDs from pixelData array
-        if (
-          selectedImageIds.length === 0 &&
-          config.pixelData &&
-          config.pixelData.length > 0
-        ) {
+        if (selectedImageIds.length === 0 && config.pixelData && config.pixelData.length > 0) {
           // Try to match pixelData to available images (this is a simplified approach)
           // In a real scenario, you'd want to store image IDs alongside pixelData
           selectedImageIds = availableImages
-            .filter(
-              (img) =>
-                img.pixel_data && config.pixelData.includes(img.pixel_data)
-            )
+            .filter((img) => img.pixel_data && config.pixelData.includes(img.pixel_data))
             .map((img) => img.id);
         }
 
         // Backward compatibility: if we have imageUrls but no imageIds
-        if (
-          selectedImageIds.length === 0 &&
-          config.imageUrls &&
-          config.imageUrls.length > 0
-        ) {
+        if (selectedImageIds.length === 0 && config.imageUrls && config.imageUrls.length > 0) {
           selectedImageIds = availableImages
-            .filter(
-              (img) =>
-                img.base_image_data &&
-                config.imageUrls.includes(img.base_image_data)
-            )
+            .filter((img) => img.base_image_data && config.imageUrls.includes(img.base_image_data))
             .map((img) => img.id);
         }
         return (
@@ -290,8 +259,7 @@ export function WidgetConfigModal({
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns:
-                    "repeat(auto-fill, minmax(6.25rem, 1fr))",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(6.25rem, 1fr))",
                   gap: "var(--space-sm)",
                   maxHeight: "18.75rem",
                   overflowY: "auto",
@@ -315,9 +283,7 @@ export function WidgetConfigModal({
                       onClick={async () => {
                         playSound("click");
                         const newIds = isSelected
-                          ? selectedImageIds.filter(
-                              (id: string) => id !== img.id
-                            )
+                          ? selectedImageIds.filter((id: string) => id !== img.id)
                           : [...selectedImageIds, img.id];
 
                         // If deselecting, just remove it
@@ -327,70 +293,49 @@ export function WidgetConfigModal({
                           );
 
                           // Update config with remaining pixel_data (new format) or imageUrls (old format)
-                          const existingPixelData = config.pixelData || [];
-                          const existingImageUrls = config.imageUrls || [];
+                          const _existingPixelData = config.pixelData || [];
+                          const _existingImageUrls = config.imageUrls || [];
 
                           setConfig({
                             ...config,
                             imageIds: newIds,
                             pixelData: remainingImages
                               .map((i) => i.pixel_data)
-                              .filter(
-                                (pd): pd is string =>
-                                  pd !== null && pd !== undefined
-                              ),
+                              .filter((pd): pd is string => pd !== null && pd !== undefined),
                             imageUrls: remainingImages
                               .map((i) => i.base_image_data)
-                              .filter(
-                                (url): url is string =>
-                                  url !== null && url !== undefined
-                              ),
+                              .filter((url): url is string => url !== null && url !== undefined),
                           });
                           return;
                         }
 
                         // If selecting and image doesn't have pixel_data, process it
-                        if (
-                          !img.pixel_data &&
-                          img.base_image_data &&
-                          !isProcessing
-                        ) {
-                          setProcessingImages((prev) =>
-                            new Set(prev).add(img.id)
-                          );
+                        if (!img.pixel_data && img.base_image_data && !isProcessing) {
+                          setProcessingImages((prev) => new Set(prev).add(img.id));
 
                           // Process image to pixel data (async, non-blocking)
                           (async () => {
                             try {
-                              console.log(
-                                `[WidgetConfig] Processing image ${img.id} to pixel data...`
-                              );
-                              const processStartTime = Date.now();
+                              // Processing image to pixel data
+                              // Processing image to pixel data
 
                               // Convert base64 to File for processing
-                              const response = await fetch(
-                                img.base_image_data!
-                              );
+                              const response = await fetch(img.base_image_data!);
                               const blob = await response.blob();
                               const file = new File([blob], "image.png", {
                                 type: "image/png",
                               });
 
                               // Process to 64x64 pixel data
-                              const pixelDataArray =
-                                await processImageToPixelData(file);
-                              const pixelDataBase64 =
-                                pixelDataToBase64(pixelDataArray);
+                              const pixelDataArray = await processImageToPixelData(file);
+                              const pixelDataBase64 = pixelDataToBase64(pixelDataArray);
 
-                              const processTime = Date.now() - processStartTime;
-                              console.log(
-                                `[WidgetConfig] Image ${img.id} processed in ${processTime}ms`
-                              );
+                              // Image processed
 
                               // Update config with pixel_data
                               setConfig((prevConfig) => {
-                                const selectedImages = availableImages.filter(
-                                  (i) => newIds.includes(i.id)
+                                const selectedImages = availableImages.filter((i) =>
+                                  newIds.includes(i.id)
                                 );
 
                                 // Collect pixel_data from selected images
@@ -416,8 +361,8 @@ export function WidgetConfigModal({
                               );
                               // Fallback: use base_image_data if processing fails
                               setConfig((prevConfig) => {
-                                const selectedImages = availableImages.filter(
-                                  (i) => newIds.includes(i.id)
+                                const selectedImages = availableImages.filter((i) =>
+                                  newIds.includes(i.id)
                                 );
                                 return {
                                   ...prevConfig,
@@ -425,8 +370,7 @@ export function WidgetConfigModal({
                                   imageUrls: selectedImages
                                     .map((i) => i.base_image_data)
                                     .filter(
-                                      (url): url is string =>
-                                        url !== null && url !== undefined
+                                      (url): url is string => url !== null && url !== undefined
                                     ),
                                 };
                               });
@@ -446,10 +390,7 @@ export function WidgetConfigModal({
                             );
                             const pixelDataArray = selectedImages
                               .map((i) => i.pixel_data)
-                              .filter(
-                                (pd): pd is string =>
-                                  pd !== null && pd !== undefined
-                              );
+                              .filter((pd): pd is string => pd !== null && pd !== undefined);
 
                             return {
                               ...prevConfig,
@@ -545,13 +486,10 @@ export function WidgetConfigModal({
               </div>
             )}
             {selectedImageIds.length > 0 && (
-              <div
-                className="game-text-muted"
-                style={{ fontSize: "var(--font-size-xs)" }}
-              >
+              <div className="game-text-muted" style={{ fontSize: "var(--font-size-xs)" }}>
                 {selectedImageIds.length} image
-                {selectedImageIds.length !== 1 ? "s" : ""} selected. Images will
-                cycle with cascade animation.
+                {selectedImageIds.length !== 1 ? "s" : ""} selected. Images will cycle with cascade
+                animation.
               </div>
             )}
           </div>
@@ -593,10 +531,7 @@ export function WidgetConfigModal({
           padding: "var(--space-xl)",
         }}
       >
-        <div
-          className="game-flex game-flex-between"
-          style={{ marginBottom: "var(--space-lg)" }}
-        >
+        <div className="game-flex game-flex-between" style={{ marginBottom: "var(--space-lg)" }}>
           <h2 className="game-heading-2" style={{ margin: 0 }}>
             Configure {widget.widget_name}
           </h2>
@@ -618,10 +553,7 @@ export function WidgetConfigModal({
           <button className="game-button" onClick={onClose}>
             Cancel
           </button>
-          <button
-            className="game-button game-button-success"
-            onClick={handleSave}
-          >
+          <button className="game-button game-button-success" onClick={handleSave}>
             Save
           </button>
         </div>

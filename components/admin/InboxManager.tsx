@@ -10,7 +10,7 @@ interface InboxItem {
   type: "recommendation" | "hangout_proposal";
   friend_id: string;
   friend_name: string;
-  data: any;
+  data: Record<string, unknown>;
   created_at: string;
   status: "pending" | "approved" | "rejected";
 }

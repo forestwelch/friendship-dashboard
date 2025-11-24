@@ -1,0 +1,178 @@
+.eventModal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-md);
+  color: var(--text);
+  font-weight: bold;
+  margin: 0;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: var(--space-sm);
+  background: var(--bg);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: var(--font-size-md);
+  font-family: inherit;
+  min-height: 44px;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-color: var(--primary);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.emojiGrid {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.emojiButton {
+  padding: var(--space-sm);
+  background: var(--bg);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xl);
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 50px;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emojiButton:hover {
+  border-color: var(--primary);
+  box-shadow: var(--game-glow-primary);
+  background: var(--secondary);
+}
+
+.emojiButton.selected {
+  border-color: var(--accent);
+  background: var(--secondary);
+  box-shadow: var(--game-glow-accent);
+}
+
+.deleteButton {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.deleteButton:hover {
+  background: var(--accent);
+  box-shadow: var(--game-glow-accent);
+}
+
+.saveButton {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--primary);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.saveButton:hover {
+  background: var(--secondary);
+  box-shadow: var(--game-glow-primary);
+}
+
+.eventsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.eventItem {
+  padding: var(--space-md);
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.eventItem:hover {
+  background: var(--primary);
+  box-shadow: var(--game-glow-primary);
+}
+
+.eventHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.eventName {
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  color: var(--text);
+}
+
+.eventDate {
+  font-size: var(--font-size-sm);
+  color: var(--text);
+  opacity: 0.7;
+}
+
+.eventDescription {
+  font-size: var(--font-size-sm);
+  color: var(--text);
+  opacity: 0.8;
+  margin-top: var(--space-xs);
+  font-style: italic;
+}
+
+.noEvents {
+  text-align: center;
+  color: var(--text);
+  opacity: 0.5;
+  padding: var(--space-md);
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .emojiGrid {
+    justify-content: center;
+  }
+
+  .emojiButton {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+

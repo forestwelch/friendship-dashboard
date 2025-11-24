@@ -17,7 +17,7 @@ interface LinksProps {
 }
 
 export function Links({ size, links = [] }: LinksProps) {
-  const [linkList, setLinkList] = useState<LinkItem[]>(links);
+  const [linkList, _setLinkList] = useState<LinkItem[]>(links);
   
   const openLink = (url: string) => {
     window.open(url, "_blank", "noopener,noreferrer");

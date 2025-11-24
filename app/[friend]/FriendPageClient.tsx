@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useMemo } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { Grid, GridItem } from "@/components/Grid";
 import { WidgetRenderer } from "@/components/WidgetRenderer";
 import { ViewEditToggle } from "@/components/admin/ViewEditToggle";
@@ -10,11 +10,9 @@ import { WidgetLibrary } from "@/components/admin/WidgetLibrary";
 import { WidgetConfigModal } from "@/components/admin/WidgetConfigModal";
 import { Friend, WidgetSize, WidgetPosition } from "@/lib/types";
 import { FriendWidget } from "@/lib/queries";
-import { Song } from "@/lib/types";
 import { canPlaceWidget, findAvailablePosition } from "@/lib/widget-utils";
 import { playSound } from "@/lib/sounds";
 import { GamepadNavigation } from "@/components/GamepadNavigation";
-import { DEFAULT_THEME_COLORS } from "@/lib/theme-defaults";
 import { useThemeContext } from "@/lib/theme-context";
 
 interface FriendPageClientProps {
@@ -36,17 +34,14 @@ export function FriendPageClient({
   const [widgets, setWidgets] = useState<FriendWidget[]>(initialWidgets);
   const [draggedWidget, setDraggedWidget] = useState<string | null>(null);
   const [hoveredWidget, setHoveredWidget] = useState<string | null>(null);
-  const [dragOverPosition, setDragOverPosition] =
-    useState<WidgetPosition | null>(null);
+  const [dragOverPosition, setDragOverPosition] = useState<WidgetPosition | null>(null);
   const [showWidgetLibrary, setShowWidgetLibrary] = useState(false);
-  const [configuringWidget, setConfiguringWidget] =
-    useState<FriendWidget | null>(null);
+  const [configuringWidget, setConfiguringWidget] = useState<FriendWidget | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const { colors: themeColors, setTheme } = useThemeContext();
 
   // State for pixel art/images map to allow updates
-  const [pixelArtMap, setPixelArtMap] =
-    useState<Map<string, string>>(initialPixelArtMap);
+  const [pixelArtMap, setPixelArtMap] = useState<Map<string, string>>(initialPixelArtMap);
 
   const handleDragStart = useCallback(
     (e: React.DragEvent, widgetId: string) => {
@@ -80,16 +75,10 @@ export function FriendPageClient({
   }, []);
 
   const calculateGridPosition = useCallback(
-    (
-      clientX: number,
-      clientY: number,
-      widgetSize?: WidgetSize
-    ): WidgetPosition | null => {
+    (clientX: number, clientY: number, widgetSize?: WidgetSize): WidgetPosition | null => {
       // Grid constants in rem (must match Grid.tsx)
       // Convert rem to pixels using computed font size
-      const rootFontSize = parseFloat(
-        getComputedStyle(document.documentElement).fontSize
-      );
+      const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
       const TILE_SIZE_REM = 5; // 80px at 16px base - must match Grid.tsx
       const GAP_REM = 0.5; // 8px at 16px base - must match Grid.tsx
       const tileSize = TILE_SIZE_REM * rootFontSize;
@@ -143,9 +132,7 @@ export function FriendPageClient({
       if (!widget) return;
 
       // Calculate position based on widget top-left, accounting for drag offset
-      const dragElement = e.currentTarget.querySelector(
-        `[data-widget-item="${draggedWidget}"]`
-      );
+      const dragElement = e.currentTarget.querySelector(`[data-widget-item="${draggedWidget}"]`);
       let offsetX = 0;
       let offsetY = 0;
 
@@ -155,19 +142,10 @@ export function FriendPageClient({
         offsetY = e.clientY - rect.top;
       }
 
-      const position = calculateGridPosition(
-        e.clientX - offsetX,
-        e.clientY - offsetY,
-        widget.size
-      );
+      const position = calculateGridPosition(e.clientX - offsetX, e.clientY - offsetY, widget.size);
 
       if (position) {
-        const canPlace = canPlaceWidget(
-          widgets,
-          draggedWidget,
-          position,
-          widget.size
-        );
+        const canPlace = canPlaceWidget(widgets, draggedWidget, position, widget.size);
         e.dataTransfer.dropEffect = canPlace ? "move" : "none";
         setDragOverPosition(canPlace ? position : null);
       } else {
@@ -191,9 +169,7 @@ export function FriendPageClient({
       }
 
       // Use the dragOverPosition if available (more accurate)
-      const position =
-        dragOverPosition ||
-        calculateGridPosition(e.clientX, e.clientY, widget.size);
+      const position = dragOverPosition || calculateGridPosition(e.clientX, e.clientY, widget.size);
       if (!position) {
         handleDragEnd();
         return;
@@ -201,12 +177,7 @@ export function FriendPageClient({
 
       // Try exact position first
       let finalPosition = position;
-      let placed = canPlaceWidget(
-        widgets,
-        draggedWidget,
-        position,
-        widget.size
-      );
+      let placed = canPlaceWidget(widgets, draggedWidget, position, widget.size);
 
       // If exact position doesn't work, try nearby positions (more lenient)
       if (!placed) {
@@ -231,9 +202,7 @@ export function FriendPageClient({
           // Check if widget fits at this position
           const [cols, rows] = widget.size.split("x").map(Number);
           if (tryPosition.x + cols <= 6 && tryPosition.y + rows <= 8) {
-            if (
-              canPlaceWidget(widgets, draggedWidget, tryPosition, widget.size)
-            ) {
+            if (canPlaceWidget(widgets, draggedWidget, tryPosition, widget.size)) {
               finalPosition = tryPosition;
               placed = true;
               break;
@@ -261,18 +230,16 @@ export function FriendPageClient({
 
       handleDragEnd();
     },
-    [isEditMode, draggedWidget, widgets, calculateGridPosition]
+    [isEditMode, draggedWidget, widgets, calculateGridPosition, dragOverPosition, handleDragEnd]
   );
 
   const handleDelete = useCallback(
     (widgetId: string) => {
       if (!isEditMode) return;
-      if (confirm("Delete this widget?")) {
-        setWidgets((prev) => prev.filter((w) => w.id !== widgetId));
-        playSound("cancel");
-      } else {
-        playSound("close");
-      }
+      // Instant delete - no confirmation (optimistic update pattern)
+      setWidgets((prev) => prev.filter((w) => w.id !== widgetId));
+      playSound("delete");
+      // TODO: Sync to DB in background (will be handled by TanStack Query mutation)
     },
     [isEditMode]
   );
@@ -289,9 +256,7 @@ export function FriendPageClient({
         id: `temp-${Date.now()}`,
         widget_id: widgetType, // Will be resolved to UUID by API
         widget_type: widgetType,
-        widget_name: widgetType
-          .replace(/_/g, " ")
-          .replace(/\b\w/g, (l) => l.toUpperCase()),
+        widget_name: widgetType.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
         position_x: newPosition.x,
         position_y: newPosition.y,
         size: size,
@@ -302,7 +267,7 @@ export function FriendPageClient({
       setShowWidgetLibrary(false);
       playSound("select");
     },
-    [widgets, friend.id]
+    [widgets]
   );
 
   const handleSave = useCallback(async () => {
@@ -334,11 +299,7 @@ export function FriendPageClient({
     } catch (error) {
       playSound("error");
       console.error("Save error:", error);
-      alert(
-        `Failed to save layout: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
+      alert(`Failed to save layout: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   }, [widgets, friend.id]);
 
@@ -446,29 +407,26 @@ export function FriendPageClient({
     } catch (error) {
       console.error("Error saving colors:", error);
     }
-  }, [friend.slug]);
+  }, [friend.slug, setTheme]);
 
-  const handleUploadImage = useCallback(
-    async (file: File, widgetId: string) => {
-      // Mock upload for now or real implementation if API existed
-      // For now, just use local object URL to preview
-      const objectUrl = URL.createObjectURL(file);
+  const handleUploadImage = useCallback(async (file: File, widgetId: string) => {
+    // Mock upload for now or real implementation if API existed
+    // For now, just use local object URL to preview
+    const objectUrl = URL.createObjectURL(file);
 
-      // Update local state
-      setPixelArtMap((prev) => {
-        const newMap = new Map(prev);
-        newMap.set(widgetId, objectUrl);
-        return newMap;
-      });
+    // Update local state
+    setPixelArtMap((prev) => {
+      const newMap = new Map(prev);
+      newMap.set(widgetId, objectUrl);
+      return newMap;
+    });
 
-      // TODO: Implement real upload
-      // const formData = new FormData();
-      // formData.append("file", file);
-      // formData.append("widgetId", widgetId);
-      // await fetch("/api/images/upload", { method: "POST", body: formData });
-    },
-    []
-  );
+    // TODO: Implement real upload
+    // const formData = new FormData();
+    // formData.append("file", file);
+    // formData.append("widgetId", widgetId);
+    // await fetch("/api/images/upload", { method: "POST", body: formData });
+  }, []);
 
   // Gamepad button handlers
   const handleGamepadButton = useCallback(
@@ -514,7 +472,7 @@ export function FriendPageClient({
 
   // Define onUpdateWidgetConfig callback at component level (not inside map)
   const handleUpdateWidgetConfig = useCallback(
-    async (widgetId: string, config: Record<string, any>) => {
+    async (widgetId: string, config: Record<string, unknown>) => {
       // Update widget config in database
       try {
         const response = await fetch(`/api/widgets/${friend.id}`, {
@@ -533,9 +491,7 @@ export function FriendPageClient({
           }),
         });
         if (response.ok) {
-          setWidgets((prev) =>
-            prev.map((w) => (w.id === widgetId ? { ...w, config } : w))
-          );
+          setWidgets((prev) => prev.map((w) => (w.id === widgetId ? { ...w, config } : w)));
         }
       } catch (error) {
         console.error("Failed to update widget config:", error);
@@ -577,10 +533,7 @@ export function FriendPageClient({
           zIndex: 10,
         }}
       >
-        <h1
-          className="game-heading-1"
-          style={{ margin: 0, color: themeColors.text }}
-        >
+        <h1 className="game-heading-1" style={{ margin: 0, color: themeColors.text }}>
           {friend.display_name.toUpperCase()}
         </h1>
         <div
@@ -623,10 +576,7 @@ export function FriendPageClient({
                 gap: "var(--space-xs)",
               }}
             >
-              <i
-                className="hn hn-plus-solid"
-                style={{ fontSize: "var(--font-size-xs)" }}
-              />
+              <i className="hn hn-plus-solid" style={{ fontSize: "var(--font-size-xs)" }} />
               ADD
             </button>
             <button
@@ -652,10 +602,7 @@ export function FriendPageClient({
                 gap: "var(--space-xs)",
               }}
             >
-              <i
-                className="hn hn-save-solid"
-                style={{ fontSize: "var(--font-size-xs)" }}
-              />
+              <i className="hn hn-save-solid" style={{ fontSize: "var(--font-size-xs)" }} />
               SAVE
             </button>
           </div>
@@ -672,6 +619,7 @@ export function FriendPageClient({
       {/* Grid container - no padding, no borders, maximize space, no scroll */}
       <div
         ref={gridRef}
+        data-grid-container-wrapper
         style={{
           position: "relative",
           overflow: "hidden",
@@ -693,20 +641,14 @@ export function FriendPageClient({
         <Grid
           dragOverPosition={dragOverPosition}
           draggedWidgetSize={
-            draggedWidget
-              ? widgets.find((w) => w.id === draggedWidget)?.size
-              : undefined
+            draggedWidget ? widgets.find((w) => w.id === draggedWidget)?.size : undefined
           }
         >
           {widgets.map((widget) => {
             let pixelArtImageUrl: string | undefined;
             // Handle both pixel_art and image widgets for the image URL
-            if (
-              widget.widget_type === "pixel_art" ||
-              widget.widget_type === "image"
-            ) {
-              pixelArtImageUrl =
-                pixelArtMap.get(widget.id) || pixelArtBySize.get(widget.size);
+            if (widget.widget_type === "pixel_art" || widget.widget_type === "image") {
+              pixelArtImageUrl = pixelArtMap.get(widget.id) || pixelArtBySize.get(widget.size);
             }
 
             const isHovered = hoveredWidget === widget.id && isEditMode;
@@ -764,10 +706,7 @@ export function FriendPageClient({
             playSound("close");
           }}
           onSave={async (newConfig) => {
-            console.log("[FriendPage] Saving widget config:", {
-              widgetId: configuringWidget.id,
-              config: newConfig,
-            });
+            // Saving widget config
 
             // Update widget config locally first for immediate feedback
             const updatedWidgets = widgets.map((w) =>
@@ -777,9 +716,7 @@ export function FriendPageClient({
 
             // Save to database - only update the specific widget, not all widgets
             try {
-              console.log(
-                "[FriendPage] Sending PUT request to /api/widgets/" + friend.id
-              );
+              // Sending PUT request to save widgets
               const response = await fetch(`/api/widgets/${friend.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -796,28 +733,18 @@ export function FriendPageClient({
 
               if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                console.error(
-                  "[FriendPage] Failed to save widget config:",
-                  errorData
-                );
+                console.error("[FriendPage] Failed to save widget config:", errorData);
                 alert(`Failed to save: ${errorData.error || "Unknown error"}`);
                 playSound("error");
                 return;
               }
 
-              const result = await response.json();
-              console.log(
-                "[FriendPage] Widget config saved successfully:",
-                result
-              );
+              const _result = await response.json();
+              // Widget config saved successfully
               playSound("success");
             } catch (error) {
               console.error("[FriendPage] Error saving widget config:", error);
-              alert(
-                `Error: ${
-                  error instanceof Error ? error.message : "Unknown error"
-                }`
-              );
+              alert(`Error: ${error instanceof Error ? error.message : "Unknown error"}`);
               playSound("error");
             }
 

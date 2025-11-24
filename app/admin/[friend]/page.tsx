@@ -1,7 +1,6 @@
 import React from "react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getFriendPage, getAllFriends } from "@/lib/queries";
+import { getFriendPage } from "@/lib/queries";
 import { Navigation } from "@/components/Navigation";
 import { WidgetManager } from "@/components/admin/WidgetManager";
 
@@ -43,7 +42,7 @@ export default async function AdminFriendPage({
   const gridTileBg = hexToRgba(friend.color_accent, 0.05);
   const gridTileBorder = hexToRgba(friend.color_secondary, 0.1);
 
-  const themeStyle: React.CSSProperties = {
+  const _themeStyle: React.CSSProperties = {
     "--primary": friend.color_primary,
     "--secondary": friend.color_secondary,
     "--accent": friend.color_accent,

@@ -3,7 +3,6 @@ import { Navigation } from "@/components/Navigation";
 import { FriendPageClient } from "@/app/[friend]/FriendPageClient";
 import { Friend } from "@/lib/types";
 import { FriendWidget } from "@/lib/queries";
-import { Song } from "@/lib/types";
 
 // Mock friend for calendar widget testing
 const mockFriend: Friend = {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useRouter, useParams } from "next/navigation";
 import { WidgetSize } from "@/lib/types";
 import { WidgetLibrary } from "@/components/admin/WidgetLibrary";

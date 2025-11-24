@@ -8,7 +8,7 @@ export interface WidgetPosition {
 }
 
 export interface WidgetData {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Widget {
@@ -16,7 +16,7 @@ export interface Widget {
   name: string;
   sizes: WidgetSize[];
   render: (size: WidgetSize, data: WidgetData) => React.ReactNode;
-  onInteraction?: (action: string, payload: any) => void;
+  onInteraction?: (action: string, payload: unknown) => void;
 }
 
 export interface Friend {

@@ -10,7 +10,7 @@ interface WidgetLibraryProps {
 
 export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
   const [selectedType, setSelectedType] = useState<string | null>(null);
-  const [previewSize, setPreviewSize] = useState<WidgetSize>("2x2");
+  const [previewSize, _setPreviewSize] = useState<WidgetSize>("2x2");
 
   const widgetTypes = [
     {
@@ -18,13 +18,6 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
       name: "Music Player",
       description: "Play your top songs",
       icon: "🎵",
-      sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
-    },
-    {
-      type: "image",
-      name: "Image",
-      description: "Display uploaded images",
-      icon: "📷",
       sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
     },
     {
@@ -49,7 +42,7 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
       sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
     },
     {
-      type: "links",
+      type: "shared_links",
       name: "Links",
       description: "Quick access links",
       icon: "🔗",
@@ -60,6 +53,34 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
       name: "Media Recommendations",
       description: "Share and track media",
       icon: "🎬",
+      sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
+    },
+    {
+      type: "mood",
+      name: "Mood Tracker",
+      description: "Track your mood with emojis",
+      icon: "😊",
+      sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
+    },
+    {
+      type: "event_countdown",
+      name: "Event Countdown",
+      description: "Countdown to upcoming events",
+      icon: "⏰",
+      sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
+    },
+    {
+      type: "personality_quiz",
+      name: "Personality Quiz",
+      description: "Discover your vibe together",
+      icon: "✨",
+      sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
+    },
+    {
+      type: "connect_four",
+      name: "Connect Four",
+      description: "Play async turn-based game",
+      icon: "🎮",
       sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
     },
   ];

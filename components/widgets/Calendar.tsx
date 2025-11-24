@@ -44,7 +44,7 @@ export function Calendar({
   
   if (size === "1x1") {
     // Mini calendar - just show today's date and next event
-    const todayEvents = getEventsForDate(today.getDate());
+    const _todayEvents = getEventsForDate(today.getDate());
     const nextEvent = events.find(e => new Date(e.date) >= today);
     
     return (

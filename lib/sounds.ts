@@ -1,7 +1,36 @@
 // Retro sound effects for the dashboard
 
 export function playSound(
-  type: "click" | "success" | "error" | "pop" | "blip" | "move" | "select" | "cancel" | "open" | "close" | "hover" | "upload" | "delete" | "focus" | "navigate"
+  type:
+    | "click"
+    | "success"
+    | "error"
+    | "pop"
+    | "blip"
+    | "move"
+    | "select"
+    | "cancel"
+    | "open"
+    | "close"
+    | "hover"
+    | "upload"
+    | "delete"
+    | "focus"
+    | "navigate"
+    | "mood_set"
+    | "mood_change"
+    | "event_save"
+    | "quiz_advance"
+    | "quiz_results"
+    | "retake"
+    | "game_drop"
+    | "game_hover"
+    | "game_win"
+    | "game_lose"
+    | "game_draw"
+    | "opponent_move"
+    | "whoosh"
+    | "ping"
 ) {
   if (typeof window === "undefined" || typeof AudioContext === "undefined") {
     return;
@@ -32,6 +61,21 @@ export function playSound(
       delete: { frequency: 250, duration: 0.15, type: "sawtooth" },
       focus: { frequency: 500, duration: 0.05, type: "square" },
       navigate: { frequency: 350, duration: 0.04, type: "square" },
+      // Widget-specific sounds
+      mood_set: { frequency: 900, duration: 0.08, type: "square" }, // Cute beep, higher pitch
+      mood_change: { frequency: 600, duration: 0.2, type: "sine" }, // Ascending/descending tone
+      event_save: { frequency: 650, duration: 0.15, type: "sine" }, // Ascending tone
+      quiz_advance: { frequency: 550, duration: 0.1, type: "sine" }, // Soft "ding"
+      quiz_results: { frequency: 800, duration: 0.3, type: "sine" }, // Magical ascending tone
+      retake: { frequency: 400, duration: 0.1, type: "sawtooth" }, // Reset/restart sound
+      game_drop: { frequency: 500, duration: 0.12, type: "square" }, // Satisfying "plunk"
+      game_hover: { frequency: 450, duration: 0.05, type: "square" }, // Subtle "bloop"
+      game_win: { frequency: 800, duration: 0.5, type: "square" }, // Celebration fanfare, 8-bit style
+      game_lose: { frequency: 200, duration: 0.4, type: "sawtooth" }, // Sad trombone, 8-bit style
+      game_draw: { frequency: 400, duration: 0.15, type: "sine" }, // Neutral tone
+      opponent_move: { frequency: 600, duration: 0.1, type: "square" }, // Notification sound
+      whoosh: { frequency: 700, duration: 0.15, type: "sine" }, // Date selection
+      ping: { frequency: 500, duration: 0.05, type: "square" }, // Field focus (can reuse focus)
     };
 
     const sound = sounds[type];
@@ -45,9 +89,8 @@ export function playSound(
 
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + sound.duration);
-  } catch (error) {
+  } catch {
     // Silently fail if audio context can't be created
-    console.debug("Could not play sound:", error);
   }
 }
 

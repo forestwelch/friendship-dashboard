@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { Navigation } from "@/components/Navigation";
 import Link from "next/link";
@@ -37,7 +37,7 @@ function getThemeClass(slug: string): string {
 export default function AdminUploadPage() {
   const params = useParams();
   const friend = params?.friend as string;
-  const themeClass = getThemeClass(friend);
+  const _themeClass = getThemeClass(friend);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<WidgetSize>("1x1");
@@ -213,7 +213,7 @@ export default function AdminUploadPage() {
             <span className="game-breadcrumb-current">Upload Pixel Art</span>
             <span style={{ marginLeft: "auto" }}>
               <Link href={`/${friend}`} className="game-link">
-                View {friend}'s page →
+                View {friend}&apos;s page →
               </Link>
             </span>
           </div>

@@ -1,0 +1,57 @@
+.dateInput {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: var(--font-size-md);
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s;
+}
+
+.dateInput:hover {
+  border-color: var(--primary);
+  box-shadow: var(--game-glow-primary);
+}
+
+.dateInput:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.datePickerContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.dateInputField {
+  width: 100%;
+  padding: var(--space-md);
+  background: var(--bg);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: var(--font-size-md);
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.dateInputField:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-color: var(--primary);
+}
+
+/* Mobile: Use native date picker */
+@media (max-width: 768px) {
+  .dateInputField {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+

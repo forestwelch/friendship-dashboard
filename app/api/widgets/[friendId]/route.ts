@@ -46,6 +46,10 @@ export async function PUT(
       .map((w: FriendWidget) => w.widget_type)
       .filter((type) => !widgetTypeMap.has(type));
     
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api/widgets/route.ts:44',message:'Validating widget types',data:{invalidTypes,availableTypes:Array.from(widgetTypeMap.keys()),widgetTypes:widgets.map((w: FriendWidget) => w.widget_type)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
+    
     if (invalidTypes.length > 0) {
       return NextResponse.json(
         {
@@ -55,7 +59,7 @@ export async function PUT(
       );
     }
 
-    console.log(`[API] Saving ${widgets.length} widgets for friend ${friendId}`);
+    // Saving widgets for friend
     
     // Delete all existing widgets for this friend
     const { error: deleteError } = await adminClient
@@ -71,7 +75,7 @@ export async function PUT(
       );
     }
     
-    console.log("[API] Deleted existing widgets, inserting new ones...");
+    // Deleted existing widgets, inserting new ones
 
     // Insert new widgets
     const widgetsToInsert = widgets.map((w: FriendWidget) => {
@@ -104,7 +108,7 @@ export async function PUT(
         );
       }
       
-      console.log(`[API] Successfully saved ${widgetsToInsert.length} widgets`);
+      // Successfully saved widgets
     }
 
     return NextResponse.json({ success: true, saved: widgetsToInsert.length });

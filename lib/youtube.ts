@@ -2,7 +2,35 @@
 
 declare global {
   interface Window {
-    YT: any;
+    YT: {
+      Player: new (elementId: string, options: { videoId: string; playerVars?: Record<string, unknown>; onReady?: () => void; onStateChange?: (event: { data: number }) => void; onError?: (event: { data: number }) => void }) => {
+        playVideo: () => void;
+        pauseVideo: () => void;
+        stopVideo: () => void;
+        getCurrentTime: () => number;
+        getDuration: () => number;
+        seekTo: (seconds: number) => void;
+        setVolume: (volume: number) => void;
+        getVolume: () => number;
+        mute: () => void;
+        unMute: () => void;
+        isMuted: () => boolean;
+        setPlaybackRate: (rate: number) => void;
+        getPlaybackRate: () => number;
+        getPlayerState: () => number;
+        loadVideoById: (videoId: string) => void;
+        cueVideoById: (videoId: string) => void;
+        destroy: () => void;
+      };
+      PlayerState: {
+        UNSTARTED: number;
+        ENDED: number;
+        PLAYING: number;
+        PAUSED: number;
+        BUFFERING: number;
+        CUED: number;
+      };
+    };
     onYouTubeIframeAPIReady: () => void;
   }
 }
@@ -87,8 +115,8 @@ export function createYouTubePlayer(
     videoId?: string;
     width?: number;
     height?: number;
-    playerVars?: any;
-    onStateChange?: (event: any) => void;
+    playerVars?: Record<string, unknown>;
+    onStateChange?: (event: { data: number }) => void;
   } = {}
 ): Promise<YouTubePlayer> {
   return loadYouTubeAPI().then(() => {
@@ -128,7 +156,7 @@ export function createYouTubePlayer(
               playerInstance = player;
               resolve(player);
             },
-            onError: (event: any) => {
+            onError: (event: { data: number }) => {
               console.error("YouTube player error:", event);
               reject(new Error(`YouTube player error: ${event.data}`));
             },

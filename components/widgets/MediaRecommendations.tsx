@@ -28,7 +28,7 @@ export function MediaRecommendations({
   onMarkWatched,
   onAddRecommendation,
 }: MediaRecommendationsProps) {
-  const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
+  const [_selectedItem, _setSelectedItem] = useState<MediaItem | null>(null);
   
   const unwatchedCount = recommendations.filter((r) => !r.watched).length;
   const latestUnwatched = recommendations.find((r) => !r.watched);

@@ -1,16 +1,12 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Friend, WidgetSize, WidgetPosition } from "@/lib/types";
 import { FriendWidget } from "@/lib/queries";
 import { Grid, GridItem } from "@/components/Grid";
 import { WidgetRenderer } from "@/components/WidgetRenderer";
 import { playSound } from "@/lib/sounds";
-import {
-  canPlaceWidget,
-  findAvailablePosition,
-  getWidgetPositions,
-} from "@/lib/widget-utils";
+import { canPlaceWidget, findAvailablePosition } from "@/lib/widget-utils";
 import { WidgetConfigModal } from "./WidgetConfigModal";
 import { WidgetLibrary } from "./WidgetLibrary";
 import { useUndoRedo } from "./UndoRedo";
@@ -32,8 +28,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
     canRedo,
   } = useUndoRedo(initialWidgets);
 
-  const [localWidgets, setLocalWidgets] =
-    useState<FriendWidget[]>(initialWidgets);
+  const [localWidgets, setLocalWidgets] = useState<FriendWidget[]>(initialWidgets);
 
   // Sync local widgets with undo/redo state
   useEffect(() => {
@@ -42,8 +37,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
 
   const setWidgets = useCallback(
     (updater: FriendWidget[] | ((prev: FriendWidget[]) => FriendWidget[])) => {
-      const newWidgets =
-        typeof updater === "function" ? updater(localWidgets) : updater;
+      const newWidgets = typeof updater === "function" ? updater(localWidgets) : updater;
       setLocalWidgets(newWidgets);
       saveState(newWidgets);
     },
@@ -51,35 +45,27 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
   );
 
   const [draggedWidget, setDraggedWidget] = useState<string | null>(null);
-  const [dragOverPosition, setDragOverPosition] =
-    useState<WidgetPosition | null>(null);
+  const [dragOverPosition, setDragOverPosition] = useState<WidgetPosition | null>(null);
   const [editingWidget, setEditingWidget] = useState<string | null>(null);
   const [showAddMenu, setShowAddMenu] = useState(false);
-  const [configuringWidget, setConfiguringWidget] =
-    useState<FriendWidget | null>(null);
+  const [configuringWidget, setConfiguringWidget] = useState<FriendWidget | null>(null);
 
   // Use localWidgets for rendering
   const displayWidgets = localWidgets;
 
-  const handleDragStart = useCallback(
-    (e: React.DragEvent, widgetId: string) => {
-      e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("text/plain", widgetId);
-      setDraggedWidget(widgetId);
-      playSound("pop");
-    },
-    []
-  );
+  const handleDragStart = useCallback((e: React.DragEvent, widgetId: string) => {
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", widgetId);
+    setDraggedWidget(widgetId);
+    playSound("pop");
+  }, []);
 
-  const handleDragOver = useCallback(
-    (e: React.DragEvent, position: WidgetPosition) => {
-      e.preventDefault();
-      e.stopPropagation();
-      e.dataTransfer.dropEffect = "move";
-      setDragOverPosition(position);
-    },
-    []
-  );
+  const handleDragOver = useCallback((e: React.DragEvent, position: WidgetPosition) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverPosition(position);
+  }, []);
 
   const handleDrop = useCallback(
     (e: React.DragEvent, position: WidgetPosition) => {
@@ -91,9 +77,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
       const widget = displayWidgets.find((w) => w.id === draggedWidget);
       if (widget) {
         // Check if position is valid and doesn't overlap with other widgets
-        if (
-          canPlaceWidget(displayWidgets, draggedWidget, position, widget.size)
-        ) {
+        if (canPlaceWidget(displayWidgets, draggedWidget, position, widget.size)) {
           const newWidgets = displayWidgets.map((w) =>
             w.id === draggedWidget
               ? {
@@ -107,9 +91,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
           playSound("success");
         } else {
           playSound("error");
-          alert(
-            "Cannot place widget here - it would overlap with another widget!"
-          );
+          alert("Cannot place widget here - it would overlap with another widget!");
         }
       }
 
@@ -134,9 +116,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
           id: `temp-${Date.now()}`,
           widget_id: "", // Will be set when saving - API will look up by widget_type
           widget_type: widgetType,
-          widget_name: widgetType
-            .replace("_", " ")
-            .replace(/\b\w/g, (l) => l.toUpperCase()),
+          widget_name: widgetType.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase()),
           size,
           position_x: foundPosition.x,
           position_y: foundPosition.y,
@@ -157,11 +137,11 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
 
   const handleDeleteWidget = useCallback(
     (widgetId: string) => {
-      if (confirm("Delete this widget?")) {
-        const newWidgets = displayWidgets.filter((w) => w.id !== widgetId);
-        setWidgets(newWidgets);
-        playSound("click");
-      }
+      // Instant delete - no confirmation (optimistic update pattern)
+      const newWidgets = displayWidgets.filter((w) => w.id !== widgetId);
+      setWidgets(newWidgets);
+      playSound("delete");
+      // TODO: Sync to DB in background (will be handled by TanStack Query mutation)
     },
     [displayWidgets, setWidgets]
   );
@@ -334,9 +314,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
               playSound("click");
 
               // Filter out temp widgets and prepare for save
-              const widgetsToSave = displayWidgets.filter(
-                (w) => !w.id.startsWith("temp-")
-              );
+              const widgetsToSave = displayWidgets.filter((w) => !w.id.startsWith("temp-"));
 
               if (widgetsToSave.length === 0) {
                 playSound("error");
@@ -360,8 +338,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
             } catch (error) {
               console.error("Error saving widgets:", error);
               playSound("error");
-              const errorMessage =
-                error instanceof Error ? error.message : "Unknown error";
+              const errorMessage = error instanceof Error ? error.message : "Unknown error";
               alert(`Failed to save layout: ${errorMessage}`);
             }
           }}
@@ -376,9 +353,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
           className="game-card"
           style={{ margin: "var(--space-md) var(--space-lg)", flexShrink: 0 }}
         >
-          <WidgetLibrary
-            onSelectWidget={(type, size) => handleAddWidget(type, size)}
-          />
+          <WidgetLibrary onSelectWidget={(type, size) => handleAddWidget(type, size)} />
         </div>
       )}
 
@@ -436,8 +411,8 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                     const touch = e.touches[0];
                     const element = e.currentTarget;
                     const rect = element.getBoundingClientRect();
-                    const startX = touch.clientX - rect.left;
-                    const startY = touch.clientY - rect.top;
+                    const _startX = touch.clientX - rect.left;
+                    const _startY = touch.clientY - rect.top;
 
                     const handleTouchMove = (moveEvent: TouchEvent) => {
                       moveEvent.preventDefault();
@@ -453,10 +428,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                     const handleTouchEnd = () => {
                       element.style.transform = "";
                       element.style.opacity = "";
-                      document.removeEventListener(
-                        "touchmove",
-                        handleTouchMove
-                      );
+                      document.removeEventListener("touchmove", handleTouchMove);
                       document.removeEventListener("touchend", handleTouchEnd);
                     };
 
@@ -510,8 +482,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                 >
                   <div
                     style={{
-                      pointerEvents:
-                        draggedWidget === widget.id ? "none" : "auto",
+                      pointerEvents: draggedWidget === widget.id ? "none" : "auto",
                       width: "100%",
                       height: "100%",
                     }}
@@ -600,32 +571,20 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
             {/* Drop zone indicators - show valid positions for dragged widget */}
             {draggedWidget &&
               (() => {
-                const draggedWidgetData = displayWidgets.find(
-                  (w) => w.id === draggedWidget
-                );
+                const draggedWidgetData = displayWidgets.find((w) => w.id === draggedWidget);
                 if (!draggedWidgetData) return null;
 
                 // Show drop zones for all valid positions
                 return allPositions
                   .filter((pos) =>
-                    canPlaceWidget(
-                      displayWidgets,
-                      draggedWidget,
-                      pos,
-                      draggedWidgetData.size
-                    )
+                    canPlaceWidget(displayWidgets, draggedWidget, pos, draggedWidgetData.size)
                   )
                   .map((pos) => {
                     const isDragOver =
-                      dragOverPosition?.x === pos.x &&
-                      dragOverPosition?.y === pos.y;
+                      dragOverPosition?.x === pos.x && dragOverPosition?.y === pos.y;
 
                     return (
-                      <GridItem
-                        key={`drop-${pos.x}-${pos.y}`}
-                        position={pos}
-                        size="1x1"
-                      >
+                      <GridItem key={`drop-${pos.x}-${pos.y}`} position={pos} size="1x1">
                         <div
                           onDragOver={(e) => {
                             e.preventDefault();
@@ -656,9 +615,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                             pointerEvents: "auto",
                             zIndex: 100,
                             borderRadius: "var(--radius-sm)",
-                            boxShadow: isDragOver
-                              ? "var(--game-glow-blue)"
-                              : "none",
+                            boxShadow: isDragOver ? "var(--game-glow-blue)" : "none",
                           }}
                         />
                       </GridItem>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { initGamepad, getGamepadState, isGamepadConnected } from "@/lib/gamepad";
 import { playSound } from "@/lib/sounds";
 
@@ -29,8 +29,8 @@ export function GamepadNavigation({
   useEffect(() => {
     if (!enabled) return;
     
-    let lastButtonState: Record<string, boolean> = {};
-    let stickDeadzone = 0.5;
+    const lastButtonState: Record<string, boolean> = {};
+    const stickDeadzone = 0.5;
 
     const getFocusableElements = () => {
       return Array.from(document.querySelectorAll(

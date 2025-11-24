@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from "./supabase";
+import { isSupabaseConfigured } from "./supabase";
 import { createInboxItem } from "./queries";
 
 export async function proposeHangout(
@@ -8,7 +8,7 @@ export async function proposeHangout(
   message?: string
 ): Promise<boolean> {
   if (!isSupabaseConfigured()) {
-    console.log("Mock: Proposed hangout", { friendId, date, time, message });
+    // Mock: Proposed hangout
     return true;
   }
 
@@ -20,13 +20,13 @@ export async function proposeHangout(
 }
 
 export async function updateMediaRecommendation(
-  friendId: string,
-  recommendations: any[]
+  _friendId: string,
+  _recommendations: Array<Record<string, unknown>>
 ): Promise<boolean> {
   // This would typically update the widget config in friend_widgets
   // But since configs are stored in the widget definition, we'd need the widget ID
   // For now, let's assume we're just logging it or sending to inbox if it's a new one
-  console.log("Update media recommendations", friendId, recommendations);
+  // Update media recommendations
   return true;
 }
 

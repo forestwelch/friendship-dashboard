@@ -17,7 +17,7 @@ export default function NotFound() {
         }}
       >
         <h1 style={{ fontSize: "var(--font-size-2xl)" }}>404 - Friend Not Found</h1>
-        <p style={{ fontSize: "var(--font-size-base)" }}>This friend doesn't have a dashboard yet.</p>
+        <p style={{ fontSize: "var(--font-size-base)" }}>This friend doesn&apos;t have a dashboard yet.</p>
         <Link
           href="/"
           className="widget-button"

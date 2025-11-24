@@ -9,7 +9,7 @@ interface WidgetProps {
   className?: string;
 }
 
-export function Widget({ size, children, className = "" }: WidgetProps) {
+export function Widget({ size: _size, children, className = "" }: WidgetProps) {
   return (
     <div 
       className={`widget ${className}`} 
