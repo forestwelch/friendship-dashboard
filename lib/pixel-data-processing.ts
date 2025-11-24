@@ -7,11 +7,13 @@ export interface ThemeColors {
   primary: string;
   secondary: string;
   accent: string;
+  bg?: string; // Optional background color
+  text?: string; // Optional text color
 }
 
 // Configuration constants
 export const PIXEL_GRID_SIZE = 128; // Increased from 64 for more detail
-export const QUANTIZATION_LEVELS = 16; // Increased from 8 for more color variety
+export const QUANTIZATION_LEVELS = 32; // Increased from 16 for more granularity and color variety
 
 /**
  * Process image file to 128x128 pixel data array
@@ -98,24 +100,31 @@ export function quantizeIntensity(intensity: number, levels: number): number {
 }
 
 /**
- * Map quantized intensity level (0-15) to theme color with gradient
- * Levels 0-4 → Primary (darkest)
- * Levels 5-9 → Secondary (medium)
- * Levels 10-15 → Accent (lightest)
- * 
- * For more variety, we can interpolate between colors
+ * Map quantized intensity level (0-31) to theme color with more granularity
+ * Uses 5-6 colors from theme palette for smoother gradients:
+ * Levels 0-5 → Primary (darkest)
+ * Levels 6-11 → Secondary (medium-dark)
+ * Levels 12-17 → Accent (medium)
+ * Levels 18-23 → Text or Secondary light (medium-light)
+ * Levels 24-31 → Bg or Accent light (lightest)
  */
 export function mapIntensityToThemeColor(
   intensityLevel: number,
   themeColors: ThemeColors
 ): string {
-  // Map 16 levels to 3 colors with smooth transitions
-  if (intensityLevel <= 4) {
-    return themeColors.primary;
-  } else if (intensityLevel <= 9) {
-    return themeColors.secondary;
+  // Map 32 levels to 5-6 colors for more granularity
+  if (intensityLevel <= 5) {
+    return themeColors.primary; // Darkest
+  } else if (intensityLevel <= 11) {
+    return themeColors.secondary; // Medium-dark
+  } else if (intensityLevel <= 17) {
+    return themeColors.accent; // Medium
+  } else if (intensityLevel <= 23) {
+    // Use text color if available, otherwise lighter secondary
+    return themeColors.text || themeColors.secondary; // Medium-light
   } else {
-    return themeColors.accent;
+    // Use bg color if available, otherwise lighter accent
+    return themeColors.bg || themeColors.accent; // Lightest
   }
 }
 

@@ -202,6 +202,8 @@ export function ImageManager({
                 primary: "#2a52be",
                 secondary: "#7cb9e8",
                 accent: "#00308f",
+                bg: "#e6f2ff",
+                text: "#001f3f",
               };
               // Calculate pixel size for preview (smaller for grid display)
               const previewSize = 150; // Fixed preview size

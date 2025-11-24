@@ -723,6 +723,8 @@ export function FriendPageClient({
                       primary: localColors.primary,
                       secondary: localColors.secondary,
                       accent: localColors.accent,
+                      bg: localColors.bg,
+                      text: localColors.text,
                     }}
                     onUpdateWidgetConfig={async (widgetId, config) => {
                       // Update widget config in database
