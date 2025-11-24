@@ -24,9 +24,9 @@ interface ColorSettingsProps {
   };
 }
 
-export function ColorSettings({ 
-  friendId, 
-  currentColors, 
+export function ColorSettings({
+  friendId,
+  currentColors,
   onColorChange,
   onRandomizeAll,
   themeColors = currentColors,
@@ -81,7 +81,10 @@ export function ColorSettings({
           boxShadow: "var(--game-shadow-lg)",
         }}
       >
-        <i className="hn hn-cog-solid" style={{ fontSize: "20px", color: themeColors.text }} />
+        <i
+          className="hn hn-cog-solid"
+          style={{ fontSize: "20px", color: themeColors.text }}
+        />
       </button>
 
       {/* Color Picker Panel */}
@@ -109,8 +112,13 @@ export function ColorSettings({
                 marginBottom: "var(--space-lg)",
               }}
             >
-              <h3 className="game-heading-2" style={{ margin: 0, color: themeColors.text }}>
-                {activeColorKey ? `EDIT ${activeColorKey.toUpperCase()}` : "COLOR SETTINGS"}
+              <h3
+                className="game-heading-2"
+                style={{ margin: 0, color: themeColors.text }}
+              >
+                {activeColorKey
+                  ? `EDIT ${activeColorKey.toUpperCase()}`
+                  : "COLOR SETTINGS"}
               </h3>
               <button
                 onClick={() => {
@@ -132,7 +140,10 @@ export function ColorSettings({
                 }}
               >
                 {activeColorKey ? (
-                  <i className="hn hn-arrow-left-solid" style={{ fontSize: "16px" }} />
+                  <i
+                    className="hn hn-arrow-left-solid"
+                    style={{ fontSize: "16px" }}
+                  />
                 ) : (
                   <i className="hn hn-times-solid" />
                 )}
@@ -141,10 +152,12 @@ export function ColorSettings({
 
             {activeColorKey ? (
               // Color Picker View
-              <ColorPicker 
-                currentColor={currentColors[activeColorKey as keyof typeof currentColors]}
+              <ColorPicker
+                currentColor={
+                  currentColors[activeColorKey as keyof typeof currentColors]
+                }
                 onColorChange={(color) => {
-                  // Optional: Live preview or wait for confirm? 
+                  // Optional: Live preview or wait for confirm?
                   // User asked for "Hover preview click to confirm".
                   // So we can update immediately on hover/change for preview.
                   onColorChange(activeColorKey, color);
@@ -178,8 +191,10 @@ export function ColorSettings({
                         style={{
                           width: "60px",
                           height: "32px",
-                          background: currentColors[key as keyof typeof currentColors],
-                          border: "var(--border-width-md) solid var(--game-border)",
+                          background:
+                            currentColors[key as keyof typeof currentColors],
+                          border:
+                            "var(--border-width-md) solid var(--game-border)",
                           borderRadius: "var(--radius-sm)",
                           cursor: "pointer",
                         }}
@@ -189,10 +204,21 @@ export function ColorSettings({
                         }}
                       />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: "var(--font-size-xs)", color: themeColors.text, opacity: 0.7 }}>
+                        <div
+                          style={{
+                            fontSize: "var(--font-size-xs)",
+                            color: themeColors.text,
+                            opacity: 0.7,
+                          }}
+                        >
                           {label}
                         </div>
-                        <div style={{ fontSize: "var(--font-size-xs)", color: themeColors.text }}>
+                        <div
+                          style={{
+                            fontSize: "var(--font-size-xs)",
+                            color: themeColors.text,
+                          }}
+                        >
                           {currentColors[key as keyof typeof currentColors]}
                         </div>
                       </div>
@@ -216,7 +242,10 @@ export function ColorSettings({
                           justifyContent: "center",
                         }}
                       >
-                        <i className="hn hn-dice-solid" style={{ fontSize: "12px" }} />
+                        <i
+                          className="hn hn-dice-solid"
+                          style={{ fontSize: "12px" }}
+                        />
                       </button>
                     </div>
                   ))}
@@ -227,7 +256,7 @@ export function ColorSettings({
                     onRandomizeAll?.();
                     playSound("select");
                   }}
-                  style={{ 
+                  style={{
                     width: "100%",
                     padding: "var(--space-sm) var(--space-md)",
                     background: themeColors.primary,
@@ -244,7 +273,10 @@ export function ColorSettings({
                     gap: "var(--space-xs)",
                   }}
                 >
-                  <i className="hn hn-dice-solid" style={{ fontSize: "12px" }} />
+                  <i
+                    className="hn hn-dice-solid"
+                    style={{ fontSize: "12px" }}
+                  />
                   RANDOMIZE ALL
                 </button>
               </>
@@ -260,7 +292,7 @@ export function ColorSettings({
               left: 0,
               right: 0,
               bottom: 0,
-              background: "rgba(0, 0, 0, 0.5)",
+              background: "var(--game-overlay-bg-50)",
               zIndex: 1000,
             }}
           />

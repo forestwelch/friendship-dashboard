@@ -263,14 +263,19 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
       }}
     >
       {/* Compact header bar */}
-      <div className="game-flex game-flex-between" style={{ 
-        padding: "var(--space-md) var(--space-lg)", 
-        borderBottom: "2px solid var(--game-border)",
-        flexShrink: 0,
-        background: "var(--game-bg-secondary)",
-      }}>
+      <div
+        className="game-flex game-flex-between"
+        style={{
+          padding: "var(--space-md) var(--space-lg)",
+          borderBottom: "2px solid var(--game-border)",
+          flexShrink: 0,
+          background: "var(--bg)",
+        }}
+      >
         <div className="game-breadcrumb">
-          <Link href="/admin" className="game-link">Admin</Link>
+          <Link href="/admin" className="game-link">
+            Admin
+          </Link>
           <span className="game-breadcrumb-separator">/</span>
           <span className="game-breadcrumb-current">{friend.display_name}</span>
         </div>
@@ -287,7 +292,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
           flexWrap: "wrap",
           flexShrink: 0,
           borderBottom: "2px solid var(--game-border)",
-          background: "var(--game-bg-secondary)",
+          background: "var(--bg)",
         }}
       >
         <button
@@ -367,7 +372,10 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
       </div>
 
       {showAddMenu && (
-        <div className="game-card" style={{ margin: "var(--space-md) var(--space-lg)", flexShrink: 0 }}>
+        <div
+          className="game-card"
+          style={{ margin: "var(--space-md) var(--space-lg)", flexShrink: 0 }}
+        >
           <WidgetLibrary
             onSelectWidget={(type, size) => handleAddWidget(type, size)}
           />
@@ -383,7 +391,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
           display: "flex",
           justifyContent: "center",
           alignItems: "flex-start",
-          background: "var(--game-bg-primary)",
+          background: "var(--bg)",
         }}
       >
         <div
@@ -430,26 +438,31 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                     const rect = element.getBoundingClientRect();
                     const startX = touch.clientX - rect.left;
                     const startY = touch.clientY - rect.top;
-                    
+
                     const handleTouchMove = (moveEvent: TouchEvent) => {
                       moveEvent.preventDefault();
                       const moveTouch = moveEvent.touches[0];
                       const deltaX = moveTouch.clientX - touch.clientX;
                       const deltaY = moveTouch.clientY - touch.clientY;
-                      
+
                       // Visual feedback
                       element.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
                       element.style.opacity = "0.7";
                     };
-                    
+
                     const handleTouchEnd = () => {
                       element.style.transform = "";
                       element.style.opacity = "";
-                      document.removeEventListener("touchmove", handleTouchMove);
+                      document.removeEventListener(
+                        "touchmove",
+                        handleTouchMove
+                      );
                       document.removeEventListener("touchend", handleTouchEnd);
                     };
-                    
-                    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+                    document.addEventListener("touchmove", handleTouchMove, {
+                      passive: false,
+                    });
                     document.addEventListener("touchend", handleTouchEnd);
                   }}
                   style={{
@@ -462,13 +475,17 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                     WebkitUserSelect: "none",
                     touchAction: "none",
                     WebkitTouchCallout: "none",
-                    transition: draggedWidget === widget.id ? "none" : "transform 0.1s ease-out, opacity 0.1s",
+                    transition:
+                      draggedWidget === widget.id
+                        ? "none"
+                        : "transform 0.1s ease-out, opacity 0.1s",
                     // Ensure drag works even with child elements
                     pointerEvents: "auto",
                   }}
                   onPointerDown={(e) => {
                     // Allow dragging from anywhere on the widget
-                    if (e.button === 0) { // Left mouse button
+                    if (e.button === 0) {
+                      // Left mouse button
                       e.currentTarget.setPointerCapture(e.pointerId);
                     }
                   }}
@@ -493,7 +510,8 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                 >
                   <div
                     style={{
-                      pointerEvents: draggedWidget === widget.id ? "none" : "auto",
+                      pointerEvents:
+                        draggedWidget === widget.id ? "none" : "auto",
                       width: "100%",
                       height: "100%",
                     }}
@@ -532,7 +550,11 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                           e.preventDefault();
                           setConfiguringWidget(widget);
                         }}
-                        style={{ padding: "var(--space-xs)", minWidth: "24px", minHeight: "24px" }}
+                        style={{
+                          padding: "var(--space-xs)",
+                          minWidth: "24px",
+                          minHeight: "24px",
+                        }}
                         title="Configure"
                       >
                         ⚙️
@@ -544,7 +566,11 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                           e.preventDefault();
                           handleDuplicateWidget(widget.id);
                         }}
-                        style={{ padding: "var(--space-xs)", minWidth: "24px", minHeight: "24px" }}
+                        style={{
+                          padding: "var(--space-xs)",
+                          minWidth: "24px",
+                          minHeight: "24px",
+                        }}
                         title="Duplicate"
                       >
                         📋
@@ -556,7 +582,11 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                           e.preventDefault();
                           handleDeleteWidget(widget.id);
                         }}
-                        style={{ padding: "var(--space-xs)", minWidth: "24px", minHeight: "24px" }}
+                        style={{
+                          padding: "var(--space-xs)",
+                          minWidth: "24px",
+                          minHeight: "24px",
+                        }}
                         title="Delete"
                       >
                         ×
@@ -616,17 +646,19 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                             width: "100%",
                             height: "100%",
                             border: isDragOver
-                              ? "3px dashed var(--game-accent-blue)"
-                              : "2px dashed var(--game-border)",
+                              ? "3px dashed var(--primary)"
+                              : "2px dashed var(--accent)",
                             background: isDragOver
-                              ? "rgba(74, 158, 255, 0.2)"
-                              : "rgba(58, 58, 90, 0.1)",
+                              ? "var(--game-overlay-primary-20)"
+                              : "var(--game-overlay-secondary-10)",
                             transition: "all var(--transition-normal)",
                             opacity: isDragOver ? 1 : 0.3,
                             pointerEvents: "auto",
                             zIndex: 100,
                             borderRadius: "var(--radius-sm)",
-                            boxShadow: isDragOver ? "var(--game-glow-blue)" : "none",
+                            boxShadow: isDragOver
+                              ? "var(--game-glow-blue)"
+                              : "none",
                           }}
                         />
                       </GridItem>

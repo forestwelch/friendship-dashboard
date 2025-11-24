@@ -5,12 +5,6 @@ import { usePathname } from "next/navigation";
 import { playSound } from "@/lib/sounds";
 
 interface NavigationProps {
-  themeColors?: {
-    bg?: string;
-    text?: string;
-    border?: string;
-    active?: string;
-  };
   actions?: {
     label: string;
     onClick: () => void;
@@ -19,7 +13,7 @@ interface NavigationProps {
   }[];
 }
 
-export function Navigation({ themeColors, actions }: NavigationProps = {} as NavigationProps) {
+export function Navigation({ actions }: NavigationProps = {} as NavigationProps) {
   const pathname = usePathname();
 
   const navLinks = [
@@ -29,8 +23,8 @@ export function Navigation({ themeColors, actions }: NavigationProps = {} as Nav
   ];
 
   const navStyle: React.CSSProperties = {
-    background: themeColors?.bg || "var(--admin-bg)",
-    borderBottomColor: themeColors?.border || "var(--admin-accent)",
+    background: "var(--bg)",
+    borderBottomColor: "var(--accent)",
   };
 
   return (
@@ -45,8 +39,8 @@ export function Navigation({ themeColors, actions }: NavigationProps = {} as Nav
             className={`game-nav-link ${isActive ? "active" : ""}`}
             style={{
               color: isActive 
-                ? (themeColors?.active || "var(--admin-text)")
-                : (themeColors?.text || "var(--admin-secondary)"),
+                ? "var(--primary)"
+                : "var(--text)",
             }}
             onClick={() => playSound("click")}
           >
@@ -57,7 +51,7 @@ export function Navigation({ themeColors, actions }: NavigationProps = {} as Nav
       
       {/* Contextual Actions */}
       {actions && actions.length > 0 && (
-        <div style={{ display: "flex", gap: "var(--space-sm)", marginLeft: "var(--space-md)", borderLeft: "var(--border-width-sm) solid var(--game-border)", paddingLeft: "var(--space-md)" }}>
+        <div style={{ display: "flex", gap: "var(--space-sm)", marginLeft: "var(--space-md)", borderLeft: "var(--border-width-sm) solid var(--accent)", paddingLeft: "var(--space-md)" }}>
           {actions.map((action, index) => (
             <button
               key={index}

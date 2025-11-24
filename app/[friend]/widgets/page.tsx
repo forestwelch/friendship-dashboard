@@ -26,8 +26,8 @@ export default function WidgetLibraryPage() {
           paddingTop: "2.25rem",
           width: "100vw",
           minHeight: "100vh",
-          background: "var(--game-bg-primary)",
-          color: "var(--game-text-primary)",
+          background: "var(--bg)",
+          color: "var(--text)",
         }}
       >
         <div className="game-container" style={{ padding: "var(--space-xl)" }}>

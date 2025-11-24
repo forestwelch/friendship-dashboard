@@ -5,20 +5,30 @@ import { Friend } from "@/lib/types";
 import { playSound } from "@/lib/sounds";
 import Link from "next/link";
 import { ColorPicker } from "./ColorPicker";
+import { DEFAULT_THEME_COLORS } from "@/lib/theme-defaults";
 
 export function FriendManager() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newFriend, setNewFriend] = useState({
+  const [newFriend, setNewFriend] = useState<{
+    name: string;
+    slug: string;
+    display_name: string;
+    color_primary: string;
+    color_secondary: string;
+    color_accent: string;
+    color_bg: string;
+    color_text: string;
+  }>({
     name: "",
     slug: "",
     display_name: "",
-    color_primary: "#4a9eff",
-    color_secondary: "#6abfff",
-    color_accent: "#2a7fff",
-    color_bg: "#0a1a2e",
-    color_text: "#c8e0ff",
+    color_primary: DEFAULT_THEME_COLORS.primary,
+    color_secondary: DEFAULT_THEME_COLORS.secondary,
+    color_accent: DEFAULT_THEME_COLORS.accent,
+    color_bg: DEFAULT_THEME_COLORS.bg,
+    color_text: DEFAULT_THEME_COLORS.text,
   });
   const [selectedColor, setSelectedColor] = useState<
     "primary" | "secondary" | "accent" | "bg" | "text"
@@ -69,11 +79,11 @@ export function FriendManager() {
         name: "",
         slug: "",
         display_name: "",
-        color_primary: "#4a9eff",
-        color_secondary: "#6abfff",
-        color_accent: "#2a7fff",
-        color_bg: "#0a1a2e",
-        color_text: "#c8e0ff",
+        color_primary: DEFAULT_THEME_COLORS.primary,
+        color_secondary: DEFAULT_THEME_COLORS.secondary,
+        color_accent: DEFAULT_THEME_COLORS.accent,
+        color_bg: DEFAULT_THEME_COLORS.bg,
+        color_text: DEFAULT_THEME_COLORS.text,
       });
       setShowAddForm(false);
       fetchFriends();
@@ -300,7 +310,7 @@ export function FriendManager() {
                         <div
                           style={{
                             fontSize: "var(--font-size-xs)",
-                            color: "var(--game-text-secondary)",
+                            color: "var(--text)",
                           }}
                         >
                           {label}
@@ -308,7 +318,7 @@ export function FriendManager() {
                         <div
                           style={{
                             fontSize: "var(--font-size-xs)",
-                            color: "var(--game-text-primary)",
+                            color: "var(--text)",
                           }}
                         >
                           {newFriend[key as keyof typeof newFriend]}
@@ -372,7 +382,7 @@ export function FriendManager() {
                 gridColumn: "1 / -1",
                 padding: "var(--space-xl)",
                 textAlign: "center",
-                color: "var(--game-text-muted)",
+                color: "var(--text)",
               }}
             >
               No friends yet. Add one above!
@@ -394,6 +404,12 @@ export function FriendManager() {
                   borderColor: friend.color_accent,
                   background: friend.color_bg,
                   borderWidth: "var(--border-width-lg)",
+                }}
+                onMouseEnter={() => {
+                  // Prefetch theme on hover
+                  if ((window as any).__prefetchTheme) {
+                    (window as any).__prefetchTheme(friend.slug);
+                  }
                 }}
               >
                 <div

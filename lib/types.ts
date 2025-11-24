@@ -40,4 +40,12 @@ export interface Song {
   thumbnail?: string;
 }
 
+export interface ThemeColors {
+  primary: string;
+  secondary: string;
+  accent: string;
+  bg: string;
+  text: string;
+}
+
 

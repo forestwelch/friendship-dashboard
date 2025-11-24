@@ -3,7 +3,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FriendWidget } from "@/lib/queries";
 import { playSound } from "@/lib/sounds";
-import { processImageToPixelData, pixelDataToBase64 } from "@/lib/pixel-data-processing";
+import {
+  processImageToPixelData,
+  pixelDataToBase64,
+} from "@/lib/pixel-data-processing";
 
 interface ImageItem {
   id: string;
@@ -235,7 +238,10 @@ export function WidgetConfigModal({
           // Try to match pixelData to available images (this is a simplified approach)
           // In a real scenario, you'd want to store image IDs alongside pixelData
           selectedImageIds = availableImages
-            .filter((img) => img.pixel_data && config.pixelData.includes(img.pixel_data))
+            .filter(
+              (img) =>
+                img.pixel_data && config.pixelData.includes(img.pixel_data)
+            )
             .map((img) => img.id);
         }
 
@@ -246,8 +252,10 @@ export function WidgetConfigModal({
           config.imageUrls.length > 0
         ) {
           selectedImageIds = availableImages
-            .filter((img) => 
-              img.base_image_data && config.imageUrls.includes(img.base_image_data)
+            .filter(
+              (img) =>
+                img.base_image_data &&
+                config.imageUrls.includes(img.base_image_data)
             )
             .map((img) => img.id);
         }
@@ -295,12 +303,12 @@ export function WidgetConfigModal({
                 {availableImages.map((img) => {
                   const isSelected = selectedImageIds.includes(img.id);
                   const isProcessing = processingImages.has(img.id);
-                  
+
                   // Use pixel_data if available (new format), otherwise fall back to base_image_data (old format)
-                  const imageSrc = img.pixel_data 
+                  const imageSrc = img.pixel_data
                     ? null // Will render programmatically
                     : img.base_image_data || null;
-                  
+
                   return (
                     <div
                       key={img.id}
@@ -317,26 +325,36 @@ export function WidgetConfigModal({
                           const remainingImages = availableImages.filter((i) =>
                             newIds.includes(i.id)
                           );
-                          
+
                           // Update config with remaining pixel_data (new format) or imageUrls (old format)
                           const existingPixelData = config.pixelData || [];
                           const existingImageUrls = config.imageUrls || [];
-                          
+
                           setConfig({
                             ...config,
                             imageIds: newIds,
                             pixelData: remainingImages
                               .map((i) => i.pixel_data)
-                              .filter((pd): pd is string => pd !== null && pd !== undefined),
+                              .filter(
+                                (pd): pd is string =>
+                                  pd !== null && pd !== undefined
+                              ),
                             imageUrls: remainingImages
                               .map((i) => i.base_image_data)
-                              .filter((url): url is string => url !== null && url !== undefined),
+                              .filter(
+                                (url): url is string =>
+                                  url !== null && url !== undefined
+                              ),
                           });
                           return;
                         }
 
                         // If selecting and image doesn't have pixel_data, process it
-                        if (!img.pixel_data && img.base_image_data && !isProcessing) {
+                        if (
+                          !img.pixel_data &&
+                          img.base_image_data &&
+                          !isProcessing
+                        ) {
                           setProcessingImages((prev) =>
                             new Set(prev).add(img.id)
                           );
@@ -350,15 +368,19 @@ export function WidgetConfigModal({
                               const processStartTime = Date.now();
 
                               // Convert base64 to File for processing
-                              const response = await fetch(img.base_image_data!);
+                              const response = await fetch(
+                                img.base_image_data!
+                              );
                               const blob = await response.blob();
                               const file = new File([blob], "image.png", {
                                 type: "image/png",
                               });
 
                               // Process to 64x64 pixel data
-                              const pixelDataArray = await processImageToPixelData(file);
-                              const pixelDataBase64 = pixelDataToBase64(pixelDataArray);
+                              const pixelDataArray =
+                                await processImageToPixelData(file);
+                              const pixelDataBase64 =
+                                pixelDataToBase64(pixelDataArray);
 
                               const processTime = Date.now() - processStartTime;
                               console.log(
@@ -370,7 +392,7 @@ export function WidgetConfigModal({
                                 const selectedImages = availableImages.filter(
                                   (i) => newIds.includes(i.id)
                                 );
-                                
+
                                 // Collect pixel_data from selected images
                                 const pixelDataArray = selectedImages
                                   .map((imageItem) => {
@@ -402,7 +424,10 @@ export function WidgetConfigModal({
                                   imageIds: newIds,
                                   imageUrls: selectedImages
                                     .map((i) => i.base_image_data)
-                                    .filter((url): url is string => url !== null && url !== undefined),
+                                    .filter(
+                                      (url): url is string =>
+                                        url !== null && url !== undefined
+                                    ),
                                 };
                               });
                             } finally {
@@ -416,13 +441,16 @@ export function WidgetConfigModal({
                         } else if (img.pixel_data) {
                           // Image already has pixel_data, just add it to config
                           setConfig((prevConfig) => {
-                            const selectedImages = availableImages.filter(
-                              (i) => newIds.includes(i.id)
+                            const selectedImages = availableImages.filter((i) =>
+                              newIds.includes(i.id)
                             );
                             const pixelDataArray = selectedImages
                               .map((i) => i.pixel_data)
-                              .filter((pd): pd is string => pd !== null && pd !== undefined);
-                            
+                              .filter(
+                                (pd): pd is string =>
+                                  pd !== null && pd !== undefined
+                              );
+
                             return {
                               ...prevConfig,
                               imageIds: newIds,
@@ -435,7 +463,7 @@ export function WidgetConfigModal({
                         position: "relative",
                         aspectRatio: "1/1",
                         border: isSelected
-                          ? "0.125rem solid var(--game-accent-blue)"
+                          ? "0.125rem solid var(--primary)"
                           : "0.0625rem solid var(--game-border)",
                         borderRadius: "var(--radius-sm)",
                         overflow: "hidden",
@@ -482,8 +510,8 @@ export function WidgetConfigModal({
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            background: "rgba(0, 0, 0, 0.5)",
-                            color: "white",
+                            background: "var(--game-overlay-bg-50)",
+                            color: "var(--text)",
                             fontSize: "var(--font-size-xs)",
                           }}
                         >
@@ -496,8 +524,8 @@ export function WidgetConfigModal({
                             position: "absolute",
                             top: "0.25rem",
                             right: "0.25rem",
-                            background: "var(--game-accent-blue)",
-                            color: "white",
+                            background: "var(--primary)",
+                            color: "var(--bg)",
                             borderRadius: "50%",
                             width: "1.25rem",
                             height: "1.25rem",
@@ -546,7 +574,7 @@ export function WidgetConfigModal({
         left: 0,
         right: 0,
         bottom: 0,
-        background: "rgba(0, 0, 0, 0.8)",
+        background: "var(--game-overlay-bg-80)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

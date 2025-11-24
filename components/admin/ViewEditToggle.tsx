@@ -1,22 +1,15 @@
 "use client";
 
 import React from "react";
+import { useTheme } from "@/lib/theme-context";
 
 interface ViewEditToggleProps {
   isEditMode: boolean;
   onToggle: (isEdit: boolean) => void;
-  themeColors?: {
-    primary?: string;
-    secondary?: string;
-    accent?: string;
-    text?: string;
-  };
 }
 
-export function ViewEditToggle({ isEditMode, onToggle, themeColors }: ViewEditToggleProps) {
-  const primary = themeColors?.primary || "var(--game-accent-blue)";
-  const secondary = themeColors?.secondary || "var(--game-accent-green)";
-  const text = themeColors?.text || "var(--game-text-primary)";
+export function ViewEditToggle({ isEditMode, onToggle }: ViewEditToggleProps) {
+  const theme = useTheme();
   
   return (
     <div
@@ -36,8 +29,8 @@ export function ViewEditToggle({ isEditMode, onToggle, themeColors }: ViewEditTo
           padding: "var(--space-xs) var(--space-sm)",
           fontSize: "var(--font-size-sm)",
           fontWeight: "bold",
-          background: !isEditMode ? primary : "transparent",
-          color: !isEditMode ? "white" : text,
+          background: !isEditMode ? "var(--primary)" : "transparent",
+          color: !isEditMode ? "var(--bg)" : "var(--text)",
           border: "none",
           borderRadius: "var(--radius-sm)",
           cursor: "pointer",
@@ -58,8 +51,8 @@ export function ViewEditToggle({ isEditMode, onToggle, themeColors }: ViewEditTo
           padding: "var(--space-xs) var(--space-sm)",
           fontSize: "var(--font-size-sm)",
           fontWeight: "bold",
-          background: isEditMode ? secondary : "transparent",
-          color: isEditMode ? "white" : text,
+          background: isEditMode ? "var(--secondary)" : "transparent",
+          color: isEditMode ? "var(--text)" : "var(--text)",
           border: "none",
           borderRadius: "var(--radius-sm)",
           cursor: "pointer",

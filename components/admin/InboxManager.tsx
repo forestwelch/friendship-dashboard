@@ -250,8 +250,8 @@ export function InboxManager() {
                         : "var(--game-surface)",
                     color:
                       item.status === "approved"
-                        ? "white"
-                        : "var(--game-text-primary)",
+                        ? "var(--bg)"
+                        : "var(--text)",
                     cursor: "default",
                   }}
                 >

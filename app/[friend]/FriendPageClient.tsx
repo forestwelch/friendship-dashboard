@@ -14,6 +14,8 @@ import { Song } from "@/lib/types";
 import { canPlaceWidget, findAvailablePosition } from "@/lib/widget-utils";
 import { playSound } from "@/lib/sounds";
 import { GamepadNavigation } from "@/components/GamepadNavigation";
+import { DEFAULT_THEME_COLORS } from "@/lib/theme-defaults";
+import { useThemeContext } from "@/lib/theme-context";
 
 interface FriendPageClientProps {
   friend: Friend;
@@ -40,13 +42,7 @@ export function FriendPageClient({
   const [configuringWidget, setConfiguringWidget] =
     useState<FriendWidget | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  const [localColors, setLocalColors] = useState({
-    primary: friend.color_primary || "#4a9eff",
-    secondary: friend.color_secondary || "#6abfff",
-    accent: friend.color_accent || "#2a7fff",
-    bg: friend.color_bg || "#0a1a2e",
-    text: friend.color_text || "#c8e0ff",
-  });
+  const { colors: themeColors, setTheme } = useThemeContext();
 
   // State for pixel art/images map to allow updates
   const [pixelArtMap, setPixelArtMap] =
@@ -356,26 +352,22 @@ export function FriendPageClient({
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
 
-  const gridTileBg = hexToRgba(localColors.accent, 0.08);
-  const gridTileBorder = hexToRgba(localColors.secondary, 0.12);
+  const gridTileBg = hexToRgba(themeColors.accent, 0.08);
+  const gridTileBorder = hexToRgba(themeColors.secondary, 0.12);
 
   const themeStyle: React.CSSProperties = {
-    "--primary": localColors.primary,
-    "--secondary": localColors.secondary,
-    "--accent": localColors.accent,
-    "--bg": localColors.bg,
-    "--text": localColors.text,
     "--grid-tile-bg": gridTileBg,
     "--grid-tile-border": gridTileBorder,
   } as React.CSSProperties;
 
   const handleColorChange = useCallback(
     async (colorKey: string, value: string) => {
-      // Update local state immediately for live preview
-      setLocalColors((prev) => ({
-        ...prev,
+      // Update theme immediately for live preview
+      const newColors = {
+        ...themeColors,
         [colorKey]: value,
-      }));
+      };
+      setTheme(newColors);
 
       // Save to database
       try {
@@ -383,10 +375,7 @@ export function FriendPageClient({
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            colors: {
-              ...localColors,
-              [colorKey]: value,
-            },
+            colors: newColors,
           }),
         });
 
@@ -397,7 +386,7 @@ export function FriendPageClient({
         console.error("Error saving color:", error);
       }
     },
-    [friend.slug, localColors]
+    [friend.slug, themeColors, setTheme]
   );
 
   const handleRandomizeAll = useCallback(async () => {
@@ -441,7 +430,7 @@ export function FriendPageClient({
     ];
 
     const randomPalette = palettes[Math.floor(Math.random() * palettes.length)];
-    setLocalColors(randomPalette);
+    setTheme(randomPalette);
 
     // Save to database
     try {
@@ -523,24 +512,6 @@ export function FriendPageClient({
     [isEditMode, handleSave]
   );
 
-  // Memoize themeColors at component level (not inside map)
-  const themeColors = useMemo(
-    () => ({
-      primary: localColors.primary,
-      secondary: localColors.secondary,
-      accent: localColors.accent,
-      bg: localColors.bg,
-      text: localColors.text,
-    }),
-    [
-      localColors.primary,
-      localColors.secondary,
-      localColors.accent,
-      localColors.bg,
-      localColors.text,
-    ]
-  );
-
   // Define onUpdateWidgetConfig callback at component level (not inside map)
   const handleUpdateWidgetConfig = useCallback(
     async (widgetId: string, config: Record<string, any>) => {
@@ -580,7 +551,7 @@ export function FriendPageClient({
         paddingTop: "2.25rem",
         width: "100vw",
         minHeight: "100vh",
-        background: localColors.bg,
+        background: themeColors.bg,
         position: "relative",
       }}
     >
@@ -600,15 +571,15 @@ export function FriendPageClient({
           justifyContent: "space-between",
           alignItems: "center",
           padding: "var(--space-md) var(--space-lg)",
-          background: localColors.bg,
-          borderBottom: `var(--border-width-md) solid ${localColors.accent}`,
+          background: themeColors.bg,
+          borderBottom: `var(--border-width-md) solid ${themeColors.accent}`,
           position: "relative",
           zIndex: 10,
         }}
       >
         <h1
           className="game-heading-1"
-          style={{ margin: 0, color: localColors.text }}
+          style={{ margin: 0, color: themeColors.text }}
         >
           {friend.display_name.toUpperCase()}
         </h1>
@@ -639,9 +610,9 @@ export function FriendPageClient({
                 padding: "var(--space-xs) var(--space-sm)",
                 height: "var(--height-button)",
                 minHeight: "var(--height-button)",
-                background: localColors.primary,
-                border: `var(--border-width-md) solid ${localColors.accent}`,
-                color: localColors.bg,
+                background: themeColors.primary,
+                border: `var(--border-width-md) solid ${themeColors.accent}`,
+                color: themeColors.bg,
                 borderRadius: "var(--radius-sm)",
                 cursor: "pointer",
                 fontWeight: "bold",
@@ -668,9 +639,9 @@ export function FriendPageClient({
                 padding: "var(--space-xs) var(--space-sm)",
                 height: "var(--height-button)",
                 minHeight: "var(--height-button)",
-                background: localColors.secondary,
-                border: `var(--border-width-md) solid ${localColors.accent}`,
-                color: localColors.bg,
+                background: themeColors.secondary,
+                border: `var(--border-width-md) solid ${themeColors.accent}`,
+                color: themeColors.bg,
                 borderRadius: "var(--radius-sm)",
                 cursor: "pointer",
                 fontWeight: "bold",
@@ -693,12 +664,6 @@ export function FriendPageClient({
             onToggle={(edit) => {
               setIsEditMode(edit);
               playSound(edit ? "open" : "close");
-            }}
-            themeColors={{
-              primary: localColors.primary,
-              secondary: localColors.secondary,
-              accent: localColors.accent,
-              text: localColors.text,
             }}
           />
         </div>
@@ -769,7 +734,6 @@ export function FriendPageClient({
                     pixelArtImageUrl={pixelArtImageUrl}
                     onUploadImage={(file) => handleUploadImage(file, widget.id)}
                     friendId={friend.id}
-                    themeColors={themeColors}
                     onUpdateWidgetConfig={handleUpdateWidgetConfig}
                   />
                   {isHovered && (
@@ -794,7 +758,7 @@ export function FriendPageClient({
       {configuringWidget && (
         <WidgetConfigModal
           widget={configuringWidget}
-          friendColors={localColors}
+          friendColors={themeColors}
           onClose={() => {
             setConfiguringWidget(null);
             playSound("close");
@@ -871,7 +835,7 @@ export function FriendPageClient({
             left: 0,
             right: 0,
             bottom: 0,
-            background: localColors.bg,
+            background: themeColors.bg,
             zIndex: 2000,
             overflow: "auto",
           }}
@@ -885,9 +849,9 @@ export function FriendPageClient({
                 }}
                 className="game-button"
                 style={{
-                  background: localColors.secondary,
-                  borderColor: localColors.accent,
-                  color: localColors.bg,
+                  background: themeColors.secondary,
+                  borderColor: themeColors.accent,
+                  color: themeColors.bg,
                 }}
               >
                 <i
@@ -904,7 +868,7 @@ export function FriendPageClient({
               className="game-heading-1"
               style={{
                 marginBottom: "var(--space-xl)",
-                color: localColors.text,
+                color: themeColors.text,
               }}
             >
               WIDGET LIBRARY
@@ -918,10 +882,9 @@ export function FriendPageClient({
       {isEditMode && (
         <ColorSettings
           friendId={friend.id}
-          currentColors={localColors}
+          currentColors={themeColors}
           onColorChange={handleColorChange}
           onRandomizeAll={handleRandomizeAll}
-          themeColors={localColors}
         />
       )}
     </div>

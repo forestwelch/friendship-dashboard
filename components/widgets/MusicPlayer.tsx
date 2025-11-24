@@ -12,16 +12,66 @@ interface MusicPlayerProps {
 
 // Sample top 10 songs (will be replaced with database data later)
 const DEFAULT_SONGS: Song[] = [
-  { id: "1", title: "Bohemian Rhapsody", artist: "Queen", youtubeId: "fJ9rUzIMcZQ" },
-  { id: "2", title: "Stairway to Heaven", artist: "Led Zeppelin", youtubeId: "QkF3oxziUI4" },
-  { id: "3", title: "Hotel California", artist: "Eagles", youtubeId: "BciS5krYL80" },
-  { id: "4", title: "Sweet Child O' Mine", artist: "Guns N' Roses", youtubeId: "1w7OgIMMRc4" },
-  { id: "5", title: "Comfortably Numb", artist: "Pink Floyd", youtubeId: "YlUKcNNmywk" },
-  { id: "6", title: "Thunderstruck", artist: "AC/DC", youtubeId: "v2AC41dglnM" },
-  { id: "7", title: "Back in Black", artist: "AC/DC", youtubeId: "pAgnJDJN4VA" },
-  { id: "8", title: "Smells Like Teen Spirit", artist: "Nirvana", youtubeId: "hTWKbfoikeg" },
-  { id: "9", title: "Enter Sandman", artist: "Metallica", youtubeId: "CD-E-LDc384" },
-  { id: "10", title: "Paranoid", artist: "Black Sabbath", youtubeId: "0qanF-91aJo" },
+  {
+    id: "1",
+    title: "Bohemian Rhapsody",
+    artist: "Queen",
+    youtubeId: "fJ9rUzIMcZQ",
+  },
+  {
+    id: "2",
+    title: "Stairway to Heaven",
+    artist: "Led Zeppelin",
+    youtubeId: "QkF3oxziUI4",
+  },
+  {
+    id: "3",
+    title: "Hotel California",
+    artist: "Eagles",
+    youtubeId: "BciS5krYL80",
+  },
+  {
+    id: "4",
+    title: "Sweet Child O' Mine",
+    artist: "Guns N' Roses",
+    youtubeId: "1w7OgIMMRc4",
+  },
+  {
+    id: "5",
+    title: "Comfortably Numb",
+    artist: "Pink Floyd",
+    youtubeId: "YlUKcNNmywk",
+  },
+  {
+    id: "6",
+    title: "Thunderstruck",
+    artist: "AC/DC",
+    youtubeId: "v2AC41dglnM",
+  },
+  {
+    id: "7",
+    title: "Back in Black",
+    artist: "AC/DC",
+    youtubeId: "pAgnJDJN4VA",
+  },
+  {
+    id: "8",
+    title: "Smells Like Teen Spirit",
+    artist: "Nirvana",
+    youtubeId: "hTWKbfoikeg",
+  },
+  {
+    id: "9",
+    title: "Enter Sandman",
+    artist: "Metallica",
+    youtubeId: "CD-E-LDc384",
+  },
+  {
+    id: "10",
+    title: "Paranoid",
+    artist: "Black Sabbath",
+    youtubeId: "0qanF-91aJo",
+  },
 ];
 
 export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
@@ -105,7 +155,8 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
 
   // 2x2 version: Album art, song info, controls
   if (size === "2x2") {
-    const currentSong = songs.find((s) => s.youtubeId === currentVideoId) || songs[0] || null;
+    const currentSong =
+      songs.find((s) => s.youtubeId === currentVideoId) || songs[0] || null;
 
     return (
       <Widget size={size}>
@@ -173,18 +224,32 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
                   handlePlayClick();
                 }
               }}
-              style={{ flex: 1, fontSize: "var(--font-size-sm)", padding: "4px" }}
+              style={{
+                flex: 1,
+                fontSize: "var(--font-size-sm)",
+                padding: "4px",
+              }}
             >
-              <i className={isPlaying ? "hn hn-pause-solid" : "hn hn-play-solid"} style={{ fontSize: "var(--font-size-sm)" }} />
+              <i
+                className={isPlaying ? "hn hn-pause-solid" : "hn hn-play-solid"}
+                style={{ fontSize: "var(--font-size-sm)" }}
+              />
             </button>
             <button
               className="widget-button"
               onClick={() => {
                 if (next) next();
               }}
-              style={{ flex: 1, fontSize: "var(--font-size-sm)", padding: "4px" }}
+              style={{
+                flex: 1,
+                fontSize: "var(--font-size-sm)",
+                padding: "4px",
+              }}
             >
-              <i className="hn hn-arrow-alt-circle-right-solid" style={{ fontSize: "var(--font-size-sm)" }} />
+              <i
+                className="hn hn-arrow-alt-circle-right-solid"
+                style={{ fontSize: "var(--font-size-sm)" }}
+              />
             </button>
           </div>
         </div>
@@ -207,7 +272,7 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
       >
         <div
           style={{
-            fontSize: "14px",
+            fontSize: "var(--font-size-sm)",
             fontWeight: "bold",
             color: "var(--text)",
             marginBottom: "var(--space-xs)",
@@ -240,7 +305,9 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
                     }
                   }}
                   style={{
-                    backgroundColor: isCurrent ? "var(--primary)" : "transparent",
+                    backgroundColor: isCurrent
+                      ? "var(--primary)"
+                      : "transparent",
                     color: isCurrent ? "var(--bg)" : "var(--text)",
                   }}
                 >
@@ -260,12 +327,28 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
               );
             })
           ) : (
-            <div style={{ padding: "6px", fontSize: "var(--font-size-sm)", color: "var(--text)", minHeight: "40px", display: "flex", alignItems: "center" }}>
+            <div
+              style={{
+                padding: "6px",
+                fontSize: "var(--font-size-sm)",
+                color: "var(--text)",
+                minHeight: "40px",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
               No songs available
             </div>
           )}
         </div>
-        <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-sm)", minHeight: "36px" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "var(--space-sm)",
+            marginTop: "var(--space-sm)",
+            minHeight: "36px",
+          }}
+        >
           <button
             className="widget-button"
             onClick={() => {
@@ -275,9 +358,19 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
                 handlePlayClick();
               }
             }}
-            style={{ flex: 1, fontSize: "11px", padding: "var(--space-sm)" }}
+            style={{
+              flex: 1,
+              fontSize: "var(--font-size-xs)",
+              padding: "var(--space-sm)",
+            }}
           >
-            <i className={isPlaying ? "hn hn-pause" : "hn hn-play"} style={{ fontSize: "var(--font-size-sm)", marginRight: "var(--space-xs)" }} />
+            <i
+              className={isPlaying ? "hn hn-pause" : "hn hn-play"}
+              style={{
+                fontSize: "var(--font-size-sm)",
+                marginRight: "var(--space-xs)",
+              }}
+            />
             {isPlaying ? "Pause" : "Play"}
           </button>
           <button
@@ -285,9 +378,19 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
             onClick={() => {
               if (next) next();
             }}
-            style={{ flex: 1, fontSize: "11px", padding: "var(--space-sm)" }}
+            style={{
+              flex: 1,
+              fontSize: "var(--font-size-xs)",
+              padding: "var(--space-sm)",
+            }}
           >
-            <i className="hn hn-arrow-circle-right" style={{ fontSize: "var(--font-size-sm)", marginRight: "var(--space-xs)" }} />
+            <i
+              className="hn hn-arrow-circle-right"
+              style={{
+                fontSize: "var(--font-size-sm)",
+                marginRight: "var(--space-xs)",
+              }}
+            />
             Next
           </button>
         </div>
@@ -295,5 +398,3 @@ export function MusicPlayer({ size, songs = DEFAULT_SONGS }: MusicPlayerProps) {
     </Widget>
   );
 }
-
-

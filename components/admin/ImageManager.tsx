@@ -3,7 +3,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { playSound } from "@/lib/sounds";
 import { WidgetSize } from "@/lib/types";
-import { base64ToPixelData, renderPixelDataAsSVG, PIXEL_GRID_SIZE } from "@/lib/pixel-data-processing";
+import {
+  base64ToPixelData,
+  renderPixelDataAsSVG,
+  PIXEL_GRID_SIZE,
+} from "@/lib/pixel-data-processing";
+import { DEFAULT_THEME_COLORS_ALT } from "@/lib/theme-defaults";
 
 interface ImageItem {
   id: string;
@@ -48,10 +53,12 @@ export function ImageManager({
     try {
       const uploadPromises = Array.from(files).map(async (file) => {
         // Process image to pixel_data client-side
-        const { processImageToPixelData, pixelDataToBase64 } = await import("@/lib/pixel-data-processing");
+        const { processImageToPixelData, pixelDataToBase64 } = await import(
+          "@/lib/pixel-data-processing"
+        );
         const pixelDataArray = await processImageToPixelData(file);
         const pixelDataBase64 = pixelDataToBase64(pixelDataArray);
-        
+
         const formData = new FormData();
         formData.append("pixel_data", pixelDataBase64);
 
@@ -170,7 +177,7 @@ export function ImageManager({
           style={{
             marginLeft: "auto",
             fontSize: "var(--font-size-xs)",
-            color: "var(--game-text-muted)",
+            color: "var(--text)",
           }}
         >
           Total Images: {images.length}
@@ -192,23 +199,29 @@ export function ImageManager({
         {images.map((img) => {
           // Render pixel_data as SVG preview, or fall back to base_image_data
           let imagePreview: React.ReactNode;
-          
+
           if (img.pixel_data) {
             try {
               const pixelData = base64ToPixelData(img.pixel_data);
               const gridSize = img.width || PIXEL_GRID_SIZE;
               // Use default theme colors for preview (can be any colors)
               const themeColors = {
-                primary: "#2a52be",
-                secondary: "#7cb9e8",
-                accent: "#00308f",
-                bg: "#e6f2ff",
-                text: "#001f3f",
+                primary: DEFAULT_THEME_COLORS_ALT.primary,
+                secondary: DEFAULT_THEME_COLORS_ALT.secondary,
+                accent: DEFAULT_THEME_COLORS_ALT.accent,
+                bg: DEFAULT_THEME_COLORS_ALT.bg,
+                text: DEFAULT_THEME_COLORS_ALT.text,
               };
               // Calculate pixel size for preview (smaller for grid display)
               const previewSize = 150; // Fixed preview size
               const pixelSize = previewSize / gridSize;
-              const svgContent = renderPixelDataAsSVG(pixelData, themeColors, gridSize, gridSize, pixelSize);
+              const svgContent = renderPixelDataAsSVG(
+                pixelData,
+                themeColors,
+                gridSize,
+                gridSize,
+                pixelSize
+              );
               imagePreview = (
                 <div
                   dangerouslySetInnerHTML={{ __html: svgContent }}
@@ -280,7 +293,7 @@ export function ImageManager({
                 position: "relative",
                 aspectRatio: "1/1",
                 border: selectedImages.has(img.id)
-                  ? "0.125rem solid var(--game-accent-blue)"
+                  ? "0.125rem solid var(--primary)"
                   : "0.0625rem solid var(--game-border)",
                 borderRadius: "var(--radius-sm)",
                 overflow: "hidden",
@@ -310,8 +323,8 @@ export function ImageManager({
                     position: "absolute",
                     top: "var(--space-xs)",
                     right: "var(--space-xs)",
-                    background: "var(--game-accent-blue)",
-                    color: "white",
+                    background: "var(--primary)",
+                    color: "var(--bg)",
                     borderRadius: "50%",
                     width: "1.25rem",
                     height: "1.25rem",
@@ -337,7 +350,7 @@ export function ImageManager({
               alignItems: "center",
               justifyContent: "center",
               height: "12.5rem",
-              color: "var(--game-text-muted)",
+              color: "var(--text)",
               flexDirection: "column",
               gap: "var(--space-md)",
             }}

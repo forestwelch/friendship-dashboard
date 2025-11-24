@@ -93,7 +93,7 @@
 }
 
 .song-item:hover {
-  background-color: rgba(var(--primary-rgb, 42, 82, 190), 0.1);
+  background-color: var(--game-overlay-primary-20);
   border-color: var(--secondary);
 }
 

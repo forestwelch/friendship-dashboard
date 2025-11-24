@@ -13,6 +13,7 @@ import { FriendWidget } from "@/lib/queries";
 import { Song } from "@/lib/types";
 import { createInboxItem } from "@/lib/queries-inbox";
 import { ThemeColors } from "@/lib/pixel-data-processing";
+import { useTheme } from "@/lib/theme-context";
 
 interface WidgetRendererProps {
   widget: FriendWidget;
@@ -24,7 +25,6 @@ interface WidgetRendererProps {
     widgetId: string,
     config: Record<string, any>
   ) => Promise<void>;
-  themeColors?: ThemeColors; // Theme colors for programmatic pixel rendering
 }
 
 /**
@@ -37,8 +37,8 @@ export const WidgetRenderer = memo(function WidgetRenderer({
   onUploadImage,
   friendId,
   onUpdateWidgetConfig,
-  themeColors,
 }: WidgetRendererProps) {
+  const themeColors = useTheme();
   const handleProposeHangout = async (
     date: string,
     time: string,

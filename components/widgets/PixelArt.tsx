@@ -469,9 +469,16 @@ export function PixelArt({
               svgPixelSize
             );
 
-            // Add visual effect for scanning pixels
+            // Add visual effect for scanning pixels (use theme text color with opacity)
             if (pixelState === "scanning") {
-              ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+              // Use theme text color for scanline effect, convert to rgba
+              const textColor = themeColors.text || "var(--text)";
+              // Extract RGB values from hex color
+              const hex = textColor.replace("#", "");
+              const r = parseInt(hex.substring(0, 2), 16);
+              const g = parseInt(hex.substring(2, 4), 16);
+              const b = parseInt(hex.substring(4, 6), 16);
+              ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.3)`;
               ctx.fillRect(
                 col * svgPixelSize,
                 row * svgPixelSize,

@@ -1,21 +1,23 @@
-/* Admin Dark Mode Styles - 6-Color Grayscale Palette */
+/* Admin Dark Mode Styles - Sleek Grayscale Palette */
 
-/* Admin 6-Color Palette:
-   1. bg - #000000 (black)
-   2. surface - #1a1a1a (dark gray)
-   3. primary - #404040 (medium gray)
-   4. secondary - #606060 (lighter gray)
-   5. accent - #808080 (border gray)
-   6. text - #e0e0e0 (light gray)
+/* Sleek Grayscale Palette:
+   1. bg - #0a0a0a (near black, softer than pure black)
+   2. surface - #1a1a1a (dark gray surface)
+   3. primary - #2a2a2a (medium-dark gray)
+   4. secondary - #3a3a3a (medium gray)
+   5. accent - #4a4a4a (lighter gray for borders/accents)
+   6. text - #e8e8e8 (soft white, easier on eyes)
 */
 
 :root {
-  --admin-bg: #000000;
-  --admin-surface: #1a1a1a;
-  --admin-primary: #404040;
-  --admin-secondary: #606060;
-  --admin-accent: #808080;
-  --admin-text: #e0e0e0;
+  /* Admin colors now use theme colors directly */
+  --admin-bg: var(--bg);
+  --admin-surface: var(--secondary);
+  --admin-primary: var(--primary);
+  --admin-secondary: var(--secondary);
+  --admin-accent: var(--accent);
+  --admin-text: var(--text);
+  --admin-text-muted: var(--text);
 }
 
 /* Admin pages dark mode */
@@ -38,9 +40,9 @@
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--game-text-primary);
-  background: var(--game-surface);
-  border: 2px solid var(--game-border);
+  color: var(--text);
+  background: var(--secondary);
+  border: 2px solid var(--accent);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -52,27 +54,26 @@
 }
 
 .admin-button-primary {
-  background: var(--game-accent-blue);
-  color: white;
-  border-color: var(--game-accent-blue-dark);
-  box-shadow: 2px 2px 0 var(--game-accent-blue-dark),
-    inset -1px -1px 0 rgba(0, 0, 0, 0.2), var(--game-glow-blue);
+  background: var(--primary);
+  color: var(--bg);
+  border-color: var(--accent);
+  box-shadow: 2px 2px 0 var(--accent), inset -1px -1px 0 rgba(0, 0, 0, 0.2),
+    var(--game-glow-primary);
 }
 
-.admin-button-success {
-  background: var(--game-accent-green);
-  color: white;
-  border-color: var(--game-accent-green-dark);
-  box-shadow: 2px 2px 0 var(--game-accent-green-dark),
-    inset -1px -1px 0 rgba(0, 0, 0, 0.2), var(--game-glow-green);
+.admin-button-secondary {
+  background: var(--secondary);
+  color: var(--text);
+  border-color: var(--accent);
+  box-shadow: 2px 2px 0 var(--accent), inset -1px -1px 0 rgba(0, 0, 0, 0.2),
+    var(--game-glow-secondary);
 }
 
-.admin-button-danger {
-  background: var(--game-accent-red);
-  color: white;
-  border-color: var(--game-accent-red-dark);
-  box-shadow: 2px 2px 0 var(--game-accent-red-dark),
-    inset -1px -1px 0 rgba(0, 0, 0, 0.2);
+.admin-button-accent {
+  background: var(--accent);
+  color: var(--text);
+  border-color: var(--accent);
+  box-shadow: 2px 2px 0 var(--accent), inset -1px -1px 0 rgba(0, 0, 0, 0.2);
 }
 
 /* Spacious sections */
@@ -96,12 +97,11 @@
 
 /* Card/container styling uses game-card */
 .admin-card {
-  background: var(--game-surface);
-  border: 2px solid var(--game-border);
+  background: var(--secondary);
+  border: 2px solid var(--accent);
   border-radius: var(--radius-sm);
   padding: var(--space-lg);
-  box-shadow: 2px 2px 0 var(--game-border-dark),
-    inset -1px -1px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 2px 2px 0 var(--accent), inset -1px -1px 0 rgba(0, 0, 0, 0.2);
 }
 
 /* Input fields use game-input */
@@ -110,9 +110,9 @@
   padding: var(--space-md) var(--space-lg);
   font-family: "Dogica", "PixelFallback", monospace;
   font-size: 12px;
-  color: var(--game-text-primary);
-  background: var(--game-bg-secondary);
-  border: 2px solid var(--game-border);
+  color: var(--text);
+  background: var(--bg);
+  border: 2px solid var(--accent);
   border-radius: var(--radius-sm);
   box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.3);
   transition: all var(--transition-fast);
@@ -120,14 +120,14 @@
 
 .admin-input:focus {
   outline: none;
-  border-color: var(--game-accent-blue);
-  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.3), var(--game-glow-blue);
+  border-color: var(--primary);
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.3), var(--game-glow-primary);
 }
 
 /* Links use game-link from design system */
 .admin-link {
   /* Use game-link styles */
-  color: var(--game-accent-blue);
+  color: var(--primary);
   text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: all var(--transition-fast);
@@ -135,8 +135,9 @@
 }
 
 .admin-link:hover {
-  color: var(--game-accent-blue-hover);
-  border-bottom-color: var(--game-accent-blue);
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  opacity: 0.8;
 }
 
 /* Save button uses game-button-success */
