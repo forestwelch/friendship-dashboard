@@ -372,7 +372,7 @@ export function FriendManager() {
             friends.map((friend) => (
               <Link
                 key={friend.id}
-                href={`/${friend.slug}`}
+                href={`/admin/${friend.slug}`}
                 className="game-card game-card-hover"
                 style={{
                   textDecoration: "none",
