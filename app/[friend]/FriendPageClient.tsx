@@ -56,8 +56,20 @@ export function FriendPageClient({
       bg: friend.color_bg,
       text: friend.color_text,
     };
-    setTheme(friendTheme);
-  }, [friend, setTheme]);
+    
+    // Only update theme if colors have actually changed
+    // Compare against current theme to avoid unnecessary updates
+    if (
+      themeColors.primary !== friendTheme.primary ||
+      themeColors.secondary !== friendTheme.secondary ||
+      themeColors.accent !== friendTheme.accent ||
+      themeColors.bg !== friendTheme.bg ||
+      themeColors.text !== friendTheme.text
+    ) {
+      setTheme(friendTheme);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [friend.color_primary, friend.color_secondary, friend.color_accent, friend.color_bg, friend.color_text, setTheme]);
 
   // State for pixel art/images map to allow updates
   const [pixelArtMap, setPixelArtMap] = useState<Map<string, string>>(initialPixelArtMap);

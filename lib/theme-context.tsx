@@ -242,9 +242,9 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     );
   }, [colors]);
 
-  const setTheme = (newColors: ThemeColors) => {
+  const setTheme = useCallback((newColors: ThemeColors) => {
     setColors(newColors);
-  };
+  }, []);
 
   return (
     <ThemeContext.Provider
