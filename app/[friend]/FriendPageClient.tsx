@@ -35,7 +35,7 @@ export function FriendPageClient({
   const userContext = useUserContext();
   // Only allow edit mode if user is admin (detected from URL path)
   const [isEditMode, setIsEditMode] = useState(userContext.isAdmin);
-  
+
   // If admin route, start in edit mode by default
   // If friend route, always stay in view mode
   const [widgets, setWidgets] = useState<FriendWidget[]>(initialWidgets);
@@ -56,7 +56,7 @@ export function FriendPageClient({
       bg: friend.color_bg,
       text: friend.color_text,
     };
-    
+
     // Only update theme if colors have actually changed
     // Compare against current theme to avoid unnecessary updates
     if (
@@ -69,7 +69,14 @@ export function FriendPageClient({
       setTheme(friendTheme);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [friend.color_primary, friend.color_secondary, friend.color_accent, friend.color_bg, friend.color_text, setTheme]);
+  }, [
+    friend.color_primary,
+    friend.color_secondary,
+    friend.color_accent,
+    friend.color_bg,
+    friend.color_text,
+    setTheme,
+  ]);
 
   // State for pixel art/images map to allow updates
   const [pixelArtMap, setPixelArtMap] = useState<Map<string, string>>(initialPixelArtMap);
@@ -466,7 +473,7 @@ export function FriendPageClient({
       if (!userContext.isAdmin) {
         return;
       }
-      
+
       if (!isEditMode) {
         if (button === "a" || button === "start") {
           // Toggle edit mode
