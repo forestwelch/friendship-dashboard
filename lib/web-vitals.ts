@@ -13,14 +13,8 @@ function reportWebVitals(metric: Metric) {
   const { name, value } = metric;
   const target = TARGETS[name as keyof typeof TARGETS];
 
-  if (target && value < target) {
-    // eslint-disable-next-line no-console
-    console.log(`✅ Good performance: ${name} = ${Math.round(value)}ms`);
-  } else if (target) {
+  if (target && value >= target) {
     console.warn(`⚠️ Check performance: ${name} = ${Math.round(value)}ms (target: <${target}ms)`);
-  } else {
-    // eslint-disable-next-line no-console
-    console.log(`📊 ${name} = ${Math.round(value)}ms`);
   }
 
   // In production, you could send this to an analytics service

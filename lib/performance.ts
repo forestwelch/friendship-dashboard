@@ -18,16 +18,10 @@ export function measurePerformance(label: string, fn: () => void | Promise<void>
     return result.finally(() => {
       performance.mark(endMark);
       performance.measure(label, startMark, endMark);
-      const measure = performance.getEntriesByName(label)[0];
-      // eslint-disable-next-line no-console
-      console.log(`[Performance] ${label}: ${measure.duration.toFixed(2)}ms`);
     });
   } else {
     performance.mark(endMark);
     performance.measure(label, startMark, endMark);
-    const measure = performance.getEntriesByName(label)[0];
-    // eslint-disable-next-line no-console
-    console.log(`[Performance] ${label}: ${measure.duration.toFixed(2)}ms`);
     return result;
   }
 }

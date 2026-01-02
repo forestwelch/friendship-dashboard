@@ -29,11 +29,9 @@ const GRID_ROWS = 8;
 
 interface GridProps {
   children: React.ReactNode;
-  dragOverPosition?: { x: number; y: number } | null;
-  draggedWidgetSize?: "1x1" | "2x2" | "3x3";
 }
 
-export function Grid({ children, dragOverPosition, draggedWidgetSize }: GridProps) {
+export function Grid({ children }: GridProps) {
   const isMobile = useIsMobile();
   const gridWidth = `calc(${GRID_COLS} * ${TILE_SIZE} + ${GRID_COLS - 1} * ${GAP})`;
   const gridHeight = `calc(${GRID_ROWS} * ${TILE_SIZE} + ${GRID_ROWS - 1} * ${GAP})`;
@@ -48,16 +46,6 @@ export function Grid({ children, dragOverPosition, draggedWidgetSize }: GridProp
     }
   }
 
-  // Calculate which tiles would be occupied by dragged widget
-  const dragOverTiles: Set<string> = new Set();
-  if (dragOverPosition && draggedWidgetSize && !isMobile) {
-    const [cols, rows] = draggedWidgetSize.split("x").map(Number);
-    for (let y = 0; y < rows; y++) {
-      for (let x = 0; x < cols; x++) {
-        dragOverTiles.add(`${dragOverPosition.x + x},${dragOverPosition.y + y}`);
-      }
-    }
-  }
 
   // Mobile: Stack layout
   if (isMobile) {
@@ -87,29 +75,22 @@ export function Grid({ children, dragOverPosition, draggedWidgetSize }: GridProp
   return (
     <div style={gridStyle} data-grid-container>
       {/* Background grid tiles - muted squares using theme colors */}
-      {allTiles.map((tile) => {
-        const isDragOver = dragOverTiles.has(`${tile.x},${tile.y}`);
-        return (
-          <div
-            key={`bg-${tile.x}-${tile.y}`}
-            className="grid-tile-bg"
-            style={{
-              gridColumn: tile.x + 1,
-              gridRow: tile.y + 1,
-              width: TILE_SIZE,
-              height: TILE_SIZE,
-              pointerEvents: "none",
-              zIndex: 0,
-              position: "relative",
-              backgroundColor: isDragOver 
-                ? "var(--accent)" 
-                : "var(--grid-tile-bg)",
-              opacity: isDragOver ? 0.3 : 1,
-              transition: "all 0.1s ease",
-            }}
-          />
-        );
-      })}
+      {allTiles.map((tile) => (
+        <div
+          key={`bg-${tile.x}-${tile.y}`}
+          className="grid-tile-bg"
+          style={{
+            gridColumn: tile.x + 1,
+            gridRow: tile.y + 1,
+            width: TILE_SIZE,
+            height: TILE_SIZE,
+            pointerEvents: "none",
+            zIndex: 0,
+            position: "relative",
+            backgroundColor: "var(--grid-tile-bg)",
+          }}
+        />
+      ))}
       {/* Actual widget content - above background tiles */}
       {children}
     </div>
@@ -120,11 +101,12 @@ interface GridItemProps {
   position: WidgetPosition;
   size: "1x1" | "2x2" | "3x3";
   children: React.ReactNode;
-  onDragOver?: (e: React.DragEvent) => void;
-  onDrop?: (e: React.DragEvent) => void;
+  ref?: React.Ref<HTMLDivElement>;
+  style?: React.CSSProperties;
 }
 
-export function GridItem({ position, size, children, onDragOver, onDrop }: GridItemProps) {
+export const GridItem = React.forwardRef<HTMLDivElement, GridItemProps>(
+  function GridItem({ position, size, children, onDragOver, onDrop, style: customStyle }, ref) {
   const isMobile = useIsMobile();
   const [cols, rows] = size.split("x").map(Number);
   const itemWidth = `calc(${cols} * ${TILE_SIZE} + ${cols - 1} * ${GAP})`;
@@ -139,25 +121,26 @@ export function GridItem({ position, size, children, onDragOver, onDrop }: GridI
     );
   }
 
-  // Desktop: Grid positioning
-  const itemStyle: React.CSSProperties = {
-    gridColumn: `${position.x + 1} / span ${cols}`,
-    gridRow: `${position.y + 1} / span ${rows}`,
-    width: itemWidth,
-    height: itemHeight,
-    position: "relative",
-    zIndex: 1,
-  };
+    // Desktop: Grid positioning
+    const itemStyle: React.CSSProperties = {
+      gridColumn: `${position.x + 1} / span ${cols}`,
+      gridRow: `${position.y + 1} / span ${rows}`,
+      width: itemWidth,
+      height: itemHeight,
+      position: "relative",
+      zIndex: 1,
+      ...customStyle,
+    };
 
-  return (
-    <div
-      style={itemStyle}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-    >
-      {children}
-    </div>
-  );
-}
+    return (
+      <div
+        ref={ref}
+        style={itemStyle}
+      >
+        {children}
+      </div>
+    );
+  }
+);
 
 

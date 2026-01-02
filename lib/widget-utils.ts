@@ -79,13 +79,13 @@ export function canPlaceWidget(
 
   // Check overlap with other widgets
   const otherWidgets = widgets.filter((w) => w.id !== widgetId);
+
   for (const widget of otherWidgets) {
-    if (
-      widgetsOverlap(
-        { position, size },
-        { position: { x: widget.position_x, y: widget.position_y }, size: widget.size }
-      )
-    ) {
+    const overlaps = widgetsOverlap(
+      { position, size },
+      { position: { x: widget.position_x, y: widget.position_y }, size: widget.size }
+    );
+    if (overlaps) {
       return false;
     }
   }

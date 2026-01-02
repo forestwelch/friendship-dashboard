@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { Friend, WidgetSize, WidgetPosition } from "@/lib/types";
 import { FriendWidget } from "@/lib/queries";
 import { Grid, GridItem } from "@/components/Grid";
@@ -12,6 +12,7 @@ import { WidgetLibrary } from "./WidgetLibrary";
 import { useUndoRedo } from "./UndoRedo";
 import { useKeyboardShortcuts } from "@/lib/keyboard";
 import Link from "next/link";
+import { EditableWidget } from "./Widget";
 
 interface WidgetManagerProps {
   friend: Friend;
@@ -37,49 +38,76 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
 
   const setWidgets = useCallback(
     (updater: FriendWidget[] | ((prev: FriendWidget[]) => FriendWidget[])) => {
-      const newWidgets = typeof updater === "function" ? updater(localWidgets) : updater;
-      setLocalWidgets(newWidgets);
-      saveState(newWidgets);
+      setLocalWidgets((prev) => {
+        const newWidgets = typeof updater === "function" ? updater(prev) : updater;
+        saveState(newWidgets);
+        return newWidgets;
+      });
     },
-    [localWidgets, saveState]
+    [saveState]
   );
 
-  const [draggedWidget, setDraggedWidget] = useState<string | null>(null);
-  const [dragOverPosition, setDragOverPosition] = useState<WidgetPosition | null>(null);
+  const [movingWidgetId, setMovingWidgetId] = useState<string | null>(null);
+  const [hoveredPosition, setHoveredPosition] = useState<WidgetPosition | null>(null);
   const [editingWidget, setEditingWidget] = useState<string | null>(null);
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [configuringWidget, setConfiguringWidget] = useState<FriendWidget | null>(null);
 
-  // Use localWidgets for rendering
-  const displayWidgets = localWidgets;
+  // Use localWidgets for rendering, but exclude the widget being moved
+  const displayWidgets = useMemo(() => {
+    if (!movingWidgetId) return localWidgets;
+    return localWidgets.filter((w) => w.id !== movingWidgetId);
+  }, [localWidgets, movingWidgetId]);
 
-  const handleDragStart = useCallback((e: React.DragEvent, widgetId: string) => {
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", widgetId);
-    setDraggedWidget(widgetId);
+  // Get the widget being moved
+  const movingWidget = useMemo(() => {
+    if (!movingWidgetId) return null;
+    return localWidgets.find((w) => w.id === movingWidgetId) || null;
+  }, [localWidgets, movingWidgetId]);
+
+  // Handle starting move mode
+  const handleStartMove = useCallback((widgetId: string) => {
+    setMovingWidgetId(widgetId);
+    setHoveredPosition(null);
     playSound("pop");
   }, []);
 
-  const handleDragOver = useCallback((e: React.DragEvent, position: WidgetPosition) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.dataTransfer.dropEffect = "move";
-    setDragOverPosition(position);
+  // Handle canceling move mode
+  const handleCancelMove = useCallback(() => {
+    setMovingWidgetId(null);
+    setHoveredPosition(null);
   }, []);
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent, position: WidgetPosition) => {
-      e.preventDefault();
-      e.stopPropagation();
+  // Handle ESC key to cancel move
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && movingWidgetId) {
+        handleCancelMove();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [movingWidgetId, handleCancelMove]);
 
-      if (!draggedWidget) return;
+  // Handle placing widget at position
+  const handlePlaceWidget = useCallback(
+    (position: WidgetPosition) => {
+      if (!movingWidgetId || !movingWidget) {
+        return;
+      }
 
-      const widget = displayWidgets.find((w) => w.id === draggedWidget);
-      if (widget) {
-        // Check if position is valid and doesn't overlap with other widgets
-        if (canPlaceWidget(displayWidgets, draggedWidget, position, widget.size)) {
-          const newWidgets = displayWidgets.map((w) =>
-            w.id === draggedWidget
+      setWidgets((prevWidgets) => {
+        const widget = prevWidgets.find((w) => w.id === movingWidgetId);
+        if (!widget) {
+          return prevWidgets;
+        }
+
+        // Check if position is valid
+        const isValid = canPlaceWidget(prevWidgets, movingWidgetId, position, widget.size);
+
+        if (isValid) {
+          const newWidgets = prevWidgets.map((w) =>
+            w.id === movingWidgetId
               ? {
                   ...w,
                   position_x: position.x,
@@ -87,34 +115,27 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                 }
               : w
           );
-          setWidgets(newWidgets);
           playSound("success");
+          setMovingWidgetId(null);
+          setHoveredPosition(null);
+          return newWidgets;
         } else {
           playSound("error");
-          alert("Cannot place widget here - it would overlap with another widget!");
+          return prevWidgets;
         }
-      }
-
-      setDraggedWidget(null);
-      setDragOverPosition(null);
+      });
     },
-    [draggedWidget, displayWidgets, setWidgets]
+    [movingWidgetId, movingWidget, setWidgets]
   );
-
-  const handleDragEnd = useCallback(() => {
-    setDraggedWidget(null);
-    setDragOverPosition(null);
-  }, []);
 
   const handleAddWidget = useCallback(
     (widgetType: string, size: WidgetSize) => {
-      // Find first available position using proper collision detection
       const foundPosition = findAvailablePosition(displayWidgets, size);
 
       if (foundPosition) {
         const newWidget: FriendWidget = {
           id: `temp-${Date.now()}`,
-          widget_id: "", // Will be set when saving - API will look up by widget_type
+          widget_id: "",
           widget_type: widgetType,
           widget_name: widgetType.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase()),
           size,
@@ -137,11 +158,9 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
 
   const handleDeleteWidget = useCallback(
     (widgetId: string) => {
-      // Instant delete - no confirmation (optimistic update pattern)
       const newWidgets = displayWidgets.filter((w) => w.id !== widgetId);
       setWidgets(newWidgets);
       playSound("delete");
-      // TODO: Sync to DB in background (will be handled by TanStack Query mutation)
     },
     [displayWidgets, setWidgets]
   );
@@ -196,13 +215,30 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
     },
   ]);
 
-  // Create grid of all positions for drop zones
-  const allPositions: WidgetPosition[] = [];
-  for (let y = 0; y < 6; y++) {
-    for (let x = 0; x < 8; x++) {
-      allPositions.push({ x, y });
+  // Create grid of all positions for drop zones (memoized)
+  const allPositions: WidgetPosition[] = useMemo(() => {
+    const positions: WidgetPosition[] = [];
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 6; x++) {
+        positions.push({ x, y });
+      }
     }
-  }
+    return positions;
+  }, []);
+
+  // Get all positions occupied by existing widgets (excluding the widget being moved)
+  const occupiedPositions = useMemo(() => {
+    const occupied = new Set<string>();
+    displayWidgets.forEach((w) => {
+      const [cols, rows] = w.size.split("x").map(Number);
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          occupied.add(`${w.position_x + x},${w.position_y + y}`);
+        }
+      }
+    });
+    return occupied;
+  }, [displayWidgets]);
 
   // Apply friend theme colors to widget preview area
   const hexToRgba = (hex: string, alpha: number): string => {
@@ -313,8 +349,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
             try {
               playSound("click");
 
-              // Filter out temp widgets and prepare for save
-              const widgetsToSave = displayWidgets.filter((w) => !w.id.startsWith("temp-"));
+              const widgetsToSave = localWidgets.filter((w) => !w.id.startsWith("temp-"));
 
               if (widgetsToSave.length === 0) {
                 playSound("error");
@@ -382,247 +417,143 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
             boxShadow: "var(--game-shadow-lg)",
             borderRadius: "var(--radius-md)",
           }}
-          onDragOver={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          onDrop={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleDragEnd();
-          }}
         >
           <Grid>
+            {/* Render all widgets except the one being moved */}
             {displayWidgets.map((widget) => (
-              <GridItem
+              <EditableWidget
                 key={widget.id}
-                position={{ x: widget.position_x, y: widget.position_y }}
-                size={widget.size}
-              >
-                <div
-                  draggable={true}
-                  onDragStart={(e) => {
-                    e.stopPropagation();
-                    handleDragStart(e, widget.id);
-                  }}
-                  onDragEnd={handleDragEnd}
-                  onTouchStart={(e) => {
-                    // Enable touch dragging
-                    const touch = e.touches[0];
-                    const element = e.currentTarget;
-                    const rect = element.getBoundingClientRect();
-                    const _startX = touch.clientX - rect.left;
-                    const _startY = touch.clientY - rect.top;
-
-                    const handleTouchMove = (moveEvent: TouchEvent) => {
-                      moveEvent.preventDefault();
-                      const moveTouch = moveEvent.touches[0];
-                      const deltaX = moveTouch.clientX - touch.clientX;
-                      const deltaY = moveTouch.clientY - touch.clientY;
-
-                      // Visual feedback
-                      element.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-                      element.style.opacity = "0.7";
-                    };
-
-                    const handleTouchEnd = () => {
-                      element.style.transform = "";
-                      element.style.opacity = "";
-                      document.removeEventListener("touchmove", handleTouchMove);
-                      document.removeEventListener("touchend", handleTouchEnd);
-                    };
-
-                    document.addEventListener("touchmove", handleTouchMove, {
-                      passive: false,
-                    });
-                    document.addEventListener("touchend", handleTouchEnd);
-                  }}
-                  style={{
-                    position: "relative",
-                    width: "100%",
-                    height: "100%",
-                    cursor: draggedWidget === widget.id ? "grabbing" : "grab",
-                    opacity: draggedWidget === widget.id ? 0.5 : 1,
-                    userSelect: "none",
-                    WebkitUserSelect: "none",
-                    touchAction: "none",
-                    WebkitTouchCallout: "none",
-                    transition:
-                      draggedWidget === widget.id
-                        ? "none"
-                        : "transform 0.1s ease-out, opacity 0.1s",
-                    // Ensure drag works even with child elements
-                    pointerEvents: "auto",
-                  }}
-                  onPointerDown={(e) => {
-                    // Allow dragging from anywhere on the widget
-                    if (e.button === 0) {
-                      // Left mouse button
-                      e.currentTarget.setPointerCapture(e.pointerId);
-                    }
-                  }}
-                  onPointerMove={(e) => {
-                    // Visual feedback during drag
-                    if (e.buttons === 1) {
-                      e.currentTarget.style.cursor = "grabbing";
-                    }
-                  }}
-                  onPointerUp={(e) => {
-                    e.currentTarget.style.cursor = "grab";
-                    e.currentTarget.releasePointerCapture(e.pointerId);
-                  }}
-                  onMouseEnter={() => setEditingWidget(widget.id)}
-                  onMouseLeave={() => setEditingWidget(null)}
-                  onClick={(e) => {
-                    // Prevent clicks during drag
-                    if (draggedWidget === widget.id) {
-                      e.stopPropagation();
-                    }
-                  }}
-                >
-                  <div
-                    style={{
-                      pointerEvents: draggedWidget === widget.id ? "none" : "auto",
-                      width: "100%",
-                      height: "100%",
-                    }}
-                    onClick={(e) => {
-                      // Prevent clicks during drag
-                      if (draggedWidget === widget.id) {
-                        e.stopPropagation();
-                        e.preventDefault();
-                      }
-                    }}
-                  >
-                    <WidgetRenderer widget={widget} songs={[]} />
-                  </div>
-                  {editingWidget === widget.id && (
-                    <div
-                      className="game-card"
-                      style={{
-                        position: "absolute",
-                        top: "var(--space-md)",
-                        right: "var(--space-md)",
-                        padding: "var(--space-sm) var(--space-md)",
-                        fontSize: "11px",
-                        zIndex: 10,
-                        display: "flex",
-                        gap: "var(--space-sm)",
-                        alignItems: "center",
-                      }}
-                    >
-                      <span>
-                        {widget.widget_name} ({widget.size})
-                      </span>
-                      <button
-                        className="game-button game-button-icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          setConfiguringWidget(widget);
-                        }}
-                        style={{
-                          padding: "var(--space-xs)",
-                          minWidth: "24px",
-                          minHeight: "24px",
-                        }}
-                        title="Configure"
-                      >
-                        ⚙️
-                      </button>
-                      <button
-                        className="game-button game-button-icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          handleDuplicateWidget(widget.id);
-                        }}
-                        style={{
-                          padding: "var(--space-xs)",
-                          minWidth: "24px",
-                          minHeight: "24px",
-                        }}
-                        title="Duplicate"
-                      >
-                        📋
-                      </button>
-                      <button
-                        className="game-button game-button-danger game-button-icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          handleDeleteWidget(widget.id);
-                        }}
-                        style={{
-                          padding: "var(--space-xs)",
-                          minWidth: "24px",
-                          minHeight: "24px",
-                        }}
-                        title="Delete"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </GridItem>
+                widget={widget}
+                onEdit={() => {
+                  if (!movingWidgetId) {
+                    setEditingWidget(widget.id);
+                  }
+                }}
+                onConfigure={() => setConfiguringWidget(widget)}
+                onDuplicate={() => handleDuplicateWidget(widget.id)}
+                onDelete={() => handleDeleteWidget(widget.id)}
+                onMove={() => handleStartMove(widget.id)}
+                editingWidget={editingWidget}
+              />
             ))}
 
-            {/* Drop zone indicators - show valid positions for dragged widget */}
-            {draggedWidget &&
-              (() => {
-                const draggedWidgetData = displayWidgets.find((w) => w.id === draggedWidget);
-                if (!draggedWidgetData) return null;
-
-                // Show drop zones for all valid positions
-                return allPositions
-                  .filter((pos) =>
-                    canPlaceWidget(displayWidgets, draggedWidget, pos, draggedWidgetData.size)
-                  )
+            {/* Show moveable tiles when a widget is being moved */}
+            {movingWidgetId && movingWidget && (
+              <>
+                {/* Show all empty positions as clickable tiles */}
+                {allPositions
+                  .filter((pos) => !occupiedPositions.has(`${pos.x},${pos.y}`))
                   .map((pos) => {
-                    const isDragOver =
-                      dragOverPosition?.x === pos.x && dragOverPosition?.y === pos.y;
+                    const isValid = canPlaceWidget(
+                      localWidgets,
+                      movingWidgetId,
+                      pos,
+                      movingWidget.size
+                    );
+
+                    // Calculate which tiles would be occupied if widget is placed at hoveredPosition
+                    const [cols, rows] = movingWidget.size.split("x").map(Number);
+                    const hoveredOccupiedTiles = new Set<string>();
+                    if (hoveredPosition) {
+                      for (let y = 0; y < rows; y++) {
+                        for (let x = 0; x < cols; x++) {
+                          hoveredOccupiedTiles.add(
+                            `${hoveredPosition.x + x},${hoveredPosition.y + y}`
+                          );
+                        }
+                      }
+                    }
+
+                    // Check if this tile is the top-left (hovered position) or part of the hovered placement area
+                    const isHovered = hoveredPosition?.x === pos.x && hoveredPosition?.y === pos.y;
+                    const isPartOfHoverArea =
+                      hoveredPosition && hoveredOccupiedTiles.has(`${pos.x},${pos.y}`);
 
                     return (
-                      <GridItem key={`drop-${pos.x}-${pos.y}`} position={pos} size="1x1">
+                      <GridItem
+                        key={`move-${pos.x}-${pos.y}`}
+                        position={pos}
+                        size="1x1"
+                        style={{ zIndex: 5 }}
+                      >
                         <div
-                          onDragOver={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleDragOver(e, pos);
+                          onClick={() => {
+                            if (isValid) {
+                              handlePlaceWidget(pos);
+                            }
                           }}
-                          onDrop={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleDrop(e, pos);
+                          onMouseEnter={() => {
+                            if (isValid) {
+                              setHoveredPosition(pos);
+                            }
                           }}
-                          onDragEnter={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setDragOverPosition(pos);
+                          onMouseLeave={() => {
+                            setHoveredPosition(null);
                           }}
                           style={{
                             width: "100%",
                             height: "100%",
-                            border: isDragOver
-                              ? "3px dashed var(--primary)"
-                              : "2px dashed var(--accent)",
-                            background: isDragOver
-                              ? "var(--game-overlay-primary-20)"
-                              : "var(--game-overlay-secondary-10)",
-                            transition: "all var(--transition-normal)",
-                            opacity: isDragOver ? 1 : 0.3,
-                            pointerEvents: "auto",
-                            zIndex: 100,
+                            border:
+                              isHovered && isValid
+                                ? "3px solid var(--primary)"
+                                : isPartOfHoverArea && isValid && hoveredPosition
+                                  ? "2px solid var(--primary)"
+                                  : isValid
+                                    ? "2px dashed var(--accent)"
+                                    : "1px dashed var(--game-border)",
+                            background:
+                              isHovered && isValid
+                                ? "var(--game-overlay-primary-20)"
+                                : isPartOfHoverArea && isValid && hoveredPosition
+                                  ? "var(--game-overlay-secondary-10)"
+                                  : isValid
+                                    ? "var(--game-overlay-secondary-10)"
+                                    : "transparent",
+                            transition: "all 0.15s ease-out",
+                            opacity: isHovered ? 1 : isValid ? 0.4 : 0.2,
                             borderRadius: "var(--radius-sm)",
-                            boxShadow: isDragOver ? "var(--game-glow-blue)" : "none",
+                            cursor: isValid ? "pointer" : "not-allowed",
+                            boxShadow: isHovered && isValid ? "var(--game-glow-blue)" : "none",
                           }}
                         />
                       </GridItem>
                     );
-                  });
-              })()}
+                  })}
+
+                {/* Show moving widget preview at hovered position */}
+                {hoveredPosition && (
+                  <GridItem
+                    position={hoveredPosition}
+                    size={movingWidget.size}
+                    style={{
+                      zIndex: 15,
+                      opacity: 0.6,
+                      pointerEvents: "none",
+                      transition: "none",
+                    }}
+                  >
+                    <WidgetRenderer widget={movingWidget} songs={[]} />
+                  </GridItem>
+                )}
+              </>
+            )}
           </Grid>
+
+          {/* Cancel move button */}
+          {movingWidgetId && (
+            <div
+              style={{
+                position: "absolute",
+                top: "var(--space-md)",
+                left: "var(--space-md)",
+                zIndex: 100,
+              }}
+            >
+              <button className="game-button game-button-danger" onClick={handleCancelMove}>
+                ✕ Cancel Move (ESC)
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
