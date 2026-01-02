@@ -1,52 +1,55 @@
 /* Mobile Responsiveness Foundation */
 
-/* Prevent horizontal overflow globally - that's it, nothing else changes */
+/* Prevent horizontal overflow globally */
 html,
 body {
   overflow-x: hidden;
   max-width: 100%;
 }
 
-/* Grid scaling - scales proportionally to fit viewport without media queries */
-/* Grid dimensions are calculated from CSS variables: --grid-width and --grid-height */
-/* Account for header (~60px) and nav (~36px) = ~96px total vertical space */
+/* Grid scaling - unified approach for desktop and mobile using scale */
 .grid-layout {
-  /* Scale based on available viewport space */
-  /* Use CSS calc to scale: min(1, availableWidth / gridWidth, availableHeight / gridHeight) */
-  /* Scale to fit both width and height, using the smaller scale factor */
-  transform: scale(
-    min(
-      1,
-      calc((100vw - 1rem) / var(--grid-width)),
-      calc((100vh - 6rem) / var(--grid-height))
-    )
-  ) !important;
+  /* Calculate scale factors for width and height */
+  /* Use slightly less than 100% to ensure no edge case overflow */
+  --scale-width: calc((100vw - 2rem) / var(--grid-width));
+  --scale-height: calc((100vh - 2rem) / var(--grid-height));
+  /* Use the smaller scale factor to fit both dimensions, but never scale up beyond 1 */
+  /* Desktop: If viewport is large, scale = 1 (natural size) */
+  /* Mobile: Scale down to fit both width and height (no overflow) */
+  /* Cap at 1 for desktop, but allow scaling down for mobile */
+  --scale-factor: min(var(--scale-width), var(--scale-height), 1);
+  transform: scale(var(--scale-factor)) !important;
   transform-origin: center center;
-  /* Ensure scaled grid doesn't cause layout issues */
   will-change: transform;
-  /* Prevent horizontal overflow */
-  max-width: 100%;
+  /* Keep original grid dimensions - scaling handles the sizing */
+  width: var(--grid-width);
+  height: var(--grid-height);
   box-sizing: border-box;
+  overflow: visible;
+  margin: 0 auto;
 }
 
-/* Grid container - ensure proper scrolling and centering */
+/* Grid container - unified approach */
 .grid-container-wrapper {
-  /* Only allow vertical scrolling when grid is larger than viewport */
-  overflow-y: auto;
+  /* When grid is scaled down (mobile), it fits perfectly - no scroll needed */
+  /* When grid is natural size (desktop), allow scroll if needed */
+  /* Since we scale to fit both dimensions, if either dimension requires scaling, */
+  /* the scaled grid will fit, so we can use hidden. Only use auto when scale = 1 */
+  overflow-y: hidden;
   overflow-x: hidden;
-  /* Ensure content can be scrolled to */
   position: relative;
-  /* Make sure container takes full available height */
-  min-height: 100%;
-  /* Allow scrolling in all directions when needed */
+  height: 100vh;
+  min-height: 100vh;
   overscroll-behavior: contain;
-  /* Center the grid using flexbox */
+  /* Center the grid both horizontally and vertically */
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Ensure no horizontal overflow */
-  max-width: 100%;
+  width: 100%;
+  max-width: 100vw;
   box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
 /* Utility classes for manual mobile adjustments if needed */

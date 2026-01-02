@@ -492,8 +492,6 @@ export function FriendPageClient({
         className="grid-container-wrapper"
         style={{
           position: "relative",
-          overflowY: "auto",
-          overflowX: "hidden",
           width: "100%",
           maxWidth: "100%",
           height: "100vh",

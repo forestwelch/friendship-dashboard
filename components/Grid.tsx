@@ -25,9 +25,6 @@ export function Grid({ children }: GridProps) {
   const gridWidth = "var(--grid-width)";
   const gridHeight = "var(--grid-height)";
 
-  // Ensure grid doesn't exceed container width
-  const maxWidth = "100%";
-
   // Create array of all grid positions for background tiles
   const allTiles: Array<{ x: number; y: number }> = [];
   for (let y = 0; y < GRID_ROWS; y++) {
@@ -45,11 +42,12 @@ export function Grid({ children }: GridProps) {
     gap: "var(--grid-gap)",
     width: gridWidth,
     height: gridHeight,
-    maxWidth: maxWidth,
     position: "relative",
     margin: 0,
     padding: 0,
     boxSizing: "border-box",
+    // Allow overflow for scrolling when content is larger than viewport
+    overflow: "visible",
   };
 
   return (
