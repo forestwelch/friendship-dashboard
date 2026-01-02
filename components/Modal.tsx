@@ -77,10 +77,12 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
 
   if (!isOpen) return null;
 
-  // Find the grid container wrapper to portal into
+  // Portal to the grid element itself so modal inherits grid's exact positioning and scaling
   const gridContainer =
     typeof document !== "undefined"
-      ? document.querySelector("[data-grid-container-wrapper]") || document.body
+      ? document.querySelector("[data-grid-container]") ||
+        document.querySelector("[data-grid-container-wrapper]") ||
+        document.body
       : null;
 
   const modalContent = (

@@ -2,19 +2,20 @@
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  /* Match grid's exact dimensions */
+  width: calc(6 * 5rem + 5 * 0.5rem);
+  height: calc(8 * 5rem + 7 * 0.5rem);
   background: var(--bg);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: stretch;
   z-index: 10000;
   padding: 0;
   overflow: hidden;
-  width: 100%;
-  height: 100%;
-  /* Ensure backdrop covers entire grid container */
+  /* When portaled to grid container, backdrop matches grid's exact dimensions */
   margin: 0;
+  /* Inherits grid container's transform (translate + scale) via CSS class */
+  /* The grid-layout class applies: translate(-50%, -50%) scale(...) */
 }
 
 .modal {
@@ -22,16 +23,17 @@
   border: none;
   border-radius: 0;
   box-shadow: none;
-  /* Exact grid dimensions: 6 cols * 5rem + 5 gaps * 0.5rem = 32.5rem */
-  width: calc(6 * 5rem + 5 * 0.5rem);
-  /* Exact grid height: 8 rows * 5rem + 7 gaps * 0.5rem = 43.5rem */
-  height: calc(8 * 5rem + 7 * 0.5rem);
-  max-width: none;
-  max-height: none;
+  /* Fill entire backdrop area - matches grid dimensions exactly */
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   position: relative;
   animation: none;
+  /* Ensure modal fills grid area completely */
+  box-sizing: border-box;
+  /* Allow modal content to scroll if needed */
+  overflow: hidden;
 }
 
 /* No animation - instant full-screen transition like MS-DOS/Windows file explorer */

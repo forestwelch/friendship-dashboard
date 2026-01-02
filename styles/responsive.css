@@ -7,6 +7,37 @@ body {
   max-width: 100%;
 }
 
+/* Grid scaling - scales proportionally to fit viewport without media queries */
+/* Grid dimensions: 520px wide (6 cols * 80px + 5 gaps * 8px), 696px tall (8 rows * 80px + 7 gaps * 8px) */
+/* Account for header (~60px) and nav (~36px) = ~96px total vertical space */
+.grid-layout {
+  /* Scale based on available viewport space */
+  /* Use CSS calc to scale: min(1, availableWidth / gridWidth, availableHeight / gridHeight) */
+  /* Scale to fit both width and height, using the smaller scale factor */
+  transform: translate(-50%, -50%) scale(
+    min(
+      1,
+      calc((100vw - 1rem) / 520px),
+      calc((100vh - 6rem) / 696px)
+    )
+  ) !important;
+  transform-origin: center center;
+  /* Ensure scaled grid doesn't cause layout issues */
+  will-change: transform;
+}
+
+/* Grid container - ensure proper scrolling */
+.grid-container-wrapper {
+  /* Ensure container allows scrolling when grid is larger than viewport */
+  overflow: auto;
+  /* Ensure content can be scrolled to */
+  position: relative;
+  /* Make sure container takes full available height */
+  min-height: 100%;
+  /* Allow scrolling in all directions when needed */
+  overscroll-behavior: contain;
+}
+
 /* Utility classes for manual mobile adjustments if needed */
 .mobile-full-width {
   width: 100% !important;

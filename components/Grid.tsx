@@ -41,7 +41,9 @@ export function Grid({ children }: GridProps) {
     }
   }
 
-  // Always use grid layout - scale on mobile via CSS
+  // Always use grid layout - scale proportionally to fit viewport
+  // Grid is ~520px wide (6 * 80px + 5 * 8px) and ~680px tall (8 * 80px + 7 * 8px)
+  // Scale to fit: min(1, viewportWidth / gridWidth, viewportHeight / gridHeight)
   const gridStyle: React.CSSProperties = {
     display: "grid",
     gridTemplateColumns: `repeat(${GRID_COLS}, ${TILE_SIZE})`,
@@ -52,11 +54,8 @@ export function Grid({ children }: GridProps) {
     position: "absolute",
     top: "50%",
     left: "50%",
-    transform: "translate(-50%, -50%)",
     margin: 0,
     padding: 0,
-    maxWidth: "100%",
-    maxHeight: "100%",
   };
 
   return (

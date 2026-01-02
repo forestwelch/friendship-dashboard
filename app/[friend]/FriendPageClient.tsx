@@ -544,7 +544,7 @@ export function FriendPageClient({
         </div>
       </div>
 
-      {/* Grid container - no padding, no borders, maximize space, no scroll */}
+      {/* Grid container - allows scrolling and scaling */}
       <div
         ref={gridRef}
         data-grid-container-wrapper
@@ -555,9 +555,7 @@ export function FriendPageClient({
           width: "100%",
           maxWidth: "100%",
           height: "calc(100vh - 2.25rem - 3.75rem)", // Full height minus nav and header
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          minHeight: "calc(100vh - 2.25rem - 3.75rem)", // Ensure full height
         }}
       >
         <Grid>
