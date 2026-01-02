@@ -12,10 +12,15 @@ interface NavigationProps {
     onClick: () => void;
     isActive?: boolean;
   }[];
+  addFriendAction?: {
+    onClick: () => void;
+  };
   className?: string;
 }
 
-export function Navigation({ adminActions, className }: NavigationProps = {} as NavigationProps) {
+export function Navigation(
+  { adminActions, addFriendAction, className }: NavigationProps = {} as NavigationProps
+) {
   const pathname = usePathname();
 
   const navLinks = [
@@ -40,6 +45,23 @@ export function Navigation({ adminActions, className }: NavigationProps = {} as 
           </Link>
         );
       })}
+
+      {/* Add Friend button - shown on manage friends page */}
+      {addFriendAction && (
+        <button
+          onClick={() => {
+            addFriendAction.onClick();
+            playSound("click");
+          }}
+          className={clsx("game-nav-link", styles.navLink)}
+          style={{
+            cursor: "pointer",
+            fontFamily: "inherit",
+          }}
+        >
+          ADD FRIEND
+        </button>
+      )}
 
       {/* Admin Actions as Links - styled exactly like nav links */}
       {adminActions && adminActions.length > 0 && (

@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { Friend } from "@/lib/types";
 import { playSound } from "@/lib/sounds";
-import Link from "next/link";
 import { ColorPicker } from "./ColorPicker";
 import { DEFAULT_THEME_COLORS } from "@/lib/theme-defaults";
+import { FriendCard } from "@/components/FriendCard";
 
 export function FriendManager() {
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -13,8 +13,6 @@ export function FriendManager() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newFriend, setNewFriend] = useState<{
     name: string;
-    slug: string;
-    display_name: string;
     color_primary: string;
     color_secondary: string;
     color_accent: string;
@@ -22,8 +20,6 @@ export function FriendManager() {
     color_text: string;
   }>({
     name: "",
-    slug: "",
-    display_name: "",
     color_primary: DEFAULT_THEME_COLORS.primary,
     color_secondary: DEFAULT_THEME_COLORS.secondary,
     color_accent: DEFAULT_THEME_COLORS.accent,
@@ -55,9 +51,9 @@ export function FriendManager() {
   };
 
   const handleAddFriend = async () => {
-    if (!newFriend.name || !newFriend.slug || !newFriend.display_name) {
+    if (!newFriend.name) {
       playSound("error");
-      alert("Please fill in name, slug, and display name!");
+      alert("Please fill in name!");
       return;
     }
 
@@ -77,8 +73,6 @@ export function FriendManager() {
       playSound("success");
       setNewFriend({
         name: "",
-        slug: "",
-        display_name: "",
         color_primary: DEFAULT_THEME_COLORS.primary,
         color_secondary: DEFAULT_THEME_COLORS.secondary,
         color_accent: DEFAULT_THEME_COLORS.accent,
@@ -119,6 +113,19 @@ export function FriendManager() {
     playSound("blip");
   };
 
+  // Listen for add friend event from navigation
+  useEffect(() => {
+    const handleAddFriend = () => {
+      setShowAddForm(true);
+      playSound("open");
+    };
+    const eventName = "admin-add-friend" as keyof WindowEventMap;
+    window.addEventListener(eventName, handleAddFriend as EventListener);
+    return () => {
+      window.removeEventListener(eventName, handleAddFriend as EventListener);
+    };
+  }, []);
+
   return (
     <div
       className="admin-page"
@@ -127,57 +134,35 @@ export function FriendManager() {
         width: "100%",
         maxWidth: "100%",
         minHeight: "100vh",
+        background: "var(--admin-bg)",
+        color: "var(--admin-text)",
         overflowX: "hidden",
-        overflowY: "auto",
-        display: "flex",
-        flexDirection: "column",
       }}
     >
       <div
         className="game-container"
         style={{
-          padding: "var(--space-md)",
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
+          paddingTop: "var(--space-3xl)",
+          paddingBottom: "var(--space-3xl)",
         }}
       >
-        <div className="game-breadcrumb" style={{ marginBottom: "var(--space-md)", flexShrink: 0 }}>
-          <Link href="/" className="game-link">
-            Home
-          </Link>
-          <span className="game-breadcrumb-separator">/</span>
-          <span className="game-breadcrumb-current">Manage Friends</span>
-        </div>
-        <h1 className="game-heading-1" style={{ marginBottom: "var(--space-md)", flexShrink: 0 }}>
-          Manage Friends
+        <h1
+          className="game-heading-1"
+          style={{
+            marginBottom: "var(--space-3xl)",
+            fontSize: "var(--font-size-3xl)",
+          }}
+        >
+          MANAGE FRIENDS
         </h1>
 
-        {/* Add Friend Button */}
-        {!showAddForm && (
-          <div style={{ marginBottom: "var(--space-md)", flexShrink: 0 }}>
-            <button
-              className="game-button game-button-primary"
-              onClick={() => {
-                setShowAddForm(true);
-                playSound("open");
-              }}
-            >
-              <i className="hn hn-plus-solid" style={{ marginRight: "var(--space-sm)" }} />
-              ADD FRIEND
-            </button>
-          </div>
-        )}
-
-        {/* Add Friend Form */}
+        {/* Add Friend Form - shown when triggered from nav */}
         {showAddForm && (
           <div
             className="game-card"
             style={{
-              marginBottom: "var(--space-md)",
+              marginBottom: "var(--space-xl)",
               padding: "var(--space-lg)",
-              flexShrink: 0,
             }}
           >
             <h2 className="game-heading-2" style={{ marginBottom: "var(--space-md)" }}>
@@ -196,7 +181,7 @@ export function FriendManager() {
                   className="game-heading-3"
                   style={{ marginBottom: "var(--space-xs)", display: "block" }}
                 >
-                  Name (lowercase, no spaces)
+                  Name
                 </label>
                 <input
                   className="game-input"
@@ -205,29 +190,7 @@ export function FriendManager() {
                   onChange={(e) =>
                     setNewFriend((prev) => ({
                       ...prev,
-                      name: e.target.value.toLowerCase().replace(/\s+/g, "-"),
-                      slug: e.target.value.toLowerCase().replace(/\s+/g, "-"),
-                    }))
-                  }
-                  placeholder="daniel"
-                />
-              </div>
-
-              <div>
-                <label
-                  className="game-heading-3"
-                  style={{ marginBottom: "var(--space-xs)", display: "block" }}
-                >
-                  Display Name
-                </label>
-                <input
-                  className="game-input"
-                  type="text"
-                  value={newFriend.display_name}
-                  onChange={(e) =>
-                    setNewFriend((prev) => ({
-                      ...prev,
-                      display_name: e.target.value,
+                      name: e.target.value,
                     }))
                   }
                   placeholder="Daniel"
@@ -339,14 +302,13 @@ export function FriendManager() {
           </div>
         )}
 
-        {/* Friends List */}
+        {/* Friends Grid */}
         <div
           style={{
-            flex: 1,
-            overflowY: "auto",
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, minmax(17.5rem, 1fr))",
             gap: "var(--space-xl)",
+            marginBottom: "var(--space-3xl)",
           }}
         >
           {loading ? (
@@ -368,55 +330,11 @@ export function FriendManager() {
                 color: "var(--text)",
               }}
             >
-              No friends yet. Add one above!
+              No friends yet. Add one using the button above!
             </div>
           ) : (
             friends.map((friend) => (
-              <Link
-                key={friend.id}
-                href={`/admin/${friend.slug}`}
-                className="game-card game-card-hover"
-                style={{
-                  textDecoration: "none",
-                  padding: "var(--space-xl)",
-                  textAlign: "center",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "var(--space-lg)",
-                  borderColor: friend.color_accent,
-                  background: friend.color_bg,
-                  borderWidth: "var(--border-width-lg)",
-                }}
-                onMouseEnter={() => {
-                  // Prefetch theme on hover
-                  const win = window as unknown as { __prefetchTheme?: (slug: string) => void };
-                  if (win.__prefetchTheme) {
-                    win.__prefetchTheme(friend.slug);
-                  }
-                }}
-              >
-                <div
-                  style={{
-                    width: "4rem",
-                    height: "4rem",
-                    borderRadius: "var(--radius-sm)",
-                    background: friend.color_primary,
-                    border: `var(--border-width-lg) solid ${friend.color_accent}`,
-                    boxShadow: "var(--game-shadow-md)",
-                  }}
-                />
-                <span
-                  className="game-heading-2"
-                  style={{
-                    margin: 0,
-                    color: friend.color_text,
-                    fontSize: "var(--font-size-xl)",
-                  }}
-                >
-                  {friend.display_name.toUpperCase()}
-                </span>
-              </Link>
+              <FriendCard key={friend.id} friend={friend} href={`/admin/${friend.slug}`} />
             ))
           )}
         </div>

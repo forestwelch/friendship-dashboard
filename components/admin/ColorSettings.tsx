@@ -17,6 +17,7 @@ interface ColorSettingsProps {
   };
   onColorChange: (colorKey: string, value: string) => void;
   onRandomizeAll?: () => void;
+  onClose?: () => void;
   themeColors?: {
     primary: string;
     secondary: string;
@@ -31,9 +32,10 @@ export function ColorSettings({
   currentColors,
   onColorChange,
   onRandomizeAll,
+  onClose,
   themeColors = currentColors,
 }: ColorSettingsProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true); // Always open when component is rendered
   const [activeColorKey, setActiveColorKey] = useState<string | null>(null);
 
   const colorKeys = [
@@ -58,27 +60,15 @@ export function ColorSettings({
     [onColorChange]
   );
 
+  const handleClose = () => {
+    setIsOpen(false);
+    setActiveColorKey(null);
+    onClose?.();
+    playSound("close");
+  };
+
   return (
     <>
-      {/* Pixelated Cog Button - using theme colors */}
-      <button
-        onClick={() => {
-          setIsOpen(!isOpen);
-          setActiveColorKey(null); // Reset on open/close toggle
-          playSound("open");
-        }}
-        className={styles.toggleButton}
-        style={{
-          background: themeColors.accent,
-          borderColor: themeColors.primary,
-        }}
-      >
-        <i
-          className={clsx("hn", "hn-cog-solid", styles.toggleIcon)}
-          style={{ color: themeColors.text }}
-        />
-      </button>
-
       {/* Color Picker Panel */}
       {isOpen && (
         <>
@@ -102,8 +92,7 @@ export function ColorSettings({
                     setActiveColorKey(null);
                     playSound("close");
                   } else {
-                    setIsOpen(false);
-                    playSound("close");
+                    handleClose();
                   }
                 }}
                 className={styles.closeButton}
@@ -194,7 +183,7 @@ export function ColorSettings({
           </div>
 
           {/* Backdrop */}
-          <div className={styles.backdrop} onClick={() => setIsOpen(false)} />
+          <div className={styles.backdrop} onClick={handleClose} />
         </>
       )}
     </>

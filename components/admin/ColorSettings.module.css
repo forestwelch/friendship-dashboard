@@ -1,35 +1,26 @@
 /* ColorSettings Styles */
 
-.toggleButton {
+.backdrop {
   position: fixed;
-  bottom: var(--space-xl);
-  right: var(--space-xl);
-  width: 48px;
-  height: 48px;
-  background: var(--primary);
-  border: var(--border-width-lg) solid var(--accent);
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  box-shadow: var(--game-shadow-lg);
-}
-
-.toggleIcon {
-  font-size: 20px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--game-overlay-bg-70);
+  z-index: 10000;
 }
 
 .panel {
   position: fixed;
-  bottom: 100px;
-  right: var(--space-xl);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 320px;
+  max-width: 90vw;
   border: var(--border-width-lg) solid var(--accent);
   border-radius: var(--radius-md);
   padding: var(--space-lg);
-  z-index: 1001;
+  z-index: 10001;
   box-shadow: var(--game-shadow-xl);
 }
 
@@ -133,6 +124,6 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--game-overlay-bg-50);
-  z-index: 1000;
+  background: var(--game-overlay-bg-70);
+  z-index: 10000;
 }

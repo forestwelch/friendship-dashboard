@@ -25,20 +25,18 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      name,
-      slug,
-      display_name,
-      color_primary,
-      color_secondary,
-      color_accent,
-      color_bg,
-      color_text,
-    } = body;
+    const { name, color_primary, color_secondary, color_accent, color_bg, color_text } = body;
 
-    if (!name || !slug || !display_name) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    if (!name) {
+      return NextResponse.json({ error: "Missing required field: name" }, { status: 400 });
     }
+
+    // Generate slug and display_name from name
+    const slug = name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
+    const display_name = name.trim();
 
     if (!isSupabaseConfigured()) {
       return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
@@ -48,7 +46,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await adminClient
       .from("friends")
       .insert({
-        name,
+        name: slug, // Use slug for the name field (database convention)
         slug,
         display_name,
         color_primary: color_primary || "#4a9eff",

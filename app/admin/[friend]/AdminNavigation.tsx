@@ -44,6 +44,11 @@ export function AdminNavigation() {
     playSound("open");
   }, []);
 
+  const handleColors = useCallback(() => {
+    window.dispatchEvent(new CustomEvent("admin-toggle-colors"));
+    playSound("open");
+  }, []);
+
   if (!userContext.isAdmin) {
     return null;
   }
@@ -71,6 +76,11 @@ export function AdminNavigation() {
               {
                 label: "SAVE",
                 onClick: handleSave,
+                isActive: false,
+              },
+              {
+                label: "COLORS",
+                onClick: handleColors,
                 isActive: false,
               },
             ]

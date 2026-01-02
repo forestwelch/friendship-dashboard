@@ -1,11 +1,11 @@
 import React from "react";
-import { Navigation } from "@/components/Navigation";
 import { FriendManager } from "@/components/admin/FriendManager";
+import { AddFriendNav } from "./AddFriendNav";
 
 export default async function AdminFriendsPage() {
   return (
     <>
-      <Navigation />
+      <AddFriendNav />
       <FriendManager />
     </>
   );

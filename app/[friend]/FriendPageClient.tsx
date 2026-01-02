@@ -15,6 +15,7 @@ import { playSound } from "@/lib/sounds";
 import { GamepadNavigation } from "@/components/GamepadNavigation";
 import { useThemeContext } from "@/lib/theme-context";
 import { useUserContext } from "@/lib/use-user-context";
+import { GRID_COLS, GRID_ROWS } from "@/lib/constants";
 
 interface FriendPageClientProps {
   friend: Friend;
@@ -43,6 +44,7 @@ export function FriendPageClient({
   const [hoveredPosition, setHoveredPosition] = useState<WidgetPosition | null>(null);
   const [showWidgetLibrary, setShowWidgetLibrary] = useState(false);
   const [configuringWidget, setConfiguringWidget] = useState<FriendWidget | null>(null);
+  const [showColorSettings, setShowColorSettings] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
   const { colors: themeColors, setTheme } = useThemeContext();
 
@@ -435,9 +437,14 @@ export function FriendPageClient({
       setIsEditMode(customEvent.detail);
     };
 
+    const handleToggleColors = () => {
+      setShowColorSettings((prev) => !prev);
+    };
+
     window.addEventListener("admin-add-widget", handleAddWidget);
     window.addEventListener("admin-save", handleAdminSave);
     window.addEventListener("admin-set-edit-mode", handleSetEditMode);
+    window.addEventListener("admin-toggle-colors", handleToggleColors);
 
     // Notify navigation of edit mode changes
     window.dispatchEvent(new CustomEvent("admin-edit-mode-changed", { detail: isEditMode }));
@@ -446,6 +453,7 @@ export function FriendPageClient({
       window.removeEventListener("admin-add-widget", handleAddWidget);
       window.removeEventListener("admin-save", handleAdminSave);
       window.removeEventListener("admin-set-edit-mode", handleSetEditMode);
+      window.removeEventListener("admin-toggle-colors", handleToggleColors);
     };
   }, [userContext.isAdmin, handleSave, isEditMode]);
 
@@ -569,8 +577,8 @@ export function FriendPageClient({
 
               // Generate all possible positions
               const allPositions: WidgetPosition[] = [];
-              for (let y = 0; y < 8; y++) {
-                for (let x = 0; x < 6; x++) {
+              for (let y = 0; y < GRID_ROWS; y++) {
+                for (let x = 0; x < GRID_COLS; x++) {
                   allPositions.push({ x, y });
                 }
               }
@@ -812,13 +820,14 @@ export function FriendPageClient({
         </div>
       )}
 
-      {/* Color settings cog */}
-      {isEditMode && (
+      {/* Color settings modal - shown when triggered from nav */}
+      {isEditMode && showColorSettings && (
         <ColorSettings
           friendId={friend.id}
           currentColors={themeColors}
           onColorChange={handleColorChange}
           onRandomizeAll={handleRandomizeAll}
+          onClose={() => setShowColorSettings(false)}
         />
       )}
     </div>
