@@ -14,8 +14,13 @@ body {
   /* Scale based on available viewport space */
   /* Use CSS calc to scale: min(1, availableWidth / gridWidth, availableHeight / gridHeight) */
   /* Scale to fit both width and height, using the smaller scale factor */
-  transform: translate(-50%, -50%)
-    scale(min(1, calc((100vw - 1rem) / 520px), calc((100vh - 6rem) / 696px))) !important;
+  transform: translate(-50%, -50%) scale(
+    min(
+      1,
+      calc((100vw - 1rem) / 520px),
+      calc((100vh - 6rem) / 696px)
+    )
+  ) !important;
   transform-origin: center center;
   /* Ensure scaled grid doesn't cause layout issues */
   will-change: transform;

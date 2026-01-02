@@ -1,8 +1,8 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-# Format code with Prettier
-npm run format
+# Format staged files with Prettier and add them to the commit
+npx lint-staged
 
 # Run linting
 npm run lint || exit 1

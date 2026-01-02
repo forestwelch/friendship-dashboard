@@ -45,3 +45,6 @@ coverage/
 # Playwright
 test-results/
 playwright-report/
+
+# Files to preserve formatting
+styles/responsive.css
