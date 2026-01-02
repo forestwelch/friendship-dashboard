@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigation } from "@/components/Navigation";
 import { notFound } from "next/navigation";
-import { getFriendPage, getGlobalContent } from "@/lib/queries";
+import { getFriendPage, getTop10Songs } from "@/lib/queries";
 import { Song } from "@/lib/types";
 import { FriendPageClient } from "@/app/[friend]/FriendPageClient";
 
@@ -30,7 +30,7 @@ export default async function AdminFriendPage({ params }: AdminFriendPageProps) 
   const { friend, widgets, pixelArtImages } = pageData;
 
   // Fetch global content (e.g., top 10 songs)
-  const songsData = await getGlobalContent("top_10_songs");
+  const songsData = await getTop10Songs();
   const songs: Song[] = songsData?.songs || [];
 
   // Create a map of pixel art images by widget_id for quick lookup
@@ -52,17 +52,9 @@ export default async function AdminFriendPage({ params }: AdminFriendPageProps) 
     });
   }
 
-  // Pass theme colors to Navigation
-  const navThemeColors = {
-    bg: friend.color_bg || "#0a1a2e",
-    text: friend.color_text || "#c8e0ff",
-    border: friend.color_accent || "#2a7fff",
-    active: friend.color_primary || "#4a9eff",
-  };
-
   return (
     <>
-      <Navigation themeColors={navThemeColors} />
+      <Navigation />
       <FriendPageClient
         friend={friend}
         initialWidgets={widgets}

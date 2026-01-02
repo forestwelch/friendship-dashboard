@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { getGlobalContent } from "@/lib/queries";
+import { getTop10Songs } from "@/lib/queries";
 import { Song, WidgetSize } from "@/lib/types";
 import { SongManager } from "./SongManager";
 import { ImageManager } from "./ImageManager";
@@ -12,8 +12,11 @@ type TabType = "songs" | "images";
 
 interface ImageItem {
   id: string;
-  base_image_data: string;
+  pixel_data?: string | null;
+  base_image_data?: string | null;
   size: WidgetSize;
+  width?: number;
+  height?: number;
   created_at: string;
 }
 
@@ -29,10 +32,8 @@ export function ContentManager() {
       try {
         setLoading(true);
         // Fetch songs
-        const data = await getGlobalContent("top_10_songs");
-        if (data && data.songs) {
-          setTopSongs(data.songs);
-        }
+        const data = await getTop10Songs();
+        setTopSongs(data.songs);
         // Fetch images
         await fetchImages();
       } catch (err) {
@@ -174,7 +175,10 @@ export function ContentManager() {
           ) : activeTab === "songs" ? (
             <SongManager initialSongs={topSongs} onSave={handleSaveSongs} />
           ) : (
-            <ImageManager initialImages={images} onImagesChange={setImages} />
+            <ImageManager
+              initialImages={images}
+              onImagesChange={(newImages) => setImages(newImages)}
+            />
           )}
         </div>
       </div>

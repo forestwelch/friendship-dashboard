@@ -7,7 +7,14 @@ declare global {
         elementId: string,
         options: {
           videoId: string;
+          width?: string | number;
+          height?: string | number;
           playerVars?: Record<string, unknown>;
+          events?: {
+            onReady?: () => void;
+            onStateChange?: (event: { data: number }) => void;
+            onError?: (event: { data: number }) => void;
+          };
           onReady?: () => void;
           onStateChange?: (event: { data: number }) => void;
           onError?: (event: { data: number }) => void;
@@ -145,8 +152,8 @@ export function createYouTubePlayer(
 
       try {
         const player = new window.YT.Player(containerId, {
-          width: options.width || 1,
-          height: options.height || 1,
+          width: String(options.width || 1),
+          height: String(options.height || 1),
           videoId: options.videoId || "",
           playerVars: {
             autoplay: 0,

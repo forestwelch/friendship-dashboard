@@ -8,7 +8,7 @@ export default async function Home() {
 
   return (
     <>
-      <Navigation themeColors={undefined} />
+      <Navigation />
       <HomeClient friends={friends} />
     </>
   );

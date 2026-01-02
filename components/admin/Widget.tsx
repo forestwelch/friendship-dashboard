@@ -122,7 +122,7 @@ export function EditableWidget({
               }}
               title="Move"
             >
-              ↕️ Move
+              <i className="hn hn-arrow-up-solid" />
             </button>
             <button
               className="game-button game-button-danger game-button-icon"

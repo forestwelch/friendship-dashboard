@@ -26,7 +26,7 @@ export function InboxManager() {
     const fetchItems = async () => {
       setLoading(true);
       const data = await getInboxItems(filter);
-      setItems(data);
+      setItems(data as unknown as InboxItem[]);
       setLoading(false);
     };
     fetchItems();
@@ -125,9 +125,13 @@ export function InboxManager() {
                 </div>
                 {item.type === "recommendation" && (
                   <div>
-                    <div style={{ fontSize: "14px", fontWeight: "bold" }}>{item.data.title}</div>
-                    <div style={{ fontSize: "12px", opacity: 0.8 }}>{item.data.type}</div>
-                    {item.data.description && (
+                    <div style={{ fontSize: "14px", fontWeight: "bold" }}>
+                      {String(item.data.title || "")}
+                    </div>
+                    <div style={{ fontSize: "12px", opacity: 0.8 }}>
+                      {String(item.data.type || "")}
+                    </div>
+                    {item.data.description != null && (
                       <div
                         style={{
                           fontSize: "12px",
@@ -135,7 +139,7 @@ export function InboxManager() {
                           opacity: 0.7,
                         }}
                       >
-                        {item.data.description}
+                        {String(item.data.description)}
                       </div>
                     )}
                   </div>
@@ -146,11 +150,14 @@ export function InboxManager() {
                       Proposed Hangout
                     </div>
                     <div className="game-text-muted" style={{ marginBottom: "var(--space-xs)" }}>
-                      {new Date(item.data.date).toLocaleDateString()} at {item.data.time}
+                      {item.data.date != null &&
+                        new Date(String(item.data.date)).toLocaleDateString()}{" "}
+                      {item.data.date != null && "at"}{" "}
+                      {item.data.time != null && String(item.data.time)}
                     </div>
-                    {item.data.message && (
+                    {item.data.message != null && (
                       <div className="game-text-muted" style={{ marginTop: "var(--space-xs)" }}>
-                        {item.data.message}
+                        {String(item.data.message)}
                       </div>
                     )}
                   </div>

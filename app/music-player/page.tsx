@@ -59,16 +59,9 @@ const mockSongs: Song[] = [
 ];
 
 export default function MusicPlayerTestPage() {
-  const navThemeColors = {
-    bg: mockFriend.color_bg || "#0a1a2e",
-    text: mockFriend.color_text || "#c8e0ff",
-    border: mockFriend.color_accent || "#2a7fff",
-    active: mockFriend.color_primary || "#4a9eff",
-  };
-
   return (
     <>
-      <Navigation themeColors={navThemeColors} />
+      <Navigation />
       <FriendPageClient
         friend={mockFriend}
         initialWidgets={mockWidgets}

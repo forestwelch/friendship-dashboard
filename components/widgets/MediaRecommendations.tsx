@@ -2,18 +2,8 @@
 
 import React, { useState } from "react";
 import { Widget } from "@/components/Widget";
-import { WidgetSize } from "@/lib/types";
+import { WidgetSize, MediaItem } from "@/lib/types";
 import { playSound } from "@/lib/sounds";
-
-interface MediaItem {
-  id: string;
-  title: string;
-  type: "movie" | "show" | "book" | "music" | "game";
-  description?: string;
-  thumbnail?: string;
-  watched?: boolean;
-  createdAt: string;
-}
 
 interface MediaRecommendationsProps {
   size: WidgetSize;

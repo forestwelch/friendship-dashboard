@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from "./supabase";
-import { Friend, WidgetSize } from "./types";
+import { Friend, WidgetSize, WidgetConfig, Song } from "./types";
 
 export interface FriendWidget {
   id: string;
@@ -9,7 +9,7 @@ export interface FriendWidget {
   size: WidgetSize;
   position_x: number;
   position_y: number;
-  config: Record<string, unknown>;
+  config: WidgetConfig;
 }
 
 export interface FriendPageData {
@@ -140,8 +140,14 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
           message: "Transforming widget",
           data: {
             widgetId: w.id,
-            widgetType: w.widgets?.type,
-            widgetName: w.widgets?.name,
+            widgetType:
+              w.widgets && typeof w.widgets === "object" && "type" in w.widgets
+                ? String((w.widgets as { type: string }).type)
+                : undefined,
+            widgetName:
+              w.widgets && typeof w.widgets === "object" && "name" in w.widgets
+                ? String((w.widgets as { name: string }).name)
+                : undefined,
             hasWidgets: !!w.widgets,
           },
           timestamp: Date.now(),
@@ -152,14 +158,20 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
       }).catch(() => {});
       // #endregion
       return {
-        id: w.id,
-        widget_id: w.widget_id,
-        widget_type: w.widgets?.type || "",
-        widget_name: w.widgets?.name || "",
-        size: w.size,
-        position_x: w.position_x,
-        position_y: w.position_y,
-        config: w.config || {},
+        id: String(w.id),
+        widget_id: String(w.widget_id),
+        widget_type:
+          w.widgets && typeof w.widgets === "object" && "type" in w.widgets
+            ? String((w.widgets as { type: string }).type)
+            : "",
+        widget_name:
+          w.widgets && typeof w.widgets === "object" && "name" in w.widgets
+            ? String((w.widgets as { name: string }).name)
+            : "",
+        size: w.size as WidgetSize,
+        position_x: Number(w.position_x),
+        position_y: Number(w.position_y),
+        config: (w.config || {}) as WidgetConfig,
       };
     });
 
@@ -179,7 +191,9 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
       // Map back to expected interface (without full image data for performance)
       pixelArtImages:
         (pixelArtImages || []).map((img: Record<string, unknown>) => ({
-          ...img,
+          id: String(img.id || ""),
+          widget_id: img.widget_id ? String(img.widget_id) : null,
+          size: (img.size as WidgetSize) || "1x1",
           image_data: "", // Will be fetched separately if needed
         })) || [],
     };
@@ -219,6 +233,15 @@ export async function getGlobalContent(contentType: string): Promise<unknown> {
     console.error("Error in getGlobalContent:", error);
     return null;
   }
+}
+
+export async function getTop10Songs(): Promise<{ songs: Song[] }> {
+  const data = await getGlobalContent("top_10_songs");
+  if (data && typeof data === "object" && "songs" in data) {
+    return data as { songs: Song[] };
+  }
+  // Fallback to mock data
+  return getMockGlobalContent("top_10_songs") as { songs: Song[] };
 }
 
 /**
@@ -333,7 +356,7 @@ function getMockFriendPage(slug: string): FriendPageData | null {
   if (!friend) return null;
 
   return {
-    friend,
+    friend: friend as unknown as Friend,
     widgets: [
       {
         id: "mock-1",
@@ -371,18 +394,25 @@ function getMockFriendPage(slug: string): FriendPageData | null {
 
 function getMockGlobalContent(contentType: string): unknown {
   if (contentType === "top_10_songs") {
-    return [
-      { id: "1", title: "Bohemian Rhapsody", artist: "Queen", youtubeId: "fJ9rUzIMcZQ" },
-      { id: "2", title: "Stairway to Heaven", artist: "Led Zeppelin", youtubeId: "QkF3oxziUI4" },
-      { id: "3", title: "Hotel California", artist: "Eagles", youtubeId: "BciS5krYL80" },
-      { id: "4", title: "Sweet Child O' Mine", artist: "Guns N' Roses", youtubeId: "1w7OgIMMRc4" },
-      { id: "5", title: "Comfortably Numb", artist: "Pink Floyd", youtubeId: "YlUKcNNmywk" },
-      { id: "6", title: "Thunderstruck", artist: "AC/DC", youtubeId: "v2AC41dglnM" },
-      { id: "7", title: "Back in Black", artist: "AC/DC", youtubeId: "pAgnJDJN4VA" },
-      { id: "8", title: "Smells Like Teen Spirit", artist: "Nirvana", youtubeId: "hTWKbfoikeg" },
-      { id: "9", title: "Enter Sandman", artist: "Metallica", youtubeId: "CD-E-LDc384" },
-      { id: "10", title: "Paranoid", artist: "Black Sabbath", youtubeId: "0qanF-91aJo" },
-    ];
+    return {
+      songs: [
+        { id: "1", title: "Bohemian Rhapsody", artist: "Queen", youtubeId: "fJ9rUzIMcZQ" },
+        { id: "2", title: "Stairway to Heaven", artist: "Led Zeppelin", youtubeId: "QkF3oxziUI4" },
+        { id: "3", title: "Hotel California", artist: "Eagles", youtubeId: "BciS5krYL80" },
+        {
+          id: "4",
+          title: "Sweet Child O' Mine",
+          artist: "Guns N' Roses",
+          youtubeId: "1w7OgIMMRc4",
+        },
+        { id: "5", title: "Comfortably Numb", artist: "Pink Floyd", youtubeId: "YlUKcNNmywk" },
+        { id: "6", title: "Thunderstruck", artist: "AC/DC", youtubeId: "v2AC41dglnM" },
+        { id: "7", title: "Back in Black", artist: "AC/DC", youtubeId: "pAgnJDJN4VA" },
+        { id: "8", title: "Smells Like Teen Spirit", artist: "Nirvana", youtubeId: "hTWKbfoikeg" },
+        { id: "9", title: "Enter Sandman", artist: "Metallica", youtubeId: "CD-E-LDc384" },
+        { id: "10", title: "Paranoid", artist: "Black Sabbath", youtubeId: "0qanF-91aJo" },
+      ],
+    };
   }
   return null;
 }

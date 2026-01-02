@@ -390,10 +390,9 @@ export function FriendManager() {
                 }}
                 onMouseEnter={() => {
                   // Prefetch theme on hover
-                  if ((window as { __prefetchTheme?: (slug: string) => void }).__prefetchTheme) {
-                    (window as { __prefetchTheme: (slug: string) => void }).__prefetchTheme(
-                      friend.slug
-                    );
+                  const win = window as unknown as { __prefetchTheme?: (slug: string) => void };
+                  if (win.__prefetchTheme) {
+                    win.__prefetchTheme(friend.slug);
                   }
                 }}
               >

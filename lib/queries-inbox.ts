@@ -50,7 +50,10 @@ export async function getInboxItems(
 
     return data.map((item: Record<string, unknown>) => ({
       ...item,
-      friend_name: item.friend?.display_name || "Unknown",
+      friend_name:
+        (item.friend && typeof item.friend === "object" && "display_name" in item.friend
+          ? (item.friend as { display_name: string }).display_name
+          : null) || "Unknown",
     }));
   } catch (error) {
     console.error("Error in getInboxItems:", error);

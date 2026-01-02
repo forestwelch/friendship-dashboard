@@ -119,7 +119,14 @@ export function AdminOverlay({ widgetId, onDelete, onMove, onEdit }: AdminOverla
               minWidth: "60px",
             }}
           >
-            ↕️ MOVE
+            <i
+              className="hn hn-arrow-up-solid"
+              style={{
+                fontSize: "var(--font-size-xs)",
+                marginRight: "var(--space-xs)",
+              }}
+            />
+            MOVE
           </button>
         )}
       </div>

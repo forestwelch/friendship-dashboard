@@ -14,6 +14,7 @@ import {
   ConnectFour,
 } from "@/components/widgets";
 import { FriendWidget } from "@/lib/queries";
+import { ConnectFourData } from "@/lib/queries-connect-four";
 import { Song } from "@/lib/types";
 import { createInboxItem } from "@/lib/queries-inbox";
 import { useTheme } from "@/lib/theme-context";
@@ -66,8 +67,8 @@ export const WidgetRenderer = memo(function WidgetRenderer({
       return;
     }
 
-    const currentRecommendations = widget.config?.recommendations || [];
-    const updated = currentRecommendations.map((rec: Record<string, unknown>) =>
+    const currentRecommendations = widget.config.recommendations || [];
+    const updated = currentRecommendations.map((rec) =>
       rec.id === recommendationId ? { ...rec, watched: true } : rec
     );
 
@@ -151,30 +152,27 @@ export const WidgetRenderer = memo(function WidgetRenderer({
       return (
         <Calendar
           size={widget.size}
-          events={widget.config?.events || []}
+          events={widget.config.events || []}
           onProposeHangout={handleProposeHangout}
         />
       );
 
     case "notes":
       // Notes widget expects string[] but config stores objects with {id, content, created_at}
-      const notesArray = widget.config?.notes || [];
-      const notesStrings =
-        Array.isArray(notesArray) && notesArray.length > 0 && typeof notesArray[0] === "object"
-          ? notesArray.map((n: Record<string, unknown>) => (n.content as string) || String(n))
-          : notesArray;
+      const notesArray = widget.config.notes || [];
+      const notesStrings = notesArray.map((n) => (typeof n === "string" ? n : n.content));
 
       return <Notes size={widget.size} initialNotes={notesStrings} />;
 
     case "shared_links":
     case "links": // Backward compatibility
-      return <Links size={widget.size} links={widget.config?.links || []} />;
+      return <Links size={widget.size} links={widget.config.links || []} />;
 
     case "media_recommendations":
       return (
         <MediaRecommendations
           size={widget.size}
-          recommendations={widget.config?.recommendations || []}
+          recommendations={widget.config.recommendations || []}
           onMarkWatched={handleMarkWatched}
           onAddRecommendation={handleAddRecommendation}
         />
@@ -226,7 +224,7 @@ export const WidgetRenderer = memo(function WidgetRenderer({
           friendName={friendName}
           widgetId={widget.id}
           themeColors={themeColors}
-          config={widget.config as Record<string, unknown>}
+          config={widget.config as unknown as ConnectFourData}
         />
       );
 

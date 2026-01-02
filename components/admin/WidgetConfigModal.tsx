@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { FriendWidget } from "@/lib/queries";
+import { WidgetConfig } from "@/lib/types";
 import { playSound } from "@/lib/sounds";
 import { processImageToPixelData, pixelDataToBase64 } from "@/lib/pixel-data-processing";
 
@@ -18,7 +19,7 @@ interface ImageItem {
 interface WidgetConfigModalProps {
   widget: FriendWidget | null;
   onClose: () => void;
-  onSave: (config: Record<string, unknown>) => void;
+  onSave: (config: WidgetConfig) => void;
   friendColors?: {
     primary: string;
     secondary: string;
@@ -34,7 +35,7 @@ export function WidgetConfigModal({
   onSave,
   friendColors: _friendColors,
 }: WidgetConfigModalProps) {
-  const [config, setConfig] = useState<Record<string, unknown>>({});
+  const [config, setConfig] = useState<WidgetConfig>({});
   const [availableImages, setAvailableImages] = useState<ImageItem[]>([]);
   const [loadingImages, setLoadingImages] = useState(false);
   const [processingImages, setProcessingImages] = useState<Set<string>>(new Set());
@@ -91,7 +92,9 @@ export function WidgetConfigModal({
             </label>
             <textarea
               className="game-input"
-              value={(config.notes || []).join("\n")}
+              value={
+                config.notes?.map((n) => (typeof n === "string" ? n : n.content)).join("\n") || ""
+              }
               onChange={(e) =>
                 setConfig({
                   ...config,
@@ -217,15 +220,17 @@ export function WidgetConfigModal({
         if (selectedImageIds.length === 0 && config.pixelData && config.pixelData.length > 0) {
           // Try to match pixelData to available images (this is a simplified approach)
           // In a real scenario, you'd want to store image IDs alongside pixelData
+          const pixelData = config.pixelData;
           selectedImageIds = availableImages
-            .filter((img) => img.pixel_data && config.pixelData.includes(img.pixel_data))
+            .filter((img) => img.pixel_data && pixelData.includes(img.pixel_data))
             .map((img) => img.id);
         }
 
         // Backward compatibility: if we have imageUrls but no imageIds
         if (selectedImageIds.length === 0 && config.imageUrls && config.imageUrls.length > 0) {
+          const imageUrls = config.imageUrls;
           selectedImageIds = availableImages
-            .filter((img) => img.base_image_data && config.imageUrls.includes(img.base_image_data))
+            .filter((img) => img.base_image_data && imageUrls.includes(img.base_image_data))
             .map((img) => img.id);
         }
         return (

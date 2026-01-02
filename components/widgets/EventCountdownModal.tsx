@@ -139,6 +139,7 @@ export function EventCountdownModal({
         }, 300);
         return () => clearTimeout(timeoutId);
       }
+      return undefined;
     },
     [editingEvent, eventDate, eventEmoji, eventDescription, updateEventMutation]
   );
@@ -158,6 +159,7 @@ export function EventCountdownModal({
         }, 300);
         return () => clearTimeout(timeoutId);
       }
+      return undefined;
     },
     [editingEvent, eventName, eventDate, eventEmoji, updateEventMutation]
   );
