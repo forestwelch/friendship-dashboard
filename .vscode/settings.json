@@ -20,5 +20,7 @@
   ],
   "[typescript]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
-  }
+  },
+  "consoleNinja.enabled": false,
+  "consoleNinja.autoStart": false
 }
