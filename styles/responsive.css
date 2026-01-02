@@ -10,9 +10,11 @@ body {
 /* Grid scaling - unified approach for desktop and mobile using scale */
 .grid-layout {
   /* Calculate scale factors for width and height */
-  /* Use slightly less than 100% to ensure no edge case overflow */
+  /* Account for navigation bar height: --height-button + --space-md */
+  /* Use slightly less than available space to ensure no edge case overflow */
+  --nav-height: calc(var(--height-button) + var(--space-md));
   --scale-width: calc((100vw - 2rem) / var(--grid-width));
-  --scale-height: calc((100vh - 2rem) / var(--grid-height));
+  --scale-height: calc((100vh - var(--nav-height) - 2rem) / var(--grid-height));
   /* Use the smaller scale factor to fit both dimensions, but never scale up beyond 1 */
   /* Desktop: If viewport is large, scale = 1 (natural size) */
   /* Mobile: Scale down to fit both width and height (no overflow) */
