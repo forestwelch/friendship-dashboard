@@ -47,10 +47,3 @@
   outline-offset: 2px;
   border-color: var(--primary);
 }
-
-/* Mobile: Use native date picker */
-@media (max-width: 768px) {
-  .dateInputField {
-    font-size: 16px; /* Prevents zoom on iOS */
-  }
-}

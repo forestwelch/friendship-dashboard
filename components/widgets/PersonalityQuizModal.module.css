@@ -172,18 +172,3 @@
   box-shadow: var(--game-glow-primary);
 }
 
-/* Mobile styles */
-@media (max-width: 768px) {
-  .optionButton {
-    padding: var(--space-md);
-    font-size: var(--font-size-md);
-  }
-
-  .resultEmoji {
-    font-size: 2.5rem;
-  }
-
-  .resultTitle {
-    font-size: var(--font-size-lg);
-  }
-}

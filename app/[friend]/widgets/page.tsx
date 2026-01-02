@@ -24,10 +24,12 @@ export default function WidgetLibraryPage() {
       <div
         style={{
           paddingTop: "2.25rem",
-          width: "100vw",
+          width: "100%",
+          maxWidth: "100%",
           minHeight: "100vh",
           background: "var(--bg)",
           color: "var(--text)",
+          overflowX: "hidden",
         }}
       >
         <div className="game-container" style={{ padding: "var(--space-xl)" }}>

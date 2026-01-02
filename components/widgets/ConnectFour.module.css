@@ -174,12 +174,3 @@
   gap: var(--space-sm);
   justify-content: flex-start;
 }
-
-/* Mobile styles */
-@media (max-width: 768px) {
-  .tile1x1,
-  .tile2x2,
-  .tile3x3 {
-    min-height: 200px;
-  }
-}

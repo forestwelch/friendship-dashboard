@@ -524,16 +524,4 @@ body {
 /* ============================================
    RESPONSIVE HELPERS
    ============================================ */
-@media (max-width: 768px) {
-  .game-container {
-    padding: 0 var(--space-md);
-  }
-
-  .game-heading-1 {
-    font-size: 20px;
-  }
-
-  .game-heading-2 {
-    font-size: 16px;
-  }
-}
+/* No mobile-specific changes - keep everything the same */

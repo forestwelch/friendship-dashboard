@@ -76,9 +76,11 @@ export function ContentManager() {
       className="admin-page"
       style={{
         paddingTop: `calc(var(--height-button) + var(--space-md))`,
-        width: "100vw",
+        width: "100%",
+        maxWidth: "100%",
         height: "calc(100vh - 2.25rem)",
-        overflow: "hidden",
+        overflowX: "hidden",
+        overflowY: "auto",
         display: "flex",
         flexDirection: "column",
       }}

@@ -424,10 +424,12 @@ export function FriendPageClient({
       style={{
         ...themeStyle,
         paddingTop: userContext.isAdmin ? "2.25rem" : "0",
-        width: "100vw",
+        width: "100%",
+        maxWidth: "100%",
         minHeight: "100vh",
         background: themeColors.bg,
         position: "relative",
+        overflowX: "hidden",
       }}
     >
       <GamepadNavigation
@@ -451,6 +453,9 @@ export function FriendPageClient({
           borderBottom: `var(--border-width-md) solid ${themeColors.accent}`,
           position: "relative",
           zIndex: 10,
+          flexWrap: "nowrap",
+          gap: "var(--space-sm)",
+          overflow: "visible",
         }}
       >
         <h1 className="game-heading-1" style={{ margin: 0, color: themeColors.text }}>
@@ -543,10 +548,12 @@ export function FriendPageClient({
       <div
         ref={gridRef}
         data-grid-container-wrapper
+        className="grid-container-wrapper"
         style={{
           position: "relative",
-          overflow: "hidden",
-          width: "100vw",
+          overflow: "auto",
+          width: "100%",
+          maxWidth: "100%",
           height: "calc(100vh - 2.25rem - 3.75rem)", // Full height minus nav and header
           display: "flex",
           alignItems: "center",

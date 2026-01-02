@@ -2,9 +2,11 @@
 
 .container {
   padding-top: calc(var(--height-button) + var(--space-md));
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }

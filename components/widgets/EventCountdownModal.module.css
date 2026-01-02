@@ -164,14 +164,3 @@
   padding: var(--space-md);
 }
 
-/* Mobile styles */
-@media (max-width: 768px) {
-  .emojiGrid {
-    justify-content: center;
-  }
-
-  .emojiButton {
-    min-width: 44px;
-    min-height: 44px;
-  }
-}

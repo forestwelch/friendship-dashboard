@@ -131,16 +131,3 @@
   text-align: center;
   margin-top: var(--space-xs);
 }
-
-/* Mobile styles */
-@media (max-width: 768px) {
-  .tile1x1,
-  .tile2x2,
-  .tile3x3 {
-    min-height: 200px;
-  }
-
-  .emojiRow {
-    gap: var(--space-sm);
-  }
-}

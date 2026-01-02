@@ -1,54 +1,32 @@
 /* Mobile Responsiveness Foundation */
 
-/* Breakpoint: 768px */
-/* Desktop: ≥ 768px (grid layout) */
-/* Mobile: < 768px (stacked cards) */
-
-/* Grid → Stack transformation utilities */
-@media (max-width: 768px) {
-  /* Full-width cards on mobile */
-  .mobile-full-width {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  /* Stack items vertically */
-  .mobile-stack {
-    flex-direction: column !important;
-  }
-
-  /* Hide on mobile */
-  .mobile-hide {
-    display: none !important;
-  }
-
-  /* Show only on mobile */
-  .mobile-only {
-    display: block !important;
-  }
-
-  /* Mobile-specific spacing adjustments */
-  .mobile-spacing {
-    padding: var(--space-md) !important;
-    gap: var(--space-md) !important;
-  }
-
-  /* Touch targets minimum 44px */
-  button,
-  a,
-  [role="button"] {
-    min-height: 44px;
-    min-width: 44px;
-  }
+/* Prevent horizontal overflow globally - that's it, nothing else changes */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
-/* Desktop-only utilities */
-@media (min-width: 769px) {
-  .desktop-only {
-    display: block !important;
-  }
-
-  .mobile-only {
-    display: none !important;
-  }
+/* Utility classes for manual mobile adjustments if needed */
+.mobile-full-width {
+  width: 100% !important;
+  max-width: 100% !important;
 }
+
+.mobile-stack {
+  flex-direction: column !important;
+}
+
+.mobile-hide {
+  display: none !important;
+}
+
+.mobile-only {
+  display: block !important;
+}
+
+.desktop-only {
+  display: block !important;
+}
+
+/* No media queries - desktop and mobile are identical */

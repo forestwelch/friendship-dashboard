@@ -4,14 +4,19 @@
   flex-direction: column;
   gap: var(--space-md);
   width: 100%;
+  max-width: 100%;
   padding: var(--space-md);
   overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .mobileItem {
   width: 100%;
+  max-width: 100%;
   min-height: 200px;
   margin-bottom: var(--space-md);
+  box-sizing: border-box;
 }
 
 /* Desktop grid styles use inline styles for dynamic positioning */

@@ -121,20 +121,3 @@
   opacity: 0.6;
   text-align: center;
 }
-
-/* Mobile styles */
-@media (max-width: 768px) {
-  .tile1x1,
-  .tile2x2,
-  .tile3x3 {
-    min-height: 200px;
-  }
-
-  .emojiLarge {
-    font-size: 2.5rem;
-  }
-
-  .historyGrid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}

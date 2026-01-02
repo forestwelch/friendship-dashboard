@@ -10,10 +10,12 @@ export default function AdminInboxPage() {
         className="admin-page"
         style={{
           paddingTop: `calc(var(--height-button) + var(--space-md))`,
-          width: "100vw",
+          width: "100%",
+          maxWidth: "100%",
           minHeight: "100vh",
           background: "var(--admin-bg)",
           color: "var(--admin-text)",
+          overflowX: "hidden",
         }}
       >
         <InboxManager />

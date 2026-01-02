@@ -2,8 +2,6 @@
 
 import React from "react";
 import { WidgetPosition } from "@/lib/types";
-import { useIsMobile } from "@/lib/useMediaQuery";
-import styles from "./Grid.module.css";
 
 interface GridProps {
   children: React.ReactNode;
@@ -32,30 +30,18 @@ interface GridProps {
 }
 
 export function Grid({ children }: GridProps) {
-  const isMobile = useIsMobile();
   const gridWidth = `calc(${GRID_COLS} * ${TILE_SIZE} + ${GRID_COLS - 1} * ${GAP})`;
   const gridHeight = `calc(${GRID_ROWS} * ${TILE_SIZE} + ${GRID_ROWS - 1} * ${GAP})`;
 
-  // Create array of all grid positions for background tiles (desktop only)
+  // Create array of all grid positions for background tiles
   const allTiles: Array<{ x: number; y: number }> = [];
-  if (!isMobile) {
-    for (let y = 0; y < GRID_ROWS; y++) {
-      for (let x = 0; x < GRID_COLS; x++) {
-        allTiles.push({ x, y });
-      }
+  for (let y = 0; y < GRID_ROWS; y++) {
+    for (let x = 0; x < GRID_COLS; x++) {
+      allTiles.push({ x, y });
     }
   }
 
-  // Mobile: Stack layout
-  if (isMobile) {
-    return (
-      <div className={styles.mobileGrid} data-grid-container>
-        {children}
-      </div>
-    );
-  }
-
-  // Desktop: Grid layout
+  // Always use grid layout - scale on mobile via CSS
   const gridStyle: React.CSSProperties = {
     display: "grid",
     gridTemplateColumns: `repeat(${GRID_COLS}, ${TILE_SIZE})`,
@@ -69,10 +55,12 @@ export function Grid({ children }: GridProps) {
     transform: "translate(-50%, -50%)",
     margin: 0,
     padding: 0,
+    maxWidth: "100%",
+    maxHeight: "100%",
   };
 
   return (
-    <div style={gridStyle} data-grid-container>
+    <div style={gridStyle} data-grid-container className="grid-layout">
       {/* Background grid tiles - muted squares using theme colors */}
       {allTiles.map((tile) => (
         <div
@@ -105,24 +93,14 @@ interface GridItemProps {
 }
 
 export const GridItem = React.forwardRef<HTMLDivElement, GridItemProps>(function GridItem(
-  { position, size, children, onDragOver, onDrop, style: customStyle },
+  { position, size, children, style: customStyle },
   ref
 ) {
-  const isMobile = useIsMobile();
   const [cols, rows] = size.split("x").map(Number);
   const itemWidth = `calc(${cols} * ${TILE_SIZE} + ${cols - 1} * ${GAP})`;
   const itemHeight = `calc(${rows} * ${TILE_SIZE} + ${rows - 1} * ${GAP})`;
 
-  // Mobile: Full-width stacked cards
-  if (isMobile) {
-    return (
-      <div className={styles.mobileItem} onDragOver={onDragOver} onDrop={onDrop}>
-        {children}
-      </div>
-    );
-  }
-
-  // Desktop: Grid positioning
+  // Always use grid positioning - scale on mobile via CSS
   const itemStyle: React.CSSProperties = {
     gridColumn: `${position.x + 1} / span ${cols}`,
     gridRow: `${position.y + 1} / span ${rows}`,

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
 import { YouTubePlayerProvider } from "@/components/YouTubePlayer";
@@ -9,6 +9,12 @@ import { WebVitals } from "@/components/WebVitals";
 export const metadata: Metadata = {
   title: "Friendship Dashboard",
   description: "A personalized social dashboard for your friends",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({

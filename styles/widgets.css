@@ -225,3 +225,5 @@
   background-color: var(--grid-tile-border) !important;
   transition: background-color 0.2s ease;
 }
+
+/* No mobile-specific widget adjustments - keep everything the same */

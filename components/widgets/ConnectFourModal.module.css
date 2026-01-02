@@ -242,10 +242,3 @@
   box-shadow: var(--game-glow-primary);
 }
 
-/* Mobile styles */
-@media (max-width: 768px) {
-  .board {
-    padding: var(--space-sm);
-    gap: 2px;
-  }
-}

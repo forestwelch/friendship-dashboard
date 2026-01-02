@@ -116,12 +116,3 @@
   opacity: 0.5;
   font-size: var(--font-size-sm);
 }
-
-/* Mobile styles */
-@media (max-width: 768px) {
-  .tile1x1,
-  .tile2x2,
-  .tile3x3 {
-    min-height: 200px;
-  }
-}
