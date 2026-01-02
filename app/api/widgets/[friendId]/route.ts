@@ -11,8 +11,8 @@ interface FriendWidgetRow {
   config: Record<string, unknown>;
   widgets?: {
     id: string;
-    widget_type: string;
-    widget_name: string;
+    type: string;
+    name: string;
   };
   widget_type?: string;
   widget_name?: string;
@@ -20,7 +20,7 @@ interface FriendWidgetRow {
 
 interface WidgetTypeRow {
   id: string;
-  widget_type: string;
+  type: string;
 }
 
 interface WidgetInput {
@@ -55,8 +55,8 @@ export async function GET(
         *,
         widgets (
           id,
-          widget_type,
-          widget_name
+          type,
+          name
         )
       `
       )
@@ -73,8 +73,8 @@ export async function GET(
     const widgets = (data || []).map((fw: FriendWidgetRow) => ({
       id: fw.id,
       widget_id: fw.widget_id,
-      widget_type: fw.widgets?.widget_type || fw.widget_type,
-      widget_name: fw.widgets?.widget_name || fw.widget_name,
+      widget_type: fw.widgets?.type || fw.widget_type,
+      widget_name: fw.widgets?.name || fw.widget_name,
       position_x: fw.position_x,
       position_y: fw.position_y,
       size: fw.size,
@@ -115,16 +115,14 @@ export async function PUT(
     // First, get all widget types to resolve widget_type strings to widget_id UUIDs
     const { data: widgetTypes, error: widgetTypesError } = await adminClient
       .from("widgets")
-      .select("id, widget_type");
+      .select("id, type");
 
     if (widgetTypesError) {
       console.error("Error fetching widget types:", widgetTypesError);
       return NextResponse.json({ error: "Failed to fetch widget types" }, { status: 500 });
     }
 
-    const widgetTypeMap = new Map(
-      (widgetTypes || []).map((wt: WidgetTypeRow) => [wt.widget_type, wt.id])
-    );
+    const widgetTypeMap = new Map((widgetTypes || []).map((wt: WidgetTypeRow) => [wt.type, wt.id]));
 
     // Delete all existing widgets for this friend
     const { error: deleteError } = await adminClient
@@ -163,8 +161,8 @@ export async function PUT(
           *,
           widgets (
             id,
-            widget_type,
-            widget_name
+            type,
+            name
           )
         `
         );
@@ -178,8 +176,8 @@ export async function PUT(
       const result = (insertedWidgets || []).map((fw: FriendWidgetRow) => ({
         id: fw.id,
         widget_id: fw.widget_id,
-        widget_type: fw.widgets?.widget_type || fw.widget_type,
-        widget_name: fw.widgets?.widget_name || fw.widget_name,
+        widget_type: fw.widgets?.type || fw.widget_type,
+        widget_name: fw.widgets?.name || fw.widget_name,
         position_x: fw.position_x,
         position_y: fw.position_y,
         size: fw.size,
