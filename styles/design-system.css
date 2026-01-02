@@ -81,6 +81,20 @@
   --border-width-md: 0.125rem; /* 2px */
   --border-width-lg: 0.1875rem; /* 3px */
 
+  /* Grid dimensions - single source of truth */
+  /* Change these values to resize the entire grid */
+  --grid-cols: 6;
+  --grid-rows: 9;
+  --grid-tile-size: 5rem; /* Tile size (5rem = 80px at 16px base) */
+  --grid-gap: 0.5rem; /* Gap between tiles (0.5rem = 8px at 16px base) */
+  /* Calculated grid dimensions */
+  --grid-width: calc(
+    var(--grid-cols) * var(--grid-tile-size) + (var(--grid-cols) - 1) * var(--grid-gap)
+  );
+  --grid-height: calc(
+    var(--grid-rows) * var(--grid-tile-size) + (var(--grid-rows) - 1) * var(--grid-gap)
+  );
+
   /* Transitions */
   --transition-fast: 0.1s ease-out;
   --transition-normal: 0.2s ease-out;

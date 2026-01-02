@@ -1,9 +1,9 @@
 import React from "react";
-import { Navigation } from "@/components/Navigation";
 import { notFound } from "next/navigation";
 import { getFriendPage, getTop10Songs } from "@/lib/queries";
 import { Song } from "@/lib/types";
 import { FriendPageClient } from "@/app/[friend]/FriendPageClient";
+import { AdminNavigation } from "./AdminNavigation";
 
 interface AdminFriendPageProps {
   params: Promise<{
@@ -54,7 +54,7 @@ export default async function AdminFriendPage({ params }: AdminFriendPageProps) 
 
   return (
     <>
-      <Navigation />
+      <AdminNavigation />
       <FriendPageClient
         friend={friend}
         initialWidgets={widgets}

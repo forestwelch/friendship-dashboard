@@ -2,6 +2,7 @@
 
 import { WidgetSize, WidgetPosition } from "./types";
 import { FriendWidget } from "./queries";
+import { GRID_COLS, GRID_ROWS } from "./constants";
 
 /**
  * Get all grid positions occupied by a widget
@@ -52,8 +53,8 @@ export function isValidPosition(position: WidgetPosition, size: WidgetSize): boo
   return (
     position.x >= 0 &&
     position.y >= 0 &&
-    position.x + cols <= 6 && // 6 cols
-    position.y + rows <= 8 // 8 rows
+    position.x + cols <= GRID_COLS &&
+    position.y + rows <= GRID_ROWS
   );
 }
 
@@ -96,10 +97,8 @@ export function findAvailablePosition(
 ): WidgetPosition | null {
   const [cols, rows] = size.split("x").map(Number);
 
-  for (let y = 0; y <= 8 - rows; y++) {
-    // 8 rows
-    for (let x = 0; x <= 6 - cols; x++) {
-      // 6 cols
+  for (let y = 0; y <= GRID_ROWS - rows; y++) {
+    for (let x = 0; x <= GRID_COLS - cols; x++) {
       const position: WidgetPosition = { x, y };
       if (canPlaceWidget(widgets, "", position, size)) {
         return position;

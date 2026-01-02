@@ -2,9 +2,9 @@
   position: absolute;
   top: 0;
   left: 0;
-  /* Match grid's exact dimensions */
-  width: calc(6 * 5rem + 5 * 0.5rem);
-  height: calc(8 * 5rem + 7 * 0.5rem);
+  /* Match grid's exact dimensions using CSS variables */
+  width: var(--grid-width);
+  height: var(--grid-height);
   background: var(--bg);
   display: flex;
   align-items: stretch;

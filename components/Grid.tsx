@@ -2,6 +2,7 @@
 
 import React from "react";
 import { WidgetPosition } from "@/lib/types";
+import { GRID_COLS, GRID_ROWS } from "@/lib/constants";
 
 interface GridProps {
   children: React.ReactNode;
@@ -15,23 +16,17 @@ interface GridItemProps {
   onDrop?: (e: React.DragEvent) => void;
 }
 
-// Base tile size in rem (assuming 16px = 1rem base) - made bigger
-const TILE_SIZE_REM = 5; // 80px at 16px base (increased from 60px)
-const GAP_REM = 0.5; // 8px at 16px base (increased from 6px)
-const TILE_SIZE = `${TILE_SIZE_REM}rem`;
-const GAP = `${GAP_REM}rem`;
-
-// Grid dimensions - changed to 6x8 (6 cols, 8 rows)
-const GRID_COLS = 6;
-const GRID_ROWS = 8;
-
 interface GridProps {
   children: React.ReactNode;
 }
 
 export function Grid({ children }: GridProps) {
-  const gridWidth = `calc(${GRID_COLS} * ${TILE_SIZE} + ${GRID_COLS - 1} * ${GAP})`;
-  const gridHeight = `calc(${GRID_ROWS} * ${TILE_SIZE} + ${GRID_ROWS - 1} * ${GAP})`;
+  // Use CSS variables for dimensions
+  const gridWidth = "var(--grid-width)";
+  const gridHeight = "var(--grid-height)";
+
+  // Ensure grid doesn't exceed container width
+  const maxWidth = "100%";
 
   // Create array of all grid positions for background tiles
   const allTiles: Array<{ x: number; y: number }> = [];
@@ -42,20 +37,19 @@ export function Grid({ children }: GridProps) {
   }
 
   // Always use grid layout - scale proportionally to fit viewport
-  // Grid is ~520px wide (6 * 80px + 5 * 8px) and ~680px tall (8 * 80px + 7 * 8px)
-  // Scale to fit: min(1, viewportWidth / gridWidth, viewportHeight / gridHeight)
+  // Dimensions are calculated from CSS variables
   const gridStyle: React.CSSProperties = {
     display: "grid",
-    gridTemplateColumns: `repeat(${GRID_COLS}, ${TILE_SIZE})`,
-    gridTemplateRows: `repeat(${GRID_ROWS}, ${TILE_SIZE})`,
-    gap: GAP,
+    gridTemplateColumns: `repeat(${GRID_COLS}, var(--grid-tile-size))`,
+    gridTemplateRows: `repeat(${GRID_ROWS}, var(--grid-tile-size))`,
+    gap: "var(--grid-gap)",
     width: gridWidth,
     height: gridHeight,
-    position: "absolute",
-    top: "50%",
-    left: "50%",
+    maxWidth: maxWidth,
+    position: "relative",
     margin: 0,
     padding: 0,
+    boxSizing: "border-box",
   };
 
   return (
@@ -68,8 +62,8 @@ export function Grid({ children }: GridProps) {
           style={{
             gridColumn: tile.x + 1,
             gridRow: tile.y + 1,
-            width: TILE_SIZE,
-            height: TILE_SIZE,
+            width: "var(--grid-tile-size)",
+            height: "var(--grid-tile-size)",
             pointerEvents: "none",
             zIndex: 0,
             position: "relative",
@@ -96,8 +90,9 @@ export const GridItem = React.forwardRef<HTMLDivElement, GridItemProps>(function
   ref
 ) {
   const [cols, rows] = size.split("x").map(Number);
-  const itemWidth = `calc(${cols} * ${TILE_SIZE} + ${cols - 1} * ${GAP})`;
-  const itemHeight = `calc(${rows} * ${TILE_SIZE} + ${rows - 1} * ${GAP})`;
+  // Calculate item dimensions using CSS variables
+  const itemWidth = `calc(${cols} * var(--grid-tile-size) + ${cols - 1} * var(--grid-gap))`;
+  const itemHeight = `calc(${rows} * var(--grid-tile-size) + ${rows - 1} * var(--grid-gap))`;
 
   // Always use grid positioning - scale on mobile via CSS
   const itemStyle: React.CSSProperties = {

@@ -13,6 +13,7 @@ import { useUndoRedo } from "./UndoRedo";
 import { useKeyboardShortcuts } from "@/lib/keyboard";
 import Link from "next/link";
 import { EditableWidget } from "./Widget";
+import { GRID_COLS, GRID_ROWS } from "@/lib/constants";
 
 interface WidgetManagerProps {
   friend: Friend;
@@ -218,8 +219,8 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
   // Create grid of all positions for drop zones (memoized)
   const allPositions: WidgetPosition[] = useMemo(() => {
     const positions: WidgetPosition[] = [];
-    for (let y = 0; y < 8; y++) {
-      for (let x = 0; x < 6; x++) {
+    for (let y = 0; y < GRID_ROWS; y++) {
+      for (let x = 0; x < GRID_COLS; x++) {
         positions.push({ x, y });
       }
     }

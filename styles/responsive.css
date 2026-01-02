@@ -8,34 +8,45 @@ body {
 }
 
 /* Grid scaling - scales proportionally to fit viewport without media queries */
-/* Grid dimensions: 520px wide (6 cols * 80px + 5 gaps * 8px), 696px tall (8 rows * 80px + 7 gaps * 8px) */
+/* Grid dimensions are calculated from CSS variables: --grid-width and --grid-height */
 /* Account for header (~60px) and nav (~36px) = ~96px total vertical space */
 .grid-layout {
   /* Scale based on available viewport space */
   /* Use CSS calc to scale: min(1, availableWidth / gridWidth, availableHeight / gridHeight) */
   /* Scale to fit both width and height, using the smaller scale factor */
-  transform: translate(-50%, -50%) scale(
+  transform: scale(
     min(
       1,
-      calc((100vw - 1rem) / 520px),
-      calc((100vh - 6rem) / 696px)
+      calc((100vw - 1rem) / var(--grid-width)),
+      calc((100vh - 6rem) / var(--grid-height))
     )
   ) !important;
   transform-origin: center center;
   /* Ensure scaled grid doesn't cause layout issues */
   will-change: transform;
+  /* Prevent horizontal overflow */
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-/* Grid container - ensure proper scrolling */
+/* Grid container - ensure proper scrolling and centering */
 .grid-container-wrapper {
-  /* Ensure container allows scrolling when grid is larger than viewport */
-  overflow: auto;
+  /* Only allow vertical scrolling when grid is larger than viewport */
+  overflow-y: auto;
+  overflow-x: hidden;
   /* Ensure content can be scrolled to */
   position: relative;
   /* Make sure container takes full available height */
   min-height: 100%;
   /* Allow scrolling in all directions when needed */
   overscroll-behavior: contain;
+  /* Center the grid using flexbox */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Ensure no horizontal overflow */
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Utility classes for manual mobile adjustments if needed */

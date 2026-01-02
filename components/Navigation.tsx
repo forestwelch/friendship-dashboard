@@ -7,16 +7,15 @@ import clsx from "clsx";
 import styles from "./Navigation.module.css";
 
 interface NavigationProps {
-  actions?: {
+  adminActions?: {
     label: string;
     onClick: () => void;
-    icon?: string;
-    primary?: boolean;
+    isActive?: boolean;
   }[];
   className?: string;
 }
 
-export function Navigation({ actions, className }: NavigationProps = {} as NavigationProps) {
+export function Navigation({ adminActions, className }: NavigationProps = {} as NavigationProps) {
   const pathname = usePathname();
 
   const navLinks = [
@@ -42,27 +41,26 @@ export function Navigation({ actions, className }: NavigationProps = {} as Navig
         );
       })}
 
-      {/* Contextual Actions */}
-      {actions && actions.length > 0 && (
-        <div className={styles.actionsContainer}>
-          {actions.map((action, index) => (
+      {/* Admin Actions as Links - styled exactly like nav links */}
+      {adminActions && adminActions.length > 0 && (
+        <>
+          {adminActions.map((action, index) => (
             <button
               key={index}
               onClick={() => {
                 action.onClick();
-                playSound(action.primary ? "select" : "click");
+                playSound("click");
               }}
-              className={clsx(
-                "game-button",
-                action.primary && "game-button-primary",
-                styles.actionButton
-              )}
+              className={clsx("game-nav-link", styles.navLink, action.isActive && "active")}
+              style={{
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
             >
-              {action.icon && <i className={clsx("hn", action.icon, styles.actionIcon)} />}
               {action.label}
             </button>
           ))}
-        </div>
+        </>
       )}
     </nav>
   );

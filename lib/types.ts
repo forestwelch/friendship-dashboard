@@ -3,8 +3,8 @@
 export type WidgetSize = "1x1" | "2x2" | "3x3";
 
 export interface WidgetPosition {
-  x: number; // 0-7 for 8-column grid
-  y: number; // 0-5 for 6-row grid
+  x: number; // 0 to (GRID_COLS - 1)
+  y: number; // 0 to (GRID_ROWS - 1)
 }
 
 export interface WidgetData {

@@ -10,6 +10,7 @@ import {
   mapIntensityToThemeColor,
   generateScanlineOrder,
 } from "@/lib/pixel-data-processing";
+import { GRID_TILE_SIZE_REM, GRID_GAP_REM } from "@/lib/constants";
 
 interface PixelArtProps {
   size: WidgetSize;
@@ -87,14 +88,14 @@ export function PixelArt({
 
   // Calculate grid dimensions based on widget size
   const getGridDimensions = useCallback(() => {
-    // Get actual widget dimensions - updated to match new grid (5rem tiles, 0.5rem gap)
+    // Get actual widget dimensions using constants
     // Default to 16px if window not available (SSR)
     const rootFontSize =
       typeof window !== "undefined" && typeof document !== "undefined"
         ? parseFloat(getComputedStyle(document.documentElement).fontSize)
         : 16;
-    const tileSize = 5 * rootFontSize; // 5rem
-    const gap = 0.5 * rootFontSize; // 0.5rem
+    const tileSize = GRID_TILE_SIZE_REM * rootFontSize;
+    const gap = GRID_GAP_REM * rootFontSize;
 
     let width = tileSize;
     let height = tileSize;
@@ -342,13 +343,13 @@ export function PixelArt({
       typeof window !== "undefined" && typeof document !== "undefined"
         ? parseFloat(getComputedStyle(document.documentElement).fontSize)
         : 16;
-    const tileSize = 5 * rootFontSize; // 5rem
+    const tileSize = GRID_TILE_SIZE_REM * rootFontSize;
 
     let widgetSize = tileSize;
     if (size === "2x2") {
-      widgetSize = tileSize * 2 + 0.5 * rootFontSize;
+      widgetSize = tileSize * 2 + GRID_GAP_REM * rootFontSize;
     } else if (size === "3x3") {
-      widgetSize = tileSize * 3 + 1 * rootFontSize;
+      widgetSize = tileSize * 3 + GRID_GAP_REM * 2 * rootFontSize;
     }
 
     // Each pixel in the 128x128 grid should be widgetSize/128

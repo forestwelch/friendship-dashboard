@@ -1,5 +1,4 @@
 import React from "react";
-import { Navigation } from "@/components/Navigation";
 import { notFound } from "next/navigation";
 import { getFriendPage, getTop10Songs } from "@/lib/queries";
 import { Song } from "@/lib/types";
@@ -55,15 +54,12 @@ export default async function FriendPage({ params }: FriendPageProps) {
   }
 
   return (
-    <>
-      <Navigation className="friend-page-nav" />
-      <FriendPageClient
-        friend={friend}
-        initialWidgets={widgets}
-        songs={songs}
-        pixelArtMap={pixelArtMap}
-        pixelArtBySize={pixelArtBySize}
-      />
-    </>
+    <FriendPageClient
+      friend={friend}
+      initialWidgets={widgets}
+      songs={songs}
+      pixelArtMap={pixelArtMap}
+      pixelArtBySize={pixelArtBySize}
+    />
   );
 }

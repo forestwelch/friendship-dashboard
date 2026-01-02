@@ -3,7 +3,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { Grid, GridItem } from "@/components/Grid";
 import { WidgetRenderer } from "@/components/WidgetRenderer";
-import { ViewEditToggle } from "@/components/admin/ViewEditToggle";
 import { AdminOverlay } from "@/components/admin/AdminOverlay";
 import { ColorSettings } from "@/components/admin/ColorSettings";
 import { WidgetLibrary } from "@/components/admin/WidgetLibrary";
@@ -419,11 +418,48 @@ export function FriendPageClient({
     [friend.id, widgets]
   );
 
+  // Listen for admin navigation events (only in admin mode)
+  useEffect(() => {
+    if (!userContext.isAdmin) return;
+
+    const handleAddWidget = () => {
+      setShowWidgetLibrary(true);
+    };
+
+    const handleAdminSave = () => {
+      handleSave();
+    };
+
+    const handleSetEditMode = (e: Event) => {
+      const customEvent = e as CustomEvent<boolean>;
+      setIsEditMode(customEvent.detail);
+    };
+
+    window.addEventListener("admin-add-widget", handleAddWidget);
+    window.addEventListener("admin-save", handleAdminSave);
+    window.addEventListener("admin-set-edit-mode", handleSetEditMode);
+
+    // Notify navigation of edit mode changes
+    window.dispatchEvent(new CustomEvent("admin-edit-mode-changed", { detail: isEditMode }));
+
+    return () => {
+      window.removeEventListener("admin-add-widget", handleAddWidget);
+      window.removeEventListener("admin-save", handleAdminSave);
+      window.removeEventListener("admin-set-edit-mode", handleSetEditMode);
+    };
+  }, [userContext.isAdmin, handleSave, isEditMode]);
+
+  // Sync edit mode changes to navigation whenever it changes
+  useEffect(() => {
+    if (!userContext.isAdmin) return;
+    window.dispatchEvent(new CustomEvent("admin-edit-mode-changed", { detail: isEditMode }));
+  }, [isEditMode, userContext.isAdmin]);
+
   return (
     <div
       style={{
         ...themeStyle,
-        paddingTop: userContext.isAdmin ? "2.25rem" : "0",
+        paddingTop: "0", // No padding - nav is fixed and doesn't affect layout
         width: "100%",
         maxWidth: "100%",
         minHeight: "100vh",
@@ -441,109 +477,6 @@ export function FriendPageClient({
           }
         }}
       />
-      {/* Top bar with toggle - hidden on non-admin pages */}
-      <div
-        className={userContext.isAdmin ? "" : "friend-page-header"}
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "var(--space-md) var(--space-lg)",
-          background: themeColors.bg,
-          borderBottom: `var(--border-width-md) solid ${themeColors.accent}`,
-          position: "relative",
-          zIndex: 10,
-          flexWrap: "nowrap",
-          gap: "var(--space-sm)",
-          overflow: "visible",
-        }}
-      >
-        <h1 className="game-heading-1" style={{ margin: 0, color: themeColors.text }}>
-          {friend.display_name.toUpperCase()}
-        </h1>
-        <div
-          style={{
-            display: "flex",
-            gap: "var(--space-md)",
-            alignItems: "center",
-          }}
-        >
-          {/* Admin buttons - always in DOM, visibility controlled */}
-          <div
-            style={{
-              display: isEditMode ? "flex" : "none",
-              gap: "var(--space-md)",
-              height: "var(--height-button)",
-              minHeight: "var(--height-button)",
-              visibility: isEditMode ? "visible" : "hidden",
-            }}
-          >
-            <button
-              onClick={() => {
-                setShowWidgetLibrary(true);
-                playSound("open");
-              }}
-              style={{
-                fontSize: "var(--font-size-sm)",
-                padding: "var(--space-xs) var(--space-sm)",
-                height: "var(--height-button)",
-                minHeight: "var(--height-button)",
-                background: themeColors.primary,
-                border: `var(--border-width-md) solid ${themeColors.accent}`,
-                color: themeColors.bg,
-                borderRadius: "var(--radius-sm)",
-                cursor: "pointer",
-                fontWeight: "bold",
-                textTransform: "uppercase",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "var(--space-xs)",
-              }}
-            >
-              <i className="hn hn-plus-solid" style={{ fontSize: "var(--font-size-xs)" }} />
-              ADD
-            </button>
-            <button
-              onClick={() => {
-                playSound("select");
-                handleSave();
-              }}
-              style={{
-                fontSize: "var(--font-size-sm)",
-                padding: "var(--space-xs) var(--space-sm)",
-                height: "var(--height-button)",
-                minHeight: "var(--height-button)",
-                background: themeColors.secondary,
-                border: `var(--border-width-md) solid ${themeColors.accent}`,
-                color: themeColors.bg,
-                borderRadius: "var(--radius-sm)",
-                cursor: "pointer",
-                fontWeight: "bold",
-                textTransform: "uppercase",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "var(--space-xs)",
-              }}
-            >
-              <i className="hn hn-save-solid" style={{ fontSize: "var(--font-size-xs)" }} />
-              SAVE
-            </button>
-          </div>
-          {/* Only show edit toggle for admin routes */}
-          {userContext.isAdmin && (
-            <ViewEditToggle
-              isEditMode={isEditMode}
-              onToggle={(edit) => {
-                setIsEditMode(edit);
-                playSound(edit ? "open" : "close");
-              }}
-            />
-          )}
-        </div>
-      </div>
-
       {/* Grid container - allows scrolling and scaling */}
       <div
         ref={gridRef}
@@ -551,11 +484,12 @@ export function FriendPageClient({
         className="grid-container-wrapper"
         style={{
           position: "relative",
-          overflow: "auto",
+          overflowY: "auto",
+          overflowX: "hidden",
           width: "100%",
           maxWidth: "100%",
-          height: "calc(100vh - 2.25rem - 3.75rem)", // Full height minus nav and header
-          minHeight: "calc(100vh - 2.25rem - 3.75rem)", // Ensure full height
+          height: "100vh",
+          minHeight: "100vh",
         }}
       >
         <Grid>

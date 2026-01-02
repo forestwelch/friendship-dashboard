@@ -1,8 +1,4 @@
-/* Hide navigation and header on friend pages (non-admin) */
-.friend-page-nav {
-  display: none !important;
-}
-
+/* Hide header on friend pages (non-admin) - nav is now always visible */
 .friend-page-header {
   display: none !important;
 }
