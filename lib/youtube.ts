@@ -3,7 +3,16 @@
 declare global {
   interface Window {
     YT: {
-      Player: new (elementId: string, options: { videoId: string; playerVars?: Record<string, unknown>; onReady?: () => void; onStateChange?: (event: { data: number }) => void; onError?: (event: { data: number }) => void }) => {
+      Player: new (
+        elementId: string,
+        options: {
+          videoId: string;
+          playerVars?: Record<string, unknown>;
+          onReady?: () => void;
+          onStateChange?: (event: { data: number }) => void;
+          onError?: (event: { data: number }) => void;
+        }
+      ) => {
         playVideo: () => void;
         pauseVideo: () => void;
         stopVideo: () => void;
@@ -173,4 +182,3 @@ export function createYouTubePlayer(
 export function getPlayerInstance(): YouTubePlayer | null {
   return playerInstance;
 }
-

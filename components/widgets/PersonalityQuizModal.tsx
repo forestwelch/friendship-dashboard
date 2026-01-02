@@ -5,15 +5,8 @@ import { playSound } from "@/lib/sounds";
 import { useUIStore } from "@/lib/store/ui-store";
 import { ThemeColors } from "@/lib/types";
 import { Modal } from "@/components/Modal";
-import {
-  QUIZ_QUESTIONS,
-  calculateResult,
-  calculateCompatibility,
-} from "@/lib/quiz-questions";
-import {
-  usePersonalityQuizWidget,
-  useSubmitQuizAnswers,
-} from "@/lib/queries-quiz";
+import { QUIZ_QUESTIONS, calculateResult, calculateCompatibility } from "@/lib/quiz-questions";
+import { usePersonalityQuizWidget, useSubmitQuizAnswers } from "@/lib/queries-quiz";
 import styles from "./PersonalityQuizModal.module.css";
 
 interface QuizResultData {
@@ -89,8 +82,9 @@ export function PersonalityQuizModal({
               description: theirResult.description,
             }
           : null;
-        const compatibility =
-          theirResultData ? calculateCompatibility(result, theirResultData) : undefined;
+        const compatibility = theirResultData
+          ? calculateCompatibility(result, theirResultData)
+          : undefined;
 
         submitQuizMutation.mutate({
           your_result: {
@@ -139,7 +133,7 @@ export function PersonalityQuizModal({
     setAnswers([]);
     setFocusedOption(0);
     playSound("retake");
-    // TODO: Clear quiz result (would need a mutation)
+    // Note: Quiz result clearing would require a mutation if needed
   };
 
   // Quiz mode
@@ -155,10 +149,7 @@ export function PersonalityQuizModal({
               QUESTION {currentQuestion + 1} of {QUIZ_QUESTIONS.length}
             </div>
             <div className={styles.progressBar}>
-              <div
-                className={styles.progressFill}
-                style={{ width: `${progress}%` }}
-              />
+              <div className={styles.progressFill} style={{ width: `${progress}%` }} />
             </div>
           </div>
 
@@ -208,9 +199,7 @@ export function PersonalityQuizModal({
               <div className={styles.theirEmoji}>{theirResultData.emoji}</div>
               <div className={styles.theirTitle}>{theirResultData.title}</div>
             </div>
-            {compatibilityNote && (
-              <p className={styles.compatibilityNote}>{compatibilityNote}</p>
-            )}
+            {compatibilityNote && <p className={styles.compatibilityNote}>{compatibilityNote}</p>}
           </div>
         )}
 
@@ -231,4 +220,3 @@ export function PersonalityQuizModal({
     </Modal>
   );
 }
-

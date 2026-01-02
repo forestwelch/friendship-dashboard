@@ -20,17 +20,19 @@ export function useUndoRedo(initialWidgets: FriendWidget[]) {
     widgetsRef.current = history[historyIndex]?.widgets || initialWidgets;
   }, [historyIndex, history, initialWidgets]);
 
-  const saveState = useCallback((widgets: FriendWidget[]) => {
-    setHistory((prev) => {
-      const newHistory = prev.slice(0, historyIndex + 1);
-      newHistory.push({ widgets, timestamp: Date.now() });
-      // Keep only last 50 states
-      const trimmedHistory =
-        newHistory.length > 50 ? newHistory.slice(-50) : newHistory;
-      setHistoryIndex(trimmedHistory.length - 1);
-      return trimmedHistory;
-    });
-  }, [historyIndex]);
+  const saveState = useCallback(
+    (widgets: FriendWidget[]) => {
+      setHistory((prev) => {
+        const newHistory = prev.slice(0, historyIndex + 1);
+        newHistory.push({ widgets, timestamp: Date.now() });
+        // Keep only last 50 states
+        const trimmedHistory = newHistory.length > 50 ? newHistory.slice(-50) : newHistory;
+        setHistoryIndex(trimmedHistory.length - 1);
+        return trimmedHistory;
+      });
+    },
+    [historyIndex]
+  );
 
   const undo = useCallback(() => {
     if (historyIndex > 0) {
@@ -57,7 +59,7 @@ export function useUndoRedo(initialWidgets: FriendWidget[]) {
 
   // Use state instead of ref for currentState to avoid ref access during render
   const [currentState, setCurrentState] = useState<FriendWidget[]>(initialWidgets);
-  
+
   useEffect(() => {
     setCurrentState(widgetsRef.current);
   }, [historyIndex, history]);
@@ -71,4 +73,3 @@ export function useUndoRedo(initialWidgets: FriendWidget[]) {
     canRedo,
   };
 }
-

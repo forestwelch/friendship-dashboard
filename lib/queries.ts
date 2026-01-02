@@ -58,10 +58,7 @@ export async function getAllFriends(): Promise<Friend[]> {
   }
 
   try {
-    const { data, error } = await supabase
-      .from("friends")
-      .select("*")
-      .order("display_name");
+    const { data, error } = await supabase.from("friends").select("*").order("display_name");
 
     if (error) {
       console.error("Error fetching friends:", error);
@@ -103,7 +100,8 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
       // Fetch friend's widgets with widget type info
       supabase
         .from("friend_widgets")
-        .select(`
+        .select(
+          `
           id,
           widget_id,
           size,
@@ -114,15 +112,13 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
             type,
             name
           )
-        `)
+        `
+        )
         .eq("friend_id", friend.id)
         .order("position_y")
         .order("position_x"),
       // Fetch pixel art images for this friend (lazy load - don't fetch full image data here)
-      supabase
-        .from("pixel_art_images")
-        .select("id, widget_id, size")
-        .eq("friend_id", friend.id)
+      supabase.from("pixel_art_images").select("id, widget_id, size").eq("friend_id", friend.id),
     ]);
 
     const { data: widgets, error: widgetsError } = widgetsResult;
@@ -136,7 +132,24 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
     // Transform widgets data
     const transformedWidgets: FriendWidget[] = (widgets || []).map((w: Record<string, unknown>) => {
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'queries.ts:142',message:'Transforming widget',data:{widgetId:w.id,widgetType:w.widgets?.type,widgetName:w.widgets?.name,hasWidgets:!!w.widgets},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      fetch("http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          location: "queries.ts:142",
+          message: "Transforming widget",
+          data: {
+            widgetId: w.id,
+            widgetType: w.widgets?.type,
+            widgetName: w.widgets?.name,
+            hasWidgets: !!w.widgets,
+          },
+          timestamp: Date.now(),
+          sessionId: "debug-session",
+          runId: "run1",
+          hypothesisId: "A",
+        }),
+      }).catch(() => {});
       // #endregion
       return {
         id: w.id,
@@ -164,12 +177,13 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
       },
       widgets: transformedWidgets,
       // Map back to expected interface (without full image data for performance)
-      pixelArtImages: (pixelArtImages || []).map((img: Record<string, unknown>) => ({
-        ...img,
-        image_data: "" // Will be fetched separately if needed
-      })) || [],
+      pixelArtImages:
+        (pixelArtImages || []).map((img: Record<string, unknown>) => ({
+          ...img,
+          image_data: "", // Will be fetched separately if needed
+        })) || [],
     };
-    
+
     // Performance: getFriendPage completed
     return result;
   } catch (error) {
@@ -210,10 +224,7 @@ export async function getGlobalContent(contentType: string): Promise<unknown> {
 /**
  * Get personal content (friend-specific)
  */
-export async function getPersonalContent(
-  friendId: string,
-  contentType: string
-): Promise<unknown> {
+export async function getPersonalContent(friendId: string, contentType: string): Promise<unknown> {
   if (!isSupabaseConfigured()) {
     return null;
   }

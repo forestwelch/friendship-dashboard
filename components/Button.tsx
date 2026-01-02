@@ -9,12 +9,12 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;
 }
 
-export function Button({ 
-  children, 
-  sound = "click", 
-  className = "", 
+export function Button({
+  children,
+  sound = "click",
+  className = "",
   onClick,
-  ...props 
+  ...props
 }: ButtonProps) {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (sound) {
@@ -24,14 +24,8 @@ export function Button({
   };
 
   return (
-    <button
-      className={`widget-button ${className}`}
-      onClick={handleClick}
-      {...props}
-    >
+    <button className={`widget-button ${className}`} onClick={handleClick} {...props}>
       {children}
     </button>
   );
 }
-
-

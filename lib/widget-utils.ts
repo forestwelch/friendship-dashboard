@@ -6,10 +6,7 @@ import { FriendWidget } from "./queries";
 /**
  * Get all grid positions occupied by a widget
  */
-export function getWidgetPositions(
-  position: WidgetPosition,
-  size: WidgetSize
-): WidgetPosition[] {
+export function getWidgetPositions(position: WidgetPosition, size: WidgetSize): WidgetPosition[] {
   const [cols, rows] = size.split("x").map(Number);
   const positions: WidgetPosition[] = [];
 
@@ -50,16 +47,13 @@ export function widgetsOverlap(
 /**
  * Check if a widget position is valid (within grid bounds)
  */
-export function isValidPosition(
-  position: WidgetPosition,
-  size: WidgetSize
-): boolean {
+export function isValidPosition(position: WidgetPosition, size: WidgetSize): boolean {
   const [cols, rows] = size.split("x").map(Number);
   return (
     position.x >= 0 &&
     position.y >= 0 &&
     position.x + cols <= 6 && // 6 cols
-    position.y + rows <= 8    // 8 rows
+    position.y + rows <= 8 // 8 rows
   );
 }
 
@@ -102,8 +96,10 @@ export function findAvailablePosition(
 ): WidgetPosition | null {
   const [cols, rows] = size.split("x").map(Number);
 
-  for (let y = 0; y <= 8 - rows; y++) { // 8 rows
-    for (let x = 0; x <= 6 - cols; x++) { // 6 cols
+  for (let y = 0; y <= 8 - rows; y++) {
+    // 8 rows
+    for (let x = 0; x <= 6 - cols; x++) {
+      // 6 cols
       const position: WidgetPosition = { x, y };
       if (canPlaceWidget(widgets, "", position, size)) {
         return position;
@@ -113,5 +109,3 @@ export function findAvailablePosition(
 
   return null;
 }
-
-

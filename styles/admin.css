@@ -46,7 +46,8 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: 2px 2px 0 var(--game-border-dark),
+  box-shadow:
+    2px 2px 0 var(--game-border-dark),
     inset -1px -1px 0 rgba(0, 0, 0, 0.3);
   min-height: 32px;
   user-select: none;
@@ -57,7 +58,9 @@
   background: var(--primary);
   color: var(--bg);
   border-color: var(--accent);
-  box-shadow: 2px 2px 0 var(--accent), inset -1px -1px 0 rgba(0, 0, 0, 0.2),
+  box-shadow:
+    2px 2px 0 var(--accent),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2),
     var(--game-glow-primary);
 }
 
@@ -65,7 +68,9 @@
   background: var(--secondary);
   color: var(--text);
   border-color: var(--accent);
-  box-shadow: 2px 2px 0 var(--accent), inset -1px -1px 0 rgba(0, 0, 0, 0.2),
+  box-shadow:
+    2px 2px 0 var(--accent),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2),
     var(--game-glow-secondary);
 }
 
@@ -73,7 +78,9 @@
   background: var(--accent);
   color: var(--text);
   border-color: var(--accent);
-  box-shadow: 2px 2px 0 var(--accent), inset -1px -1px 0 rgba(0, 0, 0, 0.2);
+  box-shadow:
+    2px 2px 0 var(--accent),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2);
 }
 
 /* Spacious sections */
@@ -101,7 +108,9 @@
   border: 2px solid var(--accent);
   border-radius: var(--radius-sm);
   padding: var(--space-lg);
-  box-shadow: 2px 2px 0 var(--accent), inset -1px -1px 0 rgba(0, 0, 0, 0.2);
+  box-shadow:
+    2px 2px 0 var(--accent),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2);
 }
 
 /* Input fields use game-input */
@@ -121,7 +130,9 @@
 .admin-input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.3), var(--game-glow-primary);
+  box-shadow:
+    inset 2px 2px 0 rgba(0, 0, 0, 0.3),
+    var(--game-glow-primary);
 }
 
 /* Links use game-link from design system */

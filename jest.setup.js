@@ -11,4 +11,3 @@ jest.mock("./lib/supabase", () => ({
 jest.mock("./lib/sounds", () => ({
   playSound: jest.fn(),
 }));
-

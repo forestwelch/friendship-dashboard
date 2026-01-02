@@ -54,11 +54,7 @@ export function DatePicker({ value, onChange, id }: DatePickerProps) {
         {displayDate} ▼
       </button>
 
-      <Modal
-        id={`datepicker-${id}`}
-        title="Select Date"
-        onClose={handleClose}
-      >
+      <Modal id={`datepicker-${id}`} title="Select Date" onClose={handleClose}>
         <div className={styles.datePickerContent}>
           {/* Native date input for mobile, calendar for desktop */}
           <input
@@ -77,4 +73,3 @@ export function DatePicker({ value, onChange, id }: DatePickerProps) {
     </>
   );
 }
-

@@ -29,10 +29,10 @@ export function MediaRecommendations({
   onAddRecommendation,
 }: MediaRecommendationsProps) {
   const [_selectedItem, _setSelectedItem] = useState<MediaItem | null>(null);
-  
+
   const unwatchedCount = recommendations.filter((r) => !r.watched).length;
   const latestUnwatched = recommendations.find((r) => !r.watched);
-  
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case "movie":
@@ -49,7 +49,7 @@ export function MediaRecommendations({
         return "hn-star-solid";
     }
   };
-  
+
   if (size === "1x1") {
     return (
       <Widget size={size}>
@@ -65,9 +65,7 @@ export function MediaRecommendations({
             gap: "var(--space-sm)",
           }}
         >
-          <div
-            style={{ fontSize: "32px", opacity: 0.8 }}
-          >
+          <div style={{ fontSize: "32px", opacity: 0.8 }}>
             {getTypeIcon(latestUnwatched?.type || "movie")}
           </div>
           {unwatchedCount > 0 && (
@@ -88,7 +86,7 @@ export function MediaRecommendations({
       </Widget>
     );
   }
-  
+
   if (size === "2x2") {
     return (
       <Widget size={size}>
@@ -111,7 +109,7 @@ export function MediaRecommendations({
           >
             Recommendations
           </div>
-          
+
           {latestUnwatched ? (
             <div
               style={{
@@ -172,7 +170,7 @@ export function MediaRecommendations({
               No new recommendations
             </div>
           )}
-          
+
           <button
             className="widget-button"
             onClick={() => {
@@ -189,7 +187,7 @@ export function MediaRecommendations({
       </Widget>
     );
   }
-  
+
   // 3x3 version - Full list
   return (
     <Widget size={size}>
@@ -228,7 +226,7 @@ export function MediaRecommendations({
             </span>
           )}
         </div>
-        
+
         <div
           style={{
             flex: 1,
@@ -255,9 +253,7 @@ export function MediaRecommendations({
                 key={item.id}
                 style={{
                   padding: "6px",
-                  background: item.watched
-                    ? "var(--secondary)"
-                    : "var(--primary)",
+                  background: item.watched ? "var(--secondary)" : "var(--primary)",
                   color: item.watched ? "var(--text)" : "var(--bg)",
                   border: "2px solid var(--accent)",
                   cursor: "pointer",
@@ -292,11 +288,7 @@ export function MediaRecommendations({
                         {getTypeIcon(item.type)}
                       </span>
                       <span style={{ fontWeight: "bold" }}>{item.title}</span>
-                      {item.watched && (
-                        <span style={{ fontSize: "8px", opacity: 0.8 }}>
-                          ✓
-                        </span>
-                      )}
+                      {item.watched && <span style={{ fontSize: "8px", opacity: 0.8 }}>✓</span>}
                     </div>
                     <div
                       style={{
@@ -330,7 +322,7 @@ export function MediaRecommendations({
             ))
           )}
         </div>
-        
+
         <button
           className="widget-button"
           onClick={() => {
@@ -347,4 +339,3 @@ export function MediaRecommendations({
     </Widget>
   );
 }
-

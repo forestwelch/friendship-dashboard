@@ -14,37 +14,37 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  
+
   useEffect(() => {
     if (editingIndex !== null && inputRef.current) {
       inputRef.current.focus();
     }
   }, [editingIndex]);
-  
+
   const addNote = () => {
     const newNote = `Note ${notes.length + 1}`;
     setNotes([...notes, newNote]);
     setEditingIndex(notes.length);
     setEditValue(newNote);
   };
-  
+
   const saveNote = () => {
     if (editingIndex === null) return;
-    
+
     const updatedNotes = [...notes];
     updatedNotes[editingIndex] = editValue || `Note ${editingIndex + 1}`;
     setNotes(updatedNotes);
     setEditingIndex(null);
     setEditValue("");
   };
-  
+
   const deleteNote = (index: number) => {
     setNotes(notes.filter((_, i) => i !== index));
     if (editingIndex === index) {
       setEditingIndex(null);
     }
   };
-  
+
   if (size === "1x1") {
     return (
       <Widget size={size}>
@@ -71,7 +71,7 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
       </Widget>
     );
   }
-  
+
   if (size === "2x2") {
     return (
       <Widget size={size}>
@@ -94,7 +94,7 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
           >
             Notes
           </div>
-          
+
           <div
             style={{
               flex: 1,
@@ -164,7 +164,7 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
               ))
             )}
           </div>
-          
+
           {editingIndex === null ? (
             <button
               className="widget-button"
@@ -205,7 +205,7 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
       </Widget>
     );
   }
-  
+
   // 3x3 version - Full notes editor
   return (
     <Widget size={size}>
@@ -230,11 +230,9 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
           }}
         >
           <span>Notes</span>
-          <span style={{ fontSize: "var(--font-size-xs)", opacity: 0.7 }}>
-            {notes.length}
-          </span>
+          <span style={{ fontSize: "var(--font-size-xs)", opacity: 0.7 }}>{notes.length}</span>
         </div>
-        
+
         <div
           style={{
             flex: 1,
@@ -340,7 +338,7 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
             ))
           )}
         </div>
-        
+
         {editingIndex === null && (
           <button
             className="widget-button"
@@ -354,5 +352,3 @@ export function Notes({ size, initialNotes = [] }: NotesProps) {
     </Widget>
   );
 }
-
-

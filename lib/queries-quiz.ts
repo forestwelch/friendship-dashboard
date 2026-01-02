@@ -156,6 +156,3 @@ export function useSubmitQuizAnswers(friendId: string, widgetId: string) {
     },
   });
 }
-
-
-

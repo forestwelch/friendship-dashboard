@@ -1,0 +1,36 @@
+/* InboxManager Styles */
+
+.breadcrumb {
+  margin-bottom: var(--space-xl);
+}
+
+.title {
+  margin-bottom: var(--space-md);
+}
+
+.description {
+  margin-bottom: var(--space-xl);
+}
+
+.filters {
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.emptyState {
+  padding: var(--space-2xl);
+  text-align: center;
+}
+
+.itemsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.itemCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-lg);
+}

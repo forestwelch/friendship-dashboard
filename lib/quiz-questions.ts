@@ -166,10 +166,7 @@ export function calculateResult(answers: string[]): QuizResult {
   };
 }
 
-export function calculateCompatibility(
-  yourResult: QuizResult,
-  theirResult: QuizResult
-): string {
+export function calculateCompatibility(yourResult: QuizResult, theirResult: QuizResult): string {
   // Hardcoded compatibility notes based on result combinations
   const compatibilityMap: Record<string, Record<string, string>> = {
     "☀️": {
@@ -206,6 +203,3 @@ export function calculateCompatibility(
     "You're both unique! Your friendship brings something special to each other's lives."
   );
 }
-
-
-

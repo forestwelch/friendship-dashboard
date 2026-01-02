@@ -15,7 +15,7 @@ export function ScaleProvider({ children }: { children: ReactNode }) {
   const [scale, setScaleState] = useState<Scale>(() => {
     if (typeof window === "undefined") return 2;
     const saved = localStorage.getItem("global-scale");
-    return (saved === "1" || saved === "2" || saved === "4") ? parseInt(saved) as Scale : 2;
+    return saved === "1" || saved === "2" || saved === "4" ? (parseInt(saved) as Scale) : 2;
   });
 
   useEffect(() => {
@@ -29,11 +29,7 @@ export function ScaleProvider({ children }: { children: ReactNode }) {
     setScaleState(newScale);
   };
 
-  return (
-    <ScaleContext.Provider value={{ scale, setScale }}>
-      {children}
-    </ScaleContext.Provider>
-  );
+  return <ScaleContext.Provider value={{ scale, setScale }}>{children}</ScaleContext.Provider>;
 }
 
 export function useScale() {
@@ -43,4 +39,3 @@ export function useScale() {
   }
   return context;
 }
-

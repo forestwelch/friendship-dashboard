@@ -6,8 +6,7 @@ const supabaseUrl = "https://kaokqdggrlavjurtwlcb.supabase.co";
 // Use NEXT_PUBLIC_ prefix for client-side access
 // For client components, we need NEXT_PUBLIC_SUPABASE_KEY
 // For server components, we can use SUPABASE_KEY
-const supabaseKey =
-  process.env.NEXT_PUBLIC_SUPABASE_KEY || process.env.SUPABASE_KEY || "";
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || process.env.SUPABASE_KEY || "";
 
 if (!supabaseKey) {
   if (typeof window !== "undefined") {
@@ -56,7 +55,7 @@ export function getSupabaseAdmin() {
   // This will work with the temporary migration that allows public writes
   console.warn(
     "SUPABASE_SERVICE_ROLE_KEY not configured. Using regular client. " +
-    "For production, set SUPABASE_SERVICE_ROLE_KEY in .env.local"
+      "For production, set SUPABASE_SERVICE_ROLE_KEY in .env.local"
   );
   return supabase;
 }

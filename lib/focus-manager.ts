@@ -1,5 +1,4 @@
-
-type FocusDirection = 'up' | 'down' | 'left' | 'right';
+type FocusDirection = "up" | "down" | "left" | "right";
 
 export function useFocusManager() {
   // Find all focusable elements
@@ -18,29 +17,32 @@ export function useFocusManager() {
   };
 
   // Find nearest element in direction
-  const findNearestElement = (current: HTMLElement, direction: FocusDirection): HTMLElement | null => {
+  const findNearestElement = (
+    current: HTMLElement,
+    direction: FocusDirection
+  ): HTMLElement | null => {
     const currentRect = current.getBoundingClientRect();
-    const candidates = getFocusableElements().filter(el => el !== current);
-    
+    const candidates = getFocusableElements().filter((el) => el !== current);
+
     let nearest: HTMLElement | null = null;
     let minDistance = Infinity;
 
-    candidates.forEach(candidate => {
+    candidates.forEach((candidate) => {
       const rect = candidate.getBoundingClientRect();
-      
+
       // Check if candidate is in the correct direction
       let isValid = false;
       switch (direction) {
-        case 'up':
+        case "up":
           isValid = rect.bottom <= currentRect.top;
           break;
-        case 'down':
+        case "down":
           isValid = rect.top >= currentRect.bottom;
           break;
-        case 'left':
+        case "left":
           isValid = rect.right <= currentRect.left;
           break;
-        case 'right':
+        case "right":
           isValid = rect.left >= currentRect.right;
           break;
       }
@@ -74,5 +76,3 @@ export function useFocusManager() {
 
   return { moveFocus };
 }
-
-

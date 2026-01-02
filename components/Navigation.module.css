@@ -1,0 +1,32 @@
+/* Navigation Styles */
+
+.nav {
+  background: var(--bg);
+  border-bottom-color: var(--accent);
+}
+
+.navLink {
+  color: var(--text);
+}
+
+.navLink.active {
+  color: var(--primary);
+}
+
+.actionsContainer {
+  display: flex;
+  gap: var(--space-sm);
+  margin-left: var(--space-md);
+  border-left: var(--border-width-sm) solid var(--accent);
+  padding-left: var(--space-md);
+}
+
+.actionButton {
+  font-size: var(--font-size-xs);
+  height: 1.5rem;
+  min-height: 1.5rem;
+}
+
+.actionIcon {
+  margin-right: 0.25rem;
+}

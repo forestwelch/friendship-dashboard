@@ -1,7 +1,9 @@
 # Comprehensive Implementation Plan
+
 ## Complete Implementation Based on Specification & Tooling Strategy Documents
 
 ## Overview
+
 Implement 4 new interactive widgets (Mood Tracker, Event Countdown, Personality Quiz, Connect Four) following strict zero-friction principles: no confirmation dialogs, no save buttons, instant optimistic updates. Integrate comprehensive tooling infrastructure (TanStack Query, Zustand, Jest, Playwright, ESLint, Prettier, Husky, Bundle Analyzer, Web Vitals, Sentry) and add mobile responsiveness.
 
 ---
@@ -17,6 +19,7 @@ All 6 checkpoint sections have been answered and validated. Proceeding with impl
 ### 0.1 Install All Required Dependencies
 
 **Production Dependencies:**
+
 ```bash
 npm install @tanstack/react-query@^5.x.x
 npm install zustand@^4.x.x
@@ -25,6 +28,7 @@ npm install web-vitals
 ```
 
 **Dev Dependencies:**
+
 ```bash
 npm install --save-dev @tanstack/react-query-devtools
 npm install --save-dev jest@^29.x.x
@@ -42,6 +46,7 @@ npm install --save-dev @typescript-eslint/parser@^6.x.x
 ### 0.2 Configure TypeScript Strict Mode
 
 **File: `tsconfig.json`**
+
 - Set `"strict": true`
 - Set `"strictNullChecks": true`
 - Set `"strictFunctionTypes": true`
@@ -55,6 +60,7 @@ npm install --save-dev @typescript-eslint/parser@^6.x.x
 ### 0.3 Configure ESLint
 
 **File: `.eslintrc.json` (UPDATE existing `eslint.config.mjs` or create new)**
+
 ```json
 {
   "extends": ["next/core-web-vitals"],
@@ -70,6 +76,7 @@ npm install --save-dev @typescript-eslint/parser@^6.x.x
 ### 0.4 Configure Prettier
 
 **File: `.prettierrc` (NEW)**
+
 ```json
 {
   "semi": true,
@@ -82,6 +89,7 @@ npm install --save-dev @typescript-eslint/parser@^6.x.x
 ```
 
 **File: `.prettierignore` (NEW)**
+
 ```
 node_modules
 .next
@@ -93,6 +101,7 @@ coverage
 ### 0.5 Setup Husky Pre-commit Hooks
 
 **File: `.husky/pre-commit` (NEW)**
+
 ```bash
 #!/bin/sh
 npm test -- --bail
@@ -100,6 +109,7 @@ npm run lint
 ```
 
 **Commands:**
+
 ```bash
 npx husky install
 npx husky add .husky/pre-commit "npm test -- --bail && npm run lint"
@@ -108,6 +118,7 @@ npx husky add .husky/pre-commit "npm test -- --bail && npm run lint"
 ### 0.6 Setup TanStack Query Infrastructure
 
 **File: `app/layout.tsx`**
+
 - Wrap app with `QueryClientProvider` (inside ThemeProvider)
 - Configure QueryClient with default options:
   - `staleTime: 1000 * 60 * 5` (5 minutes)
@@ -118,6 +129,7 @@ npx husky add .husky/pre-commit "npm test -- --bail && npm run lint"
 - Add `ReactQueryDevtools` in development mode only
 
 **File: `lib/queries.ts` (refactor existing)**
+
 - Convert ALL existing Supabase queries to TanStack Query hooks:
   - `useFriendPage(friendSlug)` - Query hook
   - `useFriendWidgets(friendId)` - Query hook
@@ -130,12 +142,14 @@ npx husky add .husky/pre-commit "npm test -- --bail && npm run lint"
 - All mutations must follow optimistic update pattern (onMutate, onError revert, onSuccess invalidate)
 
 **File: `lib/queries-client.ts` (NEW)**
+
 - Create client-side query hooks that use TanStack Query
 - Separate from server-side queries
 
 ### 0.7 Setup Zustand for Global UI State
 
 **File: `lib/store/ui-store.ts` (NEW)**
+
 - Create Zustand store for truly global state:
   - `openModal: string | null` - Current open modal ID
   - `setOpenModal(modalId: string | null)` - Function to open/close modals
@@ -144,6 +158,7 @@ npx husky add .husky/pre-commit "npm test -- --bail && npm run lint"
 ### 0.8 Remove ALL Confirmation Dialogs
 
 **Files to update:**
+
 - `components/admin/WidgetManager.tsx` - Line 160: Remove `confirm("Delete this widget?")`
   - Replace with instant delete + optimistic update + error revert
   - Pattern: Update local state immediately → playSound('delete') → sync to DB in background → revert on error
@@ -154,6 +169,7 @@ npx husky add .husky/pre-commit "npm test -- --bail && npm run lint"
   - Replace with optimistic delete pattern
 
 **Pattern (Required for ALL deletions):**
+
 ```typescript
 const deleteMutation = useMutation({
   mutationFn: async (id) => {
@@ -178,6 +194,7 @@ const deleteMutation = useMutation({
 ### 0.9 Create Modal Infrastructure
 
 **File: `components/Modal.tsx` (NEW)**
+
 - Full-screen modal component
 - X button in top-left (closes modal, plays sound)
 - Escape key support (closes modal)
@@ -190,12 +207,14 @@ const deleteMutation = useMutation({
 - Uses theme colors only
 
 **File: `lib/modal-context.tsx` (NEW)**
+
 - Context for managing open modals (or use Zustand store)
 - Single modal active at a time (prevents multiple modals)
 - `openModal: string | null` state
 - `setOpenModal(modalId: string | null)` function
 
 **File: `components/DatePicker.tsx` (NEW)**
+
 - Modal date picker component
 - Opens when date input is tapped
 - Calendar view OR native date input (mobile)
@@ -205,6 +224,7 @@ const deleteMutation = useMutation({
 ### 0.10 Database Migrations
 
 **File: `supabase/migrations/009_widget_events_table.sql` (NEW)**
+
 - Create `widget_events` table:
   ```sql
   CREATE TABLE widget_events (
@@ -224,6 +244,7 @@ const deleteMutation = useMutation({
 - Add RLS policies if needed (or disable RLS as per existing pattern)
 
 **File: `supabase/migrations/010_enable_realtime.sql` (NEW)**
+
 - Enable Realtime on `friend_widgets` table:
   ```sql
   ALTER PUBLICATION supabase_realtime ADD TABLE friend_widgets;
@@ -233,12 +254,14 @@ const deleteMutation = useMutation({
 ### 0.11 Mobile Responsiveness Foundation
 
 **File: `styles/responsive.css` (NEW)**
+
 - Media query breakpoint at 768px
 - Grid → Stack transformation utilities
 - Mobile-specific spacing adjustments
 - Full-width card styles for mobile
 
 **File: `components/Grid.tsx`**
+
 - Add mobile detection using `useMediaQuery` or CSS media queries
 - Switch to full-width stacked cards on mobile (< 768px)
 - Maintain desktop grid on larger screens (≥ 768px)
@@ -246,12 +269,14 @@ const deleteMutation = useMutation({
 - Maintain spacing and styling consistency
 
 **File: `lib/useMediaQuery.ts` (NEW)**
+
 - Custom hook for detecting viewport width
 - Returns boolean: `isMobile` (< 768px)
 
 ### 0.12 Setup Error Boundaries
 
 **File: `components/ErrorBoundary.tsx` (NEW)**
+
 - React Error Boundary component
 - Catches component errors
 - Displays user-friendly error message
@@ -261,6 +286,7 @@ const deleteMutation = useMutation({
 ### 0.13 Setup Performance Monitoring
 
 **File: `lib/web-vitals.ts` (NEW)**
+
 - Import `getCLS`, `getFID`, `getFCP`, `getLCP`, `getTTFB` from `web-vitals`
 - Create `reportWebVitals` function
 - Log performance metrics
@@ -271,6 +297,7 @@ const deleteMutation = useMutation({
   - TTFB < 600ms
 
 **File: `next.config.ts`**
+
 - Bundle Analyzer setup deferred (will be added later)
 - Target: Keep JS bundle < 250KB gzipped
 
@@ -281,32 +308,35 @@ const deleteMutation = useMutation({
 ### 0.15 Setup Jest Configuration
 
 **File: `jest.config.js` (NEW)**
+
 ```javascript
-const nextJest = require('next/jest')
+const nextJest = require("next/jest");
 
 const createJestConfig = nextJest({
-  dir: './',
-})
+  dir: "./",
+});
 
 const customJestConfig = {
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  testEnvironment: 'jest-environment-jsdom',
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
+  testEnvironment: "jest-environment-jsdom",
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
+    "^@/(.*)$": "<rootDir>/$1",
   },
-}
+};
 
-module.exports = createJestConfig(customJestConfig)
+module.exports = createJestConfig(customJestConfig);
 ```
 
 **File: `jest.setup.js` (NEW)**
+
 ```javascript
-import '@testing-library/jest-dom'
+import "@testing-library/jest-dom";
 ```
 
 ### 0.16 Update Package.json Scripts
 
 **File: `package.json`**
+
 - Add scripts:
   ```json
   {
@@ -330,6 +360,7 @@ import '@testing-library/jest-dom'
 ### 1.1 Create Mood Widget Component
 
 **File: `components/widgets/Mood.tsx` (NEW)**
+
 - Implement 1x1, 2x2, 3x3 tile versions
 - Props: `size: 1 | 2 | 3`, `friendId: string`, `widgetId: string`, `themeColors: ThemeColors`
 - 1x1: Show current emoji, tap to open modal
@@ -339,6 +370,7 @@ import '@testing-library/jest-dom'
 - Memoize with `React.memo`
 
 **File: `components/widgets/Mood.module.css` (NEW)**
+
 - Styles for all three tile sizes
 - Mobile responsive styles
 - Theme color variables
@@ -346,6 +378,7 @@ import '@testing-library/jest-dom'
 ### 1.2 Create Mood Modal Component
 
 **File: `components/widgets/MoodModal.tsx` (NEW)**
+
 - Full-screen modal with X button
 - Emoticon grid (10 emoticons: :D, :), :|, :(, T_T, :P, ;), o_o, >:), ^^)
 - Notes input (auto-saves as you type, debounced 300ms)
@@ -362,6 +395,7 @@ import '@testing-library/jest-dom'
 - Mobile: Full-screen modal, emoticon grid horizontal scroll if needed
 
 **File: `components/widgets/MoodModal.module.css` (NEW)**
+
 - Modal styles
 - Emoticon grid layout
 - Mobile responsive styles
@@ -369,6 +403,7 @@ import '@testing-library/jest-dom'
 ### 1.3 Implement Data Layer
 
 **File: `lib/queries-mood.ts` (NEW)**
+
 - `useMoodWidget(friendId, widgetId)` - Query hook
   - Fetches mood data from `friend_widgets.config`
   - Returns: `{ current_mood, history }`
@@ -387,21 +422,21 @@ import '@testing-library/jest-dom'
       "timestamp": "2024-11-23T10:30:00Z",
       "notes": "had good coffee"
     },
-    "history": [
-      { "emoji": ":D", "timestamp": "...", "notes": "" }
-    ]
+    "history": [{ "emoji": ":D", "timestamp": "...", "notes": "" }]
   }
   ```
 
 ### 1.4 Integrate with Widget System
 
 **File: `components/WidgetRenderer.tsx`**
+
 - Add case for `widget_type === "mood"`
 - Pass widget config, `themeColors`, and callbacks
 - Handle modal opening/closing using Zustand store or context
 - Wrap in ErrorBoundary
 
 **File: `components/admin/WidgetLibrary.tsx`**
+
 - Add "Mood Tracker" to widget library
 - Icon and description
 - Default size: 2x2
@@ -409,12 +444,14 @@ import '@testing-library/jest-dom'
 ### 1.5 Testing
 
 **File: `components/widgets/__tests__/Mood.test.tsx` (NEW)**
+
 - Unit tests for Mood component (all sizes)
 - Test rendering of current mood
 - Test modal opening on tap
 - Test mobile responsive behavior
 
 **File: `components/widgets/__tests__/MoodModal.test.tsx` (NEW)**
+
 - Unit tests for MoodModal component
 - Test emoticon selection
 - Test notes input auto-save
@@ -422,12 +459,14 @@ import '@testing-library/jest-dom'
 - Test sound effects triggered
 
 **File: `lib/__tests__/queries-mood.test.ts` (NEW)**
+
 - Integration tests for mood setting flow
 - Test optimistic updates
 - Test error recovery (revert on failure)
 - Test history management
 
 **File: `e2e/mood-widget.spec.ts` (NEW)**
+
 - E2E test: Complete mood setting flow
 - E2E test: Notes auto-save
 - E2E test: Mobile responsive behavior
@@ -439,6 +478,7 @@ import '@testing-library/jest-dom'
 ### 2.1 Create Event Widget Component
 
 **File: `components/widgets/EventCountdown.tsx` (NEW)**
+
 - 1x1: Days until next event
 - 2x2: Next event details (name, emoji, date, days)
 - 3x3: List of upcoming events (sorted by date)
@@ -447,6 +487,7 @@ import '@testing-library/jest-dom'
 - Memoize with `React.memo`
 
 **File: `components/widgets/EventCountdown.module.css` (NEW)**
+
 - Styles for all three tile sizes
 - Mobile responsive styles
 - Countdown animation styles
@@ -454,6 +495,7 @@ import '@testing-library/jest-dom'
 ### 2.2 Create Event Modal Component
 
 **File: `components/widgets/EventCountdownModal.tsx` (NEW)**
+
 - Full-screen modal with X button
 - Create/Edit event form:
   - Event name input (auto-saves as you type, debounced 300ms)
@@ -470,6 +512,7 @@ import '@testing-library/jest-dom'
 - Mobile: Full-screen modal with scrollable event list
 
 **File: `components/widgets/EventCountdownModal.module.css` (NEW)**
+
 - Modal styles
 - Form styles
 - Event list styles
@@ -478,6 +521,7 @@ import '@testing-library/jest-dom'
 ### 2.3 Implement Data Layer
 
 **File: `lib/queries-events.ts` (NEW)**
+
 - `useEventCountdownWidget(friendId, widgetId)` - Query hook
   - Fetches events array from `friend_widgets.config`
   - Returns: `{ events: Event[] }`
@@ -509,6 +553,7 @@ import '@testing-library/jest-dom'
 ### 2.4 Date Picker Component
 
 **File: `components/DatePicker.tsx` (NEW)**
+
 - Modal date picker component
 - Opens when date input is tapped
 - Calendar view OR native date input (mobile)
@@ -517,18 +562,21 @@ import '@testing-library/jest-dom'
 - Mobile-optimized touch targets
 
 **File: `components/DatePicker.module.css` (NEW)**
+
 - Calendar styles
 - Mobile date input styles
 
 ### 2.5 Integrate with Widget System
 
 **File: `components/WidgetRenderer.tsx`**
+
 - Add case for `widget_type === "event_countdown"`
 - Pass widget config, `themeColors`, and callbacks
 - Handle modal opening/closing
 - Wrap in ErrorBoundary
 
 **File: `components/admin/WidgetLibrary.tsx`**
+
 - Add "Event Countdown" to widget library
 - Icon and description
 - Default size: 2x2
@@ -536,12 +584,14 @@ import '@testing-library/jest-dom'
 ### 2.6 Testing
 
 **File: `components/widgets/__tests__/EventCountdown.test.tsx` (NEW)**
+
 - Unit tests for EventCountdown component
 - Test countdown calculations
 - Test event display (1x1, 2x2, 3x3)
 - Test mobile responsive behavior
 
 **File: `components/widgets/__tests__/EventCountdownModal.test.tsx` (NEW)**
+
 - Unit tests for EventCountdownModal component
 - Test event creation/deletion (no confirmation)
 - Test auto-save on input
@@ -549,12 +599,14 @@ import '@testing-library/jest-dom'
 - Test keyboard navigation
 
 **File: `lib/__tests__/queries-events.test.ts` (NEW)**
+
 - Integration tests for event CRUD operations
 - Test optimistic updates
 - Test error recovery (revert on failure)
 - Test event sorting by date
 
 **File: `e2e/event-countdown.spec.ts` (NEW)**
+
 - E2E test: Complete event creation flow
 - E2E test: Event deletion (no confirmation)
 - E2E test: Mobile date picker
@@ -566,6 +618,7 @@ import '@testing-library/jest-dom'
 ### 3.1 Create Quiz Widget Component
 
 **File: `components/widgets/PersonalityQuiz.tsx` (NEW)**
+
 - 1x1: Your emoji / Their emoji (side by side)
 - 2x2: Your vibe + Their vibe with titles
 - 3x3: Both results + compatibility percentage + bar
@@ -574,6 +627,7 @@ import '@testing-library/jest-dom'
 - Memoize with `React.memo`
 
 **File: `components/widgets/PersonalityQuiz.module.css` (NEW)**
+
 - Styles for all three tile sizes
 - Mobile responsive styles
 - Compatibility bar styles
@@ -581,6 +635,7 @@ import '@testing-library/jest-dom'
 ### 3.2 Create Quiz Modal Component
 
 **File: `components/widgets/PersonalityQuizModal.tsx` (NEW)**
+
 - Two modes: Quiz taking mode, Results mode
 - Quiz mode:
   - Progress indicator (Question X of 8)
@@ -603,6 +658,7 @@ import '@testing-library/jest-dom'
 - Mobile: Full-screen modal, questions adapt to width
 
 **File: `components/widgets/PersonalityQuizModal.module.css` (NEW)**
+
 - Quiz mode styles
 - Results mode styles
 - Progress bar styles
@@ -611,6 +667,7 @@ import '@testing-library/jest-dom'
 ### 3.3 Quiz Questions & Logic
 
 **File: `lib/quiz-questions.ts` (NEW)**
+
 - 8 custom questions (as specified in spec):
   1. When faced with a problem, do you... (Rush in / Think first / Ask for help)
   2. At parties, you're the person who... (Works the room / Finds deep conversation / Bounces around)
@@ -628,6 +685,7 @@ import '@testing-library/jest-dom'
 - Compatibility notes (hardcoded or computed from answer combinations)
 
 **File: `lib/quiz-logic.ts` (NEW)**
+
 - `calculateResult(answers: string[]): QuizResult`
 - `calculateCompatibility(yourResult: QuizResult, theirResult: QuizResult): CompatibilityNote`
 - Unit test these functions (100% coverage)
@@ -635,6 +693,7 @@ import '@testing-library/jest-dom'
 ### 3.4 Implement Data Layer
 
 **File: `lib/queries-quiz.ts` (NEW)**
+
 - `usePersonalityQuizWidget(friendId, widgetId)` - Query hook
   - Fetches quiz data from `friend_widgets.config`
   - Returns: `{ your_result, their_result, compatibility_note }`
@@ -666,12 +725,14 @@ import '@testing-library/jest-dom'
 ### 3.5 Integrate with Widget System
 
 **File: `components/WidgetRenderer.tsx`**
+
 - Add case for `widget_type === "personality_quiz"`
 - Handle quiz state (not started, in progress, completed)
 - Pass widget config, `themeColors`, and callbacks
 - Wrap in ErrorBoundary
 
 **File: `components/admin/WidgetLibrary.tsx`**
+
 - Add "Personality Quiz" to widget library
 - Icon and description
 - Default size: 3x3
@@ -679,24 +740,28 @@ import '@testing-library/jest-dom'
 ### 3.6 Testing
 
 **File: `lib/__tests__/quiz-logic.test.ts` (NEW)**
+
 - Unit tests for quiz logic (result calculation)
 - Test all result types (Sun, Moon, Star, Mixed)
 - Test compatibility calculations
 - 100% coverage required
 
 **File: `components/widgets/__tests__/PersonalityQuiz.test.tsx` (NEW)**
+
 - Unit tests for PersonalityQuiz component
 - Test "waiting for them" state
 - Test result display (all tile sizes)
 - Test mobile responsive behavior
 
 **File: `components/widgets/__tests__/PersonalityQuizModal.test.tsx` (NEW)**
+
 - Unit tests for PersonalityQuizModal component
 - Test quiz flow (8 questions → results)
 - Test retake functionality
 - Test keyboard navigation
 
 **File: `e2e/personality-quiz.spec.ts` (NEW)**
+
 - E2E test: Complete quiz flow
 - E2E test: Results display
 - E2E test: Retake functionality
@@ -708,6 +773,7 @@ import '@testing-library/jest-dom'
 ### 4.1 Create Connect Four Widget Component
 
 **File: `components/widgets/ConnectFour.tsx` (NEW)**
+
 - 1x1: Your color / Their color + "YOUR TURN" or "THEIR TURN"
 - 2x2: Mini board preview + turn indicator
 - 3x3: Full board preview + turn indicator
@@ -715,6 +781,7 @@ import '@testing-library/jest-dom'
 - Memoize with `React.memo`
 
 **File: `components/widgets/ConnectFour.module.css` (NEW)**
+
 - Styles for all three tile sizes
 - Mini board preview styles
 - Mobile responsive styles
@@ -722,6 +789,7 @@ import '@testing-library/jest-dom'
 ### 4.2 Create Game Board Modal
 
 **File: `components/widgets/ConnectFourModal.tsx` (NEW)**
+
 - Full-screen game board
 - 7 columns × 6 rows board
 - Column numbers (1-7) tappable
@@ -744,6 +812,7 @@ import '@testing-library/jest-dom'
 - Mobile: Board fills screen, scrolls for status if needed
 
 **File: `components/widgets/ConnectFourModal.module.css` (NEW)**
+
 - Game board styles
 - Piece styles and animations
 - Win/loss/draw screen styles
@@ -752,6 +821,7 @@ import '@testing-library/jest-dom'
 ### 4.3 Game Logic
 
 **File: `lib/connect-four-logic.ts` (NEW)**
+
 - Board state management (7×6 array)
 - `makeMove(board: Board, column: number, player: 'you' | 'them'): Board`
 - `checkWin(board: Board, player: 'you' | 'them'): boolean`
@@ -766,6 +836,7 @@ import '@testing-library/jest-dom'
 ### 4.4 Real-time Game Sync
 
 **File: `lib/queries-connect-four.ts` (NEW)**
+
 - `useConnectFourGame(friendId, widgetId)` - Query hook
   - Fetches game state from `friend_widgets.config`
   - Returns: `{ board, current_turn, your_color, their_color, status, moves }`
@@ -807,6 +878,7 @@ import '@testing-library/jest-dom'
 ### 4.5 Supabase Realtime Setup
 
 **File: `supabase/migrations/010_enable_realtime.sql` (NEW)**
+
 - Enable Realtime on `friend_widgets` table:
   ```sql
   ALTER PUBLICATION supabase_realtime ADD TABLE friend_widgets;
@@ -816,12 +888,14 @@ import '@testing-library/jest-dom'
 ### 4.6 Integrate with Widget System
 
 **File: `components/WidgetRenderer.tsx`**
+
 - Add case for `widget_type === "connect_four"`
 - Handle game state (active, won, lost, draw)
 - Pass widget config, `themeColors`, and callbacks
 - Wrap in ErrorBoundary
 
 **File: `components/admin/WidgetLibrary.tsx`**
+
 - Add "Connect Four" to widget library
 - Icon and description
 - Default size: 3x3
@@ -829,6 +903,7 @@ import '@testing-library/jest-dom'
 ### 4.7 Testing
 
 **File: `lib/__tests__/connect-four-logic.test.ts` (NEW)**
+
 - Unit tests for game logic (win detection, move validation)
 - Test all win conditions (horizontal, vertical, diagonal)
 - Test draw detection
@@ -836,12 +911,14 @@ import '@testing-library/jest-dom'
 - 100% coverage required
 
 **File: `components/widgets/__tests__/ConnectFour.test.tsx` (NEW)**
+
 - Unit tests for ConnectFour component
 - Test turn indicator
 - Test board preview (all tile sizes)
 - Test mobile responsive behavior
 
 **File: `components/widgets/__tests__/ConnectFourModal.test.tsx` (NEW)**
+
 - Unit tests for ConnectFourModal component
 - Test piece drop animation
 - Test win/loss/draw states
@@ -849,12 +926,14 @@ import '@testing-library/jest-dom'
 - Test real-time sync (mock Supabase Realtime)
 
 **File: `lib/__tests__/queries-connect-four.test.ts` (NEW)**
+
 - Integration tests for game moves
 - Test optimistic updates (move appears instantly)
 - Test error recovery (revert on sync failure)
 - Test real-time subscription (mock)
 
 **File: `e2e/connect-four.spec.ts` (NEW)**
+
 - E2E test: Complete game flow
 - E2E test: Win condition
 - E2E test: Mobile board layout
@@ -866,6 +945,7 @@ import '@testing-library/jest-dom'
 ### 5.1 Grid System Mobile Adaptation
 
 **File: `components/Grid.tsx`**
+
 - Detect viewport width (< 768px = mobile)
 - Switch from grid to full-width stacked cards
 - Each widget takes full width, one per row
@@ -875,6 +955,7 @@ import '@testing-library/jest-dom'
 ### 5.2 Widget Mobile Adaptations
 
 **All widget components:**
+
 - Mood: Emoticon grid horizontal scroll if needed, min 44px touch targets
 - Event: Date picker adapted for mobile date input, full-width form fields
 - Quiz: Questions fill width, options are full-width buttons, min 44px touch targets
@@ -883,6 +964,7 @@ import '@testing-library/jest-dom'
 ### 5.3 Modal Mobile Adaptations
 
 **File: `components/Modal.tsx`**
+
 - Full-screen on mobile (no background visible)
 - Touch targets minimum 44px
 - Scrollable content if > screen height
@@ -891,6 +973,7 @@ import '@testing-library/jest-dom'
 ### 5.4 Testing
 
 **File: `e2e/mobile-responsive.spec.ts` (NEW)**
+
 - E2E test: All widgets on mobile viewport (< 768px)
 - E2E test: Modals on mobile
 - E2E test: Touch interactions
@@ -903,12 +986,42 @@ import '@testing-library/jest-dom'
 ### 6.1 Sound Effects Enhancement
 
 **File: `lib/sounds.ts` (UPDATE existing)**
+
 - Extend existing `playSound` function (already uses Web Audio API)
 - Update function signature to include new types:
   ```typescript
   export function playSound(
-    type: "click" | "success" | "error" | "pop" | "blip" | "move" | "select" | "cancel" | "open" | "close" | "hover" | "upload" | "delete" | "focus" | "navigate" | "mood_set" | "mood_change" | "event_save" | "quiz_advance" | "quiz_results" | "retake" | "game_drop" | "game_hover" | "game_win" | "game_lose" | "game_draw" | "opponent_move" | "whoosh" | "ping"
-  )
+    type:
+      | "click"
+      | "success"
+      | "error"
+      | "pop"
+      | "blip"
+      | "move"
+      | "select"
+      | "cancel"
+      | "open"
+      | "close"
+      | "hover"
+      | "upload"
+      | "delete"
+      | "focus"
+      | "navigate"
+      | "mood_set"
+      | "mood_change"
+      | "event_save"
+      | "quiz_advance"
+      | "quiz_results"
+      | "retake"
+      | "game_drop"
+      | "game_hover"
+      | "game_win"
+      | "game_lose"
+      | "game_draw"
+      | "opponent_move"
+      | "whoosh"
+      | "ping"
+  );
   ```
 - Add new sound types to the `sounds` Record:
   - `mood_set`: { frequency: 900, duration: 0.08, type: "square" } (cute beep, higher pitch)
@@ -930,6 +1043,7 @@ import '@testing-library/jest-dom'
 ### 6.2 Animation Polish
 
 **File: `styles/animations.css` (NEW)**
+
 - Smooth transitions (< 300ms)
 - Piece drop animation (Connect Four) - CSS keyframes
 - Winning row flash animation
@@ -939,6 +1053,7 @@ import '@testing-library/jest-dom'
 ### 6.3 Error Handling
 
 **File: `components/ErrorBoundary.tsx` (UPDATE)**
+
 - Error boundaries around each widget
 - Graceful error recovery (revert optimistic updates)
 - User-friendly error messages
@@ -946,6 +1061,7 @@ import '@testing-library/jest-dom'
 - Log errors to console (Sentry deferred)
 
 **File: `lib/error-handling.ts` (NEW)**
+
 - Centralized error handling utilities
 - Error logging functions (console for now, Sentry deferred)
 - Error recovery patterns
@@ -953,6 +1069,7 @@ import '@testing-library/jest-dom'
 ### 6.4 Performance Optimization
 
 **File: `components/WidgetRenderer.tsx`**
+
 - Memoize widget components (`React.memo`)
 - Code split modals (dynamic imports):
   ```typescript
@@ -966,6 +1083,7 @@ import '@testing-library/jest-dom'
 ### 6.5 Accessibility
 
 **File: `components/widgets/Mood.tsx` (and all widgets)**
+
 - Keyboard navigation (all widgets)
 - ARIA labels where needed
 - Semantic HTML
@@ -979,12 +1097,14 @@ import '@testing-library/jest-dom'
 ### 7.1 Unit Tests
 
 **Coverage Goals:**
+
 - All widget components: 80%+ coverage
 - Game logic functions: 100% coverage
 - Quiz calculation logic: 100% coverage
 - Utility functions: 100% coverage
 
 **Test Files:**
+
 - `components/widgets/__tests__/Mood.test.tsx`
 - `components/widgets/__tests__/MoodModal.test.tsx`
 - `components/widgets/__tests__/EventCountdown.test.tsx`
@@ -1003,6 +1123,7 @@ import '@testing-library/jest-dom'
 ### 7.2 Integration Tests
 
 **Test Files:**
+
 - Widget data flow (query → component → mutation)
 - Optimistic updates (instant UI, background sync)
 - Error recovery (revert on failure)
@@ -1011,6 +1132,7 @@ import '@testing-library/jest-dom'
 ### 7.3 E2E Tests (Playwright)
 
 **Test Files:**
+
 - `e2e/mood-widget.spec.ts`
 - `e2e/event-countdown.spec.ts`
 - `e2e/personality-quiz.spec.ts`
@@ -1018,6 +1140,7 @@ import '@testing-library/jest-dom'
 - `e2e/mobile-responsive.spec.ts`
 
 **Test Coverage:**
+
 - Complete user flows for each widget
 - Mobile responsiveness
 - Cross-browser testing (Chromium, Firefox, WebKit)
@@ -1025,6 +1148,7 @@ import '@testing-library/jest-dom'
 ### 7.4 Manual Testing Checklist
 
 **Before Shipping:**
+
 - [ ] No confirmation dialogs anywhere
 - [ ] No save buttons anywhere
 - [ ] All interactions have sound effects
@@ -1088,14 +1212,14 @@ const mutation = useMutation({
   onMutate: async (newData) => {
     // Cancel queries
     await queryClient.cancelQueries({ queryKey: [...] })
-    
+
     // Snapshot old data
     const previousData = queryClient.getQueryData([...])
-    
+
     // Optimistic update (instant UI)
     queryClient.setQueryData([...], newData)
     playSound('success')
-    
+
     return { previousData }
   },
   onError: (err, variables, context) => {
@@ -1209,4 +1333,3 @@ const mutation = useMutation({
 ---
 
 **This plan encompasses EVERYTHING from both specification documents. All checkpoints have been answered. All clarification questions resolved. Ready to proceed with implementation.**
-

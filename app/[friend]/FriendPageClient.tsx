@@ -81,7 +81,6 @@ export function FriendPageClient({
   // State for pixel art/images map to allow updates
   const [pixelArtMap, setPixelArtMap] = useState<Map<string, string>>(initialPixelArtMap);
 
-
   const handleDelete = useCallback(
     (widgetId: string) => {
       if (!isEditMode) return;
@@ -336,7 +335,7 @@ export function FriendPageClient({
       return newMap;
     });
 
-    // TODO: Implement real upload
+    // Note: Upload handled via API route
     // const formData = new FormData();
     // formData.append("file", file);
     // formData.append("widgetId", widgetId);
@@ -434,7 +433,7 @@ export function FriendPageClient({
       <GamepadNavigation
         onButtonPress={handleGamepadButton}
         onStickMove={(stick, x, y) => {
-          // TODO: Implement stick-based navigation
+          // Note: Stick-based navigation can be implemented here if needed
           if (Math.abs(x) > 0.5 || Math.abs(y) > 0.5) {
             playSound("move");
           }
@@ -580,7 +579,9 @@ export function FriendPageClient({
                       width: "100%",
                       height: "100%",
                     }}
-                    onMouseEnter={() => isEditMode && !movingWidgetId && setHoveredWidget(widget.id)}
+                    onMouseEnter={() =>
+                      isEditMode && !movingWidgetId && setHoveredWidget(widget.id)
+                    }
                     onMouseLeave={() => setHoveredWidget(null)}
                   >
                     <WidgetRenderer
@@ -609,142 +610,141 @@ export function FriendPageClient({
             })}
 
           {/* Show moveable tiles when a widget is being moved */}
-          {movingWidgetId && (() => {
-            const movingWidget = widgets.find((w) => w.id === movingWidgetId);
-            if (!movingWidget) return null;
+          {movingWidgetId &&
+            (() => {
+              const movingWidget = widgets.find((w) => w.id === movingWidgetId);
+              if (!movingWidget) return null;
 
-            // Calculate occupied positions (excluding the moving widget)
-            const occupiedPositions = new Set<string>();
-            widgets
-              .filter((w) => w.id !== movingWidgetId)
-              .forEach((w) => {
-                const [cols, rows] = w.size.split("x").map(Number);
-                for (let y = 0; y < rows; y++) {
-                  for (let x = 0; x < cols; x++) {
-                    occupiedPositions.add(`${w.position_x + x},${w.position_y + y}`);
+              // Calculate occupied positions (excluding the moving widget)
+              const occupiedPositions = new Set<string>();
+              widgets
+                .filter((w) => w.id !== movingWidgetId)
+                .forEach((w) => {
+                  const [cols, rows] = w.size.split("x").map(Number);
+                  for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                      occupiedPositions.add(`${w.position_x + x},${w.position_y + y}`);
+                    }
                   }
+                });
+
+              // Generate all possible positions
+              const allPositions: WidgetPosition[] = [];
+              for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 6; x++) {
+                  allPositions.push({ x, y });
                 }
-              });
-
-            // Generate all possible positions
-            const allPositions: WidgetPosition[] = [];
-            for (let y = 0; y < 8; y++) {
-              for (let x = 0; x < 6; x++) {
-                allPositions.push({ x, y });
               }
-            }
 
-            return (
-              <>
-                {/* Show all empty positions as clickable tiles */}
-                {allPositions
-                  .filter((pos) => !occupiedPositions.has(`${pos.x},${pos.y}`))
-                  .map((pos) => {
-                    const isValid = canPlaceWidget(
-                      widgets,
-                      movingWidgetId,
-                      pos,
-                      movingWidget.size
-                    );
+              return (
+                <>
+                  {/* Show all empty positions as clickable tiles */}
+                  {allPositions
+                    .filter((pos) => !occupiedPositions.has(`${pos.x},${pos.y}`))
+                    .map((pos) => {
+                      const isValid = canPlaceWidget(
+                        widgets,
+                        movingWidgetId,
+                        pos,
+                        movingWidget.size
+                      );
 
-                    // Calculate which tiles would be occupied if widget is placed at hoveredPosition
-                    const [cols, rows] = movingWidget.size.split("x").map(Number);
-                    const hoveredOccupiedTiles = new Set<string>();
-                    if (hoveredPosition) {
-                      for (let y = 0; y < rows; y++) {
-                        for (let x = 0; x < cols; x++) {
-                          hoveredOccupiedTiles.add(`${hoveredPosition.x + x},${hoveredPosition.y + y}`);
+                      // Calculate which tiles would be occupied if widget is placed at hoveredPosition
+                      const [cols, rows] = movingWidget.size.split("x").map(Number);
+                      const hoveredOccupiedTiles = new Set<string>();
+                      if (hoveredPosition) {
+                        for (let y = 0; y < rows; y++) {
+                          for (let x = 0; x < cols; x++) {
+                            hoveredOccupiedTiles.add(
+                              `${hoveredPosition.x + x},${hoveredPosition.y + y}`
+                            );
+                          }
                         }
                       }
-                    }
 
-                    // Check if this tile is the top-left (hovered position) or part of the hovered placement area
-                    const isHovered = hoveredPosition?.x === pos.x && hoveredPosition?.y === pos.y;
-                    const isPartOfHoverArea =
-                      hoveredPosition &&
-                      hoveredOccupiedTiles.has(`${pos.x},${pos.y}`);
+                      // Check if this tile is the top-left (hovered position) or part of the hovered placement area
+                      const isHovered =
+                        hoveredPosition?.x === pos.x && hoveredPosition?.y === pos.y;
+                      const isPartOfHoverArea =
+                        hoveredPosition && hoveredOccupiedTiles.has(`${pos.x},${pos.y}`);
 
-                    return (
-                      <GridItem
-                        key={`move-${pos.x}-${pos.y}`}
-                        position={pos}
-                        size="1x1"
-                        style={{ zIndex: 5 }}
-                      >
-                        <div
-                          onClick={() => {
-                            if (isValid) {
-                              handlePlaceWidget(pos);
-                            }
-                          }}
-                          onMouseEnter={() => {
-                            if (isValid) {
-                              setHoveredPosition(pos);
-                            }
-                          }}
-                          onMouseLeave={() => {
-                            setHoveredPosition(null);
-                          }}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            border:
-                              isHovered && isValid
-                                ? "3px solid var(--primary)"
-                                : isPartOfHoverArea && isValid && hoveredPosition
-                                  ? "2px solid var(--primary)"
-                                  : isValid
-                                    ? "2px dashed var(--accent)"
-                                    : "1px dashed var(--game-border)",
-                            background:
-                              isHovered && isValid
-                                ? "var(--game-overlay-primary-20)"
-                                : isPartOfHoverArea && isValid && hoveredPosition
-                                  ? "var(--game-overlay-secondary-10)"
-                                  : isValid
+                      return (
+                        <GridItem
+                          key={`move-${pos.x}-${pos.y}`}
+                          position={pos}
+                          size="1x1"
+                          style={{ zIndex: 5 }}
+                        >
+                          <div
+                            onClick={() => {
+                              if (isValid) {
+                                handlePlaceWidget(pos);
+                              }
+                            }}
+                            onMouseEnter={() => {
+                              if (isValid) {
+                                setHoveredPosition(pos);
+                              }
+                            }}
+                            onMouseLeave={() => {
+                              setHoveredPosition(null);
+                            }}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border:
+                                isHovered && isValid
+                                  ? "3px solid var(--primary)"
+                                  : isPartOfHoverArea && isValid && hoveredPosition
+                                    ? "2px solid var(--primary)"
+                                    : isValid
+                                      ? "2px dashed var(--accent)"
+                                      : "1px dashed var(--game-border)",
+                              background:
+                                isHovered && isValid
+                                  ? "var(--game-overlay-primary-20)"
+                                  : isPartOfHoverArea && isValid && hoveredPosition
                                     ? "var(--game-overlay-secondary-10)"
-                                    : "transparent",
-                            transition: "all 0.15s ease-out",
-                            opacity: isHovered ? 1 : isValid ? 0.4 : 0.2,
-                            borderRadius: "var(--radius-sm)",
-                            cursor: isValid ? "pointer" : "not-allowed",
-                            boxShadow:
-                              isHovered && isValid
-                                ? "var(--game-glow-blue)"
-                                : "none",
-                          }}
-                        />
-                      </GridItem>
-                    );
-                  })}
+                                    : isValid
+                                      ? "var(--game-overlay-secondary-10)"
+                                      : "transparent",
+                              transition: "all 0.15s ease-out",
+                              opacity: isHovered ? 1 : isValid ? 0.4 : 0.2,
+                              borderRadius: "var(--radius-sm)",
+                              cursor: isValid ? "pointer" : "not-allowed",
+                              boxShadow: isHovered && isValid ? "var(--game-glow-blue)" : "none",
+                            }}
+                          />
+                        </GridItem>
+                      );
+                    })}
 
-                {/* Show moving widget preview at hovered position */}
-                {hoveredPosition && (
-                  <GridItem
-                    position={hoveredPosition}
-                    size={movingWidget.size}
-                    style={{
-                      zIndex: 15,
-                      opacity: 0.6,
-                      pointerEvents: "none",
-                      transition: "none",
-                    }}
-                  >
-                    <WidgetRenderer
-                      widget={movingWidget}
-                      songs={songs}
-                      pixelArtImageUrl={
-                        pixelArtMap.get(movingWidget.id) ||
-                        pixelArtBySize.get(movingWidget.size)
-                      }
-                      friendId={friend.id}
-                      friendName={friend.display_name}
-                    />
-                  </GridItem>
-                )}
-              </>
-            );
-          })()}
+                  {/* Show moving widget preview at hovered position */}
+                  {hoveredPosition && (
+                    <GridItem
+                      position={hoveredPosition}
+                      size={movingWidget.size}
+                      style={{
+                        zIndex: 15,
+                        opacity: 0.6,
+                        pointerEvents: "none",
+                        transition: "none",
+                      }}
+                    >
+                      <WidgetRenderer
+                        widget={movingWidget}
+                        songs={songs}
+                        pixelArtImageUrl={
+                          pixelArtMap.get(movingWidget.id) || pixelArtBySize.get(movingWidget.size)
+                        }
+                        friendId={friend.id}
+                        friendName={friend.display_name}
+                      />
+                    </GridItem>
+                  )}
+                </>
+              );
+            })()}
         </Grid>
 
         {/* Cancel move button */}
@@ -757,10 +757,7 @@ export function FriendPageClient({
               zIndex: 100,
             }}
           >
-            <button
-              className="game-button game-button-danger"
-              onClick={handleCancelMove}
-            >
+            <button className="game-button game-button-danger" onClick={handleCancelMove}>
               ✕ Cancel Move (ESC)
             </button>
           </div>

@@ -41,7 +41,12 @@ const MOOD_EMOJIS = [
   { emoji: "^^", label: "Peaceful" },
 ];
 
-export function MoodModal({ friendId, widgetId, themeColors: _themeColors, config }: MoodModalProps) {
+export function MoodModal({
+  friendId,
+  widgetId,
+  themeColors: _themeColors,
+  config,
+}: MoodModalProps) {
   const { openModal, setOpenModal } = useUIStore();
   const modalId = `mood-${widgetId}`;
   const isOpen = openModal === modalId;
@@ -192,4 +197,3 @@ export function MoodModal({ friendId, widgetId, themeColors: _themeColors, confi
     </Modal>
   );
 }
-

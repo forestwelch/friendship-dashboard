@@ -97,4 +97,3 @@ describe("Mood Widget", () => {
     expect(screen.getByText(":|")).toBeInTheDocument();
   });
 });
-

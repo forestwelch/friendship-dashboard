@@ -1,26 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const body = await request.json();
   const { colors } = body;
 
   if (!isSupabaseConfigured()) {
-    return NextResponse.json(
-      { error: "Supabase not configured" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
   }
 
   if (!colors || typeof colors !== "object") {
-    return NextResponse.json(
-      { error: "Invalid colors data" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid colors data" }, { status: 400 });
   }
 
   try {
@@ -49,9 +40,7 @@ export async function PUT(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error saving colors:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "Internal server error";
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
-

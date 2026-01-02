@@ -35,7 +35,7 @@ export function Grid({ children }: GridProps) {
   const isMobile = useIsMobile();
   const gridWidth = `calc(${GRID_COLS} * ${TILE_SIZE} + ${GRID_COLS - 1} * ${GAP})`;
   const gridHeight = `calc(${GRID_ROWS} * ${TILE_SIZE} + ${GRID_ROWS - 1} * ${GAP})`;
-  
+
   // Create array of all grid positions for background tiles (desktop only)
   const allTiles: Array<{ x: number; y: number }> = [];
   if (!isMobile) {
@@ -45,7 +45,6 @@ export function Grid({ children }: GridProps) {
       }
     }
   }
-
 
   // Mobile: Stack layout
   if (isMobile) {
@@ -105,8 +104,10 @@ interface GridItemProps {
   style?: React.CSSProperties;
 }
 
-export const GridItem = React.forwardRef<HTMLDivElement, GridItemProps>(
-  function GridItem({ position, size, children, onDragOver, onDrop, style: customStyle }, ref) {
+export const GridItem = React.forwardRef<HTMLDivElement, GridItemProps>(function GridItem(
+  { position, size, children, onDragOver, onDrop, style: customStyle },
+  ref
+) {
   const isMobile = useIsMobile();
   const [cols, rows] = size.split("x").map(Number);
   const itemWidth = `calc(${cols} * ${TILE_SIZE} + ${cols - 1} * ${GAP})`;
@@ -121,26 +122,20 @@ export const GridItem = React.forwardRef<HTMLDivElement, GridItemProps>(
     );
   }
 
-    // Desktop: Grid positioning
-    const itemStyle: React.CSSProperties = {
-      gridColumn: `${position.x + 1} / span ${cols}`,
-      gridRow: `${position.y + 1} / span ${rows}`,
-      width: itemWidth,
-      height: itemHeight,
-      position: "relative",
-      zIndex: 1,
-      ...customStyle,
-    };
+  // Desktop: Grid positioning
+  const itemStyle: React.CSSProperties = {
+    gridColumn: `${position.x + 1} / span ${cols}`,
+    gridRow: `${position.y + 1} / span ${rows}`,
+    width: itemWidth,
+    height: itemHeight,
+    position: "relative",
+    zIndex: 1,
+    ...customStyle,
+  };
 
-    return (
-      <div
-        ref={ref}
-        style={itemStyle}
-      >
-        {children}
-      </div>
-    );
-  }
-);
-
-
+  return (
+    <div ref={ref} style={itemStyle}>
+      {children}
+    </div>
+  );
+});

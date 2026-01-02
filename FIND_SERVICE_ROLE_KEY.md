@@ -3,16 +3,13 @@
 ## Step-by-Step Instructions
 
 1. **Go to your Supabase project dashboard**
-
    - Visit: https://supabase.com/dashboard
    - Log in if needed
 
 2. **Select your project**
-
    - Click on the project: `kaokqdggrlavjurtwlcb` (or whatever your project name is)
 
 3. **Navigate to Settings**
-
    - Click the gear icon (⚙️) in the left sidebar
    - Or go to: Settings → API
 
@@ -24,7 +21,6 @@
        - **`default`** - This is what we need! ⭐
        - It starts with `sb_secret_` (this is the service role key)
 5. **Copy the secret key**
-
    - Click the eye icon or "Reveal" button next to the `default` key under "Secret keys"
    - Copy the entire key (it starts with `sb_secret_...`)
 

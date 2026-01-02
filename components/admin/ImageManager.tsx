@@ -9,6 +9,8 @@ import {
   PIXEL_GRID_SIZE,
 } from "@/lib/pixel-data-processing";
 import { DEFAULT_THEME_COLORS_ALT } from "@/lib/theme-defaults";
+import clsx from "clsx";
+import styles from "./ImageManager.module.css";
 
 interface ImageItem {
   id: string;
@@ -127,33 +129,20 @@ export function ImageManager({ initialImages, onImagesChange }: ImageManagerProp
       console.error("Error deleting images:", error);
       updateImages(originalImages);
       playSound("error");
-      // TODO: Show error toast instead of alert
+      // Note: Consider adding toast notification for better UX
     }
   };
 
   return (
-    <div
-      className="game-container"
-      style={{ height: "100%", display: "flex", flexDirection: "column" }}
-    >
+    <div className={clsx("game-container", styles.container)}>
       {/* Toolbar */}
-      <div
-        className="game-card"
-        style={{
-          marginBottom: "var(--space-md)",
-          padding: "var(--space-md)",
-          display: "flex",
-          gap: "var(--space-md)",
-          alignItems: "center",
-          flexWrap: "wrap",
-        }}
-      >
+      <div className={clsx("game-card", styles.toolbar)}>
         <button
           className="game-button game-button-primary"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
         >
-          <i className="hn hn-upload-solid" style={{ marginRight: "var(--space-sm)" }} />
+          <i className={clsx("hn", "hn-upload-solid", styles.iconSpacing)} />
           {isUploading ? "UPLOADING..." : "UPLOAD IMAGES"}
         </button>
 
@@ -162,33 +151,15 @@ export function ImageManager({ initialImages, onImagesChange }: ImageManagerProp
           onClick={handleDelete}
           disabled={selectedImages.size === 0}
         >
-          <i className="hn hn-trash-solid" style={{ marginRight: "var(--space-sm)" }} />
+          <i className={clsx("hn", "hn-trash-solid", styles.iconSpacing)} />
           DELETE SELECTED ({selectedImages.size})
         </button>
 
-        <div
-          style={{
-            marginLeft: "auto",
-            fontSize: "var(--font-size-xs)",
-            color: "var(--text)",
-          }}
-        >
-          Total Images: {images.length}
-        </div>
+        <div className={styles.toolbarInfo}>Total Images: {images.length}</div>
       </div>
 
       {/* Image Grid */}
-      <div
-        className="game-card"
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(9.375rem, 1fr))",
-          gap: "var(--space-md)",
-          alignContent: "start",
-        }}
-      >
+      <div className={clsx("game-card", styles.imageGrid)}>
         {images.map((img) => {
           // Render pixel_data as SVG preview, or fall back to base_image_data
           let imagePreview: React.ReactNode;
@@ -217,134 +188,40 @@ export function ImageManager({ initialImages, onImagesChange }: ImageManagerProp
               );
               imagePreview = (
                 <div
+                  className={styles.imagePreview}
                   dangerouslySetInnerHTML={{ __html: svgContent }}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
                 />
               );
             } catch (error) {
               console.error("Error rendering pixel data preview:", error);
-              imagePreview = (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    background: "var(--game-surface)",
-                    color: "var(--text)",
-                    fontSize: "var(--font-size-xs)",
-                  }}
-                >
-                  Pixel Data
-                </div>
-              );
+              imagePreview = <div className={styles.imagePreviewError}>Pixel Data</div>;
             }
           } else if (img.base_image_data) {
             imagePreview = (
-              <img
-                src={img.base_image_data}
-                alt="Asset"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  imageRendering: "pixelated",
-                }}
-              />
+              <img src={img.base_image_data} alt="Asset" className={styles.imagePreviewImg} />
             );
           } else {
-            imagePreview = (
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: "var(--game-surface)",
-                  color: "var(--text)",
-                  fontSize: "var(--font-size-xs)",
-                }}
-              >
-                No preview
-              </div>
-            );
+            imagePreview = <div className={styles.imagePreviewError}>No preview</div>;
           }
 
+          const isSelected = selectedImages.has(img.id);
           return (
             <div
               key={img.id}
               onClick={() => toggleSelection(img.id)}
-              style={{
-                position: "relative",
-                aspectRatio: "1/1",
-                border: selectedImages.has(img.id)
-                  ? "0.125rem solid var(--primary)"
-                  : "0.0625rem solid var(--game-border)",
-                borderRadius: "var(--radius-sm)",
-                overflow: "hidden",
-                cursor: "pointer",
-                transition: "all 0.2s",
-                opacity: selectedImages.has(img.id) ? 0.8 : 1,
-                boxShadow: selectedImages.has(img.id) ? "var(--game-glow-blue)" : "none",
-                background: "var(--game-surface)",
-              }}
+              className={clsx(styles.imageItem, isSelected && styles.selected)}
             >
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  opacity: selectedImages.has(img.id) ? 0.8 : 1,
-                }}
-              >
+              <div className={clsx(styles.imagePreviewInner, isSelected && styles.selected)}>
                 {imagePreview}
               </div>
-              {selectedImages.has(img.id) && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "var(--space-xs)",
-                    right: "var(--space-xs)",
-                    background: "var(--primary)",
-                    color: "var(--bg)",
-                    borderRadius: "50%",
-                    width: "1.25rem",
-                    height: "1.25rem",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "var(--font-size-sm)",
-                    fontWeight: "bold",
-                  }}
-                >
-                  ✓
-                </div>
-              )}
+              {isSelected && <div className={styles.checkmark}>✓</div>}
             </div>
           );
         })}
 
         {images.length === 0 && (
-          <div
-            style={{
-              gridColumn: "1 / -1",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "12.5rem",
-              color: "var(--text)",
-              flexDirection: "column",
-              gap: "var(--space-md)",
-            }}
-          >
-            <i className="hn hn-image" style={{ fontSize: "2rem", opacity: 0.5 }} />
+          <div className={styles.emptyState}>
+            <i className={clsx("hn", "hn-image", styles.emptyStateIcon)} />
             <span>No images found. Upload some!</span>
           </div>
         )}
@@ -355,7 +232,7 @@ export function ImageManager({ initialImages, onImagesChange }: ImageManagerProp
         type="file"
         accept="image/*"
         multiple
-        style={{ display: "none" }}
+        className={styles.hiddenInput}
         onChange={handleUpload}
       />
     </div>

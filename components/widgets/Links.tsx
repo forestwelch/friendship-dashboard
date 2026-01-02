@@ -18,11 +18,11 @@ interface LinksProps {
 
 export function Links({ size, links = [] }: LinksProps) {
   const [linkList, _setLinkList] = useState<LinkItem[]>(links);
-  
+
   const openLink = (url: string) => {
     window.open(url, "_blank", "noopener,noreferrer");
   };
-  
+
   if (size === "1x1") {
     return (
       <Widget size={size}>
@@ -38,10 +38,7 @@ export function Links({ size, links = [] }: LinksProps) {
             gap: "var(--space-sm)",
           }}
         >
-          <i
-            className="hn hn-link-solid"
-            style={{ fontSize: "32px", opacity: 0.8 }}
-          />
+          <i className="hn hn-link-solid" style={{ fontSize: "32px", opacity: 0.8 }} />
           <div style={{ fontSize: "10px", textAlign: "center" }}>
             {linkList.length} {linkList.length === 1 ? "link" : "links"}
           </div>
@@ -49,7 +46,7 @@ export function Links({ size, links = [] }: LinksProps) {
       </Widget>
     );
   }
-  
+
   if (size === "2x2") {
     return (
       <Widget size={size}>
@@ -72,7 +69,7 @@ export function Links({ size, links = [] }: LinksProps) {
           >
             Links
           </div>
-          
+
           <div
             style={{
               flex: 1,
@@ -122,7 +119,10 @@ export function Links({ size, links = [] }: LinksProps) {
                   >
                     {link.title}
                   </span>
-                  <i className="hn hn-external-link-alt-solid" style={{ fontSize: "8px", opacity: 0.7 }} />
+                  <i
+                    className="hn hn-external-link-alt-solid"
+                    style={{ fontSize: "8px", opacity: 0.7 }}
+                  />
                 </button>
               ))
             )}
@@ -131,19 +131,19 @@ export function Links({ size, links = [] }: LinksProps) {
       </Widget>
     );
   }
-  
+
   // 3x3 version - Full links grid
   return (
     <Widget size={size}>
       <div
-          style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            padding: "var(--space-md)",
-            gap: "var(--space-sm)",
-          }}
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          padding: "var(--space-md)",
+          gap: "var(--space-sm)",
+        }}
       >
         <div
           style={{
@@ -156,11 +156,9 @@ export function Links({ size, links = [] }: LinksProps) {
           }}
         >
           <span>Quick Links</span>
-          <span style={{ fontSize: "10px", opacity: 0.7 }}>
-            {linkList.length}
-          </span>
+          <span style={{ fontSize: "10px", opacity: 0.7 }}>{linkList.length}</span>
         </div>
-        
+
         <div
           style={{
             flex: 1,
@@ -184,10 +182,7 @@ export function Links({ size, links = [] }: LinksProps) {
                 gap: "8px",
               }}
             >
-              <i
-                className="hn hn-link-solid"
-                style={{ fontSize: "32px", opacity: 0.5 }}
-              />
+              <i className="hn hn-link-solid" style={{ fontSize: "32px", opacity: 0.5 }} />
               <div>No links yet</div>
             </div>
           ) : (
@@ -208,9 +203,7 @@ export function Links({ size, links = [] }: LinksProps) {
                   textAlign: "center",
                 }}
               >
-                {link.icon && (
-                  <i className={link.icon} style={{ fontSize: "20px" }} />
-                )}
+                {link.icon && <i className={link.icon} style={{ fontSize: "20px" }} />}
                 <span
                   style={{
                     overflow: "hidden",
@@ -231,5 +224,3 @@ export function Links({ size, links = [] }: LinksProps) {
     </Widget>
   );
 }
-
-

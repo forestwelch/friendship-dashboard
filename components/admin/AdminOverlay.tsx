@@ -9,12 +9,7 @@ interface AdminOverlayProps {
   onEdit?: () => void;
 }
 
-export function AdminOverlay({
-  widgetId,
-  onDelete,
-  onMove,
-  onEdit,
-}: AdminOverlayProps) {
+export function AdminOverlay({ widgetId, onDelete, onMove, onEdit }: AdminOverlayProps) {
   return (
     <div
       data-widget-item={widgetId}

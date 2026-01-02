@@ -49,10 +49,10 @@ function convertLegacyGame(game: Partial<ConnectFourData>, friendId: string): Co
   // Convert from legacy format
   const playerOneId = ADMIN_USER_ID;
   const playerTwoId = friendId;
-  
+
   // Map "you" -> admin, "them" -> friend
   const currentTurnId = game.current_turn === "you" ? playerOneId : playerTwoId;
-  
+
   return {
     board: game.board || createEmptyBoard(),
     player_one_id: playerOneId,
@@ -82,11 +82,11 @@ function convertLegacyGame(game: Partial<ConnectFourData>, friendId: string): Co
 function initializeGame(friendId: string): ConnectFourData {
   const playerOneId = ADMIN_USER_ID;
   const playerTwoId = friendId;
-  
+
   // Coin flip: 50/50 chance
   const coinFlip = Math.random() < 0.5;
   const currentTurnId = coinFlip ? playerOneId : playerTwoId;
-  
+
   return {
     board: createEmptyBoard(),
     player_one_id: playerOneId,
@@ -113,15 +113,12 @@ export function useConnectFourGame(friendId: string, widgetId: string) {
       if (error) throw error;
 
       const rawConfig = (data?.config as Partial<ConnectFourData>) || {};
-      
+
       // If no game exists, initialize new one
       if (!rawConfig.board && !rawConfig.player_one_id) {
         const newGame = initializeGame(friendId);
         // Save initialized game to database
-        await supabase
-          .from("friend_widgets")
-          .update({ config: newGame })
-          .eq("id", widgetId);
+        await supabase.from("friend_widgets").update({ config: newGame }).eq("id", widgetId);
         return newGame;
       }
 
@@ -156,8 +153,9 @@ export function useMakeMove(friendId: string, widgetId: string, currentUserId: s
       }
 
       // Determine which player piece to place
-      const playerPiece: "you" | "them" = currentUserId === currentConfig.player_one_id ? "you" : "them";
-      
+      const playerPiece: "you" | "them" =
+        currentUserId === currentConfig.player_one_id ? "you" : "them";
+
       const newBoard = makeMove(currentConfig.board, column, playerPiece);
       if (!newBoard) {
         throw new Error("Failed to make move");
@@ -170,9 +168,10 @@ export function useMakeMove(friendId: string, widgetId: string, currentUserId: s
       const isDraw = checkDraw(newBoard);
 
       let newStatus: "active" | "won" | "lost" | "draw" = "active";
-      const nextTurnId = currentConfig.current_turn_id === currentConfig.player_one_id 
-        ? currentConfig.player_two_id 
-        : currentConfig.player_one_id;
+      const nextTurnId =
+        currentConfig.current_turn_id === currentConfig.player_one_id
+          ? currentConfig.player_two_id
+          : currentConfig.player_one_id;
       let winnerId: string | undefined;
 
       if (currentPlayerWon) {
@@ -180,9 +179,10 @@ export function useMakeMove(friendId: string, widgetId: string, currentUserId: s
         winnerId = currentUserId;
       } else if (otherPlayerWon) {
         newStatus = "lost";
-        winnerId = currentUserId === currentConfig.player_one_id 
-          ? currentConfig.player_two_id 
-          : currentConfig.player_one_id;
+        winnerId =
+          currentUserId === currentConfig.player_one_id
+            ? currentConfig.player_two_id
+            : currentConfig.player_one_id;
       } else if (isDraw) {
         newStatus = "draw";
       }
@@ -226,8 +226,9 @@ export function useMakeMove(friendId: string, widgetId: string, currentUserId: s
       if (!previousData) return { previousData };
 
       // Determine which player piece to place
-      const playerPiece: "you" | "them" = currentUserId === previousData.player_one_id ? "you" : "them";
-      
+      const playerPiece: "you" | "them" =
+        currentUserId === previousData.player_one_id ? "you" : "them";
+
       const newBoard = makeMove(previousData.board, column, playerPiece);
       if (!newBoard) return { previousData };
 
@@ -237,9 +238,10 @@ export function useMakeMove(friendId: string, widgetId: string, currentUserId: s
       const isDraw = checkDraw(newBoard);
 
       let newStatus: "active" | "won" | "lost" | "draw" = "active";
-      const nextTurnId = previousData.current_turn_id === previousData.player_one_id 
-        ? previousData.player_two_id 
-        : previousData.player_one_id;
+      const nextTurnId =
+        previousData.current_turn_id === previousData.player_one_id
+          ? previousData.player_two_id
+          : previousData.player_one_id;
       let winnerId: string | undefined;
 
       if (currentPlayerWon) {
@@ -248,9 +250,10 @@ export function useMakeMove(friendId: string, widgetId: string, currentUserId: s
         playSound("game_win");
       } else if (otherPlayerWon) {
         newStatus = "lost";
-        winnerId = currentUserId === previousData.player_one_id 
-          ? previousData.player_two_id 
-          : previousData.player_one_id;
+        winnerId =
+          currentUserId === previousData.player_one_id
+            ? previousData.player_two_id
+            : previousData.player_one_id;
         playSound("game_lose");
       } else if (isDraw) {
         newStatus = "draw";
@@ -339,7 +342,7 @@ export function useResetGame(friendId: string, widgetId: string) {
   return useMutation({
     mutationFn: async () => {
       const newGame = initializeGame(friendId);
-      
+
       const { data, error } = await supabase
         .from("friend_widgets")
         .update({ config: newGame })
@@ -351,10 +354,7 @@ export function useResetGame(friendId: string, widgetId: string) {
       return convertLegacyGame(data.config as Partial<ConnectFourData>, friendId);
     },
     onSuccess: (newGame) => {
-      queryClient.setQueryData<ConnectFourData>(
-        ["connect_four", friendId, widgetId],
-        newGame
-      );
+      queryClient.setQueryData<ConnectFourData>(["connect_four", friendId, widgetId], newGame);
       playSound("retake");
     },
     onError: () => {
@@ -362,4 +362,3 @@ export function useResetGame(friendId: string, widgetId: string) {
     },
   });
 }
-

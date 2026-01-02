@@ -18,26 +18,28 @@ This will temporarily allow public writes to the database (development only!).
 Follow the instructions in `FIND_SERVICE_ROLE_KEY.md` to find your service role key.
 
 Once you have it:
+
 1. Add it to `.env.local`:
    ```env
    SUPABASE_SERVICE_ROLE_KEY=your_key_here
    ```
 2. Revert the temporary migration by running:
+
    ```sql
    -- Revert to secure policies
    DROP POLICY IF EXISTS "Allow public writes to friend_widgets (DEV ONLY)" ON friend_widgets;
    DROP POLICY IF EXISTS "Allow public writes to global_content (DEV ONLY)" ON global_content;
    DROP POLICY IF EXISTS "Allow public writes to pixel_art_images (DEV ONLY)" ON pixel_art_images;
-   
+
    -- Restore secure policies
    CREATE POLICY "Only admins can manage friend widgets"
      ON friend_widgets FOR ALL
      USING (auth.role() = 'authenticated');
-   
+
    CREATE POLICY "Only admins can manage global content"
      ON global_content FOR ALL
      USING (auth.role() = 'authenticated');
-   
+
    CREATE POLICY "Only admins can manage pixel art images"
      ON pixel_art_images FOR ALL
      USING (auth.role() = 'authenticated');
@@ -46,4 +48,3 @@ Once you have it:
 ## Security Warning
 
 The temporary migration allows **anyone** to write to your database. Only use it for local development!
-

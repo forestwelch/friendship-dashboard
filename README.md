@@ -14,13 +14,14 @@ A personalized social dashboard where you curate custom widget-based pages for e
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 
 ### Installation
 
 1. Clone the repository
 2. Install dependencies:
+
    ```bash
    npm install
    ```
@@ -32,6 +33,7 @@ A personalized social dashboard where you curate custom widget-based pages for e
    - If the font is not available, the app will fall back to `Courier New` monospace font
 
 4. Run the development server:
+
    ```bash
    npm run dev
    ```
@@ -78,7 +80,7 @@ friendship-dashboard/
 ✅ Music Player widget (1x1, 2x2, 3x3 sizes)  
 ✅ YouTube IFrame API integration  
 ✅ Static Daniel page with blue theme  
-✅ Visual polish: chunky borders, pressed button effects  
+✅ Visual polish: chunky borders, pressed button effects
 
 ## Next Steps (Phase 2)
 

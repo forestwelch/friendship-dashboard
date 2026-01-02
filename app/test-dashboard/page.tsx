@@ -113,9 +113,7 @@ export default function TestDashboardPage() {
       position_x: 2,
       position_y: 2,
       config: {
-        recommendations: [
-          { id: "m1", title: "Inception", type: "Movie", rating: 5 },
-        ],
+        recommendations: [{ id: "m1", title: "Inception", type: "Movie", rating: 5 }],
       },
     },
     {

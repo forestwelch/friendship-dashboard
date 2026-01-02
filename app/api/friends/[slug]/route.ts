@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFriendPage } from "@/lib/queries";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const resolvedParams = await params;
     const slug = resolvedParams?.slug;
@@ -22,11 +19,6 @@ export async function GET(
     return NextResponse.json(pageData);
   } catch (error) {
     console.error("Error fetching friend:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
-
-

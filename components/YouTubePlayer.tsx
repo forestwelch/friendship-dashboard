@@ -13,26 +13,21 @@ interface YouTubePlayerContextValue {
   setPlaylist: (songs: Array<{ youtubeId: string }>) => void;
 }
 
-export const YouTubePlayerContext =
-  React.createContext<YouTubePlayerContextValue>({
-    player: null,
-    isPlaying: false,
-    currentVideoId: null,
-    play: () => {},
-    pause: () => {},
-    next: () => {},
-    setPlaylist: () => {},
-  });
+export const YouTubePlayerContext = React.createContext<YouTubePlayerContextValue>({
+  player: null,
+  isPlaying: false,
+  currentVideoId: null,
+  play: () => {},
+  pause: () => {},
+  next: () => {},
+  setPlaylist: () => {},
+});
 
 // Global singleton to ensure only one player instance exists
 let globalPlayerInstance: YouTubePlayer | null = null;
 let globalInitialized = false;
 
-export function YouTubePlayerProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function YouTubePlayerProvider({ children }: { children: React.ReactNode }) {
   const [player, setPlayer] = useState<YouTubePlayer | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
@@ -80,10 +75,7 @@ export function YouTubePlayerProvider({
       try {
         // Wait for container to be ready
         let retries = 0;
-        while (
-          (!containerRef.current || !containerRef.current.isConnected) &&
-          retries < 20
-        ) {
+        while ((!containerRef.current || !containerRef.current.isConnected) && retries < 20) {
           await new Promise((resolve) => setTimeout(resolve, 100));
           retries++;
         }

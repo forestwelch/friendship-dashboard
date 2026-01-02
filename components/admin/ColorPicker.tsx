@@ -9,11 +9,7 @@ interface ColorPickerProps {
   onColorConfirm: (color: string) => void;
 }
 
-export function ColorPicker({
-  currentColor,
-  onColorChange,
-  onColorConfirm,
-}: ColorPickerProps) {
+export function ColorPicker({ currentColor, onColorChange, onColorConfirm }: ColorPickerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const [hoverColor, setHoverColor] = useState<string | null>(null);
@@ -77,9 +73,7 @@ export function ColorPicker({
         const lightness = 100 - (y / GRID_SIZE) * 100;
         const saturation = 80;
 
-        const newColor = `hsl(${Math.floor(hue)}, ${saturation}%, ${Math.floor(
-          lightness
-        )}%)`;
+        const newColor = `hsl(${Math.floor(hue)}, ${saturation}%, ${Math.floor(lightness)}%)`;
 
         setHoverColor(newColor);
         // Only trigger callback if significantly different to avoid spamming?

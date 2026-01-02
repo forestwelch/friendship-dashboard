@@ -7,11 +7,7 @@ interface KeyboardNavigationProps {
   onEscape?: () => void;
 }
 
-export function KeyboardNavigation({
-  onNavigate,
-  onSelect,
-  onEscape,
-}: KeyboardNavigationProps) {
+export function KeyboardNavigation({ onNavigate, onSelect, onEscape }: KeyboardNavigationProps) {
   useKeyboardShortcuts([
     {
       key: "ArrowUp",
@@ -47,5 +43,3 @@ export function KeyboardNavigation({
 
   return null;
 }
-
-

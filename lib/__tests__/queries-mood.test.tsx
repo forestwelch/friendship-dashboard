@@ -86,4 +86,3 @@ describe("Mood Queries", () => {
     });
   });
 });
-

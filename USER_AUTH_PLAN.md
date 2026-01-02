@@ -3,6 +3,7 @@
 ## Overview
 
 We need to implement:
+
 1. **Authentication system** - Admin signs in, friends can view their dashboards
 2. **User identification** - Determine who is viewing/interacting
 3. **Multi-user Connect Four** - Two players (admin + friend) can play together
@@ -21,6 +22,7 @@ We need to implement:
 ### 1. Database Schema Updates
 
 **Migration: `012_add_user_auth.sql`**
+
 - Link `friends` table to admin user (creator)
 - Add `created_by_user_id UUID REFERENCES auth.users(id)` to `friends` table
 - Update Connect Four config to store actual user IDs instead of "you"/"them"
@@ -31,6 +33,7 @@ We need to implement:
 ### 2. Authentication System
 
 **Files to create:**
+
 - `app/auth/signin/page.tsx` - Sign in page
 - `app/auth/signup/page.tsx` - Sign up page (optional, or admin-only)
 - `lib/auth-context.tsx` - User context provider
@@ -38,6 +41,7 @@ We need to implement:
 - `app/api/auth/[...supabase]/route.ts` - Supabase auth route handler
 
 **Files to update:**
+
 - `app/layout.tsx` - Wrap app with AuthProvider
 - `lib/supabase.ts` - Enable auth session persistence
 - `components/Navigation.tsx` - Add sign in/out button
@@ -45,11 +49,13 @@ We need to implement:
 ### 3. User Identification Logic
 
 **Determine user role:**
+
 - **Admin (creator)**: Logged in user who created the friend
 - **Friend (viewer)**: Visiting `/daniel` without being logged in, or logged in as someone else
 - **Current user**: The person currently viewing/interacting
 
 **For Connect Four:**
+
 - `player_one_user_id` = Admin (creator of the friend)
 - `player_two_user_id` = Friend (the friend themselves)
 - `current_turn` = Which user_id's turn it is
@@ -58,6 +64,7 @@ We need to implement:
 ### 4. Connect Four Updates
 
 **Files to update:**
+
 - `lib/queries-connect-four.ts`:
   - Update `ConnectFourData` interface to use `user_id` instead of `"you" | "them"`
   - Update `useMakeMove` to check current user ID
@@ -73,16 +80,19 @@ We need to implement:
 ### 5. Protected Routes
 
 **Admin routes** (require authentication):
+
 - `/admin/*` - All admin pages
 - API routes that modify data
 
 **Public routes** (no auth required):
+
 - `/[friend]` - Friend dashboard pages
 - API routes that read data (with RLS)
 
 ### 6. API Route Updates
 
 **Files to update:**
+
 - `app/api/widgets/[friendId]/route.ts`:
   - Check if user is admin (created the friend) before allowing updates
   - Allow reads for anyone
@@ -93,11 +103,13 @@ We need to implement:
 ## Implementation Steps
 
 ### Phase 1: Database Schema
+
 1. Create migration to add `created_by_user_id` to `friends`
 2. Create migration to update Connect Four config structure
 3. Run migrations
 
 ### Phase 2: Authentication Setup
+
 1. Install `@supabase/auth-helpers-nextjs` or use Supabase client auth
 2. Create auth context provider
 3. Create sign in page
@@ -105,11 +117,13 @@ We need to implement:
 5. Add sign in/out to navigation
 
 ### Phase 3: User Identification
+
 1. Create hook `useCurrentUser()` to get current user
 2. Create hook `useIsAdmin(friendId)` to check if user created friend
 3. Update friend page to determine viewer role
 
 ### Phase 4: Connect Four Multi-User
+
 1. Update Connect Four data structure to use user IDs
 2. Update game initialization to assign player IDs
 3. Update move validation to check current user
@@ -117,6 +131,7 @@ We need to implement:
 5. Test with two different users
 
 ### Phase 5: Protected Routes
+
 1. Add middleware to protect admin routes
 2. Update API routes to check authentication
 3. Add error handling for unauthorized access
@@ -124,13 +139,16 @@ We need to implement:
 ## Database Schema Changes
 
 ### Friends Table
+
 ```sql
-ALTER TABLE friends 
+ALTER TABLE friends
 ADD COLUMN created_by_user_id UUID REFERENCES auth.users(id);
 ```
 
 ### Connect Four Config Structure
+
 **Old:**
+
 ```typescript
 {
   board: Board,
@@ -143,6 +161,7 @@ ADD COLUMN created_by_user_id UUID REFERENCES auth.users(id);
 ```
 
 **New:**
+
 ```typescript
 {
   board: Board,
@@ -160,12 +179,14 @@ ADD COLUMN created_by_user_id UUID REFERENCES auth.users(id);
 ## User Flow Examples
 
 ### Admin Flow
+
 1. Admin signs in at `/auth/signin`
 2. Admin goes to `/admin/friends` to create/edit friends
 3. Admin creates dashboard for "daniel"
 4. Admin can play Connect Four as player_one
 
 ### Friend Flow
+
 1. Friend visits `mysite.com/daniel` (no login required)
 2. Friend sees their dashboard
 3. Friend clicks Connect Four widget
@@ -173,6 +194,7 @@ ADD COLUMN created_by_user_id UUID REFERENCES auth.users(id);
 5. Friend sees "YOUR TURN" or "THEIR TURN" based on current state
 
 ### Connect Four Game Flow
+
 1. Admin creates Connect Four widget for friend "daniel"
 2. Game initializes with:
    - `player_one_user_id` = admin's user ID
@@ -211,4 +233,3 @@ ADD COLUMN created_by_user_id UUID REFERENCES auth.users(id);
 5. Implement Phase 3 & 4 (User ID + Connect Four)
 6. Test multi-user Connect Four
 7. Add protected routes (Phase 5)
-

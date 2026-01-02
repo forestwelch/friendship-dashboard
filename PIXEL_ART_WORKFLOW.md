@@ -50,7 +50,7 @@ When you upload an image:
 1. **HEIC Conversion**: If the file is HEIC/HEIF, it's converted to PNG
 2. **Cropping**: Image is center-cropped to fit the widget dimensions:
    - 1x1: 80x80px
-   - 2x2: 168x168px (80*2 + 8 gap)
+   - 2x2: 168x168px (80\*2 + 8 gap)
    - 3x3: 256x256px (80*3 + 8*2 gaps)
 3. **Pixelation**: Image is downscaled and upscaled to create pixelated effect
 4. **Color Quantization**: Colors are mapped to the friend's theme palette:
@@ -64,6 +64,7 @@ When you upload an image:
 ## Database Structure
 
 ### `pixel_art_images` table:
+
 - `id`: Unique identifier
 - `friend_id`: Which friend this image belongs to
 - `widget_id`: (Optional) Links to specific widget
@@ -77,5 +78,3 @@ When you upload an image:
 - [ ] Edit/delete uploaded images
 - [ ] Batch upload multiple sizes at once
 - [ ] Image gallery view
-
-

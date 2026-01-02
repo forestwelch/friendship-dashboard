@@ -46,9 +46,7 @@ export class ErrorBoundary extends Component<Props, State> {
             margin: "var(--space-md)",
           }}
         >
-          <h2 style={{ marginTop: 0, color: "var(--accent)" }}>
-            Something went wrong
-          </h2>
+          <h2 style={{ marginTop: 0, color: "var(--accent)" }}>Something went wrong</h2>
           <details style={{ marginTop: "var(--space-md)" }}>
             <summary style={{ cursor: "pointer", marginBottom: "var(--space-sm)" }}>
               Error details
@@ -90,6 +88,3 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
-
-
-

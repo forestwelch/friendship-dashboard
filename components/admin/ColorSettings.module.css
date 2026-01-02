@@ -1,0 +1,138 @@
+/* ColorSettings Styles */
+
+.toggleButton {
+  position: fixed;
+  bottom: var(--space-xl);
+  right: var(--space-xl);
+  width: 48px;
+  height: 48px;
+  background: var(--primary);
+  border: var(--border-width-lg) solid var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  box-shadow: var(--game-shadow-lg);
+}
+
+.toggleIcon {
+  font-size: 20px;
+}
+
+.panel {
+  position: fixed;
+  bottom: 100px;
+  right: var(--space-xl);
+  width: 320px;
+  border: var(--border-width-lg) solid var(--accent);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  z-index: 1001;
+  box-shadow: var(--game-shadow-xl);
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.panelTitle {
+  margin: 0;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-size-xl);
+  padding: var(--space-xs);
+}
+
+.closeIcon {
+  font-size: 16px;
+}
+
+.colorList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.colorItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.colorSwatch {
+  width: 60px;
+  height: 32px;
+  border: var(--border-width-md) solid var(--game-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.colorInfo {
+  flex: 1;
+}
+
+.colorLabel {
+  font-size: var(--font-size-xs);
+  opacity: 0.7;
+}
+
+.colorValue {
+  font-size: var(--font-size-xs);
+}
+
+.randomizeButton {
+  padding: var(--space-xs);
+  background: var(--secondary);
+  border: var(--border-width-md) solid var(--accent);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.randomizeIcon {
+  font-size: 12px;
+}
+
+.randomizeAllButton {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: var(--border-width-md) solid var(--accent);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  font-weight: bold;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+
+.randomizeAllIcon {
+  font-size: 12px;
+}
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--game-overlay-bg-50);
+  z-index: 1000;
+}

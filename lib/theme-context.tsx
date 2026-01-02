@@ -57,8 +57,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
       if (data.friend) {
         const theme: ThemeColors = {
           primary: data.friend.color_primary || DEFAULT_THEME_COLORS.primary,
-          secondary:
-            data.friend.color_secondary || DEFAULT_THEME_COLORS.secondary,
+          secondary: data.friend.color_secondary || DEFAULT_THEME_COLORS.secondary,
           accent: data.friend.color_accent || DEFAULT_THEME_COLORS.accent,
           bg: data.friend.color_bg || DEFAULT_THEME_COLORS.bg,
           text: data.friend.color_text || DEFAULT_THEME_COLORS.text,
@@ -149,10 +148,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         .then((data) => {
           if (data.friend) {
             const theme: ThemeColors = {
-              primary:
-                data.friend.color_primary || DEFAULT_THEME_COLORS.primary,
-              secondary:
-                data.friend.color_secondary || DEFAULT_THEME_COLORS.secondary,
+              primary: data.friend.color_primary || DEFAULT_THEME_COLORS.primary,
+              secondary: data.friend.color_secondary || DEFAULT_THEME_COLORS.secondary,
               accent: data.friend.color_accent || DEFAULT_THEME_COLORS.accent,
               bg: data.friend.color_bg || DEFAULT_THEME_COLORS.bg,
               text: data.friend.color_text || DEFAULT_THEME_COLORS.text,
@@ -202,44 +199,17 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     root.style.setProperty("--theme-text-rgb", `${tr}, ${tg}, ${tb}`);
 
     // Set overlay colors
-    root.style.setProperty(
-      "--game-overlay-bg-50",
-      `rgba(${br}, ${bg}, ${bb}, 0.5)`
-    );
-    root.style.setProperty(
-      "--game-overlay-bg-70",
-      `rgba(${br}, ${bg}, ${bb}, 0.7)`
-    );
-    root.style.setProperty(
-      "--game-overlay-bg-80",
-      `rgba(${br}, ${bg}, ${bb}, 0.8)`
-    );
-    root.style.setProperty(
-      "--game-overlay-primary-20",
-      `rgba(${pr}, ${pg}, ${pb}, 0.2)`
-    );
-    root.style.setProperty(
-      "--game-overlay-secondary-10",
-      `rgba(${sr}, ${sg}, ${sb}, 0.1)`
-    );
-    root.style.setProperty(
-      "--game-overlay-text-30",
-      `rgba(${tr}, ${tg}, ${tb}, 0.3)`
-    );
+    root.style.setProperty("--game-overlay-bg-50", `rgba(${br}, ${bg}, ${bb}, 0.5)`);
+    root.style.setProperty("--game-overlay-bg-70", `rgba(${br}, ${bg}, ${bb}, 0.7)`);
+    root.style.setProperty("--game-overlay-bg-80", `rgba(${br}, ${bg}, ${bb}, 0.8)`);
+    root.style.setProperty("--game-overlay-primary-20", `rgba(${pr}, ${pg}, ${pb}, 0.2)`);
+    root.style.setProperty("--game-overlay-secondary-10", `rgba(${sr}, ${sg}, ${sb}, 0.1)`);
+    root.style.setProperty("--game-overlay-text-30", `rgba(${tr}, ${tg}, ${tb}, 0.3)`);
 
     // Set glow effects
-    root.style.setProperty(
-      "--game-glow-primary",
-      `0 0 8px rgba(${pr}, ${pg}, ${pb}, 0.4)`
-    );
-    root.style.setProperty(
-      "--game-glow-secondary",
-      `0 0 8px rgba(${sr}, ${sg}, ${sb}, 0.4)`
-    );
-    root.style.setProperty(
-      "--game-glow-accent",
-      `0 0 8px rgba(${ar}, ${ag}, ${ab}, 0.4)`
-    );
+    root.style.setProperty("--game-glow-primary", `0 0 8px rgba(${pr}, ${pg}, ${pb}, 0.4)`);
+    root.style.setProperty("--game-glow-secondary", `0 0 8px rgba(${sr}, ${sg}, ${sb}, 0.4)`);
+    root.style.setProperty("--game-glow-accent", `0 0 8px rgba(${ar}, ${ag}, ${ab}, 0.4)`);
   }, [colors]);
 
   const setTheme = useCallback((newColors: ThemeColors) => {
@@ -247,9 +217,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   }, []);
 
   return (
-    <ThemeContext.Provider
-      value={{ colors, setTheme, prefetchTheme, preloadAllThemes }}
-    >
+    <ThemeContext.Provider value={{ colors, setTheme, prefetchTheme, preloadAllThemes }}>
       {children}
     </ThemeContext.Provider>
   );

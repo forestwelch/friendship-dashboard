@@ -34,10 +34,7 @@ export function useUserContext(): UserContext {
  * - Admin always returns "admin"
  * - Friend returns the friend's ID
  */
-export function getUserIdForFriend(
-  userContext: UserContext,
-  friendId: string
-): string {
+export function getUserIdForFriend(userContext: UserContext, friendId: string): string {
   if (userContext.isAdmin) {
     return ADMIN_USER_ID;
   }
@@ -49,13 +46,9 @@ export function getUserIdForFriend(
  * - Admin returns "FOREST"
  * - Friend returns their display name in uppercase
  */
-export function getUserDisplayName(
-  userId: string,
-  friendName: string
-): string {
+export function getUserDisplayName(userId: string, friendName: string): string {
   if (userId === ADMIN_USER_ID) {
     return ADMIN_NAME;
   }
   return friendName.toUpperCase();
 }
-

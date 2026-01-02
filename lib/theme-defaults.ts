@@ -3,11 +3,11 @@
  * Modern, minimalist grayscale palette for a sleek dark mode aesthetic
  */
 export const DEFAULT_THEME_COLORS = {
-  primary: "#3a3a3a",      // Medium gray - main interactive elements
-  secondary: "#4a4a4a",    // Lighter gray - secondary elements
-  accent: "#2a2a2a",       // Darker gray - accents and borders
-  bg: "#0a0a0a",           // Near black background
-  text: "#e8e8e8",         // Soft white text
+  primary: "#3a3a3a", // Medium gray - main interactive elements
+  secondary: "#4a4a4a", // Lighter gray - secondary elements
+  accent: "#2a2a2a", // Darker gray - accents and borders
+  bg: "#0a0a0a", // Near black background
+  text: "#e8e8e8", // Soft white text
 } as const;
 
 /**
@@ -21,4 +21,3 @@ export const DEFAULT_THEME_COLORS_ALT = {
   bg: "#e6f2ff",
   text: "#001f3f",
 } as const;
-

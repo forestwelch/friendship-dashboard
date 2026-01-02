@@ -14,11 +14,7 @@ export interface ColorPalette {
 function hexToRgb(hex: string): [number, number, number] {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
-    ? [
-        parseInt(result[1], 16),
-        parseInt(result[2], 16),
-        parseInt(result[3], 16),
-      ]
+    ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
     : [0, 0, 0];
 }
 
@@ -33,20 +29,13 @@ function colorDistance(
   g2: number,
   b2: number
 ): number {
-  return Math.sqrt(
-    Math.pow(r2 - r1, 2) + Math.pow(g2 - g1, 2) + Math.pow(b2 - b1, 2)
-  );
+  return Math.sqrt(Math.pow(r2 - r1, 2) + Math.pow(g2 - g1, 2) + Math.pow(b2 - b1, 2));
 }
 
 /**
  * Find nearest color in palette
  */
-function findNearestColor(
-  r: number,
-  g: number,
-  b: number,
-  palette: ColorPalette
-): string {
+function findNearestColor(r: number, g: number, b: number, palette: ColorPalette): string {
   const paletteColors = [
     hexToRgb(palette.primary),
     hexToRgb(palette.secondary),
@@ -55,13 +44,7 @@ function findNearestColor(
     hexToRgb(palette.text),
   ];
 
-  const paletteHex = [
-    palette.primary,
-    palette.secondary,
-    palette.accent,
-    palette.bg,
-    palette.text,
-  ];
+  const paletteHex = [palette.primary, palette.secondary, palette.accent, palette.bg, palette.text];
 
   let minDistance = Infinity;
   let nearestColor = palette.primary;
@@ -141,17 +124,7 @@ export async function processImageToPixelArt(
       // Draw image scaled down (this creates pixelation)
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(img, 0, 0, width / pixelSize, height / pixelSize);
-      ctx.drawImage(
-        canvas,
-        0,
-        0,
-        width / pixelSize,
-        height / pixelSize,
-        0,
-        0,
-        width,
-        height
-      );
+      ctx.drawImage(canvas, 0, 0, width / pixelSize, height / pixelSize, 0, 0, width, height);
 
       // Get image data
       const imageData = ctx.getImageData(0, 0, width, height);
@@ -290,4 +263,3 @@ export async function cropImageToSize(
     img.src = URL.createObjectURL(imageFile);
   });
 }
-

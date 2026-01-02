@@ -15,22 +15,15 @@ export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[]) {
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Don't intercept if user is typing in an input/textarea
-      if (
-        event.target instanceof HTMLInputElement ||
-        event.target instanceof HTMLTextAreaElement
-      ) {
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
         return;
       }
 
       for (const shortcut of shortcuts) {
-        const ctrlMatch =
-          shortcut.ctrl === undefined || event.ctrlKey === shortcut.ctrl;
-        const shiftMatch =
-          shortcut.shift === undefined || event.shiftKey === shortcut.shift;
-        const altMatch =
-          shortcut.alt === undefined || event.altKey === shortcut.alt;
-        const keyMatch =
-          event.key.toLowerCase() === shortcut.key.toLowerCase();
+        const ctrlMatch = shortcut.ctrl === undefined || event.ctrlKey === shortcut.ctrl;
+        const shiftMatch = shortcut.shift === undefined || event.shiftKey === shortcut.shift;
+        const altMatch = shortcut.alt === undefined || event.altKey === shortcut.alt;
+        const keyMatch = event.key.toLowerCase() === shortcut.key.toLowerCase();
 
         if (ctrlMatch && shiftMatch && altMatch && keyMatch) {
           event.preventDefault();
@@ -44,4 +37,3 @@ export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[]) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [shortcuts]);
 }
-

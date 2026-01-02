@@ -80,7 +80,7 @@ export function SongManager({ initialSongs = [], onSave }: SongManagerProps) {
     // Instant delete - no confirmation (optimistic update pattern)
     setSongs((prev) => prev.filter((_, i) => i !== index));
     playSound("delete");
-    // TODO: Sync to DB in background (will be handled by TanStack Query mutation)
+    // Note: DB sync handled by TanStack Query mutation
   };
 
   const handleSave = async () => {
@@ -125,15 +125,19 @@ export function SongManager({ initialSongs = [], onSave }: SongManagerProps) {
   };
 
   return (
-    <div style={{ 
-      display: "flex",
-      flexDirection: "column",
-      height: "100%",
-      overflow: "hidden",
-      gap: "var(--space-md)",
-    }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        overflow: "hidden",
+        gap: "var(--space-md)",
+      }}
+    >
       <div className="game-flex game-flex-between" style={{ flexShrink: 0 }}>
-        <h2 className="game-heading-2" style={{ margin: 0, color: "var(--admin-text)" }}>Manage Songs</h2>
+        <h2 className="game-heading-2" style={{ margin: 0, color: "var(--admin-text)" }}>
+          Manage Songs
+        </h2>
         <div className="game-flex game-flex-gap-sm">
           <button
             className="game-button"
@@ -164,12 +168,20 @@ export function SongManager({ initialSongs = [], onSave }: SongManagerProps) {
       </div>
 
       {showAddForm && (
-        <div className="game-card" style={{ 
-          flexShrink: 0,
-          background: "var(--admin-surface)",
-          borderColor: "var(--admin-accent)",
-        }}>
-          <h3 className="game-heading-3" style={{ marginBottom: "var(--space-md)", color: "var(--admin-text)" }}>Add New Song</h3>
+        <div
+          className="game-card"
+          style={{
+            flexShrink: 0,
+            background: "var(--admin-surface)",
+            borderColor: "var(--admin-accent)",
+          }}
+        >
+          <h3
+            className="game-heading-3"
+            style={{ marginBottom: "var(--space-md)", color: "var(--admin-text)" }}
+          >
+            Add New Song
+          </h3>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)" }}>
             <input
               type="text"
@@ -230,31 +242,38 @@ export function SongManager({ initialSongs = [], onSave }: SongManagerProps) {
         </div>
       )}
 
-      <div className="game-card" style={{ 
-        flex: 1,
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        background: "var(--admin-surface)",
-        borderColor: "var(--admin-accent)",
-      }}>
+      <div
+        className="game-card"
+        style={{
+          flex: 1,
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          background: "var(--admin-surface)",
+          borderColor: "var(--admin-accent)",
+        }}
+      >
         {songs.length === 0 ? (
-          <div style={{ 
-            textAlign: "center", 
-            padding: "var(--space-2xl)",
-            color: "var(--admin-text)",
-            opacity: 0.6,
-          }}>
+          <div
+            style={{
+              textAlign: "center",
+              padding: "var(--space-2xl)",
+              color: "var(--admin-text)",
+              opacity: 0.6,
+            }}
+          >
             No songs yet. Click &quot;Add Song&quot; to get started!
           </div>
         ) : (
-          <div style={{ 
-            display: "flex", 
-            flexDirection: "column", 
-            gap: "var(--space-sm)",
-            overflowY: "auto",
-            flex: 1,
-          }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--space-sm)",
+              overflowY: "auto",
+              flex: 1,
+            }}
+          >
             {songs.map((song, index) => (
               <div
                 key={song.id || index}
@@ -281,9 +300,7 @@ export function SongManager({ initialSongs = [], onSave }: SongManagerProps) {
                       type="text"
                       className="game-input"
                       value={editSong.title || ""}
-                      onChange={(e) =>
-                        setEditSong({ ...editSong, title: e.target.value })
-                      }
+                      onChange={(e) => setEditSong({ ...editSong, title: e.target.value })}
                       placeholder="Title"
                       style={{ fontSize: "var(--font-size-xs)", padding: "var(--space-sm)" }}
                     />
@@ -291,9 +308,7 @@ export function SongManager({ initialSongs = [], onSave }: SongManagerProps) {
                       type="text"
                       className="game-input"
                       value={editSong.artist || ""}
-                      onChange={(e) =>
-                        setEditSong({ ...editSong, artist: e.target.value })
-                      }
+                      onChange={(e) => setEditSong({ ...editSong, artist: e.target.value })}
                       placeholder="Artist"
                       style={{ fontSize: "var(--font-size-xs)", padding: "var(--space-sm)" }}
                     />
@@ -334,13 +349,19 @@ export function SongManager({ initialSongs = [], onSave }: SongManagerProps) {
                 ) : (
                   <>
                     <div style={{ flex: 1 }}>
-                      <div className="game-heading-3" style={{ marginBottom: "var(--space-xs)", fontSize: "var(--font-size-sm)" }}>
+                      <div
+                        className="game-heading-3"
+                        style={{ marginBottom: "var(--space-xs)", fontSize: "var(--font-size-sm)" }}
+                      >
                         {song.title}
                       </div>
                       <div className="game-text-muted" style={{ marginBottom: "var(--space-xs)" }}>
                         {song.artist}
                       </div>
-                      <div className="game-text-muted" style={{ fontSize: "var(--font-size-xs)", marginTop: "var(--space-xs)" }}>
+                      <div
+                        className="game-text-muted"
+                        style={{ fontSize: "var(--font-size-xs)", marginTop: "var(--space-xs)" }}
+                      >
                         YouTube ID: {song.youtubeId}
                       </div>
                     </div>
@@ -367,9 +388,6 @@ export function SongManager({ initialSongs = [], onSave }: SongManagerProps) {
           </div>
         )}
       </div>
-
     </div>
   );
 }
-
-

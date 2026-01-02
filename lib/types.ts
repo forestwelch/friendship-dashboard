@@ -47,5 +47,3 @@ export interface ThemeColors {
   bg: string;
   text: string;
 }
-
-

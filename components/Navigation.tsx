@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { playSound } from "@/lib/sounds";
+import clsx from "clsx";
+import styles from "./Navigation.module.css";
 
 interface NavigationProps {
   actions?: {
@@ -23,36 +25,26 @@ export function Navigation({ actions, className }: NavigationProps = {} as Navig
     { href: "/admin/content", label: "MANAGE GLOBAL CONTENT" },
   ];
 
-  const navStyle: React.CSSProperties = {
-    background: "var(--bg)",
-    borderBottomColor: "var(--accent)",
-  };
-
   return (
-    <nav className={`game-nav ${className || ""}`} style={navStyle}>
+    <nav className={clsx("game-nav", styles.nav, className)}>
       {navLinks.map((link) => {
-        const isActive = pathname === link.href || 
-          (link.href !== "/" && pathname?.startsWith(link.href));
+        const isActive =
+          pathname === link.href || (link.href !== "/" && pathname?.startsWith(link.href));
         return (
           <Link
             key={link.href}
             href={link.href}
-            className={`game-nav-link ${isActive ? "active" : ""}`}
-            style={{
-              color: isActive 
-                ? "var(--primary)"
-                : "var(--text)",
-            }}
+            className={clsx("game-nav-link", styles.navLink, isActive && styles.active)}
             onClick={() => playSound("click")}
           >
             {link.label}
           </Link>
         );
       })}
-      
+
       {/* Contextual Actions */}
       {actions && actions.length > 0 && (
-        <div style={{ display: "flex", gap: "var(--space-sm)", marginLeft: "var(--space-md)", borderLeft: "var(--border-width-sm) solid var(--accent)", paddingLeft: "var(--space-md)" }}>
+        <div className={styles.actionsContainer}>
           {actions.map((action, index) => (
             <button
               key={index}
@@ -60,10 +52,13 @@ export function Navigation({ actions, className }: NavigationProps = {} as Navig
                 action.onClick();
                 playSound(action.primary ? "select" : "click");
               }}
-              className={`game-button ${action.primary ? "game-button-primary" : ""}`}
-              style={{ fontSize: "var(--font-size-xs)", height: "1.5rem", minHeight: "1.5rem" }}
+              className={clsx(
+                "game-button",
+                action.primary && "game-button-primary",
+                styles.actionButton
+              )}
             >
-              {action.icon && <i className={`hn ${action.icon}`} style={{ marginRight: "0.25rem" }} />}
+              {action.icon && <i className={clsx("hn", action.icon, styles.actionIcon)} />}
               {action.label}
             </button>
           ))}

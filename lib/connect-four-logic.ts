@@ -10,11 +10,7 @@ export function createEmptyBoard(): Board {
     .map(() => Array(BOARD_COLS).fill(null));
 }
 
-export function makeMove(
-  board: Board,
-  column: number,
-  player: "you" | "them"
-): Board | null {
+export function makeMove(board: Board, column: number, player: "you" | "them"): Board | null {
   if (column < 0 || column >= BOARD_COLS) return null;
 
   // Find the lowest empty row in the column
@@ -43,10 +39,7 @@ export interface WinningPosition {
   col: number;
 }
 
-export function getWinningPositions(
-  board: Board,
-  player: "you" | "them"
-): WinningPosition[] {
+export function getWinningPositions(board: Board, player: "you" | "them"): WinningPosition[] {
   // Check horizontal
   for (let row = 0; row < BOARD_ROWS; row++) {
     for (let col = 0; col <= BOARD_COLS - 4; col++) {
@@ -139,6 +132,3 @@ export function calculateDropRow(board: Board, column: number): number {
   }
   return -1; // Column is full
 }
-
-
-

@@ -60,9 +60,7 @@ export function EventCountdownModal({
   // Sort events by date
   const sortedEvents = useMemo(() => {
     const gameEvents = eventData?.events || config?.events || [];
-    return [...gameEvents].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
+    return [...gameEvents].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [eventData?.events, config?.events]);
 
   const _handleCreateNew = () => {
@@ -270,11 +268,7 @@ export function EventCountdownModal({
           <div className={styles.eventsList}>
             {sortedEvents.length > 0 ? (
               sortedEvents.map((event) => (
-                <div
-                  key={event.id}
-                  className={styles.eventItem}
-                  onClick={() => handleEdit(event)}
-                >
+                <div key={event.id} className={styles.eventItem} onClick={() => handleEdit(event)}>
                   <div className={styles.eventHeader}>
                     <span className={styles.emoji}>{event.emoji}</span>
                     <span className={styles.eventName}>{event.name}</span>
@@ -294,4 +288,3 @@ export function EventCountdownModal({
     </Modal>
   );
 }
-

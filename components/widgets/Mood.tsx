@@ -79,7 +79,12 @@ export function Mood({ size, friendId, widgetId, themeColors, config }: MoodProp
         <div className={styles.tile1x1} onClick={handleClick}>
           <div className={styles.emoji}>{currentMood?.emoji || ":)"}</div>
         </div>
-        <MoodModal friendId={friendId} widgetId={widgetId} themeColors={themeColors} config={config} />
+        <MoodModal
+          friendId={friendId}
+          widgetId={widgetId}
+          themeColors={themeColors}
+          config={config}
+        />
       </>
     );
   }
@@ -107,7 +112,12 @@ export function Mood({ size, friendId, widgetId, themeColors, config }: MoodProp
             </div>
           )}
         </div>
-        <MoodModal friendId={friendId} widgetId={widgetId} themeColors={themeColors} config={config} />
+        <MoodModal
+          friendId={friendId}
+          widgetId={widgetId}
+          themeColors={themeColors}
+          config={config}
+        />
       </>
     );
   }
@@ -137,11 +147,15 @@ export function Mood({ size, friendId, widgetId, themeColors, config }: MoodProp
             )}
           </div>
         </div>
-        <MoodModal friendId={friendId} widgetId={widgetId} themeColors={themeColors} config={config} />
+        <MoodModal
+          friendId={friendId}
+          widgetId={widgetId}
+          themeColors={themeColors}
+          config={config}
+        />
       </>
     );
   }
 
   return null;
 }
-

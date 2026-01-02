@@ -79,7 +79,20 @@ body {
 }
 
 /* Force pixel font rendering on text elements (but not icons) */
-p, div, span, h1, h2, h3, h4, h5, h6, button, input, textarea, label, a {
+p,
+div,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+button,
+input,
+textarea,
+label,
+a {
   font-family: "Press Start 2P", "Dogica", "PixelFallback", "Courier New", "Courier", monospace;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: unset;
@@ -87,7 +100,10 @@ p, div, span, h1, h2, h3, h4, h5, h6, button, input, textarea, label, a {
 }
 
 /* Ensure icons keep their font */
-.hn, .hn:before, [class^="hn-"], [class*=" hn-"] {
+.hn,
+.hn:before,
+[class^="hn-"],
+[class*=" hn-"] {
   font-family: "iconfont" !important;
   -webkit-font-smoothing: none !important;
   -moz-osx-font-smoothing: unset !important;
@@ -107,7 +123,7 @@ p, div, span, h1, h2, h3, h4, h5, h6, button, input, textarea, label, a {
 ::-webkit-scrollbar-track {
   background: var(--bg);
   /* Chunky pixel border effect */
-  box-shadow: 
+  box-shadow:
     inset -0.125rem -0.125rem 0 var(--secondary),
     inset 0.125rem 0.125rem 0 var(--accent);
 }
@@ -115,7 +131,7 @@ p, div, span, h1, h2, h3, h4, h5, h6, button, input, textarea, label, a {
 ::-webkit-scrollbar-thumb {
   background: var(--primary);
   /* Chunky pixel border effect */
-  box-shadow: 
+  box-shadow:
     inset -0.125rem -0.125rem 0 var(--secondary),
     inset 0.125rem 0.125rem 0 var(--accent);
   border: var(--border-width-md) solid var(--accent);
@@ -127,14 +143,14 @@ p, div, span, h1, h2, h3, h4, h5, h6, button, input, textarea, label, a {
 
 ::-webkit-scrollbar-thumb:active {
   /* Pressed effect */
-  box-shadow: 
+  box-shadow:
     inset -2px -2px 0 var(--accent),
     inset 2px 2px 0 var(--secondary);
 }
 
 ::-webkit-scrollbar-corner {
   background: var(--bg);
-  box-shadow: 
+  box-shadow:
     inset -0.125rem -0.125rem 0 var(--secondary),
     inset 0.125rem 0.125rem 0 var(--accent);
 }

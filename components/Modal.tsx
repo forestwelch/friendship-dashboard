@@ -78,24 +78,27 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
   if (!isOpen) return null;
 
   // Find the grid container wrapper to portal into
-  const gridContainer = typeof document !== "undefined" 
-    ? document.querySelector('[data-grid-container-wrapper]') || document.body
-    : null;
+  const gridContainer =
+    typeof document !== "undefined"
+      ? document.querySelector("[data-grid-container-wrapper]") || document.body
+      : null;
 
   const modalContent = (
     <div className={styles.backdrop}>
-      <div className={styles.modal} ref={modalRef} role="dialog" aria-modal="true" aria-labelledby={title ? `${id}-title` : undefined}>
+      <div
+        className={styles.modal}
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? `${id}-title` : undefined}
+      >
         <div className={styles.header}>
           {title && (
             <h2 id={`${id}-title`} className={styles.title}>
               {title}
             </h2>
           )}
-          <button
-            className={styles.closeButton}
-            onClick={handleClose}
-            aria-label="Close modal"
-          >
+          <button className={styles.closeButton} onClick={handleClose} aria-label="Close modal">
             ✕
           </button>
         </div>
@@ -111,4 +114,3 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
 
   return modalContent;
 }
-

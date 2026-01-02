@@ -22,10 +22,13 @@ const eslintConfig = defineConfig([
       "react-hooks/purity": "error", // Prevent impure functions in render
       "no-console": ["error", { allow: ["warn", "error"] }], // Changed from warn to error
       "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/no-unused-vars": ["error", { 
-        argsIgnorePattern: "^_",
-        varsIgnorePattern: "^_",
-      }], // Changed from warn to error
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ], // Changed from warn to error
       "react/no-unescaped-entities": "error", // Changed from warn to error
       "@next/next/no-img-element": "warn", // Keep as warn (can be intentional)
       "@next/next/no-page-custom-font": "warn", // Keep as warn

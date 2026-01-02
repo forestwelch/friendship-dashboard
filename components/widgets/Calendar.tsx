@@ -15,25 +15,21 @@ interface CalendarProps {
   onProposeHangout?: (date: string, time: string) => void;
 }
 
-export function Calendar({
-  size,
-  events = [],
-  onProposeHangout,
-}: CalendarProps) {
+export function Calendar({ size, events = [], onProposeHangout }: CalendarProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  
+
   const today = new Date();
   const currentMonth = selectedDate.getMonth();
   const currentYear = selectedDate.getFullYear();
-  
+
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  
+
   const getEventsForDate = (date: number) => {
-    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-    return events.filter(e => e.date.startsWith(dateStr));
+    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(date).padStart(2, "0")}`;
+    return events.filter((e) => e.date.startsWith(dateStr));
   };
-  
+
   const isToday = (date: number) => {
     return (
       date === today.getDate() &&
@@ -41,12 +37,12 @@ export function Calendar({
       currentYear === today.getFullYear()
     );
   };
-  
+
   if (size === "1x1") {
     // Mini calendar - just show today's date and next event
     const _todayEvents = getEventsForDate(today.getDate());
-    const nextEvent = events.find(e => new Date(e.date) >= today);
-    
+    const nextEvent = events.find((e) => new Date(e.date) >= today);
+
     return (
       <Widget size={size}>
         <div
@@ -61,11 +57,9 @@ export function Calendar({
             gap: "var(--space-sm)",
           }}
         >
-          <div style={{ fontSize: "20px", fontWeight: "bold" }}>
-            {today.getDate()}
-          </div>
+          <div style={{ fontSize: "20px", fontWeight: "bold" }}>{today.getDate()}</div>
           <div style={{ fontSize: "10px", opacity: 0.8 }}>
-            {today.toLocaleDateString('en-US', { month: 'short' })}
+            {today.toLocaleDateString("en-US", { month: "short" })}
           </div>
           {nextEvent && (
             <div
@@ -85,22 +79,22 @@ export function Calendar({
       </Widget>
     );
   }
-  
+
   if (size === "2x2") {
     // Small calendar grid
     const days = ["S", "M", "T", "W", "T", "F", "S"];
     const calendarDays: Array<number | null> = [];
-    
+
     // Add empty cells for days before month starts
     for (let i = 0; i < firstDayOfMonth; i++) {
       calendarDays.push(null);
     }
-    
+
     // Add days of month
     for (let i = 1; i <= daysInMonth; i++) {
       calendarDays.push(i);
     }
-    
+
     return (
       <Widget size={size}>
         <div
@@ -121,9 +115,9 @@ export function Calendar({
               marginBottom: "4px",
             }}
           >
-            {selectedDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+            {selectedDate.toLocaleDateString("en-US", { month: "short", year: "numeric" })}
           </div>
-          
+
           {/* Day headers */}
           <div
             style={{
@@ -140,7 +134,7 @@ export function Calendar({
               </div>
             ))}
           </div>
-          
+
           {/* Calendar grid */}
           <div
             style={{
@@ -154,10 +148,10 @@ export function Calendar({
               if (day === null) {
                 return <div key={i} />;
               }
-              
+
               const dayEvents = getEventsForDate(day);
               const isTodayDate = isToday(day);
-              
+
               return (
                 <div
                   key={i}
@@ -195,27 +189,24 @@ export function Calendar({
       </Widget>
     );
   }
-  
+
   // 3x3 version - Full calendar with event list
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const calendarDays: Array<number | null> = [];
-  
+
   for (let i = 0; i < firstDayOfMonth; i++) {
     calendarDays.push(null);
   }
-  
+
   for (let i = 1; i <= daysInMonth; i++) {
     calendarDays.push(i);
   }
-  
-  const selectedEvents = events.filter(e => {
+
+  const selectedEvents = events.filter((e) => {
     const eventDate = new Date(e.date);
-    return (
-      eventDate.getMonth() === currentMonth &&
-      eventDate.getFullYear() === currentYear
-    );
+    return eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
   });
-  
+
   return (
     <Widget size={size}>
       <div
@@ -241,27 +232,21 @@ export function Calendar({
         >
           <button
             className="widget-button"
-            onClick={() =>
-              setSelectedDate(new Date(currentYear, currentMonth - 1, 1))
-            }
+            onClick={() => setSelectedDate(new Date(currentYear, currentMonth - 1, 1))}
             style={{ padding: "2px 6px", fontSize: "10px" }}
           >
             ←
           </button>
-          <div>
-            {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-          </div>
+          <div>{selectedDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</div>
           <button
             className="widget-button"
-            onClick={() =>
-              setSelectedDate(new Date(currentYear, currentMonth + 1, 1))
-            }
+            onClick={() => setSelectedDate(new Date(currentYear, currentMonth + 1, 1))}
             style={{ padding: "2px 6px", fontSize: "10px" }}
           >
             →
           </button>
         </div>
-        
+
         {/* Day headers */}
         <div
           style={{
@@ -278,7 +263,7 @@ export function Calendar({
             </div>
           ))}
         </div>
-        
+
         {/* Calendar grid */}
         <div
           style={{
@@ -293,12 +278,12 @@ export function Calendar({
             if (day === null) {
               return <div key={i} />;
             }
-            
+
             const dayEvents = getEventsForDate(day);
             const isTodayDate = isToday(day);
-            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             const isFuture = new Date(dateStr) >= new Date(today.toDateString());
-            
+
             return (
               <div
                 key={i}
@@ -331,9 +316,7 @@ export function Calendar({
                     : undefined
                 }
               >
-                <div style={{ fontWeight: isTodayDate ? "bold" : "normal" }}>
-                  {day}
-                </div>
+                <div style={{ fontWeight: isTodayDate ? "bold" : "normal" }}>{day}</div>
                 {dayEvents.length > 0 && (
                   <div
                     style={{
@@ -360,7 +343,7 @@ export function Calendar({
             );
           })}
         </div>
-        
+
         {/* Event list */}
         {selectedEvents.length > 0 && (
           <div
@@ -391,4 +374,3 @@ export function Calendar({
     </Widget>
   );
 }
-

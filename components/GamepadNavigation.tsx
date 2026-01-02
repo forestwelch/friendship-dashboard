@@ -10,10 +10,10 @@ interface GamepadNavigationProps {
   enabled?: boolean;
 }
 
-export function GamepadNavigation({ 
-  onButtonPress, 
-  onStickMove, 
-  enabled = true 
+export function GamepadNavigation({
+  onButtonPress,
+  onStickMove,
+  enabled = true,
 }: GamepadNavigationProps) {
   // Track last move time to prevent scrolling too fast
   const lastMoveTime = useRef(0);
@@ -21,21 +21,23 @@ export function GamepadNavigation({
 
   useEffect(() => {
     if (!enabled) return;
-    
+
     const cleanup = initGamepad();
     return cleanup;
   }, [enabled]);
 
   useEffect(() => {
     if (!enabled) return;
-    
+
     const lastButtonState: Record<string, boolean> = {};
     const stickDeadzone = 0.5;
 
     const getFocusableElements = () => {
-      return Array.from(document.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      )) as HTMLElement[];
+      return Array.from(
+        document.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+      ) as HTMLElement[];
     };
 
     const findNearestElement = (direction: "up" | "down" | "left" | "right") => {
@@ -50,35 +52,45 @@ export function GamepadNavigation({
       const rect = active.getBoundingClientRect();
       const center = {
         x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2
+        y: rect.top + rect.height / 2,
       };
 
-      const candidates = getFocusableElements().filter(el => el !== active && !el.getAttribute("aria-hidden"));
-      
+      const candidates = getFocusableElements().filter(
+        (el) => el !== active && !el.getAttribute("aria-hidden")
+      );
+
       let nearest: HTMLElement | null = null;
       let minDistance = Infinity;
 
-      candidates.forEach(el => {
+      candidates.forEach((el) => {
         const r = el.getBoundingClientRect();
         const c = {
           x: r.left + r.width / 2,
-          y: r.top + r.height / 2
+          y: r.top + r.height / 2,
         };
 
         // Filter based on direction
         let isValid = false;
         switch (direction) {
-          case "up": isValid = c.y < center.y; break;
-          case "down": isValid = c.y > center.y; break;
-          case "left": isValid = c.x < center.x; break;
-          case "right": isValid = c.x > center.x; break;
+          case "up":
+            isValid = c.y < center.y;
+            break;
+          case "down":
+            isValid = c.y > center.y;
+            break;
+          case "left":
+            isValid = c.x < center.x;
+            break;
+          case "right":
+            isValid = c.x > center.x;
+            break;
         }
 
         if (!isValid) return;
 
         // Calculate distance
         const dist = Math.pow(c.x - center.x, 2) + Math.pow(c.y - center.y, 2);
-        
+
         // Weight distance to prefer direct lines (e.g. moving down prefers elements directly below)
         // Add penalty for orthogonal deviation
         let penalty = 0;
@@ -108,7 +120,7 @@ export function GamepadNavigation({
 
       const state = getGamepadState();
       const now = Date.now();
-      
+
       // Check button presses
       Object.entries(state.buttons).forEach(([button, pressed]) => {
         const wasPressed = lastButtonState[button] || false;
@@ -120,15 +132,15 @@ export function GamepadNavigation({
               playSound("click");
             }
           } else if (button === "b") {
-             // Maybe go back? or blur?
-             if (document.activeElement instanceof HTMLElement) {
-               document.activeElement.blur();
-               playSound("cancel");
-             }
+            // Maybe go back? or blur?
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur();
+              playSound("cancel");
+            }
           } else if (button === "x") {
-             // Right click simulation? Or custom action
-             // Dispatch context menu event?
-             /* 
+            // Right click simulation? Or custom action
+            // Dispatch context menu event?
+            /* 
              const ev = new MouseEvent('contextmenu', {
                bubbles: true,
                cancelable: true,
@@ -137,7 +149,7 @@ export function GamepadNavigation({
              document.activeElement?.dispatchEvent(ev);
              */
           } else if (button === "dpadUp") {
-             // Handle D-pad if mapped, but stick usually handles it
+            // Handle D-pad if mapped, but stick usually handles it
           }
 
           onButtonPress?.(button);
@@ -148,7 +160,7 @@ export function GamepadNavigation({
       // Check stick movements for navigation
       if (now - lastMoveTime.current > MOVE_DELAY) {
         const { x, y } = state.sticks.left;
-        
+
         if (Math.abs(y) > stickDeadzone) {
           findNearestElement(y > 0 ? "down" : "up");
           lastMoveTime.current = now;

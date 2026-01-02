@@ -178,4 +178,3 @@ export function EventCountdown({
 
   return null;
 }
-

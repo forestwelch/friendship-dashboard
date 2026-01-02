@@ -101,9 +101,7 @@ export function useSetMood(friendId: string, widgetId: string) {
 
       const optimisticData: MoodData = {
         current_mood: newMood,
-        history: previousData
-          ? [newMood, ...(previousData.history || [])].slice(0, 30)
-          : [newMood],
+        history: previousData ? [newMood, ...(previousData.history || [])].slice(0, 30) : [newMood],
       };
 
       queryClient.setQueryData<MoodData>(["mood", friendId, widgetId], optimisticData);
@@ -191,4 +189,3 @@ export function useUpdateMoodNotes(friendId: string, widgetId: string) {
     },
   });
 }
-

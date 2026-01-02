@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Failed to fetch saved image" }, { status: 500 });
       }
 
-      return NextResponse.json({ 
+      return NextResponse.json({
         image: {
           id: data.id,
           pixel_data: data.pixel_data || null,
@@ -89,19 +89,19 @@ export async function POST(request: NextRequest) {
           width: data.width || 128,
           height: data.height || 128,
           created_at: data.created_at,
-        }
+        },
       });
     }
 
-    return NextResponse.json({ 
-      image: { 
-        id: imageId, 
+    return NextResponse.json({
+      image: {
+        id: imageId,
         pixel_data: pixelData || null,
         size: "2x2",
         width: 128,
         height: 128,
-        created_at: new Date().toISOString() 
-      } 
+        created_at: new Date().toISOString(),
+      },
     });
   } catch (error) {
     console.error("Error in POST /api/images:", error);
@@ -124,10 +124,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    const { error } = await supabase
-      .from("pixel_art_images")
-      .delete()
-      .in("id", idArray);
+    const { error } = await supabase.from("pixel_art_images").delete().in("id", idArray);
 
     if (error) {
       console.error("Error deleting images:", error);
@@ -140,4 +137,3 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
-

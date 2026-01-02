@@ -14,7 +14,4 @@
   margin-bottom: var(--space-md);
 }
 
-/* Desktop styles are handled inline in Grid.tsx */
-
-
-
+/* Desktop grid styles use inline styles for dynamic positioning */

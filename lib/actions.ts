@@ -18,16 +18,3 @@ export async function proposeHangout(
     message,
   });
 }
-
-export async function updateMediaRecommendation(
-  _friendId: string,
-  _recommendations: Array<Record<string, unknown>>
-): Promise<boolean> {
-  // This would typically update the widget config in friend_widgets
-  // But since configs are stored in the widget definition, we'd need the widget ID
-  // For now, let's assume we're just logging it or sending to inbox if it's a new one
-  // Update media recommendations
-  return true;
-}
-
-

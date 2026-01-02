@@ -72,9 +72,9 @@ export function ContentManager() {
   };
 
   return (
-    <div 
+    <div
       className="admin-page"
-      style={{ 
+      style={{
         paddingTop: `calc(var(--height-button) + var(--space-md))`,
         width: "100vw",
         height: "calc(100vh - 2.25rem)",
@@ -83,15 +83,20 @@ export function ContentManager() {
         flexDirection: "column",
       }}
     >
-      <div className="game-container" style={{ 
-        padding: "var(--space-md)",
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-      }}>
+      <div
+        className="game-container"
+        style={{
+          padding: "var(--space-md)",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
         <div className="game-breadcrumb" style={{ marginBottom: "var(--space-md)", flexShrink: 0 }}>
-          <Link href="/" className="game-link">Home</Link>
+          <Link href="/" className="game-link">
+            Home
+          </Link>
           <span className="game-breadcrumb-separator">/</span>
           <span className="game-breadcrumb-current">Manage Global Content</span>
         </div>
@@ -100,13 +105,15 @@ export function ContentManager() {
         </h1>
 
         {/* Tabs */}
-        <div style={{ 
-          display: "flex", 
-          gap: "var(--space-sm)", 
-          marginBottom: "var(--space-md)",
-          borderBottom: "var(--border-width-md) solid var(--game-border)",
-          flexShrink: 0,
-        }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "var(--space-sm)",
+            marginBottom: "var(--space-md)",
+            borderBottom: "var(--border-width-md) solid var(--game-border)",
+            flexShrink: 0,
+          }}
+        >
           <button
             onClick={() => {
               setActiveTab("songs");
@@ -119,7 +126,10 @@ export function ContentManager() {
               background: activeTab === "songs" ? "var(--primary)" : "transparent",
               color: activeTab === "songs" ? "var(--bg)" : "var(--text)",
               border: "none",
-              borderBottom: activeTab === "songs" ? `var(--border-width-md) solid var(--primary)` : `var(--border-width-md) solid transparent`,
+              borderBottom:
+                activeTab === "songs"
+                  ? `var(--border-width-md) solid var(--primary)`
+                  : `var(--border-width-md) solid transparent`,
               cursor: "pointer",
               textTransform: "uppercase",
               transition: "all var(--transition-fast)",
@@ -139,7 +149,10 @@ export function ContentManager() {
               background: activeTab === "images" ? "var(--primary)" : "transparent",
               color: activeTab === "images" ? "var(--bg)" : "var(--text)",
               border: "none",
-              borderBottom: activeTab === "images" ? `var(--border-width-md) solid var(--primary)` : `var(--border-width-md) solid transparent`,
+              borderBottom:
+                activeTab === "images"
+                  ? `var(--border-width-md) solid var(--primary)`
+                  : `var(--border-width-md) solid transparent`,
               cursor: "pointer",
               textTransform: "uppercase",
               transition: "all var(--transition-fast)",
@@ -155,9 +168,7 @@ export function ContentManager() {
               Loading...
             </div>
           ) : error ? (
-            <div style={{ padding: "2rem", color: "var(--admin-accent)" }}>
-              Error: {error}
-            </div>
+            <div style={{ padding: "2rem", color: "var(--admin-accent)" }}>Error: {error}</div>
           ) : activeTab === "songs" ? (
             <SongManager initialSongs={topSongs} onSave={handleSaveSongs} />
           ) : (

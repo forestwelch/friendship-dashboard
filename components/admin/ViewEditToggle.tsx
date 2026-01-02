@@ -10,7 +10,7 @@ interface ViewEditToggleProps {
 
 export function ViewEditToggle({ isEditMode, onToggle }: ViewEditToggleProps) {
   const _theme = useTheme();
-  
+
   return (
     <div
       style={{
@@ -70,4 +70,3 @@ export function ViewEditToggle({ isEditMode, onToggle }: ViewEditToggleProps) {
     </div>
   );
 }
-

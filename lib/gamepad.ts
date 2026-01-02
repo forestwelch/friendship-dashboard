@@ -130,4 +130,3 @@ export function getGamepadState(): GamepadState {
 export function isGamepadConnected(): boolean {
   return gamepadState.connected;
 }
-

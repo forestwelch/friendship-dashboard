@@ -11,10 +11,10 @@ interface WidgetProps {
 
 export function Widget({ size: _size, children, className = "" }: WidgetProps) {
   return (
-    <div 
-      className={`widget ${className}`} 
-      style={{ 
-        width: "100%", 
+    <div
+      className={`widget ${className}`}
+      style={{
+        width: "100%",
         height: "100%",
         position: "relative",
         zIndex: 2,
@@ -25,5 +25,3 @@ export function Widget({ size: _size, children, className = "" }: WidgetProps) {
     </div>
   );
 }
-
-

@@ -118,15 +118,30 @@
   width: 2px;
   height: 2px;
   background: var(--primary);
-  box-shadow: 
-    0px -8px 0 0 var(--primary), 2px -8px 0 0 var(--primary), 4px -8px 0 0 var(--primary),
-    6px -8px 0 0 var(--primary), 8px -8px 0 0 var(--primary), 10px -8px 0 0 var(--primary),
-    -2px -6px 0 0 var(--primary), 0px -6px 0 0 var(--primary), 2px -6px 0 0 var(--primary),
-    4px -6px 0 0 var(--primary), 6px -6px 0 0 var(--primary), 8px -6px 0 0 var(--primary),
-    10px -6px 0 0 var(--primary), 12px -6px 0 0 var(--primary),
-    -4px -4px 0 0 var(--primary), -2px -4px 0 0 var(--primary), 0px -4px 0 0 var(--primary),
-    2px -4px 0 0 var(--primary), 4px -4px 0 0 var(--primary), 6px -4px 0 0 var(--primary),
-    8px -4px 0 0 var(--primary), 10px -4px 0 0 var(--primary), 12px -4px 0 0 var(--primary),
+  box-shadow:
+    0px -8px 0 0 var(--primary),
+    2px -8px 0 0 var(--primary),
+    4px -8px 0 0 var(--primary),
+    6px -8px 0 0 var(--primary),
+    8px -8px 0 0 var(--primary),
+    10px -8px 0 0 var(--primary),
+    -2px -6px 0 0 var(--primary),
+    0px -6px 0 0 var(--primary),
+    2px -6px 0 0 var(--primary),
+    4px -6px 0 0 var(--primary),
+    6px -6px 0 0 var(--primary),
+    8px -6px 0 0 var(--primary),
+    10px -6px 0 0 var(--primary),
+    12px -6px 0 0 var(--primary),
+    -4px -4px 0 0 var(--primary),
+    -2px -4px 0 0 var(--primary),
+    0px -4px 0 0 var(--primary),
+    2px -4px 0 0 var(--primary),
+    4px -4px 0 0 var(--primary),
+    6px -4px 0 0 var(--primary),
+    8px -4px 0 0 var(--primary),
+    10px -4px 0 0 var(--primary),
+    12px -4px 0 0 var(--primary),
     14px -4px 0 0 var(--primary);
 }
 
@@ -148,15 +163,35 @@
 }
 
 .test3Piece::before {
-  content: '';
+  content: "";
   grid-column: 1 / 7;
   grid-row: 1 / 7;
   background: var(--primary);
   clip-path: polygon(
-    0% 0%, 16.67% 0%, 33.33% 0%, 50% 0%, 66.67% 0%, 83.33% 0%, 100% 0%,
-    100% 16.67%, 100% 33.33%, 100% 50%, 100% 66.67%, 100% 83.33%, 100% 100%,
-    83.33% 100%, 66.67% 100%, 50% 100%, 33.33% 100%, 16.67% 100%, 0% 100%,
-    0% 83.33%, 0% 66.67%, 0% 50%, 0% 33.33%, 0% 16.67%
+    0% 0%,
+    16.67% 0%,
+    33.33% 0%,
+    50% 0%,
+    66.67% 0%,
+    83.33% 0%,
+    100% 0%,
+    100% 16.67%,
+    100% 33.33%,
+    100% 50%,
+    100% 66.67%,
+    100% 83.33%,
+    100% 100%,
+    83.33% 100%,
+    66.67% 100%,
+    50% 100%,
+    33.33% 100%,
+    16.67% 100%,
+    0% 100%,
+    0% 83.33%,
+    0% 66.67%,
+    0% 50%,
+    0% 33.33%,
+    0% 16.67%
   );
 }
 
@@ -167,10 +202,12 @@
 
 .test4Piece {
   border-radius: 0;
-  background: 
+  background:
     radial-gradient(circle at center, var(--primary) 0%, var(--primary) 35%, transparent 35%),
     radial-gradient(circle at center, var(--primary) 0%, var(--primary) 30%, transparent 30%);
-  background-size: 100% 100%, 90% 90%;
+  background-size:
+    100% 100%,
+    90% 90%;
   background-position: center, center;
 }
 
@@ -181,11 +218,14 @@
 
 .test5Piece {
   border-radius: 0;
-  background: 
+  background:
     radial-gradient(circle, var(--primary) 0%, var(--primary) 25%, transparent 25%),
     radial-gradient(circle, var(--primary) 0%, var(--primary) 30%, transparent 30%),
     radial-gradient(circle, var(--primary) 0%, var(--primary) 35%, transparent 35%);
-  background-size: 60% 60%, 80% 80%, 100% 100%;
+  background-size:
+    60% 60%,
+    80% 80%,
+    100% 100%;
   background-position: center, center, center;
 }
 
@@ -234,7 +274,7 @@
 }
 
 .test8Piece::before {
-  content: '';
+  content: "";
   display: block;
   width: 100%;
   height: 100%;
@@ -254,16 +294,44 @@
 }
 
 .test9Piece::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: 50%;
   background: var(--primary);
   clip-path: polygon(
-    0% 0%, 12.5% 0%, 25% 0%, 37.5% 0%, 50% 0%, 62.5% 0%, 75% 0%, 87.5% 0%, 100% 0%,
-    100% 12.5%, 100% 25%, 100% 37.5%, 100% 50%, 100% 62.5%, 100% 75%, 100% 87.5%, 100% 100%,
-    87.5% 100%, 75% 100%, 62.5% 100%, 50% 100%, 37.5% 100%, 25% 100%, 12.5% 100%, 0% 100%,
-    0% 87.5%, 0% 75%, 0% 62.5%, 0% 50%, 0% 37.5%, 0% 25%, 0% 12.5%
+    0% 0%,
+    12.5% 0%,
+    25% 0%,
+    37.5% 0%,
+    50% 0%,
+    62.5% 0%,
+    75% 0%,
+    87.5% 0%,
+    100% 0%,
+    100% 12.5%,
+    100% 25%,
+    100% 37.5%,
+    100% 50%,
+    100% 62.5%,
+    100% 75%,
+    100% 87.5%,
+    100% 100%,
+    87.5% 100%,
+    75% 100%,
+    62.5% 100%,
+    50% 100%,
+    37.5% 100%,
+    25% 100%,
+    12.5% 100%,
+    0% 100%,
+    0% 87.5%,
+    0% 75%,
+    0% 62.5%,
+    0% 50%,
+    0% 37.5%,
+    0% 25%,
+    0% 12.5%
   );
 }
 
@@ -286,13 +354,23 @@
   width: 1px;
   height: 1px;
   background: var(--primary);
-  box-shadow: 
+  box-shadow:
     0px 0px 0 0 var(--primary),
-    1px 0px 0 0 var(--primary), 2px 0px 0 0 var(--primary), 3px 0px 0 0 var(--primary),
-    4px 0px 0 0 var(--primary), 5px 0px 0 0 var(--primary), 6px 0px 0 0 var(--primary),
-    7px 0px 0 0 var(--primary), 8px 0px 0 0 var(--primary), 9px 0px 0 0 var(--primary),
-    10px 0px 0 0 var(--primary), 11px 0px 0 0 var(--primary), 12px 0px 0 0 var(--primary),
-    13px 0px 0 0 var(--primary), 14px 0px 0 0 var(--primary), 15px 0px 0 0 var(--primary);
+    1px 0px 0 0 var(--primary),
+    2px 0px 0 0 var(--primary),
+    3px 0px 0 0 var(--primary),
+    4px 0px 0 0 var(--primary),
+    5px 0px 0 0 var(--primary),
+    6px 0px 0 0 var(--primary),
+    7px 0px 0 0 var(--primary),
+    8px 0px 0 0 var(--primary),
+    9px 0px 0 0 var(--primary),
+    10px 0px 0 0 var(--primary),
+    11px 0px 0 0 var(--primary),
+    12px 0px 0 0 var(--primary),
+    13px 0px 0 0 var(--primary),
+    14px 0px 0 0 var(--primary),
+    15px 0px 0 0 var(--primary);
 }
 
 /* Test 12: Filter contrast + brightness */
@@ -327,10 +405,38 @@
   outline: 2px solid var(--primary);
   outline-offset: -2px;
   clip-path: polygon(
-    0% 0%, 12.5% 0%, 25% 0%, 37.5% 0%, 50% 0%, 62.5% 0%, 75% 0%, 87.5% 0%, 100% 0%,
-    100% 12.5%, 100% 25%, 100% 37.5%, 100% 50%, 100% 62.5%, 100% 75%, 100% 87.5%, 100% 100%,
-    87.5% 100%, 75% 100%, 62.5% 100%, 50% 100%, 37.5% 100%, 25% 100%, 12.5% 100%, 0% 100%,
-    0% 87.5%, 0% 75%, 0% 62.5%, 0% 50%, 0% 37.5%, 0% 25%, 0% 12.5%
+    0% 0%,
+    12.5% 0%,
+    25% 0%,
+    37.5% 0%,
+    50% 0%,
+    62.5% 0%,
+    75% 0%,
+    87.5% 0%,
+    100% 0%,
+    100% 12.5%,
+    100% 25%,
+    100% 37.5%,
+    100% 50%,
+    100% 62.5%,
+    100% 75%,
+    100% 87.5%,
+    100% 100%,
+    87.5% 100%,
+    75% 100%,
+    62.5% 100%,
+    50% 100%,
+    37.5% 100%,
+    25% 100%,
+    12.5% 100%,
+    0% 100%,
+    0% 87.5%,
+    0% 75%,
+    0% 62.5%,
+    0% 50%,
+    0% 37.5%,
+    0% 25%,
+    0% 12.5%
   );
 }
 
@@ -375,19 +481,53 @@
 }
 
 .test18Piece::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background: var(--primary);
-  clip-path: polygon(0% 0%, 25% 0%, 50% 0%, 75% 0%, 100% 0%, 100% 25%, 100% 50%, 100% 75%, 100% 100%, 75% 100%, 50% 100%, 25% 100%, 0% 100%, 0% 75%, 0% 50%, 0% 25%);
+  clip-path: polygon(
+    0% 0%,
+    25% 0%,
+    50% 0%,
+    75% 0%,
+    100% 0%,
+    100% 25%,
+    100% 50%,
+    100% 75%,
+    100% 100%,
+    75% 100%,
+    50% 100%,
+    25% 100%,
+    0% 100%,
+    0% 75%,
+    0% 50%,
+    0% 25%
+  );
 }
 
 .test18Piece::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 5%;
   background: var(--primary);
-  clip-path: polygon(0% 0%, 25% 0%, 50% 0%, 75% 0%, 100% 0%, 100% 25%, 100% 50%, 100% 75%, 100% 100%, 75% 100%, 50% 100%, 25% 100%, 0% 100%, 0% 75%, 0% 50%, 0% 25%);
+  clip-path: polygon(
+    0% 0%,
+    25% 0%,
+    50% 0%,
+    75% 0%,
+    100% 0%,
+    100% 25%,
+    100% 50%,
+    100% 75%,
+    100% 100%,
+    75% 100%,
+    50% 100%,
+    25% 100%,
+    0% 100%,
+    0% 75%,
+    0% 50%,
+    0% 25%
+  );
 }
 
 /* Test 19: Linear gradients creating circle */
@@ -397,11 +537,29 @@
 
 .test19Piece {
   border-radius: 0;
-  background: 
+  background:
     linear-gradient(0deg, transparent 0%, var(--primary) 20%, var(--primary) 80%, transparent 100%),
-    linear-gradient(90deg, transparent 0%, var(--primary) 20%, var(--primary) 80%, transparent 100%),
-    linear-gradient(45deg, transparent 0%, var(--primary) 30%, var(--primary) 70%, transparent 100%),
-    linear-gradient(135deg, transparent 0%, var(--primary) 30%, var(--primary) 70%, transparent 100%);
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--primary) 20%,
+      var(--primary) 80%,
+      transparent 100%
+    ),
+    linear-gradient(
+      45deg,
+      transparent 0%,
+      var(--primary) 30%,
+      var(--primary) 70%,
+      transparent 100%
+    ),
+    linear-gradient(
+      135deg,
+      transparent 0%,
+      var(--primary) 30%,
+      var(--primary) 70%,
+      transparent 100%
+    );
   background-blend-mode: multiply;
 }
 
@@ -447,14 +605,24 @@
 
 .test23Piece {
   border-radius: 0;
-  background: 
+  background:
     radial-gradient(circle at 0% 0%, var(--primary) 0%, transparent 50%),
     radial-gradient(circle at 100% 0%, var(--primary) 0%, transparent 50%),
     radial-gradient(circle at 0% 100%, var(--primary) 0%, transparent 50%),
     radial-gradient(circle at 100% 100%, var(--primary) 0%, transparent 50%),
     radial-gradient(circle at center, var(--primary) 0%, var(--primary) 100%);
-  background-size: 50% 50%, 50% 50%, 50% 50%, 50% 50%, 100% 100%;
-  background-position: top left, top right, bottom left, bottom right, center;
+  background-size:
+    50% 50%,
+    50% 50%,
+    50% 50%,
+    50% 50%,
+    100% 100%;
+  background-position:
+    top left,
+    top right,
+    bottom left,
+    bottom right,
+    center;
 }
 
 /* Test 24: Text-shadow approach */
@@ -466,9 +634,13 @@
   border-radius: 0;
   font-size: 1px;
   color: var(--primary);
-  text-shadow: 
-    0 0 0 var(--primary), 1px 0 0 var(--primary), 2px 0 0 var(--primary),
-    3px 0 0 var(--primary), 4px 0 0 var(--primary), 5px 0 0 var(--primary);
+  text-shadow:
+    0 0 0 var(--primary),
+    1px 0 0 var(--primary),
+    2px 0 0 var(--primary),
+    3px 0 0 var(--primary),
+    4px 0 0 var(--primary),
+    5px 0 0 var(--primary);
   line-height: 1;
 }
 
@@ -495,10 +667,38 @@
   background-position: center;
   background-repeat: no-repeat;
   clip-path: polygon(
-    0% 0%, 12.5% 0%, 25% 0%, 37.5% 0%, 50% 0%, 62.5% 0%, 75% 0%, 87.5% 0%, 100% 0%,
-    100% 12.5%, 100% 25%, 100% 37.5%, 100% 50%, 100% 62.5%, 100% 75%, 100% 87.5%, 100% 100%,
-    87.5% 100%, 75% 100%, 62.5% 100%, 50% 100%, 37.5% 100%, 25% 100%, 12.5% 100%, 0% 100%,
-    0% 87.5%, 0% 75%, 0% 62.5%, 0% 50%, 0% 37.5%, 0% 25%, 0% 12.5%
+    0% 0%,
+    12.5% 0%,
+    25% 0%,
+    37.5% 0%,
+    50% 0%,
+    62.5% 0%,
+    75% 0%,
+    87.5% 0%,
+    100% 0%,
+    100% 12.5%,
+    100% 25%,
+    100% 37.5%,
+    100% 50%,
+    100% 62.5%,
+    100% 75%,
+    100% 87.5%,
+    100% 100%,
+    87.5% 100%,
+    75% 100%,
+    62.5% 100%,
+    50% 100%,
+    37.5% 100%,
+    25% 100%,
+    12.5% 100%,
+    0% 100%,
+    0% 87.5%,
+    0% 75%,
+    0% 62.5%,
+    0% 50%,
+    0% 37.5%,
+    0% 25%,
+    0% 12.5%
   );
 }
 
@@ -550,16 +750,44 @@
 }
 
 .test30Piece::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: 50%;
   background: var(--primary);
   clip-path: polygon(
-    0% 0%, 12.5% 0%, 25% 0%, 37.5% 0%, 50% 0%, 62.5% 0%, 75% 0%, 87.5% 0%, 100% 0%,
-    100% 12.5%, 100% 25%, 100% 37.5%, 100% 50%, 100% 62.5%, 100% 75%, 100% 87.5%, 100% 100%,
-    87.5% 100%, 75% 100%, 62.5% 100%, 50% 100%, 37.5% 100%, 25% 100%, 12.5% 100%, 0% 100%,
-    0% 87.5%, 0% 75%, 0% 62.5%, 0% 50%, 0% 37.5%, 0% 25%, 0% 12.5%
+    0% 0%,
+    12.5% 0%,
+    25% 0%,
+    37.5% 0%,
+    50% 0%,
+    62.5% 0%,
+    75% 0%,
+    87.5% 0%,
+    100% 0%,
+    100% 12.5%,
+    100% 25%,
+    100% 37.5%,
+    100% 50%,
+    100% 62.5%,
+    100% 75%,
+    100% 87.5%,
+    100% 100%,
+    87.5% 100%,
+    75% 100%,
+    62.5% 100%,
+    50% 100%,
+    37.5% 100%,
+    25% 100%,
+    12.5% 100%,
+    0% 100%,
+    0% 87.5%,
+    0% 75%,
+    0% 62.5%,
+    0% 50%,
+    0% 37.5%,
+    0% 25%,
+    0% 12.5%
   );
 }
 

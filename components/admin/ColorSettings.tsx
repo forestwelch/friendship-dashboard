@@ -3,6 +3,8 @@
 import React, { useState, useCallback } from "react";
 import { playSound } from "@/lib/sounds";
 import { ColorPicker } from "./ColorPicker";
+import clsx from "clsx";
+import styles from "./ColorSettings.module.css";
 
 interface ColorSettingsProps {
   friendId: string;
@@ -65,52 +67,33 @@ export function ColorSettings({
           setActiveColorKey(null); // Reset on open/close toggle
           playSound("open");
         }}
+        className={styles.toggleButton}
         style={{
-          position: "fixed",
-          bottom: "var(--space-xl)",
-          right: "var(--space-xl)",
-          width: "48px",
-          height: "48px",
           background: themeColors.accent,
-          border: `var(--border-width-lg) solid ${themeColors.primary}`,
-          borderRadius: "var(--radius-sm)",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 1000,
-          boxShadow: "var(--game-shadow-lg)",
+          borderColor: themeColors.primary,
         }}
       >
-        <i className="hn hn-cog-solid" style={{ fontSize: "20px", color: themeColors.text }} />
+        <i
+          className={clsx("hn", "hn-cog-solid", styles.toggleIcon)}
+          style={{ color: themeColors.text }}
+        />
       </button>
 
       {/* Color Picker Panel */}
       {isOpen && (
         <>
           <div
+            className={styles.panel}
             style={{
-              position: "fixed",
-              bottom: "100px",
-              right: "var(--space-xl)",
-              width: "320px",
               background: themeColors.bg,
-              border: `var(--border-width-lg) solid ${themeColors.accent}`,
-              borderRadius: "var(--radius-md)",
-              padding: "var(--space-lg)",
-              zIndex: 1001,
-              boxShadow: "var(--game-shadow-xl)",
+              borderColor: themeColors.accent,
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "var(--space-lg)",
-              }}
-            >
-              <h3 className="game-heading-2" style={{ margin: 0, color: themeColors.text }}>
+            <div className={styles.panelHeader}>
+              <h3
+                className={clsx("game-heading-2", styles.panelTitle)}
+                style={{ color: themeColors.text }}
+              >
                 {activeColorKey ? `EDIT ${activeColorKey.toUpperCase()}` : "COLOR SETTINGS"}
               </h3>
               <button
@@ -123,17 +106,11 @@ export function ColorSettings({
                     playSound("close");
                   }
                 }}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: themeColors.text,
-                  cursor: "pointer",
-                  fontSize: "var(--font-size-xl)",
-                  padding: "var(--space-xs)",
-                }}
+                className={styles.closeButton}
+                style={{ color: themeColors.text }}
               >
                 {activeColorKey ? (
-                  <i className="hn hn-arrow-left-solid" style={{ fontSize: "16px" }} />
+                  <i className={clsx("hn", "hn-arrow-left-solid", styles.closeIcon)} />
                 ) : (
                   <i className="hn hn-times-solid" />
                 )}
@@ -158,53 +135,24 @@ export function ColorSettings({
             ) : (
               // List View
               <>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "var(--space-md)",
-                    marginBottom: "var(--space-lg)",
-                  }}
-                >
+                <div className={styles.colorList}>
                   {colorKeys.map(({ key, label }) => (
-                    <div
-                      key={key}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "var(--space-md)",
-                      }}
-                    >
+                    <div key={key} className={styles.colorItem}>
                       <div
+                        className={styles.colorSwatch}
                         style={{
-                          width: "60px",
-                          height: "32px",
                           background: currentColors[key as keyof typeof currentColors],
-                          border: "var(--border-width-md) solid var(--game-border)",
-                          borderRadius: "var(--radius-sm)",
-                          cursor: "pointer",
                         }}
                         onClick={() => {
                           setActiveColorKey(key);
                           playSound("select");
                         }}
                       />
-                      <div style={{ flex: 1 }}>
-                        <div
-                          style={{
-                            fontSize: "var(--font-size-xs)",
-                            color: themeColors.text,
-                            opacity: 0.7,
-                          }}
-                        >
+                      <div className={styles.colorInfo}>
+                        <div className={styles.colorLabel} style={{ color: themeColors.text }}>
                           {label}
                         </div>
-                        <div
-                          style={{
-                            fontSize: "var(--font-size-xs)",
-                            color: themeColors.text,
-                          }}
-                        >
+                        <div className={styles.colorValue} style={{ color: themeColors.text }}>
                           {currentColors[key as keyof typeof currentColors]}
                         </div>
                       </div>
@@ -213,22 +161,14 @@ export function ColorSettings({
                           randomizeOne(key);
                           playSound("blip");
                         }}
+                        className={styles.randomizeButton}
                         style={{
-                          padding: "var(--space-xs)",
                           background: themeColors.secondary,
-                          border: `var(--border-width-md) solid ${themeColors.accent}`,
-                          borderRadius: "var(--radius-sm)",
+                          borderColor: themeColors.accent,
                           color: themeColors.text,
-                          cursor: "pointer",
-                          fontSize: "var(--font-size-xs)",
-                          minWidth: "32px",
-                          minHeight: "32px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
                         }}
                       >
-                        <i className="hn hn-dice-solid" style={{ fontSize: "12px" }} />
+                        <i className={clsx("hn", "hn-dice-solid", styles.randomizeIcon)} />
                       </button>
                     </div>
                   ))}
@@ -239,24 +179,14 @@ export function ColorSettings({
                     onRandomizeAll?.();
                     playSound("select");
                   }}
+                  className={styles.randomizeAllButton}
                   style={{
-                    width: "100%",
-                    padding: "var(--space-sm) var(--space-md)",
                     background: themeColors.primary,
                     color: themeColors.bg,
-                    border: `var(--border-width-md) solid ${themeColors.accent}`,
-                    borderRadius: "var(--radius-sm)",
-                    cursor: "pointer",
-                    fontSize: "var(--font-size-xs)",
-                    fontWeight: "bold",
-                    textTransform: "uppercase",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "var(--space-xs)",
+                    borderColor: themeColors.accent,
                   }}
                 >
-                  <i className="hn hn-dice-solid" style={{ fontSize: "12px" }} />
+                  <i className={clsx("hn", "hn-dice-solid", styles.randomizeAllIcon)} />
                   RANDOMIZE ALL
                 </button>
               </>
@@ -264,18 +194,7 @@ export function ColorSettings({
           </div>
 
           {/* Backdrop */}
-          <div
-            onClick={() => setIsOpen(false)}
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: "var(--game-overlay-bg-50)",
-              zIndex: 1000,
-            }}
-          />
+          <div className={styles.backdrop} onClick={() => setIsOpen(false)} />
         </>
       )}
     </>

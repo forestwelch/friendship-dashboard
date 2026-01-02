@@ -224,9 +224,7 @@ export function useDeleteEvent(friendId: string, widgetId: string) {
       ]);
 
       const optimisticData: EventCountdownData = {
-        events: previousData
-          ? previousData.events.filter((event) => event.id !== eventId)
-          : [],
+        events: previousData ? previousData.events.filter((event) => event.id !== eventId) : [],
       };
 
       queryClient.setQueryData<EventCountdownData>(
@@ -251,6 +249,3 @@ export function useDeleteEvent(friendId: string, widgetId: string) {
     },
   });
 }
-
-
-

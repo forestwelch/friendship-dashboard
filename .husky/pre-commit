@@ -1,8 +1,14 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-npm test -- --bail || exit 1
+# Format code with Prettier
+npm run format
+
+# Run linting
 npm run lint || exit 1
+
+# Run tests
+npm test -- --bail || exit 1
 
 
 

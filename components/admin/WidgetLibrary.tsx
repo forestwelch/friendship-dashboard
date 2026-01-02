@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { WidgetSize } from "@/lib/types";
 import { playSound } from "@/lib/sounds";
+import clsx from "clsx";
+import styles from "./WidgetLibrary.module.css";
 
 interface WidgetLibraryProps {
   onSelectWidget: (type: string, size: WidgetSize) => void;
@@ -87,53 +89,40 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
 
   return (
     <div>
-      <h3 className="game-heading-3" style={{ marginBottom: "var(--space-md)" }}>Widget Library</h3>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-          gap: "var(--space-md)",
-        }}
-      >
+      <h3 className={clsx("game-heading-3", styles.title)}>Widget Library</h3>
+      <div className={styles.grid}>
         {widgetTypes.map((widget) => (
           <div
             key={widget.type}
-            className="game-card game-card-hover"
-            style={{
-              cursor: "pointer",
-              padding: "var(--space-md)",
-            }}
+            className={clsx("game-card", "game-card-hover", styles.card)}
             onClick={() => {
               setSelectedType(widget.type);
               playSound("click");
             }}
           >
-            <div className="game-flex game-flex-gap-sm" style={{ marginBottom: "var(--space-sm)", alignItems: "center" }}>
-              <span style={{ fontSize: "18px" }}>{widget.icon}</span>
-              <div className="game-heading-3" style={{ margin: 0 }}>
-                {widget.name}
-              </div>
+            <div className={clsx("game-flex", "game-flex-gap-sm", styles.header)}>
+              <span className={styles.icon}>{widget.icon}</span>
+              <div className={clsx("game-heading-3", styles.name)}>{widget.name}</div>
             </div>
-            <div className="game-text-muted" style={{ marginBottom: "var(--space-sm)" }}>
-              {widget.description}
-            </div>
+            <div className={clsx("game-text-muted", styles.description)}>{widget.description}</div>
             {selectedType === widget.type && (
-              <div className="game-animate-slide-in" style={{ marginTop: "var(--space-md)" }}>
-                <div className="game-heading-3" style={{ marginBottom: "var(--space-sm)", fontSize: "11px" }}>
-                  Select Size:
-                </div>
+              <div className={clsx("game-animate-slide-in", styles.sizeSelector)}>
+                <div className={clsx("game-heading-3", styles.sizeTitle)}>Select Size:</div>
                 <div className="game-flex game-flex-gap-sm">
                   {widget.sizes.map((size) => (
                     <button
                       key={size}
-                      className={`game-button ${previewSize === size ? "game-button-primary" : ""}`}
+                      className={clsx(
+                        "game-button",
+                        previewSize === size && "game-button-primary",
+                        styles.sizeButton
+                      )}
                       onClick={(e) => {
                         e.stopPropagation();
                         onSelectWidget(widget.type, size);
                         setSelectedType(null);
                         playSound("success");
                       }}
-                      style={{ fontSize: "11px", padding: "var(--space-xs) var(--space-sm)" }}
                     >
                       {size}
                     </button>

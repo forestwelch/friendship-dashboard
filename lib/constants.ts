@@ -7,4 +7,3 @@ export const ADMIN_NAME = "FOREST";
 
 // Admin user ID identifier
 export const ADMIN_USER_ID = "admin";
-

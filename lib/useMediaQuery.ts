@@ -12,7 +12,7 @@ export function useMediaQuery(query: string): boolean {
     if (typeof window === "undefined") return;
 
     const mediaQuery = window.matchMedia(query);
-    
+
     // Update if initial value was wrong (SSR mismatch) - use setTimeout to avoid sync setState
     if (mediaQuery.matches !== matches) {
       setTimeout(() => setMatches(mediaQuery.matches), 0);
@@ -32,4 +32,3 @@ export function useMediaQuery(query: string): boolean {
 export function useIsMobile(): boolean {
   return useMediaQuery("(max-width: 768px)");
 }
-

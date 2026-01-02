@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { playSound } from "@/lib/sounds";
 import Link from "next/link";
 import { getInboxItems, updateInboxItemStatus } from "@/lib/queries";
+import clsx from "clsx";
+import styles from "./InboxManager.module.css";
 
 interface InboxItem {
   id: string;
@@ -18,9 +20,7 @@ interface InboxItem {
 export function InboxManager() {
   const [items, setItems] = useState<InboxItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<
-    "all" | "pending" | "approved" | "rejected"
-  >("all");
+  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -36,9 +36,7 @@ export function InboxManager() {
     const success = await updateInboxItemStatus(itemId, "approved");
     if (success) {
       setItems((prev) =>
-        prev.map((item) =>
-          item.id === itemId ? { ...item, status: "approved" as const } : item
-        )
+        prev.map((item) => (item.id === itemId ? { ...item, status: "approved" as const } : item))
       );
       playSound("success");
     } else {
@@ -50,9 +48,7 @@ export function InboxManager() {
     const success = await updateInboxItemStatus(itemId, "rejected");
     if (success) {
       setItems((prev) =>
-        prev.map((item) =>
-          item.id === itemId ? { ...item, status: "rejected" as const } : item
-        )
+        prev.map((item) => (item.id === itemId ? { ...item, status: "rejected" as const } : item))
       );
       playSound("click");
     } else {
@@ -68,40 +64,24 @@ export function InboxManager() {
         paddingBottom: "var(--space-2xl)",
       }}
     >
-      <div
-        className="game-breadcrumb"
-        style={{ marginBottom: "var(--space-xl)" }}
-      >
+      <div className={clsx("game-breadcrumb", styles.breadcrumb)}>
         <Link href="/admin" className="game-link">
           Admin
         </Link>
         <span className="game-breadcrumb-separator">/</span>
         <span className="game-breadcrumb-current">Inbox</span>
       </div>
-      <h1
-        className="game-heading-1"
-        style={{ marginBottom: "var(--space-md)" }}
-      >
-        Admin Inbox
-      </h1>
-      <p
-        className="game-text-muted"
-        style={{ marginBottom: "var(--space-xl)" }}
-      >
+      <h1 className={clsx("game-heading-1", styles.title)}>Admin Inbox</h1>
+      <p className={clsx("game-text-muted", styles.description)}>
         Review recommendations and hangout proposals from friends
       </p>
 
       {/* Filter buttons */}
-      <div
-        className="game-flex game-flex-gap-sm"
-        style={{ marginBottom: "var(--space-xl)", flexWrap: "wrap" }}
-      >
+      <div className={clsx("game-flex", "game-flex-gap-sm", styles.filters)}>
         {(["all", "pending", "approved", "rejected"] as const).map((f) => (
           <button
             key={f}
-            className={`game-button ${
-              filter === f ? "game-button-primary" : ""
-            }`}
+            className={clsx("game-button", filter === f && "game-button-primary")}
             onClick={() => {
               setFilter(f);
               playSound("click");
@@ -114,40 +94,15 @@ export function InboxManager() {
 
       {/* Items list */}
       {loading ? (
-        <div
-          className="game-card"
-          style={{ padding: "var(--space-2xl)", textAlign: "center" }}
-        >
-          Loading...
-        </div>
+        <div className={clsx("game-card", styles.emptyState)}>Loading...</div>
       ) : items.length === 0 ? (
-        <div
-          className="game-card"
-          style={{ padding: "var(--space-2xl)", textAlign: "center" }}
-        >
-          <p className="game-text-muted">
-            No {filter === "all" ? "" : filter} items
-          </p>
+        <div className={clsx("game-card", styles.emptyState)}>
+          <p className="game-text-muted">No {filter === "all" ? "" : filter} items</p>
         </div>
       ) : (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--space-md)",
-          }}
-        >
+        <div className={styles.itemsList}>
           {items.map((item) => (
-            <div
-              key={item.id}
-              className="game-card"
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                gap: "var(--space-lg)",
-              }}
-            >
+            <div key={item.id} className={clsx("game-card", styles.itemCard)}>
               <div style={{ flex: 1 }}>
                 <div
                   style={{
@@ -170,12 +125,8 @@ export function InboxManager() {
                 </div>
                 {item.type === "recommendation" && (
                   <div>
-                    <div style={{ fontSize: "14px", fontWeight: "bold" }}>
-                      {item.data.title}
-                    </div>
-                    <div style={{ fontSize: "12px", opacity: 0.8 }}>
-                      {item.data.type}
-                    </div>
+                    <div style={{ fontSize: "14px", fontWeight: "bold" }}>{item.data.title}</div>
+                    <div style={{ fontSize: "12px", opacity: 0.8 }}>{item.data.type}</div>
                     {item.data.description && (
                       <div
                         style={{
@@ -191,24 +142,14 @@ export function InboxManager() {
                 )}
                 {item.type === "hangout_proposal" && (
                   <div>
-                    <div
-                      className="game-heading-3"
-                      style={{ marginBottom: "var(--space-xs)" }}
-                    >
+                    <div className="game-heading-3" style={{ marginBottom: "var(--space-xs)" }}>
                       Proposed Hangout
                     </div>
-                    <div
-                      className="game-text-muted"
-                      style={{ marginBottom: "var(--space-xs)" }}
-                    >
-                      {new Date(item.data.date).toLocaleDateString()} at{" "}
-                      {item.data.time}
+                    <div className="game-text-muted" style={{ marginBottom: "var(--space-xs)" }}>
+                      {new Date(item.data.date).toLocaleDateString()} at {item.data.time}
                     </div>
                     {item.data.message && (
-                      <div
-                        className="game-text-muted"
-                        style={{ marginTop: "var(--space-xs)" }}
-                      >
+                      <div className="game-text-muted" style={{ marginTop: "var(--space-xs)" }}>
                         {item.data.message}
                       </div>
                     )}
@@ -248,10 +189,7 @@ export function InboxManager() {
                       item.status === "approved"
                         ? "var(--game-accent-green)"
                         : "var(--game-surface)",
-                    color:
-                      item.status === "approved"
-                        ? "var(--bg)"
-                        : "var(--text)",
+                    color: item.status === "approved" ? "var(--bg)" : "var(--text)",
                     cursor: "default",
                   }}
                 >

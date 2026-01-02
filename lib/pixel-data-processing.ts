@@ -53,13 +53,13 @@ export async function processImageToPixelData(imageFile: File): Promise<Uint8Arr
           const r = imageData.data[i];
           const g = imageData.data[i + 1];
           const b = imageData.data[i + 2];
-          
+
           // Convert to grayscale intensity (0-255)
           const intensity = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
-          
+
           // Quantize to 16 levels (0-15) for more color variety
           const quantized = quantizeIntensity(intensity, QUANTIZATION_LEVELS);
-          
+
           // Store in pixel array (row-major order)
           const pixelIndex = Math.floor(i / 4);
           pixelData[pixelIndex] = quantized;
@@ -109,10 +109,7 @@ export function quantizeIntensity(intensity: number, levels: number): number {
  * Levels 44-53 → Bg (light)
  * Levels 54-63 → Lightest (bg or accent variant)
  */
-export function mapIntensityToThemeColor(
-  intensityLevel: number,
-  themeColors: ThemeColors
-): string {
+export function mapIntensityToThemeColor(intensityLevel: number, themeColors: ThemeColors): string {
   // Map 64 levels to 6 colors for maximum granularity
   if (intensityLevel <= 10) {
     return themeColors.primary; // Darkest
@@ -159,8 +156,11 @@ export function base64ToPixelData(base64: string): Uint8Array {
  * Generate scanline order for CRT-style animation
  * Returns array of pixel positions in scanline order (row by row, left to right)
  */
-export function generateScanlineOrder(width: number, height: number): Array<{row: number, col: number, index: number}> {
-  const order: Array<{row: number, col: number, index: number}> = [];
+export function generateScanlineOrder(
+  width: number,
+  height: number
+): Array<{ row: number; col: number; index: number }> {
+  const order: Array<{ row: number; col: number; index: number }> = [];
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const index = row * width + col;
@@ -181,19 +181,18 @@ export function renderPixelDataAsSVG(
   pixelSize: number = 1
 ): string {
   const svgPixels: string[] = [];
-  
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const index = y * width + x;
       const intensityLevel = pixelData[index];
       const color = mapIntensityToThemeColor(intensityLevel, themeColors);
-      
+
       svgPixels.push(
         `<rect x="${x * pixelSize}" y="${y * pixelSize}" width="${pixelSize}" height="${pixelSize}" fill="${color}" />`
       );
     }
   }
-  
+
   return `<svg width="${width * pixelSize}" height="${height * pixelSize}" xmlns="http://www.w3.org/2000/svg">${svgPixels.join("")}</svg>`;
 }
-

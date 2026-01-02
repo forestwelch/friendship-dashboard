@@ -27,12 +27,14 @@ export async function getInboxItems(
   try {
     let query = supabase
       .from("inbox_items")
-      .select(`
+      .select(
+        `
         *,
         friend:friend_id (
           display_name
         )
-      `)
+      `
+      )
       .order("created_at", { ascending: false });
 
     if (status !== "all") {
@@ -69,10 +71,7 @@ export async function updateInboxItemStatus(
   }
 
   try {
-    const { error } = await supabase
-      .from("inbox_items")
-      .update({ status })
-      .eq("id", itemId);
+    const { error } = await supabase.from("inbox_items").update({ status }).eq("id", itemId);
 
     if (error) {
       console.error("Error updating inbox item:", error);
@@ -100,13 +99,11 @@ export async function createInboxItem(
   }
 
   try {
-    const { error } = await supabase
-      .from("inbox_items")
-      .insert({
-        friend_id: friendId,
-        type,
-        data,
-      });
+    const { error } = await supabase.from("inbox_items").insert({
+      friend_id: friendId,
+      type,
+      data,
+    });
 
     if (error) {
       console.error("Error creating inbox item:", error);
@@ -119,5 +116,3 @@ export async function createInboxItem(
     return false;
   }
 }
-
-

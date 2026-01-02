@@ -31,4 +31,3 @@ export function measureWebVitals() {
   onLCP(reportWebVitals);
   onTTFB(reportWebVitals);
 }
-
