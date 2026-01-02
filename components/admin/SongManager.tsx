@@ -1,25 +1,80 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Song } from "@/lib/types";
 import { playSound } from "@/lib/sounds";
 
 interface SongManagerProps {
   initialSongs?: Song[];
   onSave?: (songs: Song[]) => Promise<void>;
+  showAddForm?: boolean;
+  onAddFormChange?: (show: boolean) => void;
+  onAddSongRef?: (fn: () => void) => void;
+  onSaveRef?: (fn: () => void) => void;
+  savingRef?: (saving: boolean) => void;
 }
 
-export function SongManager({ initialSongs = [], onSave }: SongManagerProps) {
+export function SongManager({
+  initialSongs = [],
+  onSave,
+  showAddForm: externalShowAddForm,
+  onAddFormChange,
+  onAddSongRef,
+  onSaveRef,
+  savingRef,
+}: SongManagerProps) {
   const [songs, setSongs] = useState<Song[]>(initialSongs);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editSong, setEditSong] = useState<Partial<Song>>({});
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [internalShowAddForm, setInternalShowAddForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Use external showAddForm if provided, otherwise use internal state
+  const showAddForm = externalShowAddForm !== undefined ? externalShowAddForm : internalShowAddForm;
+  const setShowAddForm = onAddFormChange || setInternalShowAddForm;
+
+  // Define handleSave before using it in useEffect
+  const handleSave = useCallback(async () => {
+    if (!onSave) return;
+
+    setSaving(true);
+    try {
+      await onSave(songs);
+      playSound("success");
+      alert("Songs saved successfully! 🎉");
+    } catch (error) {
+      console.error("Error saving songs:", error);
+      playSound("error");
+      alert("Failed to save songs. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  }, [onSave, songs]);
+
+  // Expose methods to parent via refs
+  useEffect(() => {
+    if (onAddSongRef) {
+      onAddSongRef(() => setShowAddForm(true));
+    }
+  }, [onAddSongRef, setShowAddForm]);
+
+  useEffect(() => {
+    if (onSaveRef) {
+      onSaveRef(handleSave);
+    }
+  }, [onSaveRef, handleSave]);
+
+  useEffect(() => {
+    if (savingRef) {
+      savingRef(saving);
+    }
+  }, [saving, savingRef]);
+
   const [newSong, setNewSong] = useState<Partial<Song>>({
     title: "",
     artist: "",
     youtubeId: "",
   });
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setSongs(initialSongs);
@@ -83,23 +138,6 @@ export function SongManager({ initialSongs = [], onSave }: SongManagerProps) {
     // Note: DB sync handled by TanStack Query mutation
   };
 
-  const handleSave = async () => {
-    if (!onSave) return;
-
-    setSaving(true);
-    try {
-      await onSave(songs);
-      playSound("success");
-      alert("Songs saved successfully! 🎉");
-    } catch (error) {
-      console.error("Error saving songs:", error);
-      playSound("error");
-      alert("Failed to save songs. Please try again.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const extractYouTubeId = (url: string): string => {
     // Extract YouTube ID from various URL formats
     const patterns = [
@@ -134,39 +172,6 @@ export function SongManager({ initialSongs = [], onSave }: SongManagerProps) {
         gap: "var(--space-md)",
       }}
     >
-      <div className="game-flex game-flex-between" style={{ flexShrink: 0 }}>
-        <h2 className="game-heading-2" style={{ margin: 0, color: "var(--admin-text)" }}>
-          Manage Songs
-        </h2>
-        <div className="game-flex game-flex-gap-sm">
-          <button
-            className="game-button"
-            onClick={() => setShowAddForm(!showAddForm)}
-            style={{
-              background: "var(--admin-primary)",
-              borderColor: "var(--admin-accent)",
-              color: "var(--admin-text)",
-            }}
-          >
-            {showAddForm ? "Cancel" : "+ Add Song"}
-          </button>
-          {onSave && (
-            <button
-              className="game-button"
-              onClick={handleSave}
-              disabled={saving}
-              style={{
-                background: "var(--admin-secondary)",
-                borderColor: "var(--admin-accent)",
-                color: "var(--admin-text)",
-              }}
-            >
-              {saving ? "Saving..." : "💾 Save"}
-            </button>
-          )}
-        </div>
-      </div>
-
       {showAddForm && (
         <div
           className="game-card"

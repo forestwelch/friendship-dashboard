@@ -1,14 +1,14 @@
 import React from "react";
 import { getAllFriends } from "@/lib/queries";
-import { Navigation } from "@/components/Navigation";
 import { HomeClient } from "./HomeClient";
+import { AddFriendNav } from "./admin/friends/AddFriendNav";
 
 export default async function Home() {
   const friends = await getAllFriends();
 
   return (
     <>
-      <Navigation />
+      <AddFriendNav />
       <HomeClient friends={friends} />
     </>
   );

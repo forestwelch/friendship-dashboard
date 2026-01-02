@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { playSound } from "@/lib/sounds";
 import { WidgetSize } from "@/lib/types";
 import {
   base64ToPixelData,
-  renderPixelDataAsSVG,
+  renderPixelDataAsWebP,
   PIXEL_GRID_SIZE,
 } from "@/lib/pixel-data-processing";
 import { DEFAULT_THEME_COLORS_ALT } from "@/lib/theme-defaults";
@@ -25,28 +25,136 @@ interface ImageItem {
 interface ImageManagerProps {
   initialImages: ImageItem[];
   onImagesChange?: (images: ImageItem[]) => void;
+  onUploadRef?: (fn: () => void) => void;
+  onDeleteRef?: (fn: () => void) => void;
+  onSelectedCountRef?: (fn: () => number) => void;
 }
 
-export function ImageManager({ initialImages, onImagesChange }: ImageManagerProps) {
+export function ImageManager({
+  initialImages,
+  onImagesChange,
+  onUploadRef,
+  onDeleteRef,
+  onSelectedCountRef,
+}: ImageManagerProps) {
   const [images, setImages] = useState<ImageItem[]>(initialImages);
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
-  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewCache, setPreviewCache] = useState<Map<string, string>>(new Map());
+
+  const updateImages = useCallback(
+    (newImages: ImageItem[]) => {
+      setImages(newImages);
+      onImagesChange?.(newImages);
+    },
+    [onImagesChange]
+  );
+
+  const handleDelete = useCallback(async () => {
+    if (selectedImages.size === 0) return;
+
+    // Instant delete - no confirmation (optimistic update pattern)
+    const idsToDelete = Array.from(selectedImages);
+    const originalImages = images;
+
+    // Optimistic update: remove from UI immediately
+    const newImages = images.filter((img) => !selectedImages.has(img.id));
+    updateImages(newImages);
+    setSelectedImages(new Set());
+    playSound("delete");
+
+    // Sync to DB in background
+    try {
+      const response = await fetch(`/api/images?ids=${idsToDelete.join(",")}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete images");
+      }
+    } catch (error) {
+      // Revert on failure
+      console.error("Error deleting images:", error);
+      updateImages(originalImages);
+      playSound("error");
+      // Note: Consider adding toast notification for better UX
+    }
+  }, [selectedImages, images, updateImages]);
+
+  // Expose methods to parent via refs
+  useEffect(() => {
+    if (onUploadRef) {
+      onUploadRef(() => fileInputRef.current?.click());
+    }
+    if (onDeleteRef) {
+      onDeleteRef(handleDelete);
+    }
+    if (onSelectedCountRef) {
+      onSelectedCountRef(() => selectedImages.size);
+    }
+  }, [onUploadRef, onDeleteRef, onSelectedCountRef, selectedImages.size, handleDelete]);
+
+  // Generate WebP previews for pixel data images (only for new images)
+  useEffect(() => {
+    const generatePreviews = async () => {
+      const newCache = new Map(previewCache);
+      const promises: Promise<void>[] = [];
+
+      for (const img of images) {
+        if (img.pixel_data && !newCache.has(img.id)) {
+          promises.push(
+            (async () => {
+              try {
+                const pixelData = base64ToPixelData(img.pixel_data);
+                const gridSize = img.width || PIXEL_GRID_SIZE;
+                const themeColors = {
+                  primary: DEFAULT_THEME_COLORS_ALT.primary,
+                  secondary: DEFAULT_THEME_COLORS_ALT.secondary,
+                  accent: DEFAULT_THEME_COLORS_ALT.accent,
+                  bg: DEFAULT_THEME_COLORS_ALT.bg,
+                  text: DEFAULT_THEME_COLORS_ALT.text,
+                };
+                const webpDataUrl = await renderPixelDataAsWebP(
+                  pixelData,
+                  themeColors,
+                  gridSize,
+                  gridSize
+                );
+                newCache.set(img.id, webpDataUrl);
+              } catch (error) {
+                console.error(`Error generating preview for image ${img.id}:`, error);
+              }
+            })()
+          );
+        }
+      }
+
+      // Clean up cache for removed images
+      const currentImageIds = new Set(images.map((img) => img.id));
+      for (const cachedId of newCache.keys()) {
+        if (!currentImageIds.has(cachedId)) {
+          newCache.delete(cachedId);
+        }
+      }
+
+      if (promises.length > 0 || newCache.size !== previewCache.size) {
+        await Promise.all(promises);
+        setPreviewCache(newCache);
+      }
+    };
+
+    generatePreviews();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [images]);
 
   useEffect(() => {
     setImages(initialImages);
   }, [initialImages]);
 
-  const updateImages = (newImages: ImageItem[]) => {
-    setImages(newImages);
-    onImagesChange?.(newImages);
-  };
-
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    setIsUploading(true);
     playSound("select");
 
     try {
@@ -83,7 +191,6 @@ export function ImageManager({ initialImages, onImagesChange }: ImageManagerProp
       playSound("error");
       alert("Failed to upload images. Please try again.");
     } finally {
-      setIsUploading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -102,99 +209,34 @@ export function ImageManager({ initialImages, onImagesChange }: ImageManagerProp
     setSelectedImages(newSelected);
   };
 
-  const handleDelete = async () => {
-    if (selectedImages.size === 0) return;
-
-    // Instant delete - no confirmation (optimistic update pattern)
-    const idsToDelete = Array.from(selectedImages);
-    const originalImages = images;
-
-    // Optimistic update: remove from UI immediately
-    const newImages = images.filter((img) => !selectedImages.has(img.id));
-    updateImages(newImages);
-    setSelectedImages(new Set());
-    playSound("delete");
-
-    // Sync to DB in background
-    try {
-      const response = await fetch(`/api/images?ids=${idsToDelete.join(",")}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete images");
-      }
-    } catch (error) {
-      // Revert on failure
-      console.error("Error deleting images:", error);
-      updateImages(originalImages);
-      playSound("error");
-      // Note: Consider adding toast notification for better UX
-    }
-  };
-
   return (
-    <div className={clsx("game-container", styles.container)}>
-      {/* Toolbar */}
-      <div className={clsx("game-card", styles.toolbar)}>
-        <button
-          className="game-button game-button-primary"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isUploading}
-        >
-          <i className={clsx("hn", "hn-upload-solid", styles.iconSpacing)} />
-          {isUploading ? "UPLOADING..." : "UPLOAD IMAGES"}
-        </button>
-
-        <button
-          className="game-button game-button-danger"
-          onClick={handleDelete}
-          disabled={selectedImages.size === 0}
-        >
-          <i className={clsx("hn", "hn-trash-solid", styles.iconSpacing)} />
-          DELETE SELECTED ({selectedImages.size})
-        </button>
-
-        <div className={styles.toolbarInfo}>Total Images: {images.length}</div>
-      </div>
-
+    <div style={{ width: "100%" }}>
       {/* Image Grid */}
       <div className={clsx("game-card", styles.imageGrid)}>
         {images.map((img) => {
-          // Render pixel_data as SVG preview, or fall back to base_image_data
+          // Render pixel_data as WebP preview (cached), or fall back to base_image_data
           let imagePreview: React.ReactNode;
 
           if (img.pixel_data) {
-            try {
-              const pixelData = base64ToPixelData(img.pixel_data);
-              const gridSize = img.width || PIXEL_GRID_SIZE;
-              // Use default theme colors for preview (can be any colors)
-              const themeColors = {
-                primary: DEFAULT_THEME_COLORS_ALT.primary,
-                secondary: DEFAULT_THEME_COLORS_ALT.secondary,
-                accent: DEFAULT_THEME_COLORS_ALT.accent,
-                bg: DEFAULT_THEME_COLORS_ALT.bg,
-                text: DEFAULT_THEME_COLORS_ALT.text,
-              };
-              // Calculate pixel size for preview (smaller for grid display)
-              const previewSize = 150; // Fixed preview size
-              const pixelSize = previewSize / gridSize;
-              const svgContent = renderPixelDataAsSVG(
-                pixelData,
-                themeColors,
-                gridSize,
-                gridSize,
-                pixelSize
-              );
+            const cachedPreview = previewCache.get(img.id);
+            if (cachedPreview) {
               imagePreview = (
-                <div
-                  className={styles.imagePreview}
-                  dangerouslySetInnerHTML={{ __html: svgContent }}
+                <img
+                  src={cachedPreview}
+                  alt="Pixel art preview"
+                  className={styles.imagePreviewImg}
                 />
               );
-            } catch (error) {
-              console.error("Error rendering pixel data preview:", error);
-              imagePreview = <div className={styles.imagePreviewError}>Pixel Data</div>;
+            } else {
+              // Show loading state while generating preview
+              imagePreview = (
+                <div
+                  className={styles.imagePreviewError}
+                  style={{ fontSize: "var(--font-size-xs)" }}
+                >
+                  Loading...
+                </div>
+              );
             }
           } else if (img.base_image_data) {
             imagePreview = (

@@ -4,7 +4,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { FriendWidget } from "@/lib/queries";
 import { WidgetConfig } from "@/lib/types";
 import { playSound } from "@/lib/sounds";
-import { processImageToPixelData, pixelDataToBase64 } from "@/lib/pixel-data-processing";
+import {
+  processImageToPixelData,
+  pixelDataToBase64,
+  base64ToPixelData,
+  renderPixelDataAsWebP,
+  PIXEL_GRID_SIZE,
+  ThemeColors,
+} from "@/lib/pixel-data-processing";
 
 interface ImageItem {
   id: string;
@@ -33,12 +40,13 @@ export function WidgetConfigModal({
   widget,
   onClose,
   onSave,
-  friendColors: _friendColors,
+  friendColors,
 }: WidgetConfigModalProps) {
   const [config, setConfig] = useState<WidgetConfig>({});
   const [availableImages, setAvailableImages] = useState<ImageItem[]>([]);
   const [loadingImages, setLoadingImages] = useState(false);
   const [processingImages, setProcessingImages] = useState<Set<string>>(new Set());
+  const [previewCache, setPreviewCache] = useState<Map<string, string>>(new Map());
   const widgetIdRef = useRef<string | null>(null);
   const imagesFetchedRef = useRef(false);
 
@@ -67,6 +75,58 @@ export function WidgetConfigModal({
         });
     }
   }, [widget?.widget_type]);
+
+  // Generate WebP previews for pixel data images (async, non-blocking)
+  useEffect(() => {
+    if (!friendColors || availableImages.length === 0) return;
+
+    const generatePreviews = async () => {
+      const newCache = new Map(previewCache);
+      const promises: Promise<void>[] = [];
+
+      for (const img of availableImages) {
+        const pixelDataStr = img.pixel_data;
+        if (pixelDataStr && !newCache.has(img.id)) {
+          promises.push(
+            (async () => {
+              try {
+                const pixelData = base64ToPixelData(pixelDataStr);
+                const gridSize = img.width || PIXEL_GRID_SIZE;
+                const themeColors: ThemeColors = {
+                  primary: friendColors?.primary || "#4a9eff",
+                  secondary: friendColors?.secondary || "#6abfff",
+                  accent: friendColors?.accent || "#2a7fff",
+                  bg: friendColors?.bg || "#0a1a2e",
+                  text: friendColors?.text || "#c8e0ff",
+                };
+                const webpDataUrl = await renderPixelDataAsWebP(
+                  pixelData,
+                  themeColors,
+                  gridSize,
+                  gridSize
+                );
+                newCache.set(img.id, webpDataUrl);
+              } catch (error) {
+                console.error(`Error generating preview for image ${img.id}:`, error);
+              }
+            })()
+          );
+        }
+      }
+
+      // Process in batches to avoid blocking
+      const batchSize = 5;
+      for (let i = 0; i < promises.length; i += batchSize) {
+        const batch = promises.slice(i, i + batchSize);
+        await Promise.all(batch);
+        // Update cache after each batch for progressive loading
+        setPreviewCache(new Map(newCache));
+      }
+    };
+
+    generatePreviews();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableImages.map((img) => img.id).join(","), friendColors]);
 
   if (!widget) return null;
 
@@ -282,129 +342,145 @@ export function WidgetConfigModal({
                     ? null // Will render programmatically
                     : img.base_image_data || null;
 
-                  return (
-                    <div
-                      key={img.id}
-                      onClick={async () => {
-                        playSound("click");
-                        const newIds = isSelected
-                          ? selectedImageIds.filter((id: string) => id !== img.id)
-                          : [...selectedImageIds, img.id];
+                  // Render pixel data preview using cached WebP
+                  let pixelPreview: React.ReactNode = null;
+                  if (img.pixel_data) {
+                    const cachedPreview = previewCache.get(img.id);
+                    if (cachedPreview) {
+                      pixelPreview = (
+                        <img
+                          src={cachedPreview}
+                          alt="Pixel art preview"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                            imageRendering: "pixelated",
+                          }}
+                        />
+                      );
+                    } else {
+                      // Show loading state while generating preview
+                      pixelPreview = (
+                        <div
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: "var(--game-surface)",
+                            fontSize: "var(--font-size-xs)",
+                            color: "var(--text)",
+                          }}
+                        >
+                          Loading...
+                        </div>
+                      );
+                    }
+                  }
 
-                        // If deselecting, just remove it
-                        if (isSelected) {
-                          const remainingImages = availableImages.filter((i) =>
-                            newIds.includes(i.id)
-                          );
+                  const handleImageClick = () => {
+                    playSound("click");
+                    const newIds = isSelected
+                      ? selectedImageIds.filter((id: string) => id !== img.id)
+                      : [...selectedImageIds, img.id];
 
-                          // Update config with remaining pixel_data (new format) or imageUrls (old format)
-                          const _existingPixelData = config.pixelData || [];
-                          const _existingImageUrls = config.imageUrls || [];
+                    // Optimistically update UI immediately
+                    if (isSelected) {
+                      // Deselecting - simple and fast
+                      const remainingImages = availableImages.filter((i) => newIds.includes(i.id));
+                      setConfig((prev) => ({
+                        ...prev,
+                        imageIds: newIds,
+                        pixelData: remainingImages
+                          .map((i) => i.pixel_data)
+                          .filter((pd): pd is string => pd !== null && pd !== undefined),
+                        imageUrls: remainingImages
+                          .map((i) => i.base_image_data)
+                          .filter((url): url is string => url !== null && url !== undefined),
+                      }));
+                      return;
+                    }
 
-                          setConfig({
-                            ...config,
-                            imageIds: newIds,
-                            pixelData: remainingImages
-                              .map((i) => i.pixel_data)
-                              .filter((pd): pd is string => pd !== null && pd !== undefined),
-                            imageUrls: remainingImages
-                              .map((i) => i.base_image_data)
-                              .filter((url): url is string => url !== null && url !== undefined),
-                          });
-                          return;
-                        }
+                    // Selecting - update immediately, process async if needed
+                    if (img.pixel_data) {
+                      // Already has pixel_data - fast path
+                      setConfig((prev) => {
+                        const selectedImages = availableImages.filter((i) => newIds.includes(i.id));
+                        return {
+                          ...prev,
+                          imageIds: newIds,
+                          pixelData: selectedImages
+                            .map((i) => i.pixel_data)
+                            .filter((pd): pd is string => pd !== null && pd !== undefined),
+                        };
+                      });
+                    } else if (img.base_image_data && !isProcessing) {
+                      // Need to process - do it async without blocking UI
+                      setProcessingImages((prev) => new Set(prev).add(img.id));
 
-                        // If selecting and image doesn't have pixel_data, process it
-                        if (!img.pixel_data && img.base_image_data && !isProcessing) {
-                          setProcessingImages((prev) => new Set(prev).add(img.id));
+                      // Update config immediately with placeholder
+                      setConfig((prev) => ({
+                        ...prev,
+                        imageIds: newIds,
+                      }));
 
-                          // Process image to pixel data (async, non-blocking)
-                          (async () => {
-                            try {
-                              // Processing image to pixel data
-                              // Processing image to pixel data
+                      // Process in background
+                      (async () => {
+                        try {
+                          const response = await fetch(img.base_image_data!);
+                          const blob = await response.blob();
+                          const file = new File([blob], "image.png", { type: "image/png" });
+                          const pixelDataArray = await processImageToPixelData(file);
+                          const pixelDataBase64 = pixelDataToBase64(pixelDataArray);
 
-                              // Convert base64 to File for processing
-                              const response = await fetch(img.base_image_data!);
-                              const blob = await response.blob();
-                              const file = new File([blob], "image.png", {
-                                type: "image/png",
-                              });
-
-                              // Process to 64x64 pixel data
-                              const pixelDataArray = await processImageToPixelData(file);
-                              const pixelDataBase64 = pixelDataToBase64(pixelDataArray);
-
-                              // Image processed
-
-                              // Update config with pixel_data
-                              setConfig((prevConfig) => {
-                                const selectedImages = availableImages.filter((i) =>
-                                  newIds.includes(i.id)
-                                );
-
-                                // Collect pixel_data from selected images
-                                const pixelDataArray = selectedImages
-                                  .map((imageItem) => {
-                                    if (imageItem.id === img.id) {
-                                      return pixelDataBase64; // Use newly processed data
-                                    }
-                                    return imageItem.pixel_data || null;
-                                  })
-                                  .filter((pd): pd is string => pd !== null);
-
-                                return {
-                                  ...prevConfig,
-                                  imageIds: newIds,
-                                  pixelData: pixelDataArray,
-                                };
-                              });
-                            } catch (error) {
-                              console.error(
-                                `[WidgetConfig] Error processing image ${img.id}:`,
-                                error
-                              );
-                              // Fallback: use base_image_data if processing fails
-                              setConfig((prevConfig) => {
-                                const selectedImages = availableImages.filter((i) =>
-                                  newIds.includes(i.id)
-                                );
-                                return {
-                                  ...prevConfig,
-                                  imageIds: newIds,
-                                  imageUrls: selectedImages
-                                    .map((i) => i.base_image_data)
-                                    .filter(
-                                      (url): url is string => url !== null && url !== undefined
-                                    ),
-                                };
-                              });
-                            } finally {
-                              setProcessingImages((prev) => {
-                                const next = new Set(prev);
-                                next.delete(img.id);
-                                return next;
-                              });
-                            }
-                          })();
-                        } else if (img.pixel_data) {
-                          // Image already has pixel_data, just add it to config
-                          setConfig((prevConfig) => {
+                          // Update config with processed data
+                          setConfig((prev) => {
                             const selectedImages = availableImages.filter((i) =>
                               newIds.includes(i.id)
                             );
-                            const pixelDataArray = selectedImages
-                              .map((i) => i.pixel_data)
-                              .filter((pd): pd is string => pd !== null && pd !== undefined);
-
                             return {
-                              ...prevConfig,
-                              imageIds: newIds,
-                              pixelData: pixelDataArray,
+                              ...prev,
+                              pixelData: selectedImages
+                                .map((imageItem) => {
+                                  if (imageItem.id === img.id) {
+                                    return pixelDataBase64;
+                                  }
+                                  return imageItem.pixel_data || null;
+                                })
+                                .filter((pd): pd is string => pd !== null),
                             };
                           });
+                        } catch (error) {
+                          console.error(`Error processing image ${img.id}:`, error);
+                          // Fallback to base_image_data
+                          setConfig((prev) => {
+                            const selectedImages = availableImages.filter((i) =>
+                              newIds.includes(i.id)
+                            );
+                            return {
+                              ...prev,
+                              imageUrls: selectedImages
+                                .map((i) => i.base_image_data)
+                                .filter((url): url is string => url !== null && url !== undefined),
+                            };
+                          });
+                        } finally {
+                          setProcessingImages((prev) => {
+                            const next = new Set(prev);
+                            next.delete(img.id);
+                            return next;
+                          });
                         }
-                      }}
+                      })();
+                    }
+                  };
+
+                  return (
+                    <div
+                      key={img.id}
+                      onClick={handleImageClick}
                       style={{
                         position: "relative",
                         aspectRatio: "1/1",
@@ -429,6 +505,8 @@ export function WidgetConfigModal({
                             imageRendering: "pixelated",
                           }}
                         />
+                      ) : pixelPreview ? (
+                        pixelPreview
                       ) : (
                         <div
                           style={{

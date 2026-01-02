@@ -86,6 +86,20 @@ export function PixelArt({
     }
   }, [useProgrammaticRendering, pixelData, currentImageIndex]);
 
+  // Calculate actual grid size from pixel data (supports 128x128, 256x256, etc.)
+  const actualGridSize = useMemo(() => {
+    if (!currentPixelData) return PIXEL_GRID_SIZE;
+    // Calculate grid size from array length (assuming square grid)
+    const size = Math.sqrt(currentPixelData.length);
+    // Round to nearest integer and validate it's a perfect square
+    const roundedSize = Math.round(size);
+    if (roundedSize * roundedSize === currentPixelData.length) {
+      return roundedSize;
+    }
+    // Fallback to default if not a perfect square
+    return PIXEL_GRID_SIZE;
+  }, [currentPixelData]);
+
   // Calculate grid dimensions based on widget size
   const getGridDimensions = useCallback(() => {
     // Get actual widget dimensions using constants
@@ -232,10 +246,22 @@ export function PixelArt({
     useProgrammaticRendering,
   ]);
 
-  // Animation trigger: Wait 3 seconds after image change, then start animation
+  // Animation trigger: Wait before starting animation after image change
   useEffect(() => {
-    if (!useProgrammaticRendering || !currentPixelData || !nextPixelData) {
-      // Reset state if no next image - defer to avoid sync setState
+    if (!useProgrammaticRendering || !currentPixelData) {
+      // Reset state if no pixel data - defer to avoid sync setState
+      setTimeout(() => {
+        setIsAnimating(false);
+        setScanlineProgress(0);
+      }, 0);
+      scanlineStartTimeRef.current = null;
+      return;
+    }
+
+    // Only animate if we have multiple images
+    const hasMultiple = pixelData && pixelData.length > 1;
+    if (!hasMultiple || !nextPixelData) {
+      // Single image - no animation needed
       setTimeout(() => {
         setIsAnimating(false);
         setScanlineProgress(0);
@@ -273,13 +299,20 @@ export function PixelArt({
         animationStartDelayRef.current = null;
       }
     };
-  }, [currentImageIndex, useProgrammaticRendering, currentPixelData, nextPixelData, isAnimating]);
+  }, [
+    currentImageIndex,
+    useProgrammaticRendering,
+    currentPixelData,
+    nextPixelData,
+    isAnimating,
+    pixelData,
+  ]);
 
   // Animation progress loop: Updates scanlineProgress while animating
   useEffect(() => {
     if (!isAnimating || !scanlineStartTimeRef.current) return;
 
-    const SCANLINE_DURATION = 2000; // 2 seconds for smooth animation
+    const SCANLINE_DURATION = 4000; // 4 seconds for slower, smoother animation
 
     const animate = () => {
       if (!scanlineStartTimeRef.current || !isMountedRef.current) return;
@@ -338,7 +371,7 @@ export function PixelArt({
   }, [cols, rows]);
 
   // Calculate pixel size for SVG rendering based on widget size
-  const getSVGPixelSize = () => {
+  const getSVGPixelSize = useCallback(() => {
     const rootFontSize =
       typeof window !== "undefined" && typeof document !== "undefined"
         ? parseFloat(getComputedStyle(document.documentElement).fontSize)
@@ -352,30 +385,36 @@ export function PixelArt({
       widgetSize = tileSize * 3 + GRID_GAP_REM * 2 * rootFontSize;
     }
 
-    // Each pixel in the 128x128 grid should be widgetSize/128
-    return widgetSize / PIXEL_GRID_SIZE;
-  };
+    // Each pixel should be widgetSize/gridSize (dynamic based on actual grid size)
+    return widgetSize / actualGridSize;
+  }, [size, actualGridSize]);
+
+  // Hooks must be called unconditionally - move before conditional return
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const svgPixelSize = getSVGPixelSize();
+  const gridSize = actualGridSize; // Use calculated grid size from pixel data
+  const canvasSize = gridSize * svgPixelSize;
 
   // Generate scanline order for CRT animation
   const _scanlineOrder = useMemo(() => {
     if (!useProgrammaticRendering) return [];
-    return generateScanlineOrder(PIXEL_GRID_SIZE, PIXEL_GRID_SIZE);
-  }, [useProgrammaticRendering]);
+    return generateScanlineOrder(gridSize, gridSize);
+  }, [useProgrammaticRendering, gridSize]);
 
   // Calculate which pixels should show new image based on scanline progress
   // Optimized: use direct index calculation instead of findIndex
   const scannedPixelIndex = useMemo(() => {
     if (!useProgrammaticRendering || !isAnimating) return -1;
-    const totalPixels = PIXEL_GRID_SIZE * PIXEL_GRID_SIZE;
+    const totalPixels = gridSize * gridSize;
     return Math.floor(scanlineProgress * totalPixels);
-  }, [useProgrammaticRendering, isAnimating, scanlineProgress]);
+  }, [useProgrammaticRendering, isAnimating, scanlineProgress, gridSize]);
 
   const _getPixelState = useCallback(
     (row: number, col: number) => {
       if (!useProgrammaticRendering || !isAnimating || scannedPixelIndex < 0) return "old";
 
       // Calculate pixel index in scanline order (row-major: row * width + col)
-      const pixelIndex = row * PIXEL_GRID_SIZE + col;
+      const pixelIndex = row * gridSize + col;
 
       if (pixelIndex < scannedPixelIndex) {
         return "new"; // Already scanned - show new image
@@ -385,14 +424,8 @@ export function PixelArt({
         return "old"; // Not yet scanned - show old image
       }
     },
-    [useProgrammaticRendering, isAnimating, scannedPixelIndex]
+    [useProgrammaticRendering, isAnimating, scannedPixelIndex, gridSize]
   );
-
-  // Hooks must be called unconditionally - move before conditional return
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const svgPixelSize = getSVGPixelSize();
-  const gridSize = PIXEL_GRID_SIZE;
-  const canvasSize = gridSize * svgPixelSize;
 
   // Render to canvas - responds to scanlineProgress changes
   useEffect(() => {
@@ -403,6 +436,10 @@ export function PixelArt({
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
+
+    // Set canvas size to match calculated size (important for proper rendering)
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
 
     ctx.imageSmoothingEnabled = false;
 
@@ -423,6 +460,9 @@ export function PixelArt({
       for (let row = 0; row < gridSize; row++) {
         for (let col = 0; col < gridSize; col++) {
           const pixelIndex = row * gridSize + col;
+          // Ensure we don't go out of bounds
+          if (pixelIndex >= currentPixelData.length) continue;
+
           const pixelState =
             pixelIndex < currentScannedPixel
               ? "new"
@@ -432,10 +472,12 @@ export function PixelArt({
 
           // Determine which pixel data to show
           let intensityLevel: number;
-          if (pixelState === "new" && nextPixelData) {
+          if (pixelState === "new" && nextPixelData && pixelIndex < nextPixelData.length) {
             intensityLevel = nextPixelData[pixelIndex];
-          } else {
+          } else if (pixelIndex < currentPixelData.length) {
             intensityLevel = currentPixelData[pixelIndex];
+          } else {
+            continue; // Skip if out of bounds
           }
 
           const color = mapIntensityToThemeColor(intensityLevel, themeColors);
@@ -472,6 +514,8 @@ export function PixelArt({
         for (let row = 0; row < gridSize; row++) {
           for (let col = 0; col < gridSize; col++) {
             const pixelIndex = row * gridSize + col;
+            // Ensure we don't go out of bounds
+            if (pixelIndex >= nextPixelData.length) continue;
             const intensityLevel = nextPixelData[pixelIndex];
             const color = mapIntensityToThemeColor(intensityLevel, themeColors);
             if (color !== currentColor) {

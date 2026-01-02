@@ -81,8 +81,7 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
   const gridContainer =
     typeof document !== "undefined"
       ? document.querySelector("[data-grid-container]") ||
-        document.querySelector("[data-grid-container-wrapper]") ||
-        document.body
+        document.querySelector("[data-grid-container-wrapper]")
       : null;
 
   const modalContent = (
@@ -109,9 +108,14 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
     </div>
   );
 
-  // Portal to grid container if available, otherwise render normally
-  if (gridContainer && gridContainer !== document.body) {
+  // Portal to grid container if available and still in DOM, otherwise render to body
+  if (gridContainer && gridContainer.isConnected && document.body.contains(gridContainer)) {
     return createPortal(modalContent, gridContainer);
+  }
+
+  // Fallback: portal to body if grid container not available
+  if (typeof document !== "undefined") {
+    return createPortal(modalContent, document.body);
   }
 
   return modalContent;

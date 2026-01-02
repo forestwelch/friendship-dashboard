@@ -11,6 +11,7 @@ interface NavigationProps {
     label: string;
     onClick: () => void;
     isActive?: boolean;
+    disabled?: boolean;
   }[];
   addFriendAction?: {
     onClick: () => void;
@@ -25,8 +26,7 @@ export function Navigation(
 
   const navLinks = [
     { href: "/", label: "HOME" },
-    { href: "/admin/friends", label: "MANAGE FRIENDS" },
-    { href: "/admin/content", label: "MANAGE GLOBAL CONTENT" },
+    { href: "/admin/content", label: "MANAGE CONTENT" },
   ];
 
   return (
@@ -70,13 +70,17 @@ export function Navigation(
             <button
               key={index}
               onClick={() => {
-                action.onClick();
-                playSound("click");
+                if (!action.disabled) {
+                  action.onClick();
+                  playSound("click");
+                }
               }}
+              disabled={action.disabled}
               className={clsx("game-nav-link", styles.navLink, action.isActive && "active")}
               style={{
-                cursor: "pointer",
+                cursor: action.disabled ? "not-allowed" : "pointer",
                 fontFamily: "inherit",
+                opacity: action.disabled ? 0.5 : 1,
               }}
             >
               {action.label}

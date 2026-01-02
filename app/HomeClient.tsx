@@ -1,22 +1,53 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Friend } from "@/lib/types";
 import { useThemeContext } from "@/lib/theme-context";
 import { FriendCard } from "@/components/FriendCard";
+import { AddFriendModal } from "@/components/admin/AddFriendModal";
+import { useUIStore } from "@/lib/store/ui-store";
 
 interface HomeClientProps {
   friends: Friend[];
 }
 
-export function HomeClient({ friends }: HomeClientProps) {
+export function HomeClient({ friends: initialFriends }: HomeClientProps) {
   const { preloadAllThemes, prefetchTheme } = useThemeContext();
+  const { setOpenModal } = useUIStore();
+  const [friends, setFriends] = useState<Friend[]>(initialFriends);
+  const [showAddFriendModal, setShowAddFriendModal] = useState(false);
 
   // Preload all friend themes on mount for instant switching
   useEffect(() => {
     const friendSlugs = friends.map((f) => f.slug);
     preloadAllThemes(friendSlugs);
   }, [friends, preloadAllThemes]);
+
+  // Listen for add friend event from navigation
+  useEffect(() => {
+    const handleAddFriend = () => {
+      setShowAddFriendModal(true);
+      setOpenModal("add-friend-modal");
+    };
+
+    window.addEventListener("admin-add-friend", handleAddFriend);
+    return () => {
+      window.removeEventListener("admin-add-friend", handleAddFriend);
+    };
+  }, [setOpenModal]);
+
+  const handleFriendAdded = async () => {
+    // Refresh friends list
+    try {
+      const response = await fetch("/api/friends");
+      if (response.ok) {
+        const data = await response.json();
+        setFriends(data.friends || []);
+      }
+    } catch (error) {
+      console.error("Failed to refresh friends:", error);
+    }
+  };
 
   return (
     <div
@@ -59,12 +90,21 @@ export function HomeClient({ friends }: HomeClientProps) {
             <FriendCard
               key={friend.id}
               friend={friend}
-              href={`/${friend.slug}`}
               onMouseEnter={() => prefetchTheme(friend.slug)}
             />
           ))}
         </div>
       </div>
+
+      {/* Add Friend Modal */}
+      <AddFriendModal
+        isOpen={showAddFriendModal}
+        onClose={() => {
+          setShowAddFriendModal(false);
+          setOpenModal(null);
+        }}
+        onFriendAdded={handleFriendAdded}
+      />
     </div>
   );
 }

@@ -34,7 +34,12 @@ export async function GET() {
       created_at: img.created_at,
     }));
 
-    return NextResponse.json({ images });
+    const response = NextResponse.json({ images });
+
+    // Add caching headers for better performance
+    response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
+
+    return response;
   } catch (error) {
     console.error("[API] Error in GET /api/images:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

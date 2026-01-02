@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { getTop10Songs } from "@/lib/queries";
 import { Song, WidgetSize } from "@/lib/types";
 import { SongManager } from "./SongManager";
 import { ImageManager } from "./ImageManager";
-import Link from "next/link";
-import { playSound } from "@/lib/sounds";
-
-type TabType = "songs" | "images";
+import { usePathname } from "next/navigation";
+import { AddContentNav } from "@/app/admin/content/AddContentNav";
 
 interface ImageItem {
   id: string;
@@ -21,11 +19,23 @@ interface ImageItem {
 }
 
 export function ContentManager() {
-  const [activeTab, setActiveTab] = useState<TabType>("songs");
+  const pathname = usePathname();
+  const activeTab = pathname?.includes("/images") ? "images" : "songs";
+
   const [topSongs, setTopSongs] = useState<Song[]>([]);
   const [images, setImages] = useState<ImageItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [selectedImagesCount, setSelectedImagesCount] = useState(0);
+
+  // Refs for child component methods
+  const addSongRef = useRef<(() => void) | null>(null);
+  const saveSongsRef = useRef<(() => void) | null>(null);
+  const uploadImagesRef = useRef<(() => void) | null>(null);
+  const deleteImagesRef = useRef<(() => void) | null>(null);
+  const selectedCountRef = useRef<(() => number) | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,6 +56,32 @@ export function ContentManager() {
     fetchData();
   }, []);
 
+  // Listen for add content events from navigation
+  useEffect(() => {
+    const handleAddSongs = () => {
+      if (activeTab === "songs") {
+        setShowAddForm(true);
+      }
+    };
+    const handleAddImages = () => {
+      if (activeTab === "images") {
+        // Trigger file input click for images
+        const fileInput = document.querySelector<HTMLInputElement>(
+          'input[type="file"][accept="image/*"]'
+        );
+        fileInput?.click();
+      }
+    };
+
+    window.addEventListener("admin-add-songs", handleAddSongs);
+    window.addEventListener("admin-add-images", handleAddImages);
+
+    return () => {
+      window.removeEventListener("admin-add-songs", handleAddSongs);
+      window.removeEventListener("admin-add-images", handleAddImages);
+    };
+  }, [activeTab]);
+
   const fetchImages = async () => {
     try {
       const response = await fetch("/api/images");
@@ -59,113 +95,98 @@ export function ContentManager() {
   };
 
   const handleSaveSongs = async (songs: Song[]) => {
-    const response = await fetch("/api/content/top_10_songs", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ songs }),
-    });
+    setSaving(true);
+    try {
+      const response = await fetch("/api/content/top_10_songs", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ songs }),
+      });
 
-    if (!response.ok) {
-      throw new Error("Failed to save songs");
+      if (!response.ok) {
+        throw new Error("Failed to save songs");
+      }
+
+      setTopSongs(songs);
+    } finally {
+      setSaving(false);
     }
-
-    setTopSongs(songs);
   };
 
+  const handleSaveSongsClick = useCallback(() => {
+    if (saveSongsRef.current) {
+      saveSongsRef.current();
+    }
+  }, []);
+
+  const handleAddSongClick = useCallback(() => {
+    if (addSongRef.current) {
+      addSongRef.current();
+    }
+  }, []);
+
+  const handleUploadImagesClick = useCallback(() => {
+    if (uploadImagesRef.current) {
+      uploadImagesRef.current();
+    }
+  }, []);
+
+  const handleDeleteImagesClick = useCallback(() => {
+    if (deleteImagesRef.current) {
+      deleteImagesRef.current();
+    }
+  }, []);
+
+  // Update selected images count
+  useEffect(() => {
+    const updateCount = () => {
+      if (selectedCountRef.current) {
+        setSelectedImagesCount(selectedCountRef.current());
+      }
+    };
+    const interval = setInterval(updateCount, 100);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div
-      className="admin-page"
-      style={{
-        paddingTop: `calc(var(--height-button) + var(--space-md))`,
-        width: "100%",
-        maxWidth: "100%",
-        height: "calc(100vh - 2.25rem)",
-        overflowX: "hidden",
-        overflowY: "auto",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <>
+      <AddContentNav
+        onAddSong={handleAddSongClick}
+        onSaveSongs={handleSaveSongsClick}
+        onUploadImages={handleUploadImagesClick}
+        onDeleteImages={handleDeleteImagesClick}
+        selectedImagesCount={selectedImagesCount}
+        saving={saving}
+      />
       <div
-        className="game-container"
+        className="admin-page"
         style={{
-          padding: "var(--space-md)",
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
+          paddingTop: `calc(var(--height-button) + var(--space-md))`,
+          width: "100%",
+          maxWidth: "100%",
+          minHeight: "100vh",
+          background: "var(--admin-bg)",
+          color: "var(--admin-text)",
+          overflowX: "hidden",
         }}
       >
-        <div className="game-breadcrumb" style={{ marginBottom: "var(--space-md)", flexShrink: 0 }}>
-          <Link href="/" className="game-link">
-            Home
-          </Link>
-          <span className="game-breadcrumb-separator">/</span>
-          <span className="game-breadcrumb-current">Manage Global Content</span>
-        </div>
-        <h1 className="game-heading-1" style={{ marginBottom: "var(--space-md)", flexShrink: 0 }}>
-          Manage Global Content
-        </h1>
-
-        {/* Tabs */}
         <div
+          className="game-container"
           style={{
-            display: "flex",
-            gap: "var(--space-sm)",
-            marginBottom: "var(--space-md)",
-            borderBottom: "var(--border-width-md) solid var(--game-border)",
-            flexShrink: 0,
+            paddingTop: "var(--space-3xl)",
+            paddingBottom: "var(--space-3xl)",
           }}
         >
-          <button
-            onClick={() => {
-              setActiveTab("songs");
-              playSound("click");
-            }}
+          <h1
+            className="game-heading-1"
             style={{
-              padding: "var(--space-sm) var(--space-lg)",
-              fontSize: "var(--font-size-sm)",
-              fontWeight: "bold",
-              background: activeTab === "songs" ? "var(--primary)" : "transparent",
-              color: activeTab === "songs" ? "var(--bg)" : "var(--text)",
-              border: "none",
-              borderBottom:
-                activeTab === "songs"
-                  ? `var(--border-width-md) solid var(--primary)`
-                  : `var(--border-width-md) solid transparent`,
-              cursor: "pointer",
-              textTransform: "uppercase",
-              transition: "all var(--transition-fast)",
+              marginBottom: "var(--space-3xl)",
+              fontSize: "var(--font-size-3xl)",
             }}
           >
-            Songs
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab("images");
-              playSound("click");
-            }}
-            style={{
-              padding: "var(--space-sm) var(--space-lg)",
-              fontSize: "var(--font-size-sm)",
-              fontWeight: "bold",
-              background: activeTab === "images" ? "var(--primary)" : "transparent",
-              color: activeTab === "images" ? "var(--bg)" : "var(--text)",
-              border: "none",
-              borderBottom:
-                activeTab === "images"
-                  ? `var(--border-width-md) solid var(--primary)`
-                  : `var(--border-width-md) solid transparent`,
-              cursor: "pointer",
-              textTransform: "uppercase",
-              transition: "all var(--transition-fast)",
-            }}
-          >
-            Images
-          </button>
-        </div>
+            {activeTab === "songs" ? "MANAGE SONGS" : "MANAGE IMAGES"}
+          </h1>
 
-        <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           {loading ? (
             <div style={{ padding: "2rem", textAlign: "center", color: "var(--admin-text)" }}>
               Loading...
@@ -173,15 +194,36 @@ export function ContentManager() {
           ) : error ? (
             <div style={{ padding: "2rem", color: "var(--admin-accent)" }}>Error: {error}</div>
           ) : activeTab === "songs" ? (
-            <SongManager initialSongs={topSongs} onSave={handleSaveSongs} />
+            <SongManager
+              initialSongs={topSongs}
+              onSave={handleSaveSongs}
+              showAddForm={showAddForm}
+              onAddFormChange={setShowAddForm}
+              onAddSongRef={(fn) => {
+                addSongRef.current = fn;
+              }}
+              onSaveRef={(fn) => {
+                saveSongsRef.current = fn;
+              }}
+              savingRef={setSaving}
+            />
           ) : (
             <ImageManager
               initialImages={images}
               onImagesChange={(newImages) => setImages(newImages)}
+              onUploadRef={(fn) => {
+                uploadImagesRef.current = fn;
+              }}
+              onDeleteRef={(fn) => {
+                deleteImagesRef.current = fn;
+              }}
+              onSelectedCountRef={(fn) => {
+                selectedCountRef.current = fn;
+              }}
             />
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }
