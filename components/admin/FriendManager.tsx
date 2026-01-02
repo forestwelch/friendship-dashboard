@@ -333,9 +333,7 @@ export function FriendManager() {
               No friends yet. Add one using the button above!
             </div>
           ) : (
-            friends.map((friend) => (
-              <FriendCard key={friend.id} friend={friend} href={`/admin/${friend.slug}`} />
-            ))
+            friends.map((friend) => <FriendCard key={friend.id} friend={friend} />)
           )}
         </div>
       </div>

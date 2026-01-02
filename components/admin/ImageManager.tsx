@@ -101,11 +101,13 @@ export function ImageManager({
       const promises: Promise<void>[] = [];
 
       for (const img of images) {
-        if (img.pixel_data && !newCache.has(img.id)) {
+        const pixelDataStr = img.pixel_data;
+        if (pixelDataStr && !newCache.has(img.id)) {
+          const pixelDataBase64 = pixelDataStr; // Type narrowing
           promises.push(
             (async () => {
               try {
-                const pixelData = base64ToPixelData(img.pixel_data);
+                const pixelData = base64ToPixelData(pixelDataBase64);
                 const gridSize = img.width || PIXEL_GRID_SIZE;
                 const themeColors = {
                   primary: DEFAULT_THEME_COLORS_ALT.primary,
