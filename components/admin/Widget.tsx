@@ -57,88 +57,53 @@ export function EditableWidget({
           <WidgetRenderer widget={widget} songs={[]} />
         </div>
         {editingWidget === widget.id && (
-          <div
-            className="game-card"
-            style={{
-              position: "absolute",
-              top: "var(--space-md)",
-              right: "var(--space-md)",
-              padding: "var(--space-sm) var(--space-md)",
-              fontSize: "11px",
-              zIndex: 1000,
-              display: "flex",
-              gap: "var(--space-sm)",
-              alignItems: "center",
-              pointerEvents: "auto",
-            }}
-          >
+          <div className="widget-edit-menu">
             <span>
               {widget.widget_name} ({widget.size})
             </span>
             <button
-              className="game-button game-button-icon"
+              className="game-button game-button-icon widget-edit-button"
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 onConfigure();
               }}
-              style={{
-                padding: "var(--space-xs)",
-                minWidth: "24px",
-                minHeight: "24px",
-              }}
               title="Configure"
             >
-              ⚙️
+              <i className="hn hn-cog-solid" />
             </button>
             <button
-              className="game-button game-button-icon"
+              className="game-button game-button-icon widget-edit-button"
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 onDuplicate();
               }}
-              style={{
-                padding: "var(--space-xs)",
-                minWidth: "24px",
-                minHeight: "24px",
-              }}
               title="Duplicate"
             >
-              📋
+              <i className="hn hn-clipboard-solid" />
             </button>
             <button
-              className="game-button game-button-icon"
+              className="game-button game-button-icon widget-edit-button"
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 onMove();
-              }}
-              style={{
-                padding: "var(--space-xs)",
-                minWidth: "24px",
-                minHeight: "24px",
-                cursor: "pointer",
               }}
               title="Move"
             >
               <i className="hn hn-arrow-up-solid" />
             </button>
             <button
-              className="game-button game-button-danger game-button-icon"
+              className="game-button game-button-danger game-button-icon widget-edit-button"
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 onDelete();
               }}
-              style={{
-                padding: "var(--space-xs)",
-                minWidth: "24px",
-                minHeight: "24px",
-              }}
               title="Delete"
             >
-              ×
+              <i className="hn hn-times-solid" />
             </button>
           </div>
         )}

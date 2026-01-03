@@ -1,0 +1,230 @@
+"use client";
+
+import React, { useState } from "react";
+import { Modal } from "@/components/Modal";
+import { useUIStore } from "@/lib/store/ui-store";
+import {
+  useCurrentTopic,
+  useReviewsForTopic,
+  useCreateTopic,
+  useSubmitReview,
+  useRevealTopic,
+} from "@/lib/queries-reviews-hooks";
+import { useIdentity } from "@/lib/identity-utils";
+import { FormField, Input, Textarea, Button, Card } from "@/components/shared";
+
+interface AbsurdReviewsModalProps {
+  friendId: string;
+  friendName: string;
+}
+
+export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalProps) {
+  const { setOpenModal } = useUIStore();
+  const [stars, setStars] = useState(3);
+  const [reviewText, setReviewText] = useState("");
+  const [recommend, setRecommend] = useState(false);
+  const [newTopicName, setNewTopicName] = useState("");
+  const identity = useIdentity();
+  const modalId = `absurdreviews-${friendId}`;
+
+  const { data: topic } = useCurrentTopic(friendId);
+  const { data: reviews = [] } = useReviewsForTopic(topic?.id || null);
+  const createTopicMutation = useCreateTopic(friendId);
+  const submitReviewMutation = useSubmitReview(friendId, topic?.id || "");
+  const revealTopicMutation = useRevealTopic(friendId, topic?.id || "");
+
+  const myReview = topic ? reviews.find((r) => r.reviewer === identity) : null;
+  const otherReview = topic ? reviews.find((r) => r.reviewer !== identity) : null;
+  const hasBothReviews = reviews.length >= 2;
+  const isRevealed = topic?.status === "revealed";
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!topic || !reviewText.trim() || submitReviewMutation.isPending) return;
+
+    submitReviewMutation.mutate(
+      {
+        reviewer: identity,
+        stars,
+        reviewText: reviewText.trim(),
+        recommend,
+      },
+      {
+        onSuccess: () => {
+          setReviewText("");
+          setStars(3);
+          setRecommend(false);
+        },
+      }
+    );
+  };
+
+  const handleReveal = () => {
+    if (!topic || isRevealed || revealTopicMutation.isPending) return;
+    revealTopicMutation.mutate();
+  };
+
+  const handleSetTopic = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTopicName.trim() || createTopicMutation.isPending) return;
+
+    createTopicMutation.mutate(newTopicName.trim(), {
+      onSuccess: () => {
+        setNewTopicName("");
+      },
+    });
+  };
+
+  return (
+    <Modal id={modalId} title="Absurd Reviews" onClose={() => setOpenModal(null)}>
+      <div className="modal-content">
+        {!topic ? (
+          // Set Topic Form (Forest only)
+          identity === "admin" && (
+            <form onSubmit={handleSetTopic} className="form-section form">
+              <div className="form-title">Set New Topic:</div>
+              <FormField label="Topic name" required>
+                <Input
+                  type="text"
+                  value={newTopicName}
+                  onChange={(e) => setNewTopicName(e.target.value)}
+                  placeholder="e.g., 'The concept of Tuesday'"
+                  required
+                />
+              </FormField>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={createTopicMutation.isPending || !newTopicName.trim()}
+              >
+                {createTopicMutation.isPending ? "Setting..." : "Set Topic"}
+              </Button>
+            </form>
+          )
+        ) : (
+          <>
+            {/* Topic Display */}
+            <Card variant="accent" className="text-center">
+              <div className="form-title" style={{ fontSize: "var(--font-size-lg)" }}>
+                {topic.topic_name}
+              </div>
+            </Card>
+
+            {/* Submit Review Form */}
+            {!myReview && (
+              <form onSubmit={handleSubmitReview} className="form-section form">
+                <FormField label="Star Rating (1-5)">
+                  <div className="star-rating-buttons">
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <Button
+                        key={num}
+                        type="button"
+                        onClick={() => setStars(num)}
+                        className={stars === num ? "star-selected" : ""}
+                      >
+                        {num} <i className="hn hn-star-solid" style={{ fontSize: "0.8rem" }} />
+                      </Button>
+                    ))}
+                  </div>
+                </FormField>
+                <FormField label="Review (max 200 chars)" required>
+                  <Textarea
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    rows={3}
+                    maxLength={200}
+                    showCharCount
+                    required
+                  />
+                </FormField>
+                <div className="checkbox-field">
+                  <input
+                    type="checkbox"
+                    id="recommend"
+                    checked={recommend}
+                    onChange={(e) => setRecommend(e.target.checked)}
+                  />
+                  <label htmlFor="recommend">Recommend to a friend?</label>
+                </div>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={submitReviewMutation.isPending || !reviewText.trim()}
+                >
+                  {submitReviewMutation.isPending ? "Submitting..." : "Submit Review"}
+                </Button>
+              </form>
+            )}
+
+            {/* View Reviews */}
+            {hasBothReviews && (
+              <div className="reviews-section">
+                {!isRevealed && (
+                  <Button
+                    onClick={handleReveal}
+                    variant="primary"
+                    disabled={revealTopicMutation.isPending}
+                  >
+                    Reveal Reviews
+                  </Button>
+                )}
+                {isRevealed && (
+                  <div className="reviews-grid">
+                    {[myReview, otherReview].map((review, idx) => {
+                      if (!review) return null;
+                      return (
+                        <Card key={idx}>
+                          <div className="entry-title">
+                            {review.reviewer === identity
+                              ? "You"
+                              : review.reviewer === "admin"
+                                ? "Forest"
+                                : friendName}
+                          </div>
+                          <div className="stars-display">
+                            {Array.from({ length: review.stars }).map((_, i) => (
+                              <i key={i} className="hn hn-star-solid" />
+                            ))}
+                          </div>
+                          <div className="entry-content">{review.review_text}</div>
+                          {review.recommend && (
+                            <div className="recommend-badge">
+                              <i className="hn hn-check-solid" /> Recommends
+                            </div>
+                          )}
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Set Next Topic (Forest only) */}
+            {isRevealed && identity === "admin" && (
+              <form onSubmit={handleSetTopic} className="form-section form">
+                <div className="form-title">Set Next Topic:</div>
+                <FormField label="Topic name" required>
+                  <Input
+                    type="text"
+                    value={newTopicName}
+                    onChange={(e) => setNewTopicName(e.target.value)}
+                    placeholder="e.g., 'The concept of Tuesday'"
+                    required
+                  />
+                </FormField>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={createTopicMutation.isPending || !newTopicName.trim()}
+                >
+                  {createTopicMutation.isPending ? "Setting..." : "Set Next Topic"}
+                </Button>
+              </form>
+            )}
+          </>
+        )}
+      </div>
+    </Modal>
+  );
+}

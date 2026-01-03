@@ -10,7 +10,6 @@ import { canPlaceWidget, findAvailablePosition } from "@/lib/widget-utils";
 import { WidgetConfigModal } from "./WidgetConfigModal";
 import { WidgetLibrary } from "./WidgetLibrary";
 import { useUndoRedo } from "./UndoRedo";
-import { useKeyboardShortcuts } from "@/lib/keyboard";
 import Link from "next/link";
 import { EditableWidget } from "./Widget";
 import { GRID_COLS, GRID_ROWS } from "@/lib/constants";
@@ -192,30 +191,6 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
     [displayWidgets, setWidgets]
   );
 
-  // Keyboard shortcuts for undo/redo
-  useKeyboardShortcuts([
-    {
-      key: "z",
-      ctrl: true,
-      action: () => {
-        if (canUndo) {
-          undo();
-        }
-      },
-      description: "Undo",
-    },
-    {
-      key: "y",
-      ctrl: true,
-      action: () => {
-        if (canRedo) {
-          redo();
-        }
-      },
-      description: "Redo",
-    },
-  ]);
-
   // Create grid of all positions for drop zones (memoized)
   const allPositions: WidgetPosition[] = useMemo(() => {
     const positions: WidgetPosition[] = [];
@@ -380,7 +355,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
           }}
           style={{ marginLeft: "auto" }}
         >
-          💾 Save Layout
+          <i className="hn hn-save-solid" style={{ marginRight: "var(--space-xs)" }} /> Save Layout
         </button>
       </div>
 
@@ -510,7 +485,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                                   : isValid
                                     ? "var(--game-overlay-secondary-10)"
                                     : "transparent",
-                            transition: "all 0.15s ease-out",
+                            /* Transition removed for performance */
                             opacity: isHovered ? 1 : isValid ? 0.4 : 0.2,
                             borderRadius: "var(--radius-sm)",
                             cursor: isValid ? "pointer" : "not-allowed",
@@ -551,7 +526,8 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
               }}
             >
               <button className="game-button game-button-danger" onClick={handleCancelMove}>
-                ✕ Cancel Move (ESC)
+                <i className="hn hn-times-solid" style={{ marginRight: "var(--space-xs)" }} />{" "}
+                Cancel Move (ESC)
               </button>
             </div>
           )}

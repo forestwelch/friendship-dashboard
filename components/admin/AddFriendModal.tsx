@@ -5,6 +5,7 @@ import { playSound } from "@/lib/sounds";
 import { ColorPicker } from "./ColorPicker";
 import { DEFAULT_THEME_COLORS } from "@/lib/theme-defaults";
 import { Modal } from "@/components/Modal";
+import { FormField, Input } from "@/components/shared";
 import { useUIStore } from "@/lib/store/ui-store";
 
 interface AddFriendModalProps {
@@ -120,22 +121,9 @@ export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModa
   return (
     <>
       <Modal id="add-friend-modal" title="ADD NEW FRIEND" onClose={handleClose}>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--space-md)",
-          }}
-        >
-          <div>
-            <label
-              className="game-heading-3"
-              style={{ marginBottom: "var(--space-xs)", display: "block" }}
-            >
-              Name
-            </label>
-            <input
-              className="game-input"
+        <div className="modal-content">
+          <FormField label="Name" required>
+            <Input
               type="text"
               value={newFriend.name}
               onChange={(e) =>
@@ -147,7 +135,7 @@ export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModa
               placeholder="Daniel"
               autoFocus
             />
-          </div>
+          </FormField>
 
           {/* Color Settings */}
           <div>

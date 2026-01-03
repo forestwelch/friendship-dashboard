@@ -76,6 +76,12 @@ export function WidgetConfigModal({
     }
   }, [widget?.widget_type]);
 
+  const handleSave = () => {
+    onSave(config);
+    playSound("success");
+    onClose();
+  };
+
   // Generate WebP previews for pixel data images (async, non-blocking)
   useEffect(() => {
     if (!friendColors || availableImages.length === 0) return;
@@ -128,17 +134,33 @@ export function WidgetConfigModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [availableImages.map((img) => img.id).join(","), friendColors]);
 
-  if (!widget) return null;
+  // Music player song selection state - hooks must be called before conditional return
+  const [availableSongs, setAvailableSongs] = useState<
+    Array<{ id: string; title: string; artist: string }>
+  >([]);
+  const [loadingSongs, setLoadingSongs] = useState(false);
 
-  const handleSave = () => {
-    onSave(config);
-    playSound("success");
-    onClose();
-  };
+  useEffect(() => {
+    if (widget?.widget_type === "music_player") {
+      setLoadingSongs(true);
+      fetch("/api/content/top_10_songs")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.songs && Array.isArray(data.songs)) {
+            setAvailableSongs(data.songs);
+          }
+          setLoadingSongs(false);
+        })
+        .catch(() => {
+          setLoadingSongs(false);
+        });
+    }
+  }, [widget?.widget_type]);
 
   const renderConfigFields = () => {
+    if (!widget) return null;
     switch (widget.widget_type) {
-      case "notes":
+      case "music_player": {
         return (
           <div
             style={{
@@ -148,131 +170,50 @@ export function WidgetConfigModal({
             }}
           >
             <label className="game-heading-3" style={{ margin: 0 }}>
-              Initial Notes (one per line)
+              Select Song
             </label>
-            <textarea
-              className="game-input"
-              value={
-                config.notes?.map((n) => (typeof n === "string" ? n : n.content)).join("\n") || ""
-              }
-              onChange={(e) =>
-                setConfig({
-                  ...config,
-                  notes: e.target.value.split("\n").filter((n) => n.trim()),
-                })
-              }
-              style={{
-                minHeight: "6.25rem",
-                fontFamily: "inherit",
-              }}
-            />
-          </div>
-        );
-
-      case "shared_links":
-      case "links": // Backward compatibility
-        return (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--space-md)",
-            }}
-          >
-            <label className="game-heading-3" style={{ margin: 0 }}>
-              Links (JSON format)
-            </label>
-            <textarea
-              className="game-input"
-              value={JSON.stringify(config.links || [], null, 2)}
-              onChange={(e) => {
-                try {
-                  const parsed = JSON.parse(e.target.value);
-                  setConfig({ ...config, links: parsed });
-                } catch {
-                  // Invalid JSON, ignore
+            {loadingSongs ? (
+              <div
+                className="game-text-muted"
+                style={{ padding: "var(--space-lg)", textAlign: "center" }}
+              >
+                Loading songs...
+              </div>
+            ) : (
+              <select
+                className="game-input"
+                value={(config.selectedSongId as string) || ""}
+                onChange={(e) =>
+                  setConfig({
+                    ...config,
+                    selectedSongId: e.target.value,
+                  })
                 }
-              }}
-              style={{
-                fontFamily: "monospace",
-                minHeight: "9.375rem",
-              }}
-            />
+                style={{
+                  fontFamily: "inherit",
+                  padding: "var(--space-md)",
+                  minHeight: "2.5rem",
+                }}
+              >
+                <option value="">-- Select a song --</option>
+                {availableSongs.map((song) => (
+                  <option key={song.id} value={song.id}>
+                    {song.title} - {song.artist}
+                  </option>
+                ))}
+              </select>
+            )}
             <div className="game-text-muted" style={{ fontSize: "var(--font-size-xs)" }}>
-              Format: JSON array of link objects with id, title, url, icon
+              The selected song will auto-play when the friend visits the page.
             </div>
           </div>
         );
-
-      case "calendar":
-        return (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--space-md)",
-            }}
-          >
-            <label className="game-heading-3" style={{ margin: 0 }}>
-              Events (JSON format)
-            </label>
-            <textarea
-              className="game-input"
-              value={JSON.stringify(config.events || [], null, 2)}
-              onChange={(e) => {
-                try {
-                  const parsed = JSON.parse(e.target.value);
-                  setConfig({ ...config, events: parsed });
-                } catch {
-                  // Invalid JSON, ignore
-                }
-              }}
-              style={{
-                fontFamily: "monospace",
-                minHeight: "9.375rem",
-              }}
-            />
-            <div className="game-text-muted" style={{ fontSize: "var(--font-size-xs)" }}>
-              Format: JSON array of event objects with id, title, date, time
-            </div>
-          </div>
-        );
-
-      case "media_recommendations":
-        return (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--space-md)",
-            }}
-          >
-            <label className="game-heading-3" style={{ margin: 0 }}>
-              Recommendations (JSON format)
-            </label>
-            <textarea
-              className="game-input"
-              value={JSON.stringify(config.recommendations || [], null, 2)}
-              onChange={(e) => {
-                try {
-                  const parsed = JSON.parse(e.target.value);
-                  setConfig({ ...config, recommendations: parsed });
-                } catch {
-                  // Invalid JSON, ignore
-                }
-              }}
-              style={{
-                fontFamily: "monospace",
-                minHeight: "9.375rem",
-              }}
-            />
-            <div className="game-text-muted" style={{ fontSize: "var(--font-size-xs)" }}>
-              Format: JSON array of recommendation objects with id, title, type, description
-            </div>
-          </div>
-        );
+      }
 
       case "pixel_art":
+        // Transition type selection
+        const transitionType = (config.transitionType as string) || "scanline";
+
         // Get selected image IDs - check pixelData (new format) or imageIds/imageUrls (backward compatibility)
         let selectedImageIds: string[] = config.imageIds || [];
 
@@ -331,6 +272,7 @@ export function WidgetConfigModal({
                   padding: "var(--space-sm)",
                   border: "var(--border-width-md) solid var(--game-border)",
                   borderRadius: "var(--radius-sm)",
+                  alignContent: "start",
                 }}
               >
                 {availableImages.map((img) => {
@@ -484,14 +426,17 @@ export function WidgetConfigModal({
                       style={{
                         position: "relative",
                         aspectRatio: "1/1",
+                        width: "100%",
+                        minHeight: "6.25rem",
                         border: isSelected
                           ? "0.125rem solid var(--primary)"
                           : "0.0625rem solid var(--game-border)",
                         borderRadius: "var(--radius-sm)",
                         overflow: "hidden",
+                        backgroundColor: "var(--game-surface)",
                         cursor: "pointer",
                         opacity: isSelected ? 1 : 0.7,
-                        transition: "all 0.2s",
+                        /* Transition removed for performance */
                       }}
                     >
                       {imageSrc ? (
@@ -560,7 +505,7 @@ export function WidgetConfigModal({
                             fontWeight: "bold",
                           }}
                         >
-                          ✓
+                          <i className="hn hn-check-solid" />
                         </div>
                       )}
                     </div>
@@ -575,6 +520,40 @@ export function WidgetConfigModal({
                 animation.
               </div>
             )}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "var(--space-sm)",
+                marginTop: "var(--space-md)",
+              }}
+            >
+              <label className="game-heading-3" style={{ margin: 0 }}>
+                Transition Effect
+              </label>
+              <select
+                className="game-input"
+                value={transitionType}
+                onChange={(e) =>
+                  setConfig({
+                    ...config,
+                    transitionType: e.target.value,
+                  })
+                }
+                style={{
+                  fontFamily: "inherit",
+                  padding: "var(--space-md)",
+                  minHeight: "2.5rem",
+                }}
+              >
+                <option value="scanline">Scanline Sweep</option>
+                <option value="dissolve">Random Dissolve</option>
+                <option value="boot-up">Gameboy Boot-up</option>
+              </select>
+              <div className="game-text-muted" style={{ fontSize: "var(--font-size-xs)" }}>
+                Transition effect runs on page load and when cycling to next image.
+              </div>
+            </div>
           </div>
         );
 
@@ -586,6 +565,8 @@ export function WidgetConfigModal({
         );
     }
   };
+
+  if (!widget) return null;
 
   return (
     <div
@@ -623,7 +604,7 @@ export function WidgetConfigModal({
             onClick={onClose}
             style={{ minWidth: "2rem", minHeight: "2rem" }}
           >
-            ×
+            <i className="hn hn-times-solid" />
           </button>
         </div>
 

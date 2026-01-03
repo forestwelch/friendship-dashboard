@@ -4,19 +4,17 @@ import React, { memo } from "react";
 import {
   MusicPlayer,
   PixelArt,
-  Calendar,
-  Notes,
-  Links,
-  MediaRecommendations,
-  Mood,
-  EventCountdown,
   PersonalityQuiz,
   ConnectFour,
+  ConsumptionLog,
+  QuestionJar,
+  AudioSnippets,
+  AbsurdReviews,
+  FridgeMagnets,
 } from "@/components/widgets";
 import { FriendWidget } from "@/lib/queries";
 import { ConnectFourData } from "@/lib/queries-connect-four";
 import { Song } from "@/lib/types";
-import { createInboxItem } from "@/lib/queries-inbox";
 import { useTheme } from "@/lib/theme-context";
 
 interface WidgetRendererProps {
@@ -39,59 +37,20 @@ export const WidgetRenderer = memo(function WidgetRenderer({
   onUploadImage: _onUploadImage,
   friendId,
   friendName = "Friend",
-  onUpdateWidgetConfig,
+  onUpdateWidgetConfig: _onUpdateWidgetConfig,
 }: WidgetRendererProps) {
   const themeColors = useTheme();
-  const handleProposeHangout = async (date: string, time: string, message?: string) => {
-    if (!friendId) {
-      console.error("No friend ID provided for hangout proposal");
-      return;
-    }
-
-    const success = await createInboxItem(friendId, "hangout_proposal", {
-      date,
-      time,
-      message,
-    });
-
-    if (success) {
-      alert(`Hangout proposal sent: ${date} at ${time}`);
-    } else {
-      alert("Failed to send hangout proposal");
-    }
-  };
-
-  const handleMarkWatched = async (recommendationId: string) => {
-    if (!onUpdateWidgetConfig) {
-      // Mark as watched - no-op without callback
-      return;
-    }
-
-    const currentRecommendations = widget.config.recommendations || [];
-    const updated = currentRecommendations.map((rec) =>
-      rec.id === recommendationId ? { ...rec, watched: true } : rec
-    );
-
-    await onUpdateWidgetConfig(widget.id, {
-      ...widget.config,
-      recommendations: updated,
-    });
-  };
-
-  const handleAddRecommendation = async () => {
-    // For now, just log - could open a modal or navigate to a form
-    // Add recommendation - would open modal
-    // In a real implementation, this would:
-    // 1. Open a modal/form
-    // 2. Collect recommendation data
-    // 3. Add to widget config via onUpdateWidgetConfig
-    // 4. Or send to inbox if it's a recommendation from a friend
-  };
 
   // Debug logging removed - was causing lint errors (Date.now() in render)
   switch (widget.widget_type) {
     case "music_player":
-      return <MusicPlayer size={widget.size} songs={songs} />;
+      return (
+        <MusicPlayer
+          size={widget.size}
+          songs={songs}
+          selectedSongId={widget.config?.selectedSongId as string | undefined}
+        />
+      );
 
     case "pixel_art":
       // Check if widget config has pixelData (new programmatic approach) or imageUrls (backward compatibility)
@@ -100,7 +59,16 @@ export const WidgetRenderer = memo(function WidgetRenderer({
 
       // Use programmatic rendering if pixelData is available
       if (pixelData && pixelData.length > 0 && themeColors) {
-        return <PixelArt size={widget.size} pixelData={pixelData} themeColors={themeColors} />;
+        return (
+          <PixelArt
+            size={widget.size}
+            pixelData={pixelData}
+            themeColors={themeColors}
+            transitionType={
+              (widget.config.transitionType as "scanline" | "dissolve" | "boot-up") || "scanline"
+            }
+          />
+        );
       }
 
       // Fallback to image-based rendering (backward compatibility)
@@ -127,6 +95,9 @@ export const WidgetRenderer = memo(function WidgetRenderer({
           size={widget.size}
           imageUrl={imageUrls ? undefined : pixelArtImageUrl}
           imageUrls={imageUrls}
+          transitionType={
+            (widget.config.transitionType as "scanline" | "dissolve" | "boot-up") || "scanline"
+          }
         />
       );
 
@@ -137,7 +108,16 @@ export const WidgetRenderer = memo(function WidgetRenderer({
 
       // Use programmatic rendering if pixelData is available
       if (imagePixelData && imagePixelData.length > 0 && themeColors) {
-        return <PixelArt size={widget.size} pixelData={imagePixelData} themeColors={themeColors} />;
+        return (
+          <PixelArt
+            size={widget.size}
+            pixelData={imagePixelData}
+            themeColors={themeColors}
+            transitionType={
+              (widget.config.transitionType as "scanline" | "dissolve" | "boot-up") || "scanline"
+            }
+          />
+        );
       }
 
       return (
@@ -145,60 +125,9 @@ export const WidgetRenderer = memo(function WidgetRenderer({
           size={widget.size}
           imageUrl={imageImageUrls ? undefined : pixelArtImageUrl}
           imageUrls={imageImageUrls}
-        />
-      );
-
-    case "calendar":
-      return (
-        <Calendar
-          size={widget.size}
-          events={widget.config.events || []}
-          onProposeHangout={handleProposeHangout}
-        />
-      );
-
-    case "notes":
-      // Notes widget expects string[] but config stores objects with {id, content, created_at}
-      const notesArray = widget.config.notes || [];
-      const notesStrings = notesArray.map((n) => (typeof n === "string" ? n : n.content));
-
-      return <Notes size={widget.size} initialNotes={notesStrings} />;
-
-    case "shared_links":
-    case "links": // Backward compatibility
-      return <Links size={widget.size} links={widget.config.links || []} />;
-
-    case "media_recommendations":
-      return (
-        <MediaRecommendations
-          size={widget.size}
-          recommendations={widget.config.recommendations || []}
-          onMarkWatched={handleMarkWatched}
-          onAddRecommendation={handleAddRecommendation}
-        />
-      );
-
-    case "mood":
-      const moodSize = parseInt(widget.size.split("x")[0]) as 1 | 2 | 3;
-      return (
-        <Mood
-          size={moodSize}
-          friendId={friendId || ""}
-          widgetId={widget.id}
-          themeColors={themeColors}
-          config={widget.config as Record<string, unknown>}
-        />
-      );
-
-    case "event_countdown":
-      const eventSize = parseInt(widget.size.split("x")[0]) as 1 | 2 | 3;
-      return (
-        <EventCountdown
-          size={eventSize}
-          friendId={friendId || ""}
-          widgetId={widget.id}
-          themeColors={themeColors}
-          config={widget.config as Record<string, unknown>}
+          transitionType={
+            (widget.config.transitionType as "scanline" | "dissolve" | "boot-up") || "scanline"
+          }
         />
       );
 
@@ -215,11 +144,9 @@ export const WidgetRenderer = memo(function WidgetRenderer({
       );
 
     case "connect_four":
-      // Convert "1x1" -> 1, "2x2" -> 2, "3x3" -> 3
-      const connectFourSize = parseInt(widget.size.split("x")[0]) as 1 | 2 | 3;
       return (
         <ConnectFour
-          size={connectFourSize}
+          size={widget.size}
           friendId={friendId || ""}
           friendName={friendName}
           widgetId={widget.id}
@@ -227,6 +154,23 @@ export const WidgetRenderer = memo(function WidgetRenderer({
           config={widget.config as unknown as ConnectFourData}
         />
       );
+
+    case "consumption_log":
+      return (
+        <ConsumptionLog size={widget.size} friendId={friendId || ""} friendName={friendName} />
+      );
+
+    case "question_jar":
+      return <QuestionJar size={widget.size} friendId={friendId || ""} friendName={friendName} />;
+
+    case "audio_snippets":
+      return <AudioSnippets size={widget.size} friendId={friendId || ""} />;
+
+    case "absurd_reviews":
+      return <AbsurdReviews size={widget.size} friendId={friendId || ""} friendName={friendName} />;
+
+    case "fridge_magnets":
+      return <FridgeMagnets size={widget.size} friendId={friendId || ""} />;
 
     default:
       return (

@@ -24,7 +24,7 @@ export function FriendCard({ friend, onMouseEnter }: FriendCardProps) {
         borderColor: friend.color_accent,
         background: friend.color_bg,
         borderWidth: "var(--border-width-lg)",
-        transition: "all 0.2s ease",
+        /* Transition removed for performance */
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = friend.color_primary;

@@ -30,3 +30,9 @@
 .actionIcon {
   margin-right: 0.25rem;
 }
+
+.subAction {
+  font-size: var(--font-size-sm);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}

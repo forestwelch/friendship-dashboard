@@ -45,7 +45,6 @@
   border: 2px solid var(--accent);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all var(--transition-fast);
   box-shadow:
     2px 2px 0 var(--game-border-dark),
     inset -1px -1px 0 rgba(0, 0, 0, 0.3);
@@ -124,7 +123,6 @@
   border: 2px solid var(--accent);
   border-radius: var(--radius-sm);
   box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.3);
-  transition: all var(--transition-fast);
 }
 
 .admin-input:focus {
@@ -141,7 +139,6 @@
   color: var(--primary);
   text-decoration: none;
   border-bottom: 1px solid transparent;
-  transition: all var(--transition-fast);
   font-weight: bold;
 }
 

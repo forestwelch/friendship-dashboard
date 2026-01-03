@@ -258,7 +258,11 @@ export function ImageManager({
               <div className={clsx(styles.imagePreviewInner, isSelected && styles.selected)}>
                 {imagePreview}
               </div>
-              {isSelected && <div className={styles.checkmark}>✓</div>}
+              {isSelected && (
+                <div className={styles.checkmark}>
+                  <i className="hn hn-check-solid" />
+                </div>
+              )}
             </div>
           );
         })}

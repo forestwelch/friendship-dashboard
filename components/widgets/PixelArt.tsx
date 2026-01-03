@@ -12,6 +12,8 @@ import {
 } from "@/lib/pixel-data-processing";
 import { GRID_TILE_SIZE_REM, GRID_GAP_REM } from "@/lib/constants";
 
+export type TransitionType = "scanline" | "dissolve" | "boot-up";
+
 interface PixelArtProps {
   size: WidgetSize;
   imageUrl?: string; // Single image (backward compatibility)
@@ -20,6 +22,7 @@ interface PixelArtProps {
   themeColors?: ThemeColors; // Theme colors for programmatic rendering
   pixelSize?: number; // Size of each pixel block for animation
   transitionDelay?: number; // Delay between slideshow transitions in ms
+  transitionType?: TransitionType; // Transition effect type: scanline, dissolve, or boot-up
 }
 
 export function PixelArt({
@@ -30,11 +33,15 @@ export function PixelArt({
   themeColors,
   pixelSize = 8,
   transitionDelay = 3000,
+  transitionType = "scanline",
 }: PixelArtProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [scanlineProgress, setScanlineProgress] = useState(0); // 0 to 1, tracks scanline position
+  const [dissolveProgress, setDissolveProgress] = useState(0); // 0 to 1, tracks dissolve progress
+  const [bootUpProgress, setBootUpProgress] = useState(0); // 0 to 1, tracks boot-up progress
+  const [randomOrder, setRandomOrder] = useState<number[]>([]); // Random pixel order for dissolve
 
   // Use refs to track previous values and prevent loops
   const prevImagesRef = useRef<string[]>([]);
@@ -202,7 +209,14 @@ export function PixelArt({
     if (!hasMultiple) return;
     if (!imageLoaded && !useProgrammaticRendering) return; // For image-based, wait for load
     if (isAnimating) return; // Don't cycle during animation
-    if (scanlineProgress > 0 && scanlineProgress < 1) return; // Don't cycle during scanline animation
+    // Don't cycle during any animation
+    if (
+      (transitionType === "scanline" && scanlineProgress > 0 && scanlineProgress < 1) ||
+      (transitionType === "dissolve" && dissolveProgress > 0 && dissolveProgress < 1) ||
+      (transitionType === "boot-up" && bootUpProgress > 0 && bootUpProgress < 1)
+    ) {
+      return;
+    }
 
     // For programmatic rendering: animation effect handles the transition timing
     // We only update the index after animation completes
@@ -216,7 +230,11 @@ export function PixelArt({
 
     if (slideshowTimeoutRef.current) clearTimeout(slideshowTimeoutRef.current);
     slideshowTimeoutRef.current = setTimeout(() => {
-      if (isMountedRef.current && !isAnimating && scanlineProgress === 0) {
+      const noAnimation =
+        (transitionType === "scanline" && scanlineProgress === 0) ||
+        (transitionType === "dissolve" && dissolveProgress === 0) ||
+        (transitionType === "boot-up" && bootUpProgress === 0);
+      if (isMountedRef.current && !isAnimating && noAnimation) {
         setCurrentImageIndex((prev) => {
           const maxIndex = images.length - 1;
           const next = (prev + 1) % (maxIndex + 1);
@@ -243,6 +261,9 @@ export function PixelArt({
     imageLoaded,
     isAnimating,
     scanlineProgress,
+    dissolveProgress,
+    bootUpProgress,
+    transitionType,
     useProgrammaticRendering,
   ]);
 
@@ -253,6 +274,9 @@ export function PixelArt({
       setTimeout(() => {
         setIsAnimating(false);
         setScanlineProgress(0);
+        setDissolveProgress(0);
+        setBootUpProgress(0);
+        setRandomOrder([]);
       }, 0);
       scanlineStartTimeRef.current = null;
       return;
@@ -265,6 +289,9 @@ export function PixelArt({
       setTimeout(() => {
         setIsAnimating(false);
         setScanlineProgress(0);
+        setDissolveProgress(0);
+        setBootUpProgress(0);
+        setRandomOrder([]);
       }, 0);
       scanlineStartTimeRef.current = null;
       return;
@@ -290,6 +317,9 @@ export function PixelArt({
       if (!isMountedRef.current) return;
       setIsAnimating(true);
       setScanlineProgress(0);
+      setDissolveProgress(0);
+      setBootUpProgress(0);
+      setRandomOrder([]);
       scanlineStartTimeRef.current = Date.now();
     }, 3000);
 
@@ -306,27 +336,53 @@ export function PixelArt({
     nextPixelData,
     isAnimating,
     pixelData,
+    transitionType,
   ]);
 
-  // Animation progress loop: Updates scanlineProgress while animating
+  // Animation progress loop: Updates progress based on transitionType
   useEffect(() => {
     if (!isAnimating || !scanlineStartTimeRef.current) return;
 
-    const SCANLINE_DURATION = 4000; // 4 seconds for slower, smoother animation
+    const ANIMATION_DURATION = 4000; // 4 seconds for slower, smoother animation
 
     const animate = () => {
       if (!scanlineStartTimeRef.current || !isMountedRef.current) return;
 
       const elapsed = Date.now() - scanlineStartTimeRef.current;
-      const progress = Math.min(elapsed / SCANLINE_DURATION, 1);
+      const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
 
-      setScanlineProgress(progress);
+      // Update progress based on transition type
+      if (transitionType === "scanline") {
+        setScanlineProgress(progress);
+      } else if (transitionType === "dissolve") {
+        setDissolveProgress(progress);
+        // Initialize random order for dissolve if not set
+        if (progress === 0 && randomOrder.length === 0) {
+          const { cols, rows } = getGridDimensions();
+          const totalPixels = cols * rows;
+          const order = Array.from({ length: totalPixels }, (_, i) => i);
+          // Shuffle array
+          for (let i = order.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [order[i], order[j]] = [order[j], order[i]];
+          }
+          setRandomOrder(order);
+        }
+      } else if (transitionType === "boot-up") {
+        setBootUpProgress(progress);
+      }
 
       if (progress < 1) {
         animationFrameRef.current = requestAnimationFrame(animate);
       } else {
         // Animation complete
-        setScanlineProgress(1.0);
+        if (transitionType === "scanline") {
+          setScanlineProgress(1.0);
+        } else if (transitionType === "dissolve") {
+          setDissolveProgress(1.0);
+        } else if (transitionType === "boot-up") {
+          setBootUpProgress(1.0);
+        }
         setIsAnimating(false);
         scanlineStartTimeRef.current = null;
 
@@ -334,6 +390,9 @@ export function PixelArt({
         setTimeout(() => {
           if (isMountedRef.current) {
             setScanlineProgress(0);
+            setDissolveProgress(0);
+            setBootUpProgress(0);
+            setRandomOrder([]);
             setCurrentImageIndex((prev) => {
               const maxIndex = pixelData?.length || 1;
               const next = (prev + 1) % maxIndex;
@@ -352,7 +411,8 @@ export function PixelArt({
         animationFrameRef.current = null;
       }
     };
-  }, [isAnimating, pixelData?.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAnimating, pixelData?.length, transitionType]);
 
   const handleImageLoad = () => {
     setImageLoaded(true);
@@ -401,30 +461,70 @@ export function PixelArt({
     return generateScanlineOrder(gridSize, gridSize);
   }, [useProgrammaticRendering, gridSize]);
 
-  // Calculate which pixels should show new image based on scanline progress
-  // Optimized: use direct index calculation instead of findIndex
+  // Calculate which pixels should show new image based on transition type and progress
   const scannedPixelIndex = useMemo(() => {
     if (!useProgrammaticRendering || !isAnimating) return -1;
     const totalPixels = gridSize * gridSize;
-    return Math.floor(scanlineProgress * totalPixels);
-  }, [useProgrammaticRendering, isAnimating, scanlineProgress, gridSize]);
+
+    if (transitionType === "scanline") {
+      return Math.floor(scanlineProgress * totalPixels);
+    } else if (transitionType === "dissolve") {
+      return Math.floor(dissolveProgress * totalPixels);
+    } else if (transitionType === "boot-up") {
+      // Boot-up: reveal from top to bottom
+      return Math.floor(bootUpProgress * totalPixels);
+    }
+    return Math.floor(scanlineProgress * totalPixels); // Fallback
+  }, [
+    useProgrammaticRendering,
+    isAnimating,
+    scanlineProgress,
+    dissolveProgress,
+    bootUpProgress,
+    gridSize,
+    transitionType,
+  ]);
 
   const _getPixelState = useCallback(
     (row: number, col: number) => {
       if (!useProgrammaticRendering || !isAnimating || scannedPixelIndex < 0) return "old";
 
-      // Calculate pixel index in scanline order (row-major: row * width + col)
       const pixelIndex = row * gridSize + col;
+      let shouldShowNew = false;
 
-      if (pixelIndex < scannedPixelIndex) {
-        return "new"; // Already scanned - show new image
-      } else if (pixelIndex === scannedPixelIndex) {
-        return "scanning"; // Currently being scanned - animate
+      if (transitionType === "scanline") {
+        // Scanline: reveal top to bottom, left to right
+        shouldShowNew = pixelIndex < scannedPixelIndex;
+      } else if (transitionType === "dissolve") {
+        // Dissolve: reveal in random order
+        const revealIndex = randomOrder.indexOf(pixelIndex);
+        shouldShowNew = revealIndex >= 0 && revealIndex < scannedPixelIndex;
+      } else if (transitionType === "boot-up") {
+        // Boot-up: reveal from top to bottom (row by row)
+        const currentRow = Math.floor(scannedPixelIndex / gridSize);
+        shouldShowNew =
+          row < currentRow || (row === currentRow && col < scannedPixelIndex % gridSize);
+      }
+
+      if (shouldShowNew) {
+        return "new"; // Already revealed - show new image
+      } else if (
+        pixelIndex === scannedPixelIndex ||
+        (transitionType === "dissolve" && randomOrder[scannedPixelIndex] === pixelIndex)
+      ) {
+        return "scanning"; // Currently being revealed - animate
       } else {
-        return "old"; // Not yet scanned - show old image
+        return "old"; // Not yet revealed - show old image
       }
     },
-    [useProgrammaticRendering, isAnimating, scannedPixelIndex, gridSize]
+    [
+      useProgrammaticRendering,
+      isAnimating,
+      scannedPixelIndex,
+      gridSize,
+      transitionType,
+      randomOrder,
+    ]
   );
 
   // Render to canvas - responds to scanlineProgress changes
@@ -443,17 +543,14 @@ export function PixelArt({
 
     ctx.imageSmoothingEnabled = false;
 
-    // Render function - called whenever scanlineProgress changes
+    // Render function - called whenever progress changes
     const render = () => {
       if (!ctx || !currentPixelData) return;
-
-      const totalPixels = gridSize * gridSize;
-      const currentScannedPixel = Math.min(Math.ceil(scanlineProgress * totalPixels), totalPixels);
 
       // Clear canvas
       ctx.clearRect(0, 0, canvasSize, canvasSize);
 
-      // Render pixels based on scanline progress
+      // Render pixels based on transition type and progress
       let currentColor = "";
       ctx.fillStyle = "";
 
@@ -463,15 +560,12 @@ export function PixelArt({
           // Ensure we don't go out of bounds
           if (pixelIndex >= currentPixelData.length) continue;
 
-          const pixelState =
-            pixelIndex < currentScannedPixel
-              ? "new"
-              : pixelIndex === currentScannedPixel
-                ? "scanning"
-                : "old";
+          // Determine pixel state based on transition type using the helper function
+          const pixelState = _getPixelState(row, col);
 
           // Determine which pixel data to show
           let intensityLevel: number;
+
           if (pixelState === "new" && nextPixelData && pixelIndex < nextPixelData.length) {
             intensityLevel = nextPixelData[pixelIndex];
           } else if (pixelIndex < currentPixelData.length) {
@@ -507,7 +601,12 @@ export function PixelArt({
       }
 
       // If animation completed, ensure final frame shows all new pixels
-      if (scanlineProgress >= 1 && nextPixelData) {
+      const isComplete =
+        (transitionType === "scanline" && scanlineProgress >= 1) ||
+        (transitionType === "dissolve" && dissolveProgress >= 1) ||
+        (transitionType === "boot-up" && bootUpProgress >= 1);
+
+      if (isComplete && nextPixelData) {
         ctx.clearRect(0, 0, canvasSize, canvasSize);
         let currentColor = "";
         ctx.fillStyle = "";
@@ -528,17 +627,23 @@ export function PixelArt({
       }
     };
 
-    // Render whenever scanlineProgress changes
+    // Render whenever progress changes
     render();
   }, [
     useProgrammaticRendering,
     currentPixelData,
     nextPixelData,
     scanlineProgress,
+    dissolveProgress,
+    bootUpProgress,
+    transitionType,
+    randomOrder,
     themeColors,
     gridSize,
     svgPixelSize,
     canvasSize,
+    scannedPixelIndex,
+    _getPixelState,
   ]);
 
   // Render programmatic Canvas with CRT scanline animation (much faster than 16K DOM elements)
@@ -600,7 +705,7 @@ export function PixelArt({
               height: "100%",
               objectFit: "cover",
               opacity: isAnimating ? 0 : 1,
-              transition: "opacity 0.3s",
+              /* Transition removed for performance */
               imageRendering: "pixelated",
             }}
           />

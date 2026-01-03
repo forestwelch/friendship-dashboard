@@ -34,7 +34,7 @@ export function ViewEditToggle({ isEditMode, onToggle }: ViewEditToggleProps) {
           border: "none",
           borderRadius: "var(--radius-sm)",
           cursor: "pointer",
-          transition: "all var(--transition-fast)",
+          /* Transition removed for performance */
           textTransform: "uppercase",
           height: "var(--height-button)",
           minHeight: "var(--height-button)",
@@ -56,7 +56,7 @@ export function ViewEditToggle({ isEditMode, onToggle }: ViewEditToggleProps) {
           border: "none",
           borderRadius: "var(--radius-sm)",
           cursor: "pointer",
-          transition: "all var(--transition-fast)",
+          /* Transition removed for performance */
           textTransform: "uppercase",
           height: "var(--height-button)",
           minHeight: "var(--height-button)",

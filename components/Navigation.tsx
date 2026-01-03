@@ -63,7 +63,7 @@ export function Navigation(
         </button>
       )}
 
-      {/* Admin Actions as Links - styled exactly like nav links */}
+      {/* Admin Actions as Links - styled as sub-actions (smaller, underlined) */}
       {adminActions && adminActions.length > 0 && (
         <>
           {adminActions.map((action, index) => (
@@ -76,7 +76,12 @@ export function Navigation(
                 }
               }}
               disabled={action.disabled}
-              className={clsx("game-nav-link", styles.navLink, action.isActive && "active")}
+              className={clsx(
+                "game-nav-link",
+                styles.navLink,
+                styles.subAction,
+                action.isActive && "active"
+              )}
               style={{
                 cursor: action.disabled ? "not-allowed" : "pointer",
                 fontFamily: "inherit",

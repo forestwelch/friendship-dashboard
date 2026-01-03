@@ -9,6 +9,21 @@ import { QUIZ_QUESTIONS, calculateResult, calculateCompatibility } from "@/lib/q
 import { usePersonalityQuizWidget, useSubmitQuizAnswers } from "@/lib/queries-quiz";
 import styles from "./PersonalityQuizModal.module.css";
 
+// Helper function to convert emoji strings to icon class names
+function getIconForEmoji(emoji: string): string {
+  const emojiToIcon: Record<string, string> = {
+    "☀️": "hn-sun-solid",
+    "🌙": "hn-moon-solid",
+    "⭐": "hn-star-solid",
+    "🌑": "hn-moon-solid",
+    "🌞": "hn-sun-solid",
+    "🌠": "hn-star-solid",
+    "🌈": "hn-palette-solid",
+    "✨": "hn-star-solid",
+  };
+  return emojiToIcon[emoji] || "hn-star-solid";
+}
+
 interface QuizResultData {
   emoji: string;
   title: string;
@@ -187,7 +202,17 @@ export function PersonalityQuizModal({
     <Modal id={modalId} title="YOUR VIBE" onClose={() => setOpenModal(null)}>
       <div className={styles.resultsModal}>
         <div className={styles.resultSection}>
-          <div className={styles.resultEmoji}>✨ {yourResult.emoji} ✨</div>
+          <div className={styles.resultEmoji}>
+            <i
+              className="hn hn-star-solid"
+              style={{ fontSize: "1.5rem", marginRight: "var(--space-xs)" }}
+            />
+            <i className={`hn ${getIconForEmoji(yourResult.emoji)}`} style={{ fontSize: "2rem" }} />
+            <i
+              className="hn hn-star-solid"
+              style={{ fontSize: "1.5rem", marginLeft: "var(--space-xs)" }}
+            />
+          </div>
           <h2 className={styles.resultTitle}>YOU ARE {yourResult.title}</h2>
           <p className={styles.resultDescription}>{yourResult.description}</p>
         </div>
@@ -196,7 +221,12 @@ export function PersonalityQuizModal({
           <div className={styles.compatibilitySection}>
             <h3 className={styles.compatibilityTitle}>--- COMPATIBILITY ---</h3>
             <div className={styles.theirResult}>
-              <div className={styles.theirEmoji}>{theirResultData.emoji}</div>
+              <div className={styles.theirEmoji}>
+                <i
+                  className={`hn ${getIconForEmoji(theirResultData.emoji)}`}
+                  style={{ fontSize: "2rem" }}
+                />
+              </div>
               <div className={styles.theirTitle}>{theirResultData.title}</div>
             </div>
             {compatibilityNote && <p className={styles.compatibilityNote}>{compatibilityNote}</p>}

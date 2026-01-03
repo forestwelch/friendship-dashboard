@@ -304,7 +304,14 @@ export default function AdminUploadPage() {
                   disabled={processing}
                   style={{ width: "100%" }}
                 >
-                  {processing ? "Processing..." : "💾 Save Pixel Art"}
+                  {processing ? (
+                    "Processing..."
+                  ) : (
+                    <>
+                      <i className="hn hn-save-solid" style={{ marginRight: "var(--space-xs)" }} />{" "}
+                      Save Pixel Art
+                    </>
+                  )}
                 </button>
               </div>
             )}

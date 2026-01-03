@@ -12,7 +12,6 @@ import { ThemeColors } from "@/lib/theme-context";
 import { FriendWidget } from "@/lib/queries";
 import { canPlaceWidget, findAvailablePosition } from "@/lib/widget-utils";
 import { playSound } from "@/lib/sounds";
-import { GamepadNavigation } from "@/components/GamepadNavigation";
 import { useThemeContext } from "@/lib/theme-context";
 import { useUserContext } from "@/lib/use-user-context";
 import { GRID_COLS, GRID_ROWS } from "@/lib/constants";
@@ -343,53 +342,6 @@ export function FriendPageClient({
     // await fetch("/api/images/upload", { method: "POST", body: formData });
   }, []);
 
-  // Gamepad button handlers
-  const handleGamepadButton = useCallback(
-    (button: string) => {
-      // Only allow edit mode toggle for admin routes
-      if (!userContext.isAdmin) {
-        return;
-      }
-
-      if (!isEditMode) {
-        if (button === "a" || button === "start") {
-          // Toggle edit mode
-          setIsEditMode(true);
-          playSound("open");
-        }
-      } else {
-        switch (button) {
-          case "b":
-          case "y":
-            // Exit edit mode
-            setIsEditMode(false);
-            playSound("close");
-            break;
-          case "a":
-            // Add widget
-            setShowWidgetLibrary(true);
-            playSound("open");
-            break;
-          case "x":
-            // Save
-            handleSave();
-            break;
-          case "r":
-            // Open widget library
-            setShowWidgetLibrary(true);
-            playSound("open");
-            break;
-          case "l":
-            // Close widget library
-            setShowWidgetLibrary(false);
-            playSound("close");
-            break;
-        }
-      }
-    },
-    [isEditMode, handleSave, userContext]
-  );
-
   // Define onUpdateWidgetConfig callback at component level (not inside map)
   const handleUpdateWidgetConfig = useCallback(
     async (widgetId: string, config: Record<string, unknown>) => {
@@ -476,15 +428,6 @@ export function FriendPageClient({
         overflowX: "hidden",
       }}
     >
-      <GamepadNavigation
-        onButtonPress={handleGamepadButton}
-        onStickMove={(stick, x, y) => {
-          // Note: Stick-based navigation can be implemented here if needed
-          if (Math.abs(x) > 0.5 || Math.abs(y) > 0.5) {
-            playSound("move");
-          }
-        }}
-      />
       {/* Grid container - allows scrolling and scaling */}
       <div
         ref={gridRef}
@@ -703,7 +646,8 @@ export function FriendPageClient({
             }}
           >
             <button className="game-button game-button-danger" onClick={handleCancelMove}>
-              ✕ Cancel Move (ESC)
+              <i className="hn hn-times-solid" style={{ marginRight: "var(--space-xs)" }} /> Cancel
+              Move (ESC)
             </button>
           </div>
         )}

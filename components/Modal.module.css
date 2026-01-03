@@ -5,10 +5,10 @@
   /* Match grid's exact dimensions using CSS variables */
   width: var(--grid-width);
   height: var(--grid-height);
-  background: var(--bg);
+  background: rgba(0, 0, 0, 0.75); /* Dark overlay backdrop */
   display: flex;
-  align-items: stretch;
-  justify-content: stretch;
+  align-items: center;
+  justify-content: center;
   z-index: 10000;
   padding: 0;
   overflow: hidden;
@@ -20,17 +20,16 @@
 
 .modal {
   background: var(--bg);
-  border: none;
+  border: 4px solid var(--primary); /* Chunky pixel border */
   border-radius: 0;
   box-shadow: none;
-  /* Fill entire backdrop area - matches grid dimensions exactly */
-  width: 100%;
-  height: 100%;
+  /* Match grid's exact dimensions */
+  width: var(--grid-width);
+  height: var(--grid-height);
   display: flex;
   flex-direction: column;
   position: relative;
-  animation: none;
-  /* Ensure modal fills grid area completely */
+
   box-sizing: border-box;
   /* Allow modal content to scroll if needed */
   overflow: hidden;
@@ -56,31 +55,32 @@
 
 .closeButton {
   background: transparent;
-  border: 2px solid var(--secondary);
+  border: none;
   color: var(--text);
-  font-size: var(--font-size-xxl);
+  font-size: 2rem; /* Larger, chunkier X */
   font-weight: bold;
   cursor: pointer;
-  padding: var(--space-sm);
+  padding: 0;
   line-height: 1;
-  min-width: 3rem;
-  min-height: 3rem;
+  align-self: stretch;
+  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  /* Transitions removed for performance */
   font-family: "Press Start 2P", "Dogica", "PixelFallback", "Courier New", "Courier", monospace;
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: unset;
+  /* MS-DOS/early Windows style chunky X */
+  letter-spacing: 0;
 }
 
 .closeButton:hover {
-  color: var(--text);
+  color: var(--accent);
   background: var(--primary);
-  border-color: var(--primary);
 }
 
 .closeButton:focus {
@@ -93,4 +93,25 @@
   overflow-y: auto;
   flex: 1;
   min-height: 0; /* Allow flex item to shrink below content size */
+  /* Retro-styled scrollbar */
+  scrollbar-width: thick;
+  scrollbar-color: var(--secondary) var(--bg);
+}
+
+.content::-webkit-scrollbar {
+  width: 12px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: var(--bg);
+  border: 2px solid var(--secondary);
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: var(--secondary);
+  border: 2px solid var(--primary);
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
 }

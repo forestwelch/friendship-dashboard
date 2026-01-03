@@ -10,7 +10,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+
   padding: var(--space-sm);
   background: var(--bg);
   border: 2px solid var(--secondary);
@@ -121,7 +121,6 @@
 .compatibilityFill {
   height: 100%;
   background: var(--primary);
-  transition: width 0.3s ease;
 }
 
 .compatibilityText {

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { WidgetPosition } from "@/lib/types";
+import { WidgetPosition, WidgetSize } from "@/lib/types";
 import { GRID_COLS, GRID_ROWS } from "@/lib/constants";
 
 interface GridProps {
@@ -10,7 +10,7 @@ interface GridProps {
 
 interface GridItemProps {
   position: WidgetPosition;
-  size: "1x1" | "2x2" | "3x3";
+  size: WidgetSize;
   children: React.ReactNode;
   onDragOver?: (e: React.DragEvent) => void;
   onDrop?: (e: React.DragEvent) => void;
@@ -77,7 +77,7 @@ export function Grid({ children }: GridProps) {
 
 interface GridItemProps {
   position: WidgetPosition;
-  size: "1x1" | "2x2" | "3x3";
+  size: WidgetSize;
   children: React.ReactNode;
   ref?: React.Ref<HTMLDivElement>;
   style?: React.CSSProperties;

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "@hackernoon/pixel-icon-library/fonts/iconfont.css";
 @import "../styles/widgets.css";
+@import "../styles/admin-components.css";
 
 /* Dogica Pixel Font - Pixel art version for retro aesthetic */
 @font-face {

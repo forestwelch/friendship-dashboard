@@ -176,14 +176,16 @@ export function InboxManager() {
                     onClick={() => handleApprove(item.id)}
                     style={{ fontSize: "11px" }}
                   >
-                    ✓ Approve
+                    <i className="hn hn-check-solid" style={{ marginRight: "var(--space-xs)" }} />{" "}
+                    Approve
                   </button>
                   <button
                     className="game-button game-button-danger"
                     onClick={() => handleReject(item.id)}
                     style={{ fontSize: "11px" }}
                   >
-                    × Reject
+                    <i className="hn hn-times-solid" style={{ marginRight: "var(--space-xs)" }} />{" "}
+                    Reject
                   </button>
                 </div>
               )}
@@ -200,7 +202,17 @@ export function InboxManager() {
                     cursor: "default",
                   }}
                 >
-                  {item.status === "approved" ? "✓ Approved" : "× Rejected"}
+                  {item.status === "approved" ? (
+                    <>
+                      <i className="hn hn-check-solid" style={{ marginRight: "var(--space-xs)" }} />{" "}
+                      Approved
+                    </>
+                  ) : (
+                    <>
+                      <i className="hn hn-times-solid" style={{ marginRight: "var(--space-xs)" }} />{" "}
+                      Rejected
+                    </>
+                  )}
                 </div>
               )}
             </div>

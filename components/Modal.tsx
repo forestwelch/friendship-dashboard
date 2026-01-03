@@ -66,12 +66,24 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
     };
 
     modal.addEventListener("keydown", handleTab);
-    firstElement?.focus();
+
+    // Only focus first element if no input is already focused
+    // This prevents stealing focus when user is typing
+    const activeElement = document.activeElement;
+    const isInputFocused =
+      activeElement &&
+      (activeElement.tagName === "INPUT" ||
+        activeElement.tagName === "TEXTAREA" ||
+        activeElement.tagName === "SELECT");
+
+    if (!isInputFocused) {
+      firstElement?.focus();
+    }
 
     return () => {
       modal.removeEventListener("keydown", handleTab);
     };
-  }, [isOpen, handleClose]);
+  }, [isOpen]);
 
   // Removed backdrop click handler - modals can only be closed via X button or ESC key
 
@@ -100,7 +112,7 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
             </h2>
           )}
           <button className={styles.closeButton} onClick={handleClose} aria-label="Close modal">
-            ✕
+            <i className="hn hn-window-close-solid" />
           </button>
         </div>
         <div className={styles.content}>{children}</div>

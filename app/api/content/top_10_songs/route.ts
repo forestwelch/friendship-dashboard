@@ -1,5 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
+import { getTop10Songs } from "@/lib/queries";
+
+export async function GET() {
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
+  }
+
+  try {
+    const { songs } = await getTop10Songs();
+    return NextResponse.json({ songs });
+  } catch (error) {
+    console.error("Error fetching songs:", error);
+    return NextResponse.json({ error: "Failed to fetch songs" }, { status: 500 });
+  }
+}
 
 export async function PUT(request: NextRequest) {
   if (!isSupabaseConfigured()) {

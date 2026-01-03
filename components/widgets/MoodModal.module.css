@@ -36,7 +36,7 @@
   border: 2px solid var(--secondary);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.2s;
+
   min-height: 80px;
 }
 
