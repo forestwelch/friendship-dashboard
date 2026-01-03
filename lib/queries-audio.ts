@@ -44,43 +44,48 @@ export async function uploadAudioSnippet(
   }
 
   try {
-    // Upload to Supabase Storage
-    const fileName = `${friendId}/${Date.now()}.webm`;
-    const { error: uploadError } = await supabase.storage
-      .from("audio-snippets")
-      .upload(fileName, audioBlob, {
-        contentType: "audio/webm",
-      });
-
-    if (uploadError) {
-      console.error("Error uploading audio:", uploadError);
+    // Validate blob
+    if (!audioBlob || audioBlob.size === 0) {
+      console.error("Invalid audio blob: empty or null");
       return null;
     }
 
-    // Get public URL
-    const { data: urlData } = supabase.storage.from("audio-snippets").getPublicUrl(fileName);
-    const audioUrl = urlData.publicUrl;
-
-    // Save metadata to database
-    const { data, error } = await supabase
-      .from("audio_snippets")
-      .insert({
-        friend_id: friendId,
-        audio_url: audioUrl,
-        recorded_by: recordedBy,
-        icon_name: iconName,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error("Error saving audio snippet:", error);
+    // Check blob size (limit to 5MB as per migration notes, supports up to 5 seconds of audio)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (audioBlob.size > maxSize) {
+      console.error(`Audio blob too large: ${audioBlob.size} bytes (max: ${maxSize})`);
       return null;
     }
 
+    // Use API route to avoid CORS issues with direct storage uploads
+    // This works around the 400/CORS error we're seeing
+    const formData = new FormData();
+    formData.append("audio", audioBlob, "recording.webm");
+    formData.append("friendId", friendId);
+    formData.append("recordedBy", recordedBy);
+    formData.append("iconName", iconName);
+
+    console.warn("Uploading via API route to avoid CORS issues...");
+
+    const response = await fetch("/api/audio/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+      console.error("API upload error:", errorData);
+      return null;
+    }
+
+    const { data } = await response.json();
     return data;
   } catch (error) {
     console.error("Error in uploadAudioSnippet:", error);
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
     return null;
   }
 }

@@ -210,7 +210,7 @@ export function ConnectFourModal({
               {status === "draw" && (
                 <>
                   <div className={styles.resultIcon}>
-                    <i className="hn hn-equals-solid" style={{ fontSize: "2rem" }} />
+                    <i className="hn hn-divider-solid" style={{ fontSize: "2rem" }} />
                   </div>
                   <h2 className={styles.resultTitle}>DRAW</h2>
                 </>

@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { Friend } from "@/lib/types";
 import { playSound } from "@/lib/sounds";
+import "@/styles/friend-card.css";
 
 interface FriendCardProps {
   friend: Friend;
@@ -13,78 +14,60 @@ interface FriendCardProps {
 export function FriendCard({ friend, onMouseEnter }: FriendCardProps) {
   return (
     <div
-      className="game-card"
-      style={{
-        padding: "var(--space-2xl)",
-        textAlign: "center",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "var(--space-lg)",
-        borderColor: friend.color_accent,
-        background: friend.color_bg,
-        borderWidth: "var(--border-width-lg)",
-        /* Transition removed for performance */
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = friend.color_primary;
-        e.currentTarget.style.background = friend.color_secondary;
-        onMouseEnter?.();
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = friend.color_accent;
-        e.currentTarget.style.background = friend.color_bg;
-      }}
+      className="game-card friend-card"
+      data-friend-primary={friend.color_primary}
+      data-friend-secondary={friend.color_secondary}
+      data-friend-accent={friend.color_accent}
+      data-friend-bg={friend.color_bg}
+      data-friend-text={friend.color_text}
+      style={
+        {
+          "--friend-primary": friend.color_primary,
+          "--friend-secondary": friend.color_secondary,
+          "--friend-accent": friend.color_accent,
+          "--friend-bg": friend.color_bg,
+          "--friend-text": friend.color_text,
+        } as React.CSSProperties
+      }
+      onMouseEnter={onMouseEnter}
     >
-      <span
-        className="game-heading-2"
-        style={{
-          margin: 0,
-          color: friend.color_text,
-          fontSize: "var(--font-size-xl)",
-        }}
-      >
+      <span className="game-heading-2 friend-card-title" data-friend-text={friend.color_text}>
         {friend.display_name.toUpperCase()}
       </span>
 
       {/* VIEW and EDIT buttons */}
-      <div
-        style={{
-          display: "flex",
-          gap: "var(--space-md)",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
+      <div className="friend-card-buttons">
         <Link
           href={`/${friend.slug}`}
-          className="game-button"
+          className="game-button friend-card-button friend-card-button-view"
           onClick={() => playSound("click")}
-          style={{
-            padding: "var(--space-sm) var(--space-lg)",
-            background: friend.color_primary,
-            borderColor: friend.color_accent,
-            color: friend.color_text,
-            textDecoration: "none",
-            fontSize: "var(--font-size-sm)",
-            fontWeight: "bold",
-          }}
+          data-friend-primary={friend.color_primary}
+          data-friend-accent={friend.color_accent}
+          data-friend-text={friend.color_text}
+          style={
+            {
+              "--friend-primary": friend.color_primary,
+              "--friend-accent": friend.color_accent,
+              "--friend-text": friend.color_text,
+            } as React.CSSProperties
+          }
         >
           VIEW
         </Link>
         <Link
           href={`/admin/${friend.slug}`}
-          className="game-button"
+          className="game-button friend-card-button friend-card-button-edit"
           onClick={() => playSound("click")}
-          style={{
-            padding: "var(--space-sm) var(--space-lg)",
-            background: friend.color_secondary,
-            borderColor: friend.color_accent,
-            color: friend.color_text,
-            textDecoration: "none",
-            fontSize: "var(--font-size-sm)",
-            fontWeight: "bold",
-          }}
+          data-friend-secondary={friend.color_secondary}
+          data-friend-accent={friend.color_accent}
+          data-friend-text={friend.color_text}
+          style={
+            {
+              "--friend-secondary": friend.color_secondary,
+              "--friend-accent": friend.color_accent,
+              "--friend-text": friend.color_text,
+            } as React.CSSProperties
+          }
         >
           EDIT
         </Link>

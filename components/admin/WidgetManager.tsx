@@ -505,7 +505,6 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                       zIndex: 15,
                       opacity: 0.6,
                       pointerEvents: "none",
-                      transition: "none",
                     }}
                   >
                     <WidgetRenderer widget={movingWidget} songs={[]} />

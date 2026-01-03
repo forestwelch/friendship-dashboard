@@ -19,13 +19,54 @@ export function AudioSnippetsModal({ friendId }: AudioSnippetsModalProps) {
   const { data: snippets = [] } = useAudioSnippets(friendId);
 
   const handlePlay = (audioUrl: string) => {
-    const audio = new Audio(audioUrl);
-    audio.play();
-    playSound("click");
-  };
+    // Validate URL before attempting to play (accepts both absolute and relative URLs)
+    if (!audioUrl || (!audioUrl.startsWith("http") && !audioUrl.startsWith("/"))) {
+      console.error("Invalid audio URL:", audioUrl);
+      playSound("error");
+      return;
+    }
 
-  const getIconColor = (recordedBy: "admin" | "friend") => {
-    return recordedBy === identity ? "var(--primary)" : "var(--secondary)";
+    const audio = new Audio();
+
+    // Set up error handler before setting src
+    audio.addEventListener("error", (e) => {
+      console.error("Error loading audio:", {
+        error: e,
+        url: audioUrl,
+        code: audio.error?.code,
+        message: audio.error?.message,
+      });
+      playSound("error");
+    });
+
+    // Verify audio duration when metadata loads
+    audio.addEventListener("loadedmetadata", () => {
+      try {
+        const duration = audio.duration;
+        if (duration && !isNaN(duration)) {
+          console.warn(`Playing audio snippet - Duration: ${duration.toFixed(2)}s`);
+          if (duration < 4.0) {
+            console.warn(`⚠️ Warning: Audio snippet is only ${duration.toFixed(2)}s, expected ~5s`);
+          }
+        }
+      } catch (error) {
+        console.error("Error reading audio metadata:", error);
+      }
+    });
+
+    // Set src and play
+    audio.src = audioUrl;
+
+    audio.play().catch((error) => {
+      console.error("Error playing audio:", {
+        error,
+        url: audioUrl,
+        message: error.message,
+      });
+      playSound("error");
+    });
+
+    playSound("click");
   };
 
   return (
@@ -41,9 +82,8 @@ export function AudioSnippetsModal({ friendId }: AudioSnippetsModalProps) {
                 key={snippet.id}
                 onClick={() => handlePlay(snippet.audio_url)}
                 className="snippet-button"
-                style={{
-                  backgroundColor: getIconColor(snippet.recorded_by),
-                }}
+                data-recorded-by={snippet.recorded_by}
+                data-is-owner={snippet.recorded_by === identity ? "true" : "false"}
               >
                 <i className={`hn ${snippet.icon_name} snippet-icon`} />
               </button>

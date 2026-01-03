@@ -18,7 +18,7 @@ function getIconForEmoji(emoji: string): string {
     "🌑": "hn-moon-solid",
     "🌞": "hn-sun-solid",
     "🌠": "hn-star-solid",
-    "🌈": "hn-palette-solid",
+    "🌈": "hn-bolt-solid", // palette-solid not available, using bolt for rainbow/colorful
     "✨": "hn-star-solid",
   };
   return emojiToIcon[emoji] || "hn-star-solid";

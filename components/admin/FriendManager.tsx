@@ -214,7 +214,7 @@ export function FriendManager() {
                       padding: "var(--space-xs) var(--space-sm)",
                     }}
                   >
-                    <i className="hn hn-dice-solid" style={{ marginRight: "var(--space-xs)" }} />
+                    <i className="hn hn-shuffle-solid" style={{ marginRight: "var(--space-xs)" }} />
                     RANDOMIZE
                   </button>
                 </div>

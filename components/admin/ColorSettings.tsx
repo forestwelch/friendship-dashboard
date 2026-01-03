@@ -157,7 +157,7 @@ export function ColorSettings({
                           color: themeColors.text,
                         }}
                       >
-                        <i className={clsx("hn", "hn-dice-solid", styles.randomizeIcon)} />
+                        <i className={clsx("hn", "hn-shuffle-solid", styles.randomizeIcon)} />
                       </button>
                     </div>
                   ))}
@@ -175,7 +175,7 @@ export function ColorSettings({
                     borderColor: themeColors.accent,
                   }}
                 >
-                  <i className={clsx("hn", "hn-dice-solid", styles.randomizeAllIcon)} />
+                  <i className={clsx("hn", "hn-shuffle-solid", styles.randomizeAllIcon)} />
                   RANDOMIZE ALL
                 </button>
               </>

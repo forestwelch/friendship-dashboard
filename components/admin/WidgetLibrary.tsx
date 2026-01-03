@@ -40,28 +40,28 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
       type: "connect_four",
       name: "Connect Four",
       description: "Play async turn-based game",
-      icon: "hn-gamepad-solid",
+      icon: "hn-play-solid", // gamepad-solid not available
       sizes: ["2x1", "2x2", "3x3"],
     },
     {
       type: "consumption_log",
       name: "Shared Consumption Log",
       description: "Running diary of media consumption",
-      icon: "hn-book-solid",
+      icon: "hn-bookmark-solid", // book-solid not available
       sizes: ["2x1"],
     },
     {
       type: "question_jar",
       name: "Question Jar",
       description: "Alternating Q&A conversation",
-      icon: "hn-question-circle-solid",
+      icon: "hn-question-solid", // question-circle-solid not available
       sizes: ["2x2"],
     },
     {
       type: "audio_snippets",
       name: "Audio Snippets",
-      description: "Shared soundboard of 2-second clips",
-      icon: "hn-microphone-solid",
+      description: "Shared soundboard of 5-second clips",
+      icon: "hn-sound-on-solid", // microphone-solid not available
       sizes: ["1x2", "1x3"],
     },
     {
@@ -75,7 +75,7 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
       type: "fridge_magnets",
       name: "Fridge Magnets",
       description: "Virtual fridge with magnetic letters",
-      icon: "hn-magnet-solid",
+      icon: "hn-paperclip-solid", // magnet-solid not available
       sizes: ["2x3"] as WidgetSize[],
     },
   ];

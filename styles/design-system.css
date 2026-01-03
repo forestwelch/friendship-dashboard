@@ -675,10 +675,11 @@ textarea.game-input {
 
 .snippets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--space-md);
   overflow-y: auto;
   flex: 1;
+  align-items: start;
 }
 
 .snippet-button {
@@ -692,6 +693,16 @@ textarea.game-input {
   border: var(--border-width-md) solid var(--accent);
   border-radius: var(--radius-sm);
   cursor: pointer;
+  background-color: var(--secondary);
+  min-width: 0; /* Prevent grid overflow */
+}
+
+.snippet-button[data-is-owner="true"] {
+  background-color: var(--primary);
+}
+
+.snippet-button[data-is-owner="false"] {
+  background-color: var(--secondary);
 }
 
 .snippet-icon {

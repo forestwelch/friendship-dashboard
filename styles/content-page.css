@@ -1,0 +1,64 @@
+/* Content Page Styles */
+
+.content-page {
+  padding-top: calc(var(--height-button) + var(--space-md));
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  overflow-x: hidden;
+}
+
+.content-container {
+  padding-top: var(--space-3xl);
+  padding-bottom: var(--space-3xl);
+}
+
+.content-title {
+  margin-bottom: var(--space-3xl);
+  font-size: var(--font-size-3xl);
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
+  gap: var(--space-xl);
+  margin-bottom: var(--space-3xl);
+}
+
+.content-card-link {
+  text-decoration: none;
+  padding: var(--space-2xl);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  border-width: var(--border-width-lg);
+}
+
+.content-card-icon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  border: var(--border-width-lg) solid var(--accent);
+  box-shadow: var(--game-shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  color: var(--bg);
+  opacity: 0.9;
+}
+
+.content-card-icon i {
+  font-size: 2rem;
+}
+
+.content-card-title {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--font-size-xl);
+}

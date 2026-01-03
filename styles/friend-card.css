@@ -1,0 +1,57 @@
+/* Friend Card Styles */
+
+.friend-card {
+  padding: var(--space-2xl);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  border-width: var(--border-width-lg);
+}
+
+.friend-card-title {
+  margin: 0;
+  font-size: var(--font-size-xl);
+}
+
+.friend-card-buttons {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+  justify-content: center;
+}
+
+.friend-card-button {
+  padding: var(--space-sm) var(--space-lg);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+}
+
+/* Dynamic friend colors via CSS custom properties */
+.friend-card[data-friend-primary][data-friend-secondary][data-friend-accent][data-friend-bg][data-friend-text] {
+  border-color: var(--friend-accent);
+  background: var(--friend-bg);
+}
+
+.friend-card[data-friend-primary][data-friend-secondary][data-friend-accent][data-friend-bg][data-friend-text]:hover {
+  border-color: var(--friend-primary);
+  background: var(--friend-secondary);
+}
+
+.friend-card-title[data-friend-text] {
+  color: var(--friend-text);
+}
+
+.friend-card-button-view[data-friend-primary][data-friend-accent][data-friend-text] {
+  background: var(--friend-primary);
+  border-color: var(--friend-accent);
+  color: var(--friend-text);
+}
+
+.friend-card-button-edit[data-friend-secondary][data-friend-accent][data-friend-text] {
+  background: var(--friend-secondary);
+  border-color: var(--friend-accent);
+  color: var(--friend-text);
+}

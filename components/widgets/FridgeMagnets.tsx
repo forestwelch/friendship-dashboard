@@ -56,7 +56,7 @@ export function FridgeMagnets({ size, friendId }: FridgeMagnetsProps) {
               }}
             >
               {magnet.type === "icon" ? (
-                <i className="hn hn-font-solid" style={{ fontSize: "inherit" }} />
+                <i className="hn hn-bars-solid" style={{ fontSize: "inherit" }} />
               ) : (
                 magnet.value
               )}

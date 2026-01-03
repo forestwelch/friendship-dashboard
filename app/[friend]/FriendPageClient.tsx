@@ -596,7 +596,6 @@ export function FriendPageClient({
                                     : isValid
                                       ? "var(--game-overlay-secondary-10)"
                                       : "transparent",
-                              transition: "all 0.15s ease-out",
                               opacity: isHovered ? 1 : isValid ? 0.4 : 0.2,
                               borderRadius: "var(--radius-sm)",
                               cursor: isValid ? "pointer" : "not-allowed",
@@ -616,7 +615,6 @@ export function FriendPageClient({
                         zIndex: 15,
                         opacity: 0.6,
                         pointerEvents: "none",
-                        transition: "none",
                       }}
                     >
                       <WidgetRenderer
