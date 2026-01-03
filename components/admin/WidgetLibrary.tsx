@@ -40,7 +40,7 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
       type: "connect_four",
       name: "Connect Four",
       description: "Play async turn-based game",
-      icon: "hn-play-solid", // gamepad-solid not available
+      icon: "hn-gaming", // gaming not available
       sizes: ["2x1", "2x2", "3x3"],
     },
     {
@@ -76,7 +76,7 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
       name: "Fridge Magnets",
       description: "Virtual fridge with magnetic letters",
       icon: "hn-paperclip-solid", // magnet-solid not available
-      sizes: ["2x3"] as WidgetSize[],
+      sizes: ["2x3", "3x4"] as WidgetSize[],
     },
   ];
 

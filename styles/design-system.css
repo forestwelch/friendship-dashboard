@@ -521,8 +521,12 @@ textarea.game-input {
 .modal-content {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: var(--space-md);
   height: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--space-sm);
+  overflow: hidden;
 }
 
 .form-section {
@@ -716,12 +720,11 @@ textarea.game-input {
 }
 
 .fridge-canvas {
-  width: 100%;
-  height: 400px;
-  min-height: 400px;
+  /* Width, height, and aspect-ratio set dynamically via inline styles */
+  max-width: calc(100% - var(--space-sm) * 2);
   position: relative;
   background-color: var(--bg);
-  border: 4px solid var(--secondary);
+  border: 2px solid var(--secondary);
   border-radius: var(--radius-sm);
   background-image: repeating-linear-gradient(
     0deg,
@@ -731,21 +734,74 @@ textarea.game-input {
     rgba(0, 0, 0, 0.05) 4px
   );
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .fridge-magnet {
   position: absolute;
-  font-size: var(--font-size-lg);
-  color: var(--text);
+  font-size: 32px; /* Bigger letters */
   font-family: "Dogica", monospace;
   font-weight: bold;
   cursor: move;
   user-select: none;
+  /* No background, border, or padding */
+  background: none;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  font-style: normal; /* Prevent icons from being italicized */
+}
+
+.fridge-magnet i {
+  font-style: normal; /* Ensure icons are not italicized */
+}
+
+.fridge-bank {
+  width: 100%;
+  max-width: 100%;
+  height: calc(
+    4 * 42px + 3 * 2px + var(--space-xs) * 2
+  ); /* 4 rows * 42px (40px slot + 2px gap) + 3 gaps + padding */
+  min-height: calc(4 * 42px + 3 * 2px + var(--space-xs) * 2);
+  display: grid;
+  gap: 2px;
+  position: relative;
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
   padding: var(--space-xs);
-  background-color: var(--primary);
-  border: 2px solid var(--secondary);
-  border-radius: var(--radius-sm);
-  box-shadow: 2px 2px 0 var(--secondary);
+  flex-shrink: 0;
+  overflow: hidden; /* No scrolling needed - fixed 4 rows */
+  margin: 0 calc(-1 * var(--space-sm)); /* Extend to full width by negating modal-content padding */
+  width: calc(100% + 2 * var(--space-sm)); /* Full width including padding compensation */
+}
+
+.fridge-bank-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 40px;
+  min-width: 0; /* Allow grid items to shrink below content size */
+  overflow: hidden;
+}
+
+.fridge-bank-slot-empty {
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-xs);
+}
+
+.fridge-bank-count {
+  font-size: 10px;
+  color: var(--text);
+  margin-top: 2px;
+  font-family: "Dogica", monospace;
+}
+
+.fridge-magnet-bank {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
 }
 
 /* ============================================
