@@ -374,6 +374,14 @@ function FridgeCanvas({
     }
   };
 
+  const handleReset = () => {
+    const stateBeforeChange = [...magnetsRef.current];
+    const clearedMagnets = magnetsRef.current.filter((m) => m.inBank === true);
+    setUndoStack((prev) => [...prev, stateBeforeChange]);
+    onMagnetsChange(clearedMagnets);
+    playSound("click");
+  };
+
   const [{ isOver }, drop] = useDrop({
     accept: "magnet",
     drop: (item: { index: number; magnet: Magnet; isInBank?: boolean }, monitor) => {
@@ -464,6 +472,19 @@ function FridgeCanvas({
           }}
         >
           Undo
+        </button>
+      )}
+      {undoStack.length === 0 && canvasMagnets.length > 0 && (
+        <button
+          onClick={handleReset}
+          className="game-button"
+          style={{
+            position: "absolute",
+            bottom: "var(--space-sm)",
+            right: "var(--space-sm)",
+          }}
+        >
+          Reset
         </button>
       )}
     </div>

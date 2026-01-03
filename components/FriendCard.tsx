@@ -9,9 +9,19 @@ import "@/styles/friend-card.css";
 interface FriendCardProps {
   friend: Friend;
   onMouseEnter?: () => void;
+  onDelete?: (friendId: string, friendSlug: string) => void;
 }
 
-export function FriendCard({ friend, onMouseEnter }: FriendCardProps) {
+export function FriendCard({ friend, onMouseEnter, onDelete }: FriendCardProps) {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (onDelete) {
+      onDelete(friend.id, friend.slug);
+    }
+  };
+
   return (
     <div
       className="game-card friend-card"
@@ -35,7 +45,7 @@ export function FriendCard({ friend, onMouseEnter }: FriendCardProps) {
         {friend.display_name.toUpperCase()}
       </span>
 
-      {/* VIEW and EDIT buttons */}
+      {/* VIEW, EDIT, and DELETE buttons */}
       <div className="friend-card-buttons">
         <Link
           href={`/${friend.slug}`}
@@ -71,6 +81,21 @@ export function FriendCard({ friend, onMouseEnter }: FriendCardProps) {
         >
           EDIT
         </Link>
+        <button
+          className="game-button friend-card-button friend-card-button-delete"
+          onClick={handleDelete}
+          data-friend-accent={friend.color_accent}
+          data-friend-text={friend.color_text}
+          style={
+            {
+              "--friend-accent": friend.color_accent,
+              "--friend-text": friend.color_text,
+            } as React.CSSProperties
+          }
+          title="Delete friend"
+        >
+          <i className="hn hn-trash-alt-solid" />
+        </button>
       </div>
     </div>
   );

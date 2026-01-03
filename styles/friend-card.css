@@ -55,3 +55,23 @@
   border-color: var(--friend-accent);
   color: var(--friend-text);
 }
+
+.friend-card-button-delete[data-friend-accent][data-friend-text] {
+  background: transparent;
+  border-color: var(--friend-accent);
+  color: var(--friend-accent);
+  padding: var(--space-sm);
+  min-width: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.friend-card-button-delete[data-friend-accent][data-friend-text]:hover {
+  background: var(--friend-accent);
+  color: var(--friend-text);
+}
+
+.friend-card-button-delete[data-friend-accent][data-friend-text] i {
+  font-size: var(--font-size-md);
+}

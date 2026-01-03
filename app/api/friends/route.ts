@@ -73,3 +73,30 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
+
+export async function DELETE() {
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
+  }
+
+  try {
+    const adminClient = getSupabaseAdmin();
+
+    // Delete all friends (cascade will handle related records)
+    // Using gte with a UUID that's always less than any valid UUID ensures we match all rows
+    const { error } = await adminClient
+      .from("friends")
+      .delete()
+      .gte("id", "00000000-0000-0000-0000-000000000000");
+
+    if (error) {
+      console.error("Error deleting all friends:", error);
+      return NextResponse.json({ error: "Failed to delete all friends" }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error in DELETE /api/friends:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}

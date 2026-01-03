@@ -92,6 +92,62 @@ export function FriendManager() {
     setNewFriend((prev) => ({ ...prev, [colorKey]: value }));
   };
 
+  const handleDeleteFriend = async (friendId: string, friendSlug: string) => {
+    // Find the friend to restore if deletion fails
+    const friendToRestore = friends.find((f) => f.id === friendId);
+
+    // Optimistic update - remove immediately from UI
+    setFriends((prev) => prev.filter((f) => f.id !== friendId));
+    playSound("delete");
+
+    try {
+      const response = await fetch(`/api/friends/${friendSlug}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to delete friend");
+      }
+
+      playSound("success");
+    } catch (error) {
+      playSound("error");
+      console.error("Error deleting friend:", error);
+      // Restore friend if API call failed
+      if (friendToRestore) {
+        setFriends((prev) =>
+          [...prev, friendToRestore].sort((a, b) => a.display_name.localeCompare(b.display_name))
+        );
+      }
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    // Optimistic update - clear immediately from UI
+    const previousFriends = [...friends];
+    setFriends([]);
+    playSound("delete");
+
+    try {
+      const response = await fetch("/api/friends", {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to delete all friends");
+      }
+
+      playSound("success");
+    } catch (error) {
+      playSound("error");
+      console.error("Error deleting all friends:", error);
+      // Restore friends if API call failed
+      setFriends(previousFriends);
+    }
+  };
+
   const generateRandomColors = () => {
     const hues = [200, 0, 120, 300, 40];
     const hue = hues[Math.floor(Math.random() * hues.length)];
@@ -146,15 +202,38 @@ export function FriendManager() {
           paddingBottom: "var(--space-3xl)",
         }}
       >
-        <h1
-          className="game-heading-1"
+        <div
           style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
             marginBottom: "var(--space-3xl)",
-            fontSize: "var(--font-size-3xl)",
           }}
         >
-          MANAGE FRIENDS
-        </h1>
+          <h1
+            className="game-heading-1"
+            style={{
+              margin: 0,
+              fontSize: "var(--font-size-3xl)",
+            }}
+          >
+            MANAGE FRIENDS
+          </h1>
+          {friends.length > 0 && (
+            <button
+              className="game-button"
+              onClick={handleDeleteAll}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "var(--space-xs)",
+              }}
+            >
+              <i className="hn hn-trash-alt-solid" />
+              DELETE ALL
+            </button>
+          )}
+        </div>
 
         {/* Add Friend Form - shown when triggered from nav */}
         {showAddForm && (
@@ -333,7 +412,9 @@ export function FriendManager() {
               No friends yet. Add one using the button above!
             </div>
           ) : (
-            friends.map((friend) => <FriendCard key={friend.id} friend={friend} />)
+            friends.map((friend) => (
+              <FriendCard key={friend.id} friend={friend} onDelete={handleDeleteFriend} />
+            ))
           )}
         </div>
       </div>
