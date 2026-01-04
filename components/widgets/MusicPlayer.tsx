@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useContext, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Widget } from "@/components/Widget";
 import { WidgetSize, Song } from "@/lib/types";
-import { YouTubePlayerContext } from "@/components/YouTubePlayer";
 
 interface MusicPlayerProps {
   size: WidgetSize;
@@ -12,18 +11,85 @@ interface MusicPlayerProps {
 }
 
 export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerProps) {
-  const { isPlaying, currentVideoId, play, pause } = useContext(YouTubePlayerContext);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentSongId, setCurrentSongId] = useState<string | null>(selectedSongId || null);
+  const [loadedSongs, setLoadedSongs] = useState<Song[]>(songs);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Auto-play selected song on page load (for all sizes)
+  // Update loadedSongs when songs prop changes (only if different)
   useEffect(() => {
-    if (!selectedSongId || !songs || songs.length === 0) return;
+    if (songs.length > 0 && JSON.stringify(songs) !== JSON.stringify(loadedSongs)) {
+      // Use requestAnimationFrame to avoid synchronous setState
+      requestAnimationFrame(() => {
+        setLoadedSongs(songs);
+      });
+    }
+  }, [songs, loadedSongs]);
 
-    const selectedSong = songs.find((s) => s.id === selectedSongId);
-    if (!selectedSong || !selectedSong.youtubeId) return;
+  // Fetch songs if not provided
+  useEffect(() => {
+    if (songs.length > 0) {
+      return; // Don't fetch if songs are provided
+    }
+
+    // Fetch from API if no songs provided
+    fetch("/api/content/top_10_songs")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.songs && Array.isArray(data.songs)) {
+          setLoadedSongs(data.songs);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching songs:", error);
+      });
+  }, [songs]);
+
+  // Initialize audio element
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const audio = new Audio();
+    audio.preload = "auto";
+
+    audio.addEventListener("play", () => setIsPlaying(true));
+    audio.addEventListener("pause", () => setIsPlaying(false));
+    audio.addEventListener("ended", () => setIsPlaying(false));
+
+    audioRef.current = audio;
+
+    return () => {
+      audio.pause();
+      audio.src = "";
+      audioRef.current = null;
+    };
+  }, []);
+
+  // Update currentSongId when selectedSongId prop changes
+  useEffect(() => {
+    if (selectedSongId && selectedSongId !== currentSongId) {
+      requestAnimationFrame(() => {
+        setCurrentSongId(selectedSongId);
+      });
+    }
+  }, [selectedSongId, currentSongId]);
+
+  // Auto-play selected song on page load
+  useEffect(() => {
+    if (!selectedSongId || !loadedSongs || loadedSongs.length === 0 || !audioRef.current) return;
+    if (currentSongId !== selectedSongId) return; // Wait for currentSongId to update
+
+    const selectedSong = loadedSongs.find((s) => s.id === selectedSongId);
+    if (!selectedSong || !selectedSong.mp3Url) return;
 
     // Auto-play immediately on mount
-    play(selectedSong.youtubeId);
-  }, [selectedSongId, songs, play]);
+    const audio = audioRef.current;
+    audio.src = selectedSong.mp3Url;
+    audio.play().catch((error) => {
+      console.error("Error auto-playing song:", error);
+      // Auto-play might be blocked by browser, that's okay
+    });
+  }, [selectedSongId, loadedSongs, currentSongId]);
 
   // Support 1x1, 3x1, and 4x2 sizes
   const isValidSize = size === "1x1" || size === "3x1" || size === "4x2";
@@ -37,16 +103,26 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
   }
 
   const selectedSong = selectedSongId
-    ? songs.find((s) => s.id === selectedSongId)
-    : songs[0] || null;
+    ? loadedSongs.find((s) => s.id === selectedSongId)
+    : loadedSongs[0] || null;
 
   const handleTogglePlayPause = () => {
-    if (!selectedSong || !selectedSong.youtubeId) return;
+    if (!selectedSong || !selectedSong.mp3Url || !audioRef.current) return;
 
-    if (isPlaying && currentVideoId === selectedSong.youtubeId) {
-      pause();
+    const audio = audioRef.current;
+
+    // If switching songs, update source
+    if (currentSongId !== selectedSong.id) {
+      audio.src = selectedSong.mp3Url;
+      setCurrentSongId(selectedSong.id);
+    }
+
+    if (isPlaying && currentSongId === selectedSong.id) {
+      audio.pause();
     } else {
-      play(selectedSong.youtubeId);
+      audio.play().catch((error) => {
+        console.error("Error playing song:", error);
+      });
     }
   };
 
@@ -57,7 +133,7 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
         <div className="music-player-control" onClick={handleTogglePlayPause}>
           <i
             className={
-              isPlaying && currentVideoId === selectedSong?.youtubeId
+              isPlaying && currentSongId === selectedSong?.id
                 ? "hn hn-pause-solid music-player-icon"
                 : "hn hn-play-solid music-player-icon"
             }
@@ -96,7 +172,7 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
         >
           <i
             className={
-              isPlaying && currentVideoId === selectedSong?.youtubeId
+              isPlaying && currentSongId === selectedSong?.id
                 ? "hn hn-pause-solid"
                 : "hn hn-play-solid"
             }

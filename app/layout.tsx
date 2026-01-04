@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import "./globals.css";
-import { YouTubePlayerProvider } from "@/components/YouTubePlayer";
 import { ThemeProvider } from "@/lib/theme-context";
 import { QueryProvider } from "@/lib/providers";
 import { WebVitals } from "@/components/WebVitals";
@@ -33,18 +31,10 @@ export default function RootLayout({
         />
       </head>
       <body>
-        {/* Load YouTube API using Next.js Script component - safer than manual DOM manipulation */}
-        <Script
-          src="https://www.youtube.com/iframe_api"
-          strategy="lazyOnload"
-          id="youtube-api-script"
-        />
         <ThemeProvider>
           <QueryProvider>
-            <YouTubePlayerProvider>
-              {children}
-              <WebVitals />
-            </YouTubePlayerProvider>
+            {children}
+            <WebVitals />
           </QueryProvider>
         </ThemeProvider>
       </body>

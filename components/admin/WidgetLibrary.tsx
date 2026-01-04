@@ -18,7 +18,7 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
     {
       type: "music_player",
       name: "Music Player",
-      description: "Play a selected song",
+      description: "Play MP3 songs (upload your own)",
       icon: "hn-music-solid",
       sizes: ["1x1", "3x1", "4x2"] as WidgetSize[],
     },

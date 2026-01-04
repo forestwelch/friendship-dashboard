@@ -238,10 +238,20 @@ export async function getGlobalContent(contentType: string): Promise<unknown> {
 export async function getTop10Songs(): Promise<{ songs: Song[] }> {
   const data = await getGlobalContent("top_10_songs");
   if (data && typeof data === "object" && "songs" in data) {
-    return data as { songs: Song[] };
+    const songs = (data as { songs: unknown[] }).songs;
+    // Filter out old YouTube songs - only return songs with mp3Url
+    const validSongs = songs.filter(
+      (song: unknown): song is Song =>
+        typeof song === "object" &&
+        song !== null &&
+        "mp3Url" in song &&
+        typeof (song as { mp3Url: unknown }).mp3Url === "string" &&
+        !("youtubeId" in song)
+    );
+    return { songs: validSongs };
   }
-  // Fallback to mock data
-  return getMockGlobalContent("top_10_songs") as { songs: Song[] };
+  // Return empty array instead of mock YouTube data
+  return { songs: [] };
 }
 
 /**
@@ -394,25 +404,8 @@ function getMockFriendPage(slug: string): FriendPageData | null {
 
 function getMockGlobalContent(contentType: string): unknown {
   if (contentType === "top_10_songs") {
-    return {
-      songs: [
-        { id: "1", title: "Bohemian Rhapsody", artist: "Queen", youtubeId: "fJ9rUzIMcZQ" },
-        { id: "2", title: "Stairway to Heaven", artist: "Led Zeppelin", youtubeId: "QkF3oxziUI4" },
-        { id: "3", title: "Hotel California", artist: "Eagles", youtubeId: "BciS5krYL80" },
-        {
-          id: "4",
-          title: "Sweet Child O' Mine",
-          artist: "Guns N' Roses",
-          youtubeId: "1w7OgIMMRc4",
-        },
-        { id: "5", title: "Comfortably Numb", artist: "Pink Floyd", youtubeId: "YlUKcNNmywk" },
-        { id: "6", title: "Thunderstruck", artist: "AC/DC", youtubeId: "v2AC41dglnM" },
-        { id: "7", title: "Back in Black", artist: "AC/DC", youtubeId: "pAgnJDJN4VA" },
-        { id: "8", title: "Smells Like Teen Spirit", artist: "Nirvana", youtubeId: "hTWKbfoikeg" },
-        { id: "9", title: "Enter Sandman", artist: "Metallica", youtubeId: "CD-E-LDc384" },
-        { id: "10", title: "Paranoid", artist: "Black Sabbath", youtubeId: "0qanF-91aJo" },
-      ],
-    };
+    // Return empty array - no more YouTube mock data
+    return { songs: [] };
   }
   return null;
 }

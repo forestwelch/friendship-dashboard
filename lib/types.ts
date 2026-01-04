@@ -65,7 +65,7 @@ export interface Song {
   id: string;
   title: string;
   artist: string;
-  youtubeId: string;
+  mp3Url: string;
   thumbnail?: string;
 }
 

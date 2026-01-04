@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Song } from "@/lib/types";
 import { playSound } from "@/lib/sounds";
 
@@ -28,6 +28,8 @@ export function SongManager({
   const [editSong, setEditSong] = useState<Partial<Song>>({});
   const [internalShowAddForm, setInternalShowAddForm] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Use external showAddForm if provided, otherwise use internal state
   const showAddForm = externalShowAddForm !== undefined ? externalShowAddForm : internalShowAddForm;
@@ -73,31 +75,81 @@ export function SongManager({
   const [newSong, setNewSong] = useState<Partial<Song>>({
     title: "",
     artist: "",
-    youtubeId: "",
+    mp3Url: "",
   });
 
   useEffect(() => {
-    setSongs(initialSongs);
+    // Filter out old YouTube songs that don't have mp3Url
+    const validSongs = initialSongs.filter((song) => song.mp3Url && !("youtubeId" in song));
+    setSongs(validSongs);
   }, [initialSongs]);
 
-  const handleAddSong = () => {
-    if (!newSong.title || !newSong.artist || !newSong.youtubeId) {
+  const handleFileUpload = async (file: File) => {
+    if (!file.type.startsWith("audio/")) {
       playSound("error");
-      alert("Please fill in all fields!");
+      alert("Please select an audio file (MP3, etc.)");
       return;
     }
 
-    const song: Song = {
-      id: `song-${Date.now()}`,
-      title: newSong.title!,
-      artist: newSong.artist!,
-      youtubeId: newSong.youtubeId!,
-    };
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("mp3", file);
+      formData.append("title", newSong.title || "");
+      formData.append("artist", newSong.artist || "");
 
-    setSongs((prev) => [...prev, song]);
-    setNewSong({ title: "", artist: "", youtubeId: "" });
-    setShowAddForm(false);
-    playSound("success");
+      const response = await fetch("/api/content/top_10_songs/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || "Failed to upload MP3");
+      }
+
+      const { mp3Url, title, artist } = await response.json();
+
+      const song: Song = {
+        id: `song-${Date.now()}`,
+        title: title || newSong.title || "Untitled",
+        artist: artist || newSong.artist || "Unknown Artist",
+        mp3Url,
+      };
+
+      setSongs((prev) => [...prev, song]);
+      setNewSong({ title: "", artist: "", mp3Url: "" });
+      setShowAddForm(false);
+      playSound("success");
+    } catch (error) {
+      console.error("Error uploading MP3:", error);
+      playSound("error");
+      alert(`Failed to upload MP3: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleAddSong = () => {
+    if (!newSong.title || !newSong.artist) {
+      playSound("error");
+      alert("Please fill in title and artist!");
+      return;
+    }
+
+    // Trigger file input
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+    // Reset input so same file can be selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleEditSong = (index: number) => {
@@ -108,7 +160,7 @@ export function SongManager({
   const handleSaveEdit = () => {
     if (editingIndex === null) return;
 
-    if (!editSong.title || !editSong.artist || !editSong.youtubeId) {
+    if (!editSong.title || !editSong.artist || !editSong.mp3Url) {
       playSound("error");
       alert("Please fill in all fields!");
       return;
@@ -121,7 +173,7 @@ export function SongManager({
               ...song,
               title: editSong.title!,
               artist: editSong.artist!,
-              youtubeId: editSong.youtubeId!,
+              mp3Url: editSong.mp3Url!,
             }
           : song
       )
@@ -138,30 +190,6 @@ export function SongManager({
     // Note: DB sync handled by TanStack Query mutation
   };
 
-  const extractYouTubeId = (url: string): string => {
-    // Extract YouTube ID from various URL formats
-    const patterns = [
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-      /^([a-zA-Z0-9_-]{11})$/,
-    ];
-
-    for (const pattern of patterns) {
-      const match = url.match(pattern);
-      if (match) return match[1];
-    }
-
-    return url; // Return as-is if no pattern matches
-  };
-
-  const handlePasteYouTubeUrl = (field: "youtubeId" | "newYoutubeId", value: string) => {
-    const id = extractYouTubeId(value);
-    if (field === "youtubeId") {
-      setEditSong({ ...editSong, youtubeId: id });
-    } else {
-      setNewSong({ ...newSong, youtubeId: id });
-    }
-  };
-
   return (
     <div
       style={{
@@ -172,6 +200,13 @@ export function SongManager({
         gap: "var(--space-md)",
       }}
     >
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="audio/*"
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+      />
       {showAddForm && (
         <div
           className="game-card"
@@ -212,36 +247,20 @@ export function SongManager({
                 color: "var(--admin-text)",
               }}
             />
-            <input
-              type="text"
-              className="game-input"
-              placeholder="YouTube ID or URL"
-              value={newSong.youtubeId || ""}
-              onChange={(e) => {
-                const value = e.target.value;
-                setNewSong({ ...newSong, youtubeId: value });
-                if (value.includes("youtube.com") || value.includes("youtu.be")) {
-                  handlePasteYouTubeUrl("newYoutubeId", value);
-                }
-              }}
-              style={{
-                background: "var(--admin-bg)",
-                borderColor: "var(--admin-accent)",
-                color: "var(--admin-text)",
-                gridColumn: "1 / -1",
-              }}
-            />
             <button
               className="game-button"
               onClick={handleAddSong}
+              disabled={uploading || !newSong.title || !newSong.artist}
               style={{
-                background: "var(--admin-primary)",
+                background: uploading ? "var(--admin-accent)" : "var(--admin-primary)",
                 borderColor: "var(--admin-accent)",
                 color: "var(--admin-text)",
                 gridColumn: "1 / -1",
+                opacity: uploading || !newSong.title || !newSong.artist ? 0.6 : 1,
+                cursor: uploading || !newSong.title || !newSong.artist ? "not-allowed" : "pointer",
               }}
             >
-              Add Song
+              {uploading ? "Uploading..." : "Select MP3 File"}
             </button>
           </div>
         </div>
@@ -317,20 +336,9 @@ export function SongManager({
                       placeholder="Artist"
                       style={{ fontSize: "var(--font-size-xs)", padding: "var(--space-sm)" }}
                     />
-                    <input
-                      type="text"
-                      className="game-input"
-                      value={editSong.youtubeId || ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setEditSong({ ...editSong, youtubeId: value });
-                        if (value.includes("youtube.com") || value.includes("youtu.be")) {
-                          handlePasteYouTubeUrl("youtubeId", value);
-                        }
-                      }}
-                      placeholder="YouTube ID"
-                      style={{ fontSize: "var(--font-size-xs)", padding: "var(--space-sm)" }}
-                    />
+                    <div className="game-text-muted" style={{ fontSize: "var(--font-size-xs)" }}>
+                      MP3 URL: {editSong.mp3Url || "N/A"}
+                    </div>
                     <div className="game-flex game-flex-gap-sm">
                       <button
                         className="game-button game-button-success"
@@ -363,12 +371,14 @@ export function SongManager({
                       <div className="game-text-muted" style={{ marginBottom: "var(--space-xs)" }}>
                         {song.artist}
                       </div>
-                      <div
-                        className="game-text-muted"
-                        style={{ fontSize: "var(--font-size-xs)", marginTop: "var(--space-xs)" }}
-                      >
-                        YouTube ID: {song.youtubeId}
-                      </div>
+                      {song.mp3Url && (
+                        <div
+                          className="game-text-muted"
+                          style={{ fontSize: "var(--font-size-xs)", marginTop: "var(--space-xs)" }}
+                        >
+                          MP3 URL: {song.mp3Url.substring(0, 50)}...
+                        </div>
+                      )}
                     </div>
                     <div className="game-flex game-flex-gap-sm">
                       <button
