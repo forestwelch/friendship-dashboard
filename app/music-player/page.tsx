@@ -54,8 +54,8 @@ const mockWidgets: FriendWidget[] = [
 
 // Sample songs for testing
 const mockSongs: Song[] = [
-  { id: "1", title: "Test Song 1", artist: "Test Artist", youtubeId: "dQw4w9WgXcQ" },
-  { id: "2", title: "Test Song 2", artist: "Test Artist", youtubeId: "dQw4w9WgXcQ" },
+  { id: "1", title: "Test Song 1", artist: "Test Artist", mp3Url: "https://example.com/test1.mp3" },
+  { id: "2", title: "Test Song 2", artist: "Test Artist", mp3Url: "https://example.com/test2.mp3" },
 ];
 
 export default function MusicPlayerTestPage() {
