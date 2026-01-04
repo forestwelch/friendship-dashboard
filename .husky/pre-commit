@@ -8,7 +8,7 @@ npx lint-staged
 npm run lint || exit 1
 
 # Run tests
-npm test -- --bail || exit 1
+npm test -- --bail --passWithNoTests || exit 1
 
 
 

@@ -17,8 +17,6 @@ export function playSound(
     | "delete"
     | "focus"
     | "navigate"
-    | "mood_set"
-    | "mood_change"
     | "event_save"
     | "quiz_advance"
     | "quiz_results"
@@ -62,8 +60,6 @@ export function playSound(
       focus: { frequency: 500, duration: 0.05, type: "square" },
       navigate: { frequency: 350, duration: 0.04, type: "square" },
       // Widget-specific sounds
-      mood_set: { frequency: 900, duration: 0.08, type: "square" }, // Cute beep, higher pitch
-      mood_change: { frequency: 600, duration: 0.2, type: "sine" }, // Ascending/descending tone
       event_save: { frequency: 650, duration: 0.15, type: "sine" }, // Ascending tone
       quiz_advance: { frequency: 550, duration: 0.1, type: "sine" }, // Soft "ding"
       quiz_results: { frequency: 800, duration: 0.3, type: "sine" }, // Magical ascending tone
