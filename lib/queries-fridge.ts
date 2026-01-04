@@ -286,14 +286,19 @@ export function getRandomRotation(): number {
 }
 
 export function getCanvasDimensions(size: string): { width: number; height: number } {
-  switch (size) {
-    case "2x3":
-      return { width: 400, height: 600 };
-    case "3x4":
-      return { width: 600, height: 800 };
-    default:
-      return { width: 400, height: 600 };
-  }
+  // Calculate canvas dimensions based on size
+  // Base dimensions scale proportionally
+  const [cols, rows] = size.split("x").map(Number);
+
+  // Base size for 2x3: 400x600
+  // Scale proportionally for other sizes
+  const baseWidth = 200; // per column
+  const baseHeight = 200; // per row
+
+  return {
+    width: baseWidth * cols,
+    height: baseHeight * rows,
+  };
 }
 
 export function generateMagnetInventory(): Magnet[] {

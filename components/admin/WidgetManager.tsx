@@ -130,6 +130,14 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
 
   const handleAddWidget = useCallback(
     (widgetType: string, size: WidgetSize) => {
+      // Check for duplicate widget types (except pixel_art which allows multiple)
+      const existingWidgetsOfType = displayWidgets.filter((w) => w.widget_type === widgetType);
+      if (widgetType !== "pixel_art" && existingWidgetsOfType.length > 0) {
+        playSound("error");
+        alert(`You can only have one ${widgetType.replace(/_/g, " ")} widget per friend.`);
+        return;
+      }
+
       const foundPosition = findAvailablePosition(displayWidgets, size);
 
       if (foundPosition) {
@@ -538,9 +546,11 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
         <WidgetConfigModal
           widget={configuringWidget}
           onClose={() => setConfiguringWidget(null)}
-          onSave={(newConfig) => {
+          onSave={(newConfig, newSize) => {
             const newWidgets = displayWidgets.map((w) =>
-              w.id === configuringWidget.id ? { ...w, config: newConfig } : w
+              w.id === configuringWidget.id
+                ? { ...w, config: newConfig, size: newSize || w.size }
+                : w
             );
             setWidgets(newWidgets);
             setConfiguringWidget(null);

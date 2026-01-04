@@ -32,11 +32,11 @@ export function ConsumptionLog({ size, friendId, friendName }: ConsumptionLogPro
     setOpenModal(`consumption-${friendId}`);
   };
 
-  // Only support 2x1 size
-  if (size !== "2x1") {
+  // Only support 3x1 size
+  if (size !== "3x1") {
     return (
       <Widget size={size}>
-        <div className="widget-error-message">Consumption Log only supports 2×1 size</div>
+        <div className="widget-error-message">Consumption Log only supports 3×1 size</div>
       </Widget>
     );
   }
@@ -45,13 +45,29 @@ export function ConsumptionLog({ size, friendId, friendName }: ConsumptionLogPro
   const displayTitle = mostRecent?.title || "No entries yet";
   const displayThought = mostRecent?.thought || "Click to add your first entry";
 
+  // Format unread count badge
+  const badgeText =
+    unreadCount > 0
+      ? displayTitle && displayTitle.length > 20
+        ? `new rec!`
+        : `new rec ${displayTitle}`
+      : null;
+
   return (
     <>
       <Widget size={size}>
         <div onClick={handleClick} className="widget-clickable">
-          <div className="widget-title">{displayTitle}</div>
-          <div className="widget-content">{displayThought}</div>
-          {unreadCount > 0 && <div className="widget-badge">{unreadCount} new</div>}
+          {unreadCount > 0 && badgeText && (
+            <div className="widget-badge" style={{ marginBottom: "var(--space-xs)" }}>
+              {badgeText}
+            </div>
+          )}
+          {unreadCount === 0 && (
+            <>
+              <div className="widget-title">{displayTitle}</div>
+              <div className="widget-content">{displayThought}</div>
+            </>
+          )}
         </div>
       </Widget>
       <ConsumptionLogModal friendId={friendId} friendName={friendName} />

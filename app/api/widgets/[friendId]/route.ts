@@ -113,16 +113,44 @@ export async function PUT(
     const adminClient = getSupabaseAdmin();
 
     // First, get all widget types to resolve widget_type strings to widget_id UUIDs
+    // Also get allow_multiple flag for duplicate checking
     const { data: widgetTypes, error: widgetTypesError } = await adminClient
       .from("widgets")
-      .select("id, type");
+      .select("id, type, allow_multiple");
 
     if (widgetTypesError) {
       console.error("Error fetching widget types:", widgetTypesError);
       return NextResponse.json({ error: "Failed to fetch widget types" }, { status: 500 });
     }
 
-    const widgetTypeMap = new Map((widgetTypes || []).map((wt: WidgetTypeRow) => [wt.type, wt.id]));
+    const widgetTypeMap = new Map(
+      (widgetTypes || []).map((wt: WidgetTypeRow & { allow_multiple?: boolean }) => [
+        wt.type,
+        wt.id,
+      ])
+    );
+
+    const widgetAllowMultipleMap = new Map(
+      (widgetTypes || []).map((wt: WidgetTypeRow & { allow_multiple?: boolean }) => [
+        wt.type,
+        wt.allow_multiple || false,
+      ])
+    );
+
+    // Check for duplicate widget types (except those that allow_multiple)
+    const widgetTypeCounts = new Map<string, number>();
+    for (const w of widgets) {
+      const count = widgetTypeCounts.get(w.widget_type) || 0;
+      widgetTypeCounts.set(w.widget_type, count + 1);
+
+      const allowMultiple = widgetAllowMultipleMap.get(w.widget_type) || false;
+      if (!allowMultiple && count >= 1) {
+        return NextResponse.json(
+          { error: `Only one ${w.widget_type} widget is allowed per friend` },
+          { status: 400 }
+        );
+      }
+    }
 
     // Delete all existing widgets for this friend
     const { error: deleteError } = await adminClient
@@ -169,7 +197,16 @@ export async function PUT(
 
       if (insertError) {
         console.error("Error inserting widgets:", insertError);
-        return NextResponse.json({ error: "Failed to save widgets" }, { status: 500 });
+        console.error("Widgets being inserted:", JSON.stringify(widgetsToInsert, null, 2));
+        return NextResponse.json(
+          {
+            error: "Failed to save widgets",
+            details: insertError.message,
+            code: insertError.code,
+            hint: insertError.hint,
+          },
+          { status: 500 }
+        );
       }
 
       // Transform the response

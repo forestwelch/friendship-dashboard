@@ -15,6 +15,7 @@ import {
 } from "@/lib/queries-fridge";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { TouchBackend } from "react-dnd-touch-backend";
 import { playSound } from "@/lib/sounds";
 import { WidgetSize } from "@/lib/types";
 
@@ -350,17 +351,20 @@ function FridgeCanvas({
       const constrainedY = Math.max(0, Math.min(y, canvasHeight - magnetSize));
 
       if (magnetIndex >= 0 && magnetIndex < newMagnets.length) {
-        newMagnets[magnetIndex] = {
-          ...newMagnets[magnetIndex],
-          x: constrainedX,
-          y: constrainedY,
-          inBank: false,
-        };
+        // Only update if position actually changed
+        const currentMagnet = newMagnets[magnetIndex];
+        if (currentMagnet.x !== constrainedX || currentMagnet.y !== constrainedY) {
+          newMagnets[magnetIndex] = {
+            ...currentMagnet,
+            x: constrainedX,
+            y: constrainedY,
+            inBank: false,
+          };
+          setUndoStack((prev) => [...prev, stateBeforeChange]);
+          onMagnetsChange(newMagnets);
+          playSound("move");
+        }
       }
-
-      setUndoStack((prev) => [...prev, stateBeforeChange]);
-      onMagnetsChange(newMagnets);
-      playSound("move");
     },
     [onMagnetsChange, canvasWidth, canvasHeight]
   );
@@ -397,6 +401,7 @@ function FridgeCanvas({
       let x = offset.x - rect.left;
       let y = offset.y - rect.top;
 
+      // More accurate positioning for touch devices
       if (initialSourceClientOffset) {
         const initialClientOffset = monitor.getInitialClientOffset();
         if (initialClientOffset) {
@@ -406,6 +411,11 @@ function FridgeCanvas({
           y -= dragOffsetY;
         }
       }
+
+      // Snap to grid for better placement accuracy
+      const gridSize = 8;
+      x = Math.round(x / gridSize) * gridSize;
+      y = Math.round(y / gridSize) * gridSize;
 
       x = Math.max(0, Math.min(x, rect.width - magnetSize));
       y = Math.max(0, Math.min(y, rect.height - magnetSize));
@@ -509,9 +519,10 @@ export function FridgeMagnetsModal({ friendId, size }: FridgeMagnetsModalProps) 
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
+      // Increase debounce time to reduce save frequency
       saveTimeoutRef.current = setTimeout(() => {
         updateMutation.mutate(newMagnets);
-      }, 100);
+      }, 500);
     },
     [updateMutation]
   );
@@ -524,8 +535,22 @@ export function FridgeMagnetsModal({ friendId, size }: FridgeMagnetsModalProps) 
     };
   }, []);
 
+  // Use TouchBackend for mobile, HTML5Backend for desktop
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const backend = isMobile ? TouchBackend : HTML5Backend;
+  const backendOptions = isMobile
+    ? {
+        enableMouseEvents: true,
+        enableTouchEvents: true,
+        enableKeyboardEvents: false,
+        delay: 0,
+        delayTouchStart: 0,
+        touchSlop: 0,
+      }
+    : undefined;
+
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DndProvider backend={backend} options={backendOptions}>
       <Modal id={modalId} title="Fridge Magnets" onClose={() => setOpenModal(null)}>
         <div className="modal-content" style={{ overflow: "hidden" }}>
           <FridgeCanvas

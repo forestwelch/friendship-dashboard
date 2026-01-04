@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { memo, useCallback } from "react";
 
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   value: string;
@@ -9,7 +9,7 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   showCharCount?: boolean;
 }
 
-export function Textarea({
+export const Textarea = memo(function Textarea({
   value,
   onChange,
   maxLength,
@@ -17,12 +17,15 @@ export function Textarea({
   className = "",
   ...props
 }: TextareaProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (maxLength && e.target.value.length > maxLength) {
-      return;
-    }
-    onChange(e);
-  };
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      if (maxLength && e.target.value.length > maxLength) {
+        return;
+      }
+      onChange(e);
+    },
+    [maxLength, onChange]
+  );
 
   return (
     <>
@@ -40,4 +43,4 @@ export function Textarea({
       )}
     </>
   );
-}
+});

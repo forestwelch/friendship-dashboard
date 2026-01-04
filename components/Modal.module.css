@@ -2,9 +2,11 @@
   position: absolute;
   top: 0;
   left: 0;
-  /* Match grid's exact dimensions using CSS variables */
-  width: var(--grid-width);
-  height: var(--grid-height);
+  right: 0;
+  bottom: 0;
+  /* Cover entire container (wrapper or grid) */
+  width: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.75); /* Dark overlay backdrop */
   display: flex;
   align-items: center;
@@ -12,10 +14,12 @@
   z-index: 10000;
   padding: 0;
   overflow: hidden;
-  /* When portaled to grid container, backdrop matches grid's exact dimensions */
   margin: 0;
+  /* When portaled to grid container wrapper, covers entire viewport */
+  /* When portaled to grid container, covers grid area */
   /* Inherits grid container's transform (translate + scale) via CSS class */
-  /* The grid-layout class applies: translate(-50%, -50%) scale(...) */
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .modal {
@@ -33,6 +37,8 @@
   box-sizing: border-box;
   /* Allow modal content to scroll if needed */
   overflow: hidden;
+  pointer-events: auto;
+  cursor: default;
 }
 
 /* No animation - instant full-screen transition like MS-DOS/Windows file explorer */

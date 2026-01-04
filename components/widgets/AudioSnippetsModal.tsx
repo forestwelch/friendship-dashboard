@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Modal } from "@/components/Modal";
 import { useUIStore } from "@/lib/store/ui-store";
-import { useAudioSnippets } from "@/lib/queries-audio-hooks";
+import { useAudioSnippets, useDeleteAudioSnippet } from "@/lib/queries-audio-hooks";
 import { useIdentity } from "@/lib/identity-utils";
 import { playSound } from "@/lib/sounds";
 
@@ -15,8 +15,21 @@ export function AudioSnippetsModal({ friendId }: AudioSnippetsModalProps) {
   const { setOpenModal } = useUIStore();
   const identity = useIdentity();
   const modalId = `audiosnippets-${friendId}`;
+  const isAdmin = identity === "admin";
+  const [hoveredSnippet, setHoveredSnippet] = useState<string | null>(null);
 
   const { data: snippets = [] } = useAudioSnippets(friendId);
+  const deleteMutation = useDeleteAudioSnippet(friendId);
+
+  // Show all snippets in order (no deduplication - user wants all clips)
+  // Sort by creation date to show newest last
+  const sortedSnippets = React.useMemo(() => {
+    return [...snippets].sort((a, b) => {
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+      return dateA - dateB;
+    });
+  }, [snippets]);
 
   const handlePlay = (audioUrl: string) => {
     // Validate URL before attempting to play (accepts both absolute and relative URLs)
@@ -57,16 +70,32 @@ export function AudioSnippetsModal({ friendId }: AudioSnippetsModalProps) {
     // Set src and play
     audio.src = audioUrl;
 
-    audio.play().catch((error) => {
-      console.error("Error playing audio:", {
-        error,
-        url: audioUrl,
-        message: error.message,
-      });
-      playSound("error");
-    });
+    // Preload for better mobile performance
+    audio.preload = "auto";
 
-    playSound("click");
+    // For mobile, ensure we handle user interaction requirement
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          playSound("click");
+        })
+        .catch((error) => {
+          console.error("Error playing audio:", {
+            error,
+            url: audioUrl,
+            message: error.message,
+          });
+          playSound("error");
+        });
+    }
+  };
+
+  const handleDelete = (e: React.MouseEvent, snippetId: string) => {
+    e.stopPropagation();
+    if (isAdmin && confirm("Delete this audio snippet?")) {
+      deleteMutation.mutate(snippetId);
+    }
   };
 
   return (
@@ -74,19 +103,35 @@ export function AudioSnippetsModal({ friendId }: AudioSnippetsModalProps) {
       <div className="modal-content">
         <div className="form-title-small">Total clips: {snippets.length}</div>
         <div className="snippets-grid">
-          {snippets.length === 0 ? (
+          {sortedSnippets.length === 0 ? (
             <div className="empty-state">No clips yet. Record your first snippet!</div>
           ) : (
-            snippets.map((snippet) => (
-              <button
+            sortedSnippets.map((snippet) => (
+              <div
                 key={snippet.id}
-                onClick={() => handlePlay(snippet.audio_url)}
-                className="snippet-button"
-                data-recorded-by={snippet.recorded_by}
-                data-is-owner={snippet.recorded_by === identity ? "true" : "false"}
+                className="snippet-button-wrapper"
+                onMouseEnter={() => setHoveredSnippet(snippet.id)}
+                onMouseLeave={() => setHoveredSnippet(null)}
               >
-                <i className={`hn ${snippet.icon_name} snippet-icon`} />
-              </button>
+                <button
+                  onClick={() => handlePlay(snippet.audio_url)}
+                  className="snippet-button"
+                  data-recorded-by={snippet.recorded_by}
+                  data-is-owner={snippet.recorded_by === identity ? "true" : "false"}
+                >
+                  <i className={`hn ${snippet.icon_name} snippet-icon`} />
+                </button>
+                {isAdmin && hoveredSnippet === snippet.id && (
+                  <button
+                    onClick={(e) => handleDelete(e, snippet.id)}
+                    className="snippet-delete-button"
+                    aria-label="Delete snippet"
+                    title="Delete snippet"
+                  >
+                    <i className="hn hn-trash-solid" />
+                  </button>
+                )}
+              </div>
             ))
           )}
         </div>

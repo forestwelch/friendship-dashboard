@@ -89,3 +89,26 @@ export async function uploadAudioSnippet(
     return null;
   }
 }
+
+export async function deleteAudioSnippet(snippetId: string): Promise<boolean> {
+  if (!isSupabaseConfigured()) {
+    return false;
+  }
+
+  try {
+    const response = await fetch(`/api/audio/${snippetId}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+      console.error("API delete error:", errorData);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error in deleteAudioSnippet:", error);
+    return false;
+  }
+}

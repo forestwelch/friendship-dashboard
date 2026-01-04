@@ -26,11 +26,14 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
     setOpenModal(modalId);
   };
 
-  // Only support 2x2 size
-  if (size !== "2x2") {
+  // Support 2x1, 3x1, and 4x1 sizes (horizontal layouts)
+  const [cols, rows] = size.split("x").map(Number);
+  const isValidSize = rows === 1 && cols >= 2 && cols <= 4;
+
+  if (!isValidSize) {
     return (
       <Widget size={size}>
-        <div className="widget-error-message">Absurd Reviews only supports 2×2 size</div>
+        <div className="widget-error-message">Absurd Reviews supports 2×1, 3×1, and 4×1 sizes</div>
       </Widget>
     );
   }
@@ -70,9 +73,27 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
         <div
           onClick={handleClick}
           className="widget-clickable"
-          style={{ justifyContent: "center", alignItems: "center", textAlign: "center" }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            padding: "var(--space-sm)",
+            gap: "var(--space-xs)",
+          }}
         >
-          <div className="widget-title">{topic.topic_name}</div>
+          <div
+            className="widget-title"
+            style={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              width: "100%",
+            }}
+          >
+            {topic.topic_name}
+          </div>
           <div
             className="widget-content"
             style={{
@@ -80,6 +101,8 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
               alignItems: "center",
               gap: "var(--space-xs)",
               justifyContent: "center",
+              flex: 1,
+              minHeight: 0,
             }}
           >
             {isRevealed && myReview && otherReview ? (
@@ -89,12 +112,31 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
                 <i className="hn hn-star-solid" style={{ fontSize: "0.7rem" }} />
               </>
             ) : (
-              displayText
+              <div
+                style={{
+                  textAlign: "center",
+                  overflow: "hidden",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                }}
+              >
+                {displayText}
+              </div>
             )}
           </div>
           {myReview && !otherReview && (
-            <div className="widget-badge">
+            <div
+              className="widget-badge"
+              style={{
+                fontSize: "var(--font-size-xs)",
+                display: "flex",
+                alignItems: "center",
+                gap: "var(--space-xs)",
+              }}
+            >
               <i className="hn hn-check-solid" />
+              <span>Your review ready</span>
             </div>
           )}
         </div>

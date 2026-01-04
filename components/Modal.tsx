@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { usePathname } from "next/navigation";
 import { playSound } from "@/lib/sounds";
 import { useUIStore } from "@/lib/store/ui-store";
 import styles from "./Modal.module.css";
@@ -16,7 +17,18 @@ interface ModalProps {
 export function Modal({ id, title, children, onClose }: ModalProps) {
   const { openModal, setOpenModal } = useUIStore();
   const modalRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
   const isOpen = openModal === id;
+
+  // Close modal on navigation to prevent DOM errors
+  useEffect(() => {
+    if (isOpen) {
+      setOpenModal(null);
+      onClose?.();
+    }
+    // Only react to pathname changes, not other dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   const handleClose = useCallback(() => {
     playSound("close");
@@ -85,25 +97,32 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
     };
   }, [isOpen]);
 
-  // Removed backdrop click handler - modals can only be closed via X button or ESC key
+  // Handle backdrop click to close modal
+  const handleBackdropClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (e.target === e.currentTarget) {
+        handleClose();
+      }
+    },
+    [handleClose]
+  );
 
   if (!isOpen) return null;
 
-  // Portal to the grid element itself so modal inherits grid's exact positioning and scaling
-  const gridContainer =
-    typeof document !== "undefined"
-      ? document.querySelector("[data-grid-container]") ||
-        document.querySelector("[data-grid-container-wrapper]")
-      : null;
-
   const modalContent = (
-    <div className={styles.backdrop}>
+    <div
+      className={styles.backdrop}
+      onClick={handleBackdropClick}
+      style={{ pointerEvents: "auto" }}
+    >
       <div
         className={styles.modal}
         ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? `${id}-title` : undefined}
+        onClick={(e) => e.stopPropagation()}
+        style={{ pointerEvents: "auto" }}
       >
         <div className={styles.header}>
           {title && (
@@ -120,13 +139,18 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
     </div>
   );
 
-  // Portal to grid container if available and still in DOM, otherwise render to body
-  if (gridContainer && gridContainer.isConnected && document.body.contains(gridContainer)) {
-    return createPortal(modalContent, gridContainer);
-  }
-
-  // Fallback: portal to body if grid container not available
+  // Portal to grid container wrapper if available and still in DOM, otherwise render to body
+  // This ensures modals render in the same place as the grid with proper scaling/positioning
   if (typeof document !== "undefined") {
+    const gridWrapper =
+      document.querySelector("[data-grid-container-wrapper]") ||
+      document.querySelector("[data-grid-container]");
+
+    if (gridWrapper && gridWrapper.isConnected && document.body.contains(gridWrapper)) {
+      return createPortal(modalContent, gridWrapper);
+    }
+
+    // Fallback to body if grid container not available
     return createPortal(modalContent, document.body);
   }
 

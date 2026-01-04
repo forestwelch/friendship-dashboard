@@ -319,6 +319,12 @@ body {
     rgba(0, 0, 0, 0.3);
   min-height: var(--height-input);
   height: var(--height-input);
+  /* Improve mobile typing performance */
+  -webkit-appearance: none;
+  appearance: none;
+  will-change: contents;
+  /* Ensure minimum touch target size for mobile */
+  min-height: 44px;
 }
 
 .game-input:focus {
@@ -679,11 +685,13 @@ textarea.game-input {
 
 .snippets-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-md);
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-sm);
   overflow-y: auto;
   flex: 1;
   align-items: start;
+  padding: var(--space-sm);
+  align-content: start;
 }
 
 .snippet-button {
@@ -693,12 +701,21 @@ textarea.game-input {
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-sm);
   border: var(--border-width-md) solid var(--accent);
   border-radius: var(--radius-sm);
   cursor: pointer;
   background-color: var(--secondary);
   min-width: 0; /* Prevent grid overflow */
+}
+
+.snippet-button:hover {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.snippet-button:active {
+  opacity: 0.8;
 }
 
 .snippet-button[data-is-owner="true"] {
@@ -709,8 +726,51 @@ textarea.game-input {
   background-color: var(--secondary);
 }
 
+.snippet-button[data-is-owner="true"]:hover {
+  background-color: var(--accent);
+  opacity: 0.9;
+}
+
+.snippet-button[data-is-owner="false"]:hover {
+  background-color: var(--primary);
+  opacity: 0.9;
+}
+
 .snippet-icon {
-  font-size: 2rem;
+  font-size: 3rem;
+}
+
+.snippet-button-wrapper {
+  position: relative;
+  aspect-ratio: 1/1;
+}
+
+.snippet-delete-button {
+  position: absolute;
+  top: var(--space-xs);
+  right: var(--space-xs);
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--error, #ff4444);
+  color: var(--bg);
+  border: var(--border-width-md) solid var(--accent);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  z-index: 10;
+  font-size: 0.75rem;
+  padding: 0;
+}
+
+.snippet-delete-button:hover {
+  background-color: var(--accent);
+  opacity: 0.9;
+}
+
+.snippet-delete-button:active {
+  opacity: 0.8;
 }
 
 .undo-button {

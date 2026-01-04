@@ -52,8 +52,8 @@
     inset -2px -2px 0 var(--accent),
     inset 2px 2px 0 var(--secondary),
     2px 2px 0 rgba(0, 0, 0, 0.2);
-  /* Ensure consistent sizing */
-  min-height: 36px;
+  /* Ensure consistent sizing and mobile-friendly touch targets */
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -63,6 +63,7 @@
   /* Prevent text selection from causing layout shift */
   user-select: none;
   -webkit-user-select: none;
+  touch-action: manipulation; /* Improve touch responsiveness */
 }
 
 .widget-button:hover {
@@ -182,6 +183,10 @@
   font-size: var(--font-size-xs);
   color: var(--accent);
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-shrink: 0;
 }
 
 .fridge-preview {

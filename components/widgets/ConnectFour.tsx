@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { Widget } from "@/components/Widget";
 import { playSound } from "@/lib/sounds";
 import { useUIStore } from "@/lib/store/ui-store";
 import { ThemeColors, WidgetSize } from "@/lib/types";
@@ -33,16 +33,10 @@ export function ConnectFour({
   const { setOpenModal } = useUIStore();
 
   // Add real-time updates for preview tiles
-  const { data: gameData, refetch } = useConnectFourGame(friendId, widgetId);
+  const { data: gameData } = useConnectFourGame(friendId, widgetId);
   useGameSubscription(friendId, widgetId);
 
-  // Also poll periodically as a fallback (every 2 seconds)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refetch();
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [refetch]);
+  // Removed polling - rely on real-time subscriptions for better performance
 
   // Use live data from query, fallback to config prop
   const game = gameData || config;
@@ -124,11 +118,18 @@ export function ConnectFour({
     );
   }
 
-  // 3x3 Tile: Full board preview
-  if (size === "3x3") {
+  // 3x3 and larger: Full board preview
+  const [cols, rows] = size.split("x").map(Number);
+  if (cols >= 3 && rows >= 3) {
+    const tileClass =
+      cols === 4 && rows === 4
+        ? styles.tile4x4
+        : cols === 5 && rows === 5
+          ? styles.tile5x5
+          : styles.tile3x3;
     return (
       <>
-        <div className={styles.tile3x3} onClick={handleClick}>
+        <div className={tileClass} onClick={handleClick}>
           <div className={styles.title}>CONNECT FOUR</div>
           {renderFullBoard()}
         </div>
@@ -143,5 +144,10 @@ export function ConnectFour({
     );
   }
 
-  return null;
+  // Default: show error for unsupported sizes
+  return (
+    <Widget size={size}>
+      <div className="widget-error-message">Connect Four supports 2×1, 2×2, and 3×3+ sizes</div>
+    </Widget>
+  );
 }

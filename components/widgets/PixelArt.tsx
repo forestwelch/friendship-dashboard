@@ -587,12 +587,58 @@ export function PixelArt({
           // Add visual effect for scanning pixels (use theme text color with opacity)
           if (pixelState === "scanning") {
             // Use theme text color for scanline effect, convert to rgba
-            const textColor = themeColors.text || "var(--text)";
-            // Extract RGB values from hex color
-            const hex = textColor.replace("#", "");
-            const r = parseInt(hex.substring(0, 2), 16);
-            const g = parseInt(hex.substring(2, 4), 16);
-            const b = parseInt(hex.substring(4, 6), 16);
+            const textColor = themeColors.text || "#e8e8e8";
+            // Convert color to RGB (handles hex, hsl, rgb formats)
+            let r = 232,
+              g = 232,
+              b = 232; // Default light gray
+
+            if (textColor.startsWith("#")) {
+              const cleanHex = textColor.replace("#", "").trim();
+              if (cleanHex.length === 6) {
+                r = parseInt(cleanHex.substring(0, 2), 16) || 232;
+                g = parseInt(cleanHex.substring(2, 4), 16) || 232;
+                b = parseInt(cleanHex.substring(4, 6), 16) || 232;
+              }
+            } else if (textColor.startsWith("hsl")) {
+              const match = textColor.match(/hsl\(?\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%\s*\)?/i);
+              if (match) {
+                const h = parseInt(match[1], 10) / 360;
+                const s = parseInt(match[2], 10) / 100;
+                const l = parseInt(match[3], 10) / 100;
+                if (!isNaN(h) && !isNaN(s) && !isNaN(l)) {
+                  let rgbR, rgbG, rgbB;
+                  if (s === 0) {
+                    rgbR = rgbG = rgbB = l;
+                  } else {
+                    const hue2rgb = (p: number, q: number, t: number) => {
+                      if (t < 0) t += 1;
+                      if (t > 1) t -= 1;
+                      if (t < 1 / 6) return p + (q - p) * 6 * t;
+                      if (t < 1 / 2) return q;
+                      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+                      return p;
+                    };
+                    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                    const p = 2 * l - q;
+                    rgbR = hue2rgb(p, q, h + 1 / 3);
+                    rgbG = hue2rgb(p, q, h);
+                    rgbB = hue2rgb(p, q, h - 1 / 3);
+                  }
+                  r = Math.round(rgbR * 255);
+                  g = Math.round(rgbG * 255);
+                  b = Math.round(rgbB * 255);
+                }
+              }
+            } else if (textColor.startsWith("rgb")) {
+              const match = textColor.match(/rgba?\(?\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+              if (match) {
+                r = parseInt(match[1], 10) || 232;
+                g = parseInt(match[2], 10) || 232;
+                b = parseInt(match[3], 10) || 232;
+              }
+            }
+
             ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.3)`;
             ctx.fillRect(col * svgPixelSize, row * svgPixelSize, svgPixelSize, svgPixelSize);
             ctx.fillStyle = currentColor;

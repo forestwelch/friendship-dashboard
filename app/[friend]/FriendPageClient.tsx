@@ -160,6 +160,14 @@ export function FriendPageClient({
 
   const handleAddWidget = useCallback(
     (widgetType: string, size: WidgetSize) => {
+      // Check for duplicate widget types (except pixel_art which allows multiple)
+      const existingWidgetsOfType = widgets.filter((w) => w.widget_type === widgetType);
+      if (widgetType !== "pixel_art" && existingWidgetsOfType.length > 0) {
+        playSound("error");
+        alert(`You can only have one ${widgetType.replace(/_/g, " ")} widget per friend.`);
+        return;
+      }
+
       const newPosition = findAvailablePosition(widgets, size);
       if (!newPosition) {
         alert("No space available for this widget size!");
@@ -204,7 +212,8 @@ export function FriendPageClient({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to save");
+        console.error("Save error details:", errorData);
+        throw new Error(errorData.details || errorData.error || "Failed to save");
       }
 
       playSound("success");
@@ -577,6 +586,18 @@ export function FriendPageClient({
                             onMouseLeave={() => {
                               setHoveredPosition(null);
                             }}
+                            onTouchStart={() => {
+                              if (isValid) {
+                                setHoveredPosition(pos);
+                              }
+                            }}
+                            onTouchEnd={(e) => {
+                              e.preventDefault();
+                              if (isValid) {
+                                handlePlaceWidget(pos);
+                              }
+                              setHoveredPosition(null);
+                            }}
                             style={{
                               width: "100%",
                               height: "100%",
@@ -600,6 +621,9 @@ export function FriendPageClient({
                               borderRadius: "var(--radius-sm)",
                               cursor: isValid ? "pointer" : "not-allowed",
                               boxShadow: isHovered && isValid ? "var(--game-glow-blue)" : "none",
+                              touchAction: "manipulation",
+                              minHeight: "44px",
+                              minWidth: "44px",
                             }}
                           />
                         </GridItem>
@@ -660,12 +684,14 @@ export function FriendPageClient({
             setConfiguringWidget(null);
             playSound("close");
           }}
-          onSave={async (newConfig) => {
+          onSave={async (newConfig, newSize) => {
             // Saving widget config
 
-            // Update widget config locally first for immediate feedback
+            // Update widget config and size locally first for immediate feedback
             const updatedWidgets = widgets.map((w) =>
-              w.id === configuringWidget.id ? { ...w, config: newConfig } : w
+              w.id === configuringWidget.id
+                ? { ...w, config: newConfig, size: newSize || w.size }
+                : w
             );
             setWidgets(updatedWidgets);
 
@@ -689,7 +715,9 @@ export function FriendPageClient({
               if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 console.error("[FriendPage] Failed to save widget config:", errorData);
-                alert(`Failed to save: ${errorData.error || "Unknown error"}`);
+                console.error("[FriendPage] Widgets being saved:", updatedWidgets);
+                const errorMsg = errorData.details || errorData.error || "Unknown error";
+                alert(`Failed to save: ${errorMsg}`);
                 playSound("error");
                 return;
               }

@@ -99,46 +99,57 @@ function initializeGame(friendId: string): ConnectFourData {
   };
 }
 
-export function useConnectFourGame(friendId: string, widgetId: string) {
+export function useConnectFourGame(friendId: string, _widgetId: string) {
   return useQuery({
-    queryKey: ["connect_four", friendId, widgetId],
+    queryKey: ["connect_four", friendId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("friend_widgets")
+      // Check if game exists in connect_four_games table (friend-based)
+      const { data: gameData, error: gameError } = await supabase
+        .from("connect_four_games")
         .select("config")
         .eq("friend_id", friendId)
-        .eq("id", widgetId)
         .single();
 
-      if (error) throw error;
-
-      const rawConfig = (data?.config as Partial<ConnectFourData>) || {};
-
-      // If no game exists, initialize new one
-      if (!rawConfig.board && !rawConfig.player_one_id) {
-        const newGame = initializeGame(friendId);
-        // Save initialized game to database
-        await supabase.from("friend_widgets").update({ config: newGame }).eq("id", widgetId);
-        return newGame;
+      if (gameError && gameError.code !== "PGRST116") {
+        // PGRST116 = no rows returned, which is fine
+        throw gameError;
       }
 
-      // Convert legacy format if needed
-      return convertLegacyGame(rawConfig, friendId);
+      if (gameData && gameData.config) {
+        const rawConfig = (gameData.config as Partial<ConnectFourData>) || {};
+        if (rawConfig.board || rawConfig.player_one_id) {
+          // Convert legacy format if needed
+          return convertLegacyGame(rawConfig, friendId);
+        }
+      }
+
+      // No game exists, initialize new one
+      const newGame = initializeGame(friendId);
+      // Save initialized game to connect_four_games table
+      await supabase
+        .from("connect_four_games")
+        .upsert({ friend_id: friendId, config: newGame }, { onConflict: "friend_id" });
+      return newGame;
     },
     staleTime: 1000 * 60 * 1, // 1 minute (shorter for real-time game)
   });
 }
 
-export function useMakeMove(friendId: string, widgetId: string, currentUserId: string) {
+export function useMakeMove(friendId: string, _widgetId: string, currentUserId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (column: number) => {
-      const { data: currentData } = await supabase
-        .from("friend_widgets")
+      // Get game state from connect_four_games table (friend-based)
+      const { data: currentData, error: fetchError } = await supabase
+        .from("connect_four_games")
         .select("config")
-        .eq("id", widgetId)
+        .eq("friend_id", friendId)
         .single();
+
+      if (fetchError && fetchError.code !== "PGRST116") {
+        throw fetchError;
+      }
 
       const rawConfig = (currentData?.config as Partial<ConnectFourData>) || {};
       const currentConfig = convertLegacyGame(rawConfig, friendId);
@@ -202,10 +213,10 @@ export function useMakeMove(friendId: string, widgetId: string, currentUserId: s
         moves: [...currentConfig.moves, newMove],
       };
 
+      // Update game state in connect_four_games table
       const { data, error } = await supabase
-        .from("friend_widgets")
-        .update({ config: updatedConfig })
-        .eq("id", widgetId)
+        .from("connect_four_games")
+        .upsert({ friend_id: friendId, config: updatedConfig }, { onConflict: "friend_id" })
         .select()
         .single();
 
@@ -214,14 +225,10 @@ export function useMakeMove(friendId: string, widgetId: string, currentUserId: s
     },
     onMutate: async (column) => {
       await queryClient.cancelQueries({
-        queryKey: ["connect_four", friendId, widgetId],
+        queryKey: ["connect_four", friendId],
       });
 
-      const previousData = queryClient.getQueryData<ConnectFourData>([
-        "connect_four",
-        friendId,
-        widgetId,
-      ]);
+      const previousData = queryClient.getQueryData<ConnectFourData>(["connect_four", friendId]);
 
       if (!previousData) return { previousData };
 
@@ -275,55 +282,46 @@ export function useMakeMove(friendId: string, widgetId: string, currentUserId: s
         moves: [...previousData.moves, newMove],
       };
 
-      queryClient.setQueryData<ConnectFourData>(
-        ["connect_four", friendId, widgetId],
-        optimisticData
-      );
+      queryClient.setQueryData<ConnectFourData>(["connect_four", friendId], optimisticData);
 
       return { previousData };
     },
     onError: (err, variables, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData<ConnectFourData>(
-          ["connect_four", friendId, widgetId],
-          context.previousData
-        );
+        queryClient.setQueryData<ConnectFourData>(["connect_four", friendId], context.previousData);
       }
       playSound("error");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["connect_four", friendId, widgetId],
+        queryKey: ["connect_four", friendId],
       });
     },
   });
 }
 
-export function useGameSubscription(friendId: string, widgetId: string) {
+export function useGameSubscription(friendId: string, _widgetId: string) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
     const channel = supabase
-      .channel(`game:${widgetId}`)
+      .channel(`connect_four:${friendId}`)
       .on(
         "postgres_changes",
         {
           event: "UPDATE",
           schema: "public",
-          table: "friend_widgets",
-          filter: `id=eq.${widgetId}`,
+          table: "connect_four_games",
+          filter: `friend_id=eq.${friendId}`,
         },
         (payload) => {
           const rawConfig = payload.new.config as Partial<ConnectFourData>;
           const newConfig = convertLegacyGame(rawConfig, friendId);
           // Update query cache and invalidate to trigger re-render
-          queryClient.setQueryData<ConnectFourData>(
-            ["connect_four", friendId, widgetId],
-            newConfig
-          );
+          queryClient.setQueryData<ConnectFourData>(["connect_four", friendId], newConfig);
           // Also invalidate to ensure all components using this query re-render
           queryClient.invalidateQueries({
-            queryKey: ["connect_four", friendId, widgetId],
+            queryKey: ["connect_four", friendId],
           });
           playSound("opponent_move");
         }
@@ -333,20 +331,20 @@ export function useGameSubscription(friendId: string, widgetId: string) {
     return () => {
       channel.unsubscribe();
     };
-  }, [friendId, widgetId, queryClient]);
+  }, [friendId, queryClient]);
 }
 
-export function useResetGame(friendId: string, widgetId: string) {
+export function useResetGame(friendId: string, _widgetId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => {
       const newGame = initializeGame(friendId);
 
+      // Update game state in connect_four_games table
       const { data, error } = await supabase
-        .from("friend_widgets")
-        .update({ config: newGame })
-        .eq("id", widgetId)
+        .from("connect_four_games")
+        .upsert({ friend_id: friendId, config: newGame }, { onConflict: "friend_id" })
         .select()
         .single();
 
@@ -354,7 +352,7 @@ export function useResetGame(friendId: string, widgetId: string) {
       return convertLegacyGame(data.config as Partial<ConnectFourData>, friendId);
     },
     onSuccess: (newGame) => {
-      queryClient.setQueryData<ConnectFourData>(["connect_four", friendId, widgetId], newGame);
+      queryClient.setQueryData<ConnectFourData>(["connect_four", friendId], newGame);
       playSound("retake");
     },
     onError: () => {

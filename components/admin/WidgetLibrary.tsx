@@ -20,7 +20,7 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
       name: "Music Player",
       description: "Play a selected song",
       icon: "hn-music-solid",
-      sizes: ["1x1"] as WidgetSize[],
+      sizes: ["1x1", "3x1", "4x2"] as WidgetSize[],
     },
     {
       type: "pixel_art",
@@ -48,7 +48,7 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
       name: "Shared Consumption Log",
       description: "Running diary of media consumption",
       icon: "hn-bookmark-solid", // book-solid not available
-      sizes: ["2x1"],
+      sizes: ["3x1"],
     },
     {
       type: "question_jar",
@@ -62,21 +62,21 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
       name: "Audio Snippets",
       description: "Shared soundboard of 5-second clips",
       icon: "hn-sound-on-solid", // microphone-solid not available
-      sizes: ["1x2", "1x3"],
+      sizes: ["1x2", "1x3", "2x1", "3x1"],
     },
     {
       type: "absurd_reviews",
       name: "Absurd Reviews",
       description: "Rate mundane concepts together",
       icon: "hn-star-solid",
-      sizes: ["2x2"],
+      sizes: ["2x1"],
     },
     {
       type: "fridge_magnets",
       name: "Fridge Magnets",
       description: "Virtual fridge with magnetic letters",
       icon: "hn-paperclip-solid", // magnet-solid not available
-      sizes: ["2x3", "3x4"] as WidgetSize[],
+      sizes: ["2x3", "3x4", "4x6"] as WidgetSize[],
     },
   ];
 

@@ -38,9 +38,11 @@
   text-transform: uppercase;
   box-shadow: var(--game-shadow-md);
   min-width: 60px;
+  min-height: 44px; /* Minimum touch target size for mobile */
   display: flex;
   align-items: center;
   gap: var(--space-xs);
+  touch-action: manipulation; /* Improve touch responsiveness */
 }
 
 .admin-overlay-button-edit {

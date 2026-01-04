@@ -25,11 +25,14 @@ export function QuestionJar({ size, friendId, friendName }: QuestionJarProps) {
     setOpenModal(modalId);
   };
 
-  // Only support 2x2 size
-  if (size !== "2x2") {
+  // Support 2x2, 3x2, and 4x2 sizes
+  const [cols, rows] = size.split("x").map(Number);
+  const isValidSize = size === "2x2" || size === "3x2" || size === "4x2";
+
+  if (!isValidSize) {
     return (
       <Widget size={size}>
-        <div className="widget-error-message">Question Jar only supports 2×2 size</div>
+        <div className="widget-error-message">Question Jar supports 2×2, 3×2, and 4×2 sizes</div>
       </Widget>
     );
   }
@@ -39,13 +42,11 @@ export function QuestionJar({ size, friendId, friendName }: QuestionJarProps) {
 
   // Determine widget display state
   let displayText = "";
-  let showIndicator = false;
 
   if (unansweredQuestion) {
     if (unansweredQuestion.asked_by !== identity) {
       // Your turn to answer
       displayText = `Q: ${unansweredQuestion.question_text}`;
-      showIndicator = true;
     } else {
       // Waiting for other's answer
       displayText = `Waiting for ${unansweredQuestion.asked_by === "admin" ? friendName : "Forest"}'s answer...`;
@@ -53,7 +54,6 @@ export function QuestionJar({ size, friendId, friendName }: QuestionJarProps) {
   } else {
     // Your turn to ask
     displayText = "Your turn to ask!";
-    showIndicator = true;
   }
 
   return (
@@ -62,14 +62,26 @@ export function QuestionJar({ size, friendId, friendName }: QuestionJarProps) {
         <div
           onClick={handleClick}
           className="widget-clickable"
-          style={{ justifyContent: "center", alignItems: "center", textAlign: "center" }}
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            padding: "var(--space-sm)",
+          }}
         >
-          {showIndicator && (
-            <div style={{ fontSize: "var(--font-size-lg)", color: "var(--accent)" }}>
-              <i className="hn hn-star-solid" style={{ fontSize: "1.5rem" }} />
-            </div>
-          )}
-          <div className="widget-title" style={{ wordBreak: "break-word" }}>
+          <div
+            className="widget-content"
+            style={{
+              wordBreak: "break-word",
+              overflow: "hidden",
+              display: "-webkit-box",
+              WebkitLineClamp: rows >= 3 ? 6 : 4,
+              WebkitBoxOrient: "vertical",
+              textAlign: "center",
+              fontSize: cols >= 4 ? "var(--font-size-sm)" : "var(--font-size-xs)",
+              lineHeight: 1.4,
+            }}
+          >
             {displayText}
           </div>
         </div>

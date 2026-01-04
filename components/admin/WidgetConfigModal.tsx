@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { FriendWidget } from "@/lib/queries";
-import { WidgetConfig } from "@/lib/types";
+import { WidgetConfig, WidgetSize } from "@/lib/types";
 import { playSound } from "@/lib/sounds";
 import {
   processImageToPixelData,
@@ -26,7 +26,7 @@ interface ImageItem {
 interface WidgetConfigModalProps {
   widget: FriendWidget | null;
   onClose: () => void;
-  onSave: (config: WidgetConfig) => void;
+  onSave: (config: WidgetConfig, size?: WidgetSize) => void;
   friendColors?: {
     primary: string;
     secondary: string;
@@ -36,6 +36,19 @@ interface WidgetConfigModalProps {
   };
 }
 
+// Widget size options by type
+const WIDGET_SIZES: Record<string, WidgetSize[]> = {
+  music_player: ["1x1", "3x1", "4x2"],
+  pixel_art: ["1x1", "2x2", "3x3", "4x4", "5x5"],
+  personality_quiz: ["1x1", "2x2", "3x3", "4x4"],
+  connect_four: ["2x1", "2x2", "3x3", "4x4"],
+  consumption_log: ["3x1", "4x1", "5x1"],
+  question_jar: ["2x2", "3x2", "4x2"],
+  audio_snippets: ["1x2", "1x3", "2x1", "3x1", "4x1"],
+  absurd_reviews: ["2x1", "3x1", "4x1"],
+  fridge_magnets: ["2x3", "3x4", "4x6"],
+};
+
 export function WidgetConfigModal({
   widget,
   onClose,
@@ -43,6 +56,7 @@ export function WidgetConfigModal({
   friendColors,
 }: WidgetConfigModalProps) {
   const [config, setConfig] = useState<WidgetConfig>({});
+  const [selectedSize, setSelectedSize] = useState<WidgetSize | null>(null);
   const [availableImages, setAvailableImages] = useState<ImageItem[]>([]);
   const [loadingImages, setLoadingImages] = useState(false);
   const [processingImages, setProcessingImages] = useState<Set<string>>(new Set());
@@ -55,6 +69,7 @@ export function WidgetConfigModal({
     if (widget && widget.id !== widgetIdRef.current) {
       widgetIdRef.current = widget.id;
       setConfig(widget.config || {});
+      setSelectedSize(widget.size || null);
       imagesFetchedRef.current = false; // Reset fetch flag for new widget
     }
   }, [widget]);
@@ -77,7 +92,11 @@ export function WidgetConfigModal({
   }, [widget?.widget_type]);
 
   const handleSave = () => {
-    onSave(config);
+    if (selectedSize && selectedSize !== widget?.size) {
+      onSave(config, selectedSize);
+    } else {
+      onSave(config);
+    }
     playSound("success");
     onClose();
   };
@@ -607,6 +626,26 @@ export function WidgetConfigModal({
             <i className="hn hn-times-solid" />
           </button>
         </div>
+
+        {/* Size Selection */}
+        {widget && WIDGET_SIZES[widget.widget_type] && (
+          <div style={{ marginBottom: "var(--space-lg)" }}>
+            <h3 className="game-heading-3" style={{ marginBottom: "var(--space-sm)" }}>
+              Widget Size
+            </h3>
+            <div className="game-flex game-flex-gap-sm" style={{ flexWrap: "wrap" }}>
+              {WIDGET_SIZES[widget.widget_type].map((size) => (
+                <button
+                  key={size}
+                  className={`game-button ${selectedSize === size ? "game-button-primary" : ""}`}
+                  onClick={() => setSelectedSize(size)}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {renderConfigFields()}
 

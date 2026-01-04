@@ -47,10 +47,12 @@ export function FridgeMagnets({ size, friendId }: FridgeMagnetsProps) {
     setOpenModal(modalId);
   };
 
-  if (size !== "2x3" && size !== "3x4") {
+  // Support various sizes - validate that it's a reasonable size
+  const [cols, rows] = size.split("x").map(Number);
+  if (isNaN(cols) || isNaN(rows) || cols < 2 || rows < 3 || cols > 4 || rows > 6) {
     return (
       <Widget size={size}>
-        <div className="widget-error-message">Fridge Magnets only supports 2×3 and 3×4 sizes</div>
+        <div className="widget-error-message">Fridge Magnets supports sizes from 2×3 to 4×6</div>
       </Widget>
     );
   }
