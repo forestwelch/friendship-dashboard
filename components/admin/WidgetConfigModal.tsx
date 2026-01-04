@@ -609,9 +609,12 @@ export function WidgetConfigModal({
         style={{
           maxWidth: "37.5rem",
           width: "90%",
-          maxHeight: "80vh",
-          overflowY: "auto",
+          maxHeight: "calc(100vh - 2rem)" /* Ensure X button is always visible with padding */,
+          overflow: "hidden" /* No scrolling - content must fit */,
           padding: "var(--space-xl)",
+          position: "relative" /* Ensure close button positioning works */,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <div className="game-flex game-flex-between" style={{ marginBottom: "var(--space-lg)" }}>

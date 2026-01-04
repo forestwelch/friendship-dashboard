@@ -147,6 +147,7 @@ function MagnetBank({
 
       const col = Math.min(Math.max(0, Math.floor((x - padding) / actualSlotWidth)), cols - 1);
       const scrollTop = bankRef.current.scrollTop || 0;
+      // Updated to match new compact row height (32px + 1px gap = 33px per row)
       const slotHeight = (rect.height - padding * 2) / rows;
       const row = Math.min(
         Math.max(0, Math.floor((y + scrollTop - padding) / slotHeight)),
@@ -209,8 +210,8 @@ function MagnetBank({
       style={{
         cursor: isOver ? "grabbing" : "default",
         gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
-        gridAutoRows: "minmax(40px, auto)",
-        gridTemplateRows: `repeat(${rows}, minmax(40px, auto))`,
+        gridAutoRows: "minmax(32px, auto)" /* Reduced from 40px for more compact rows */,
+        gridTemplateRows: `repeat(${rows}, minmax(32px, auto))` /* Reduced from 40px */,
       }}
     >
       {bankItems.map((item, idx) => {

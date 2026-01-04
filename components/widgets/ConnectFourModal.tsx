@@ -22,6 +22,7 @@ import {
 } from "@/lib/queries-connect-four";
 import { useUserContext, getUserIdForFriend, getUserDisplayName } from "@/lib/use-user-context";
 import { ADMIN_USER_ID } from "@/lib/constants";
+import { getUserColor } from "@/lib/color-utils";
 import styles from "./ConnectFourModal.module.css";
 
 interface ConnectFourModalProps {
@@ -60,6 +61,10 @@ export function ConnectFourModal({
   const playerTwoId = game?.player_two_id || friendId;
   const currentTurnId = game?.current_turn_id || playerOneId;
   const isMyTurn = currentTurnId === currentUserId;
+
+  // Debug: Log for ghost piece color determination
+  // playerOneId is always admin, playerTwoId is always friend
+  // currentTurnId should match one of them to determine whose turn it is
 
   // Player colors are determined by themeColors (primary/secondary)
 
@@ -162,23 +167,44 @@ export function ConnectFourModal({
                   <div key={row} className={styles.boardRow}>
                     {Array.from({ length: BOARD_COLS }).map((_, col) => {
                       const cell = board[row][col];
-                      // Colors are consistent: "you" = player_one (primary), "them" = player_two (secondary)
+                      // Colors: friend always = primary (pink), admin always = secondary (green)
+                      // playerOneId is always admin, playerTwoId is always friend
+                      // Board stores "you" and "them" relative to the player who made the move
+                      // For winning screen, we need to determine actual player from moves or use a default
                       const isWinning = isWinningCell(row, col);
+                      let pieceColor: string | null = null;
+
+                      if (cell === "you") {
+                        // "you" piece - in winning screen, assume it's the winner's piece
+                        // But we need to know which player won - use winnerId if available
+                        if (winnerId) {
+                          pieceColor = getUserColor(winnerId, friendId, themeColors);
+                        } else {
+                          // Fallback: use currentUserId (whoever is viewing)
+                          pieceColor = getUserColor(currentUserId, friendId, themeColors);
+                        }
+                      } else if (cell === "them") {
+                        // "them" piece - the other player
+                        if (winnerId) {
+                          const otherPlayerId =
+                            winnerId === playerOneId ? playerTwoId : playerOneId;
+                          pieceColor = getUserColor(otherPlayerId, friendId, themeColors);
+                        } else {
+                          const otherPlayerId =
+                            currentUserId === playerOneId ? playerTwoId : playerOneId;
+                          pieceColor = getUserColor(otherPlayerId, friendId, themeColors);
+                        }
+                      }
 
                       return (
                         <div
                           key={col}
                           className={`${styles.cell} ${isWinning ? styles.winningCell : ""}`}
                         >
-                          {cell === "you" ? (
+                          {pieceColor ? (
                             <div
                               className={`${styles.piece} ${isWinning ? styles.winningPiece : ""}`}
-                              style={{ backgroundColor: themeColors.primary }}
-                            />
-                          ) : cell === "them" ? (
-                            <div
-                              className={`${styles.piece} ${isWinning ? styles.winningPiece : ""}`}
-                              style={{ backgroundColor: themeColors.secondary }}
+                              style={{ backgroundColor: pieceColor }}
                             />
                           ) : null}
                         </div>
@@ -241,8 +267,7 @@ export function ConnectFourModal({
             <span
               className={styles.playerCircle}
               style={{
-                backgroundColor:
-                  currentUserId === playerOneId ? themeColors.primary : themeColors.secondary,
+                backgroundColor: getUserColor(playerOneId, friendId, themeColors),
               }}
             />
             <span className={styles.vs}>vs</span>
@@ -252,8 +277,7 @@ export function ConnectFourModal({
             <span
               className={styles.playerCircle}
               style={{
-                backgroundColor:
-                  currentUserId === playerOneId ? themeColors.secondary : themeColors.primary,
+                backgroundColor: getUserColor(playerTwoId, friendId, themeColors),
               }}
             />
           </div>
@@ -304,28 +328,46 @@ export function ConnectFourModal({
                         cursor: status === "active" && isMyTurn ? "pointer" : "default",
                       }}
                     >
-                      {cell === "you" ? (
-                        <div
-                          className={`${styles.piece} ${isWinning ? styles.winningPiece : ""}`}
-                          style={{ backgroundColor: themeColors.primary }}
-                        />
-                      ) : cell === "them" ? (
-                        <div
-                          className={`${styles.piece} ${isWinning ? styles.winningPiece : ""}`}
-                          style={{ backgroundColor: themeColors.secondary }}
-                        />
-                      ) : showGhostPiece ? (
-                        <div
-                          className={styles.ghostPiece}
-                          style={{
-                            backgroundColor:
-                              currentUserId === playerOneId
-                                ? themeColors.primary
-                                : themeColors.secondary,
-                            opacity: ghostOpacity,
-                          }}
-                        />
-                      ) : null}
+                      {(() => {
+                        // Colors: friend always = primary (pink), admin always = secondary (green)
+                        // playerOneId is always admin, playerTwoId is always friend
+                        // Board stores "you" and "them" relative to the player who made the move
+                        // We need to map "you"/"them" to actual player IDs based on who's viewing
+                        let pieceColor: string | null = null;
+
+                        if (cell === "you") {
+                          // "you" piece belongs to currentUserId (whoever is viewing)
+                          pieceColor = getUserColor(currentUserId, friendId, themeColors);
+                        } else if (cell === "them") {
+                          // "them" piece belongs to the other player
+                          const otherPlayerId =
+                            currentUserId === playerOneId ? playerTwoId : playerOneId;
+                          pieceColor = getUserColor(otherPlayerId, friendId, themeColors);
+                        } else if (showGhostPiece) {
+                          // Ghost piece shows the color of the player whose turn it is
+                          const ghostColor = getUserColor(currentTurnId, friendId, themeColors);
+                          return (
+                            <div
+                              className={styles.ghostPiece}
+                              style={{
+                                backgroundColor: ghostColor,
+                                opacity: ghostOpacity,
+                              }}
+                            />
+                          );
+                        }
+
+                        if (pieceColor) {
+                          const isWinning = isWinningCell(row, col);
+                          return (
+                            <div
+                              className={`${styles.piece} ${isWinning ? styles.winningPiece : ""}`}
+                              style={{ backgroundColor: pieceColor }}
+                            />
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                   );
                 })}

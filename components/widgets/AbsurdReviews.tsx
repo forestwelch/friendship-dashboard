@@ -17,7 +17,7 @@ interface AbsurdReviewsProps {
 export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps) {
   const { setOpenModal } = useUIStore();
   const identity = useIdentity();
-  const modalId = `absurdreviews-${friendId}`;
+  const modalId = `anthropocenereviewed-${friendId}`;
 
   const { data: topic } = useCurrentTopic(friendId);
   const { data: reviews = [] } = useReviewsForTopic(topic?.id || null);
@@ -33,7 +33,9 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
   if (!isValidSize) {
     return (
       <Widget size={size}>
-        <div className="widget-error-message">Absurd Reviews supports 2×1, 3×1, and 4×1 sizes</div>
+        <div className="widget-error-message">
+          Anthropocene Reviewed supports 2×1, 3×1, and 4×1 sizes
+        </div>
       </Widget>
     );
   }

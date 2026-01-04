@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { playSound } from "@/lib/sounds";
 import Link from "next/link";
 import { getInboxItems, updateInboxItemStatus } from "@/lib/queries";
+import { formatDateCompact } from "@/lib/date-utils";
 import clsx from "clsx";
 import styles from "./InboxManager.module.css";
 
@@ -150,10 +151,12 @@ export function InboxManager() {
                       Proposed Hangout
                     </div>
                     <div className="game-text-muted" style={{ marginBottom: "var(--space-xs)" }}>
-                      {item.data.date != null &&
-                        new Date(String(item.data.date)).toLocaleDateString()}{" "}
-                      {item.data.date != null && "at"}{" "}
-                      {item.data.time != null && String(item.data.time)}
+                      {item.data.date != null && (
+                        <>
+                          {formatDateCompact(String(item.data.date))}{" "}
+                          {item.data.time != null && `at ${String(item.data.time)}`}
+                        </>
+                      )}
                     </div>
                     {item.data.message != null && (
                       <div className="game-text-muted" style={{ marginTop: "var(--space-xs)" }}>
@@ -166,7 +169,7 @@ export function InboxManager() {
                   className="game-text-muted"
                   style={{ fontSize: "10px", marginTop: "var(--space-sm)" }}
                 >
-                  {new Date(item.created_at).toLocaleString()}
+                  {formatDateCompact(item.created_at)}
                 </div>
               </div>
               {item.status === "pending" && (

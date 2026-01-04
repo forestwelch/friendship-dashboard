@@ -11,7 +11,7 @@ export const ADMIN_USER_ID = "admin";
 // Grid dimensions - single source of truth
 // Change these values to resize the entire grid
 export const GRID_COLS = 5;
-export const GRID_ROWS = 10;
+export const GRID_ROWS = 9; // Reduced from 10 to 9 rows to prevent mobile cutoff
 export const GRID_TILE_SIZE_REM = 5; // Tile size in rem (5rem = 80px at 16px base)
 export const GRID_GAP_REM = 0.5; // Gap between tiles in rem (0.5rem = 8px at 16px base)
 

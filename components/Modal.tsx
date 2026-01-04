@@ -97,24 +97,12 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
     };
   }, [isOpen]);
 
-  // Handle backdrop click to close modal
-  const handleBackdropClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.target === e.currentTarget) {
-        handleClose();
-      }
-    },
-    [handleClose]
-  );
+  // No backdrop click - removed for seamless app feel
 
   if (!isOpen) return null;
 
   const modalContent = (
-    <div
-      className={styles.backdrop}
-      onClick={handleBackdropClick}
-      style={{ pointerEvents: "auto" }}
-    >
+    <div className={styles.backdrop} style={{ pointerEvents: "auto" }}>
       <div
         className={styles.modal}
         ref={modalRef}

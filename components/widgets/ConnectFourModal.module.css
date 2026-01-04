@@ -111,7 +111,7 @@
 .ghostPiece {
   width: 80%;
   height: 80%;
-  background: var(--primary);
+  /* Background color set inline based on whose turn it is */
   border-radius: 0;
   /* Opacity set inline based on position (0.2 for cells above drop, 0.8 for drop cell) */
   image-rendering: pixelated;

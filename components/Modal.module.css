@@ -7,7 +7,7 @@
   /* Cover entire container (wrapper or grid) */
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.75); /* Dark overlay backdrop */
+  background: transparent; /* No backdrop - seamless app feel */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,7 +19,7 @@
   /* When portaled to grid container, covers grid area */
   /* Inherits grid container's transform (translate + scale) via CSS class */
   pointer-events: auto;
-  cursor: pointer;
+  cursor: default; /* Changed from pointer since no backdrop click */
 }
 
 .modal {
@@ -27,15 +27,17 @@
   border: 4px solid var(--primary); /* Chunky pixel border */
   border-radius: 0;
   box-shadow: none;
-  /* Match grid's exact dimensions */
+  /* Match grid's exact dimensions, but ensure it doesn't exceed viewport */
   width: var(--grid-width);
   height: var(--grid-height);
+  max-width: 100vw;
+  max-height: 100vh; /* Ensure modal never exceeds viewport height */
   display: flex;
   flex-direction: column;
   position: relative;
 
   box-sizing: border-box;
-  /* Allow modal content to scroll if needed */
+  /* No scrolling - content must fit perfectly */
   overflow: hidden;
   pointer-events: auto;
   cursor: default;
@@ -50,6 +52,11 @@
   padding: var(--space-md) var(--space-lg);
   border-bottom: 2px solid var(--primary);
   flex-shrink: 0;
+  /* Ensure header (and X button) is always visible */
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 10;
 }
 
 .title {
@@ -96,7 +103,7 @@
 
 .content {
   padding: 0;
-  overflow: hidden;
+  overflow: hidden; /* No scrolling - content must fit */
   flex: 1;
   min-height: 0; /* Allow flex item to shrink below content size */
   display: flex;

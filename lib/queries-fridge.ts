@@ -293,7 +293,7 @@ export function getCanvasDimensions(size: string): { width: number; height: numb
   // Base size for 2x3: 400x600
   // Scale proportionally for other sizes
   const baseWidth = 200; // per column
-  const baseHeight = 200; // per row
+  const baseHeight = 185; // per row (slightly reduced to fit better)
 
   return {
     width: baseWidth * cols,

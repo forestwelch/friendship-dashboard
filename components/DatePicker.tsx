@@ -4,6 +4,7 @@ import { useState } from "react";
 import { playSound } from "@/lib/sounds";
 import { Modal } from "./Modal";
 import { useUIStore } from "@/lib/store/ui-store";
+import { formatDateCompact } from "@/lib/date-utils";
 import styles from "./DatePicker.module.css";
 
 interface DatePickerProps {
@@ -35,13 +36,7 @@ export function DatePicker({ value, onChange, id }: DatePickerProps) {
   };
 
   // Format date for display
-  const displayDate = value
-    ? new Date(value).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : "Select date";
+  const displayDate = value ? formatDateCompact(value) : "Select date";
 
   return (
     <>

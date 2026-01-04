@@ -10,6 +10,8 @@ import {
 } from "@/lib/queries-question-jar-hooks";
 import { useIdentity } from "@/lib/identity-utils";
 import { FormField, Textarea } from "@/components/shared";
+import { formatDateCompact } from "@/lib/date-utils";
+import { getUserColorVar } from "@/lib/color-utils";
 
 interface QuestionJarModalProps {
   friendId: string;
@@ -64,14 +66,9 @@ export function QuestionJarModal({ friendId, friendName }: QuestionJarModalProps
     );
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
+  // Get initials for display
+  const friendInitial = friendName.charAt(0).toUpperCase();
+  const forestInitial = "F"; // Forest's initial
 
   return (
     <Modal id={modalId} title="Question Jar" onClose={() => setOpenModal(null)}>
@@ -136,17 +133,31 @@ export function QuestionJarModal({ friendId, friendName }: QuestionJarModalProps
           ) : (
             entries
               .filter((e) => e.answer_text)
-              .map((entry) => (
-                <div key={entry.id} className="entry">
-                  <div className="entry-title">Q: {entry.question_text}</div>
-                  <div className="entry-content">A: {entry.answer_text}</div>
-                  <div className="entry-meta">
-                    Asked by {entry.asked_by === "admin" ? "Forest" : friendName} • Answered by{" "}
-                    {entry.answered_by === "admin" ? "Forest" : friendName} •{" "}
-                    {formatDate(entry.answered_at || entry.asked_at)}
+              .map((entry) => {
+                const askerInitial = entry.asked_by === "admin" ? forestInitial : friendInitial;
+                const answererInitial =
+                  entry.answered_by === "admin" ? forestInitial : friendInitial;
+
+                return (
+                  <div key={entry.id} className="entry">
+                    <div
+                      className="entry-title"
+                      style={{ color: getUserColorVar(entry.asked_by, friendId) }}
+                    >
+                      {askerInitial}: {entry.question_text}
+                    </div>
+                    <div
+                      className="entry-content"
+                      style={{ color: getUserColorVar(entry.answered_by, friendId) }}
+                    >
+                      {answererInitial}: {entry.answer_text}
+                    </div>
+                    <div className="entry-meta">
+                      {formatDateCompact(entry.answered_at || entry.asked_at)}
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
           )}
         </div>
       </div>

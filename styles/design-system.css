@@ -84,7 +84,7 @@
   /* Grid dimensions - single source of truth */
   /* Change these values to resize the entire grid */
   --grid-cols: 5;
-  --grid-rows: 10;
+  --grid-rows: 9; /* Reduced from 10 to 9 rows to prevent mobile cutoff */
   --grid-tile-size: 5rem; /* Tile size (5rem = 80px at 16px base) */
   --grid-gap: 0.5rem; /* Gap between tiles (0.5rem = 8px at 16px base) */
   /* Calculated grid dimensions */
@@ -718,21 +718,22 @@ textarea.game-input {
   opacity: 0.8;
 }
 
-.snippet-button[data-is-owner="true"] {
-  background-color: var(--primary);
-}
-
-.snippet-button[data-is-owner="false"] {
+/* Colors: friend always = primary, admin always = secondary */
+.snippet-button[data-recorded-by="admin"] {
   background-color: var(--secondary);
 }
 
-.snippet-button[data-is-owner="true"]:hover {
+.snippet-button[data-recorded-by]:not([data-recorded-by="admin"]) {
+  background-color: var(--primary);
+}
+
+.snippet-button[data-recorded-by="admin"]:hover {
   background-color: var(--accent);
   opacity: 0.9;
 }
 
-.snippet-button[data-is-owner="false"]:hover {
-  background-color: var(--primary);
+.snippet-button[data-recorded-by]:not([data-recorded-by="admin"]):hover {
+  background-color: var(--accent);
   opacity: 0.9;
 }
 
@@ -784,7 +785,7 @@ textarea.game-input {
   max-width: calc(100% - var(--space-sm) * 2);
   position: relative;
   background-color: var(--bg);
-  border: 2px solid var(--secondary);
+  border: none; /* Removed border */
   border-radius: var(--radius-sm);
   background-image: repeating-linear-gradient(
     0deg,
@@ -820,11 +821,11 @@ textarea.game-input {
   width: 100%;
   max-width: 100%;
   height: calc(
-    4 * 42px + 3 * 2px + var(--space-xs) * 2
-  ); /* 4 rows * 42px (40px slot + 2px gap) + 3 gaps + padding */
-  min-height: calc(4 * 42px + 3 * 2px + var(--space-xs) * 2);
+    4 * 34px + 3 * 1px + var(--space-xs) * 2
+  ); /* 4 rows * 34px (32px slot + 1px gap) + 3 gaps + padding - more compact */
+  min-height: calc(4 * 34px + 3 * 1px + var(--space-xs) * 2);
   display: grid;
-  gap: 2px;
+  gap: 1px; /* Reduced from 2px for more compact spacing */
   position: relative;
   background-color: transparent;
   border: none;
@@ -841,7 +842,7 @@ textarea.game-input {
   align-items: center;
   justify-content: center;
   position: relative;
-  min-height: 40px;
+  min-height: 32px; /* Reduced from 40px for more compact rows */
   min-width: 0; /* Allow grid items to shrink below content size */
   overflow: hidden;
 }

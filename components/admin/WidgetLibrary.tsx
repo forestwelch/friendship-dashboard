@@ -66,7 +66,7 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
     },
     {
       type: "absurd_reviews",
-      name: "Absurd Reviews",
+      name: "Anthropocene Reviewed",
       description: "Rate mundane concepts together",
       icon: "hn-star-solid",
       sizes: ["2x1"],

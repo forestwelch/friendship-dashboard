@@ -5,6 +5,7 @@ import {
   createTopic,
   submitReview,
   revealTopic,
+  getAllRevealedTopics,
 } from "./queries-reviews";
 import { playSound } from "./sounds";
 
@@ -78,10 +79,18 @@ export function useRevealTopic(friendId: string, topicId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["review_topic", friendId] });
       queryClient.invalidateQueries({ queryKey: ["reviews", topicId] });
+      queryClient.invalidateQueries({ queryKey: ["revealed_topics", friendId] });
       playSound("success");
     },
     onError: () => {
       playSound("error");
     },
+  });
+}
+
+export function useAllRevealedTopics(friendId: string) {
+  return useQuery({
+    queryKey: ["revealed_topics", friendId],
+    queryFn: () => getAllRevealedTopics(friendId),
   });
 }

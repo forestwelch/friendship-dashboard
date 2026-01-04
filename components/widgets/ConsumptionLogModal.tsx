@@ -10,13 +10,18 @@ import {
 } from "@/lib/queries-consumption-hooks";
 import { useIdentity } from "@/lib/identity-utils";
 import { FormField, Input, Textarea } from "@/components/shared";
+import { formatDateCompact } from "@/lib/date-utils";
+import { getUserColorVar } from "@/lib/color-utils";
 
 interface ConsumptionLogModalProps {
   friendId: string;
   friendName: string;
 }
 
-export function ConsumptionLogModal({ friendId, friendName }: ConsumptionLogModalProps) {
+export function ConsumptionLogModal({
+  friendId,
+  friendName: _friendName,
+}: ConsumptionLogModalProps) {
   const { openModal, setOpenModal } = useUIStore();
   const [title, setTitle] = useState("");
   const [link, setLink] = useState("");
@@ -67,15 +72,6 @@ export function ConsumptionLogModal({ friendId, friendName }: ConsumptionLogModa
     );
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
   return (
     <Modal id={modalId} title="Shared Consumption Log" onClose={() => setOpenModal(null)}>
       <div className="modal-content">
@@ -122,31 +118,34 @@ export function ConsumptionLogModal({ friendId, friendName }: ConsumptionLogModa
           {entries.length === 0 ? (
             <div className="empty-state">No entries yet. Be the first to add one!</div>
           ) : (
-            entries.map((entry) => (
-              <div key={entry.id} className="entry">
-                <div className="entry-header">
-                  <div className="entry-title">
-                    {entry.link ? (
-                      <a
-                        href={entry.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: "var(--primary)", textDecoration: "underline" }}
-                      >
-                        {entry.title}
-                      </a>
-                    ) : (
-                      entry.title
-                    )}
+            entries.map((entry) => {
+              const entryColor = getUserColorVar(entry.added_by, friendId);
+
+              return (
+                <div key={entry.id} className="entry">
+                  <div className="entry-header">
+                    <div className="entry-title" style={{ color: entryColor }}>
+                      {entry.link ? (
+                        <a
+                          href={entry.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: entryColor, textDecoration: "underline" }}
+                        >
+                          {entry.title}
+                        </a>
+                      ) : (
+                        entry.title
+                      )}
+                    </div>
+                    <div className="entry-date">{formatDateCompact(entry.created_at)}</div>
                   </div>
-                  <div className="entry-date">{formatDate(entry.created_at)}</div>
+                  <div className="entry-content" style={{ color: entryColor }}>
+                    {entry.thought}
+                  </div>
                 </div>
-                <div className="entry-content">{entry.thought}</div>
-                <div className="entry-meta">
-                  Added by {entry.added_by === "admin" ? "Forest" : friendName}
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

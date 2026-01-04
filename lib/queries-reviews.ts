@@ -166,3 +166,60 @@ export async function revealTopic(topicId: string): Promise<boolean> {
     return false;
   }
 }
+
+export interface ReviewTopicWithReviews extends ReviewTopic {
+  reviews: Review[];
+}
+
+export async function getAllRevealedTopics(friendId: string): Promise<ReviewTopicWithReviews[]> {
+  if (!isSupabaseConfigured()) {
+    return [];
+  }
+
+  try {
+    const { data: topics, error } = await supabase
+      .from("review_topics")
+      .select("*")
+      .eq("friend_id", friendId)
+      .eq("status", "revealed")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching revealed topics:", error);
+      return [];
+    }
+
+    if (!topics || topics.length === 0) {
+      return [];
+    }
+
+    // Fetch reviews for all topics
+    const topicIds = topics.map((t) => t.id);
+    const { data: allReviews, error: reviewsError } = await supabase
+      .from("reviews")
+      .select("*")
+      .in("topic_id", topicIds);
+
+    if (reviewsError) {
+      console.error("Error fetching reviews:", reviewsError);
+      return topics.map((topic) => ({ ...topic, reviews: [] }));
+    }
+
+    // Group reviews by topic_id
+    const reviewsByTopic = new Map<string, Review[]>();
+    (allReviews || []).forEach((review) => {
+      const existing = reviewsByTopic.get(review.topic_id) || [];
+      existing.push(review);
+      reviewsByTopic.set(review.topic_id, existing);
+    });
+
+    // Combine topics with their reviews
+    return topics.map((topic) => ({
+      ...topic,
+      reviews: reviewsByTopic.get(topic.id) || [],
+    }));
+  } catch (error) {
+    console.error("Error in getAllRevealedTopics:", error);
+    return [];
+  }
+}

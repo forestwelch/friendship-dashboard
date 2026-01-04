@@ -11,6 +11,8 @@ import {
   useConnectFourGame,
   useGameSubscription,
 } from "@/lib/queries-connect-four";
+import { ADMIN_USER_ID } from "@/lib/constants";
+import { getUserColor } from "@/lib/color-utils";
 import styles from "./ConnectFour.module.css";
 
 interface ConnectFourProps {
@@ -50,6 +52,30 @@ export function ConnectFour({
   // Render full board preview (6x7)
   const renderFullBoard = () => {
     const displayBoard = board.length > 0 ? board : createEmptyBoard();
+    const game = gameData || config;
+    const playerOneId = game?.player_one_id || ADMIN_USER_ID;
+    const playerTwoId = game?.player_two_id || friendId;
+    const moves = game?.moves || [];
+
+    // Build a map of which player owns each piece by tracking moves
+    // The board stores "you" and "them" relative to whoever made the move
+    // We need to reconstruct actual ownership from the moves array
+    const pieceOwnership = new Map<string, string>(); // "row,col" -> playerId
+
+    moves.forEach((move) => {
+      // Find which row this move ended up in
+      const col = move.column;
+      let row = BOARD_ROWS - 1;
+      for (let r = BOARD_ROWS - 1; r >= 0; r--) {
+        const key = `${r},${col}`;
+        if (!pieceOwnership.has(key)) {
+          row = r;
+          break;
+        }
+      }
+      const key = `${row},${col}`;
+      pieceOwnership.set(key, move.player_id);
+    });
 
     return (
       <div className={styles.fullBoard}>
@@ -57,18 +83,28 @@ export function ConnectFour({
           <div key={rowIdx} className={styles.boardRow}>
             {Array.from({ length: BOARD_COLS }).map((_, colIdx) => {
               const cell = displayBoard[rowIdx]?.[colIdx];
+              if (!cell) return <div key={colIdx} className={styles.boardCell} />;
+
+              // Determine actual owner from moves history
+              const key = `${rowIdx},${colIdx}`;
+              const ownerId = pieceOwnership.get(key);
+
+              // If we can't determine from moves, use a fallback based on cell value
+              // This shouldn't happen, but just in case
+              let pieceColor: string | null = null;
+              if (ownerId) {
+                pieceColor = getUserColor(ownerId, friendId, themeColors);
+              } else {
+                // Fallback: assume "you" pieces are from playerTwoId (friend) if no moves tracked
+                // This is imperfect but better than nothing
+                const fallbackOwnerId = cell === "you" ? playerTwoId : playerOneId;
+                pieceColor = getUserColor(fallbackOwnerId, friendId, themeColors);
+              }
+
               return (
                 <div key={colIdx} className={styles.boardCell}>
-                  {cell === "you" ? (
-                    <div
-                      className={styles.piecePreview}
-                      style={{ backgroundColor: themeColors.primary }}
-                    />
-                  ) : cell === "them" ? (
-                    <div
-                      className={styles.piecePreview}
-                      style={{ backgroundColor: themeColors.secondary }}
-                    />
+                  {pieceColor ? (
+                    <div className={styles.piecePreview} style={{ backgroundColor: pieceColor }} />
                   ) : null}
                 </div>
               );

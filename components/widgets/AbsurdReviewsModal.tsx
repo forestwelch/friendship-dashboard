@@ -9,9 +9,12 @@ import {
   useCreateTopic,
   useSubmitReview,
   useRevealTopic,
+  useAllRevealedTopics,
 } from "@/lib/queries-reviews-hooks";
 import { useIdentity } from "@/lib/identity-utils";
 import { FormField, Input, Textarea, Button, Card } from "@/components/shared";
+import { formatDateCompact } from "@/lib/date-utils";
+import { getUserColorVar } from "@/lib/color-utils";
 
 interface AbsurdReviewsModalProps {
   friendId: string;
@@ -25,10 +28,11 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
   const [recommend, setRecommend] = useState(false);
   const [newTopicName, setNewTopicName] = useState("");
   const identity = useIdentity();
-  const modalId = `absurdreviews-${friendId}`;
+  const modalId = `anthropocenereviewed-${friendId}`;
 
   const { data: topic } = useCurrentTopic(friendId);
   const { data: reviews = [] } = useReviewsForTopic(topic?.id || null);
+  const { data: archivedTopics = [] } = useAllRevealedTopics(friendId);
   const createTopicMutation = useCreateTopic(friendId);
   const submitReviewMutation = useSubmitReview(friendId, topic?.id || "");
   const revealTopicMutation = useRevealTopic(friendId, topic?.id || "");
@@ -76,7 +80,7 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
   };
 
   return (
-    <Modal id={modalId} title="Absurd Reviews" onClose={() => setOpenModal(null)}>
+    <Modal id={modalId} title="Anthropocene Reviewed" onClose={() => setOpenModal(null)}>
       <div className="modal-content">
         {!topic ? (
           // Set Topic Form (Forest only)
@@ -172,9 +176,10 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
                   <div className="reviews-grid">
                     {[myReview, otherReview].map((review, idx) => {
                       if (!review) return null;
+                      const reviewColor = getUserColorVar(review.reviewer, friendId);
                       return (
-                        <Card key={idx}>
-                          <div className="entry-title">
+                        <Card key={idx} style={{ borderColor: reviewColor }}>
+                          <div className="entry-title" style={{ color: reviewColor }}>
                             {review.reviewer === identity
                               ? "You"
                               : review.reviewer === "admin"
@@ -186,7 +191,9 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
                               <i key={i} className="hn hn-star-solid" />
                             ))}
                           </div>
-                          <div className="entry-content">{review.review_text}</div>
+                          <div className="entry-content" style={{ color: reviewColor }}>
+                            {review.review_text}
+                          </div>
                           {review.recommend && (
                             <div className="recommend-badge">
                               <i className="hn hn-check-solid" /> Recommends
@@ -223,6 +230,57 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
               </form>
             )}
           </>
+        )}
+
+        {/* Archive Section */}
+        {archivedTopics.length > 0 && (
+          <div className="entries-list">
+            <div className="form-title">Archive:</div>
+            {archivedTopics.map((archivedTopic) => {
+              const archivedReviews = archivedTopic.reviews || [];
+              const myArchivedReview = archivedReviews.find((r) => r.reviewer === identity);
+              const otherArchivedReview = archivedReviews.find((r) => r.reviewer !== identity);
+
+              return (
+                <div key={archivedTopic.id} className="entry">
+                  <div className="entry-title">{archivedTopic.topic_name}</div>
+                  {myArchivedReview && otherArchivedReview && (
+                    <div className="reviews-grid" style={{ marginTop: "var(--space-sm)" }}>
+                      {[myArchivedReview, otherArchivedReview].map((review, idx) => {
+                        if (!review) return null;
+                        const reviewColor = getUserColorVar(review.reviewer, friendId);
+                        return (
+                          <Card key={idx} style={{ borderColor: reviewColor }}>
+                            <div className="entry-title" style={{ color: reviewColor }}>
+                              {review.reviewer === identity
+                                ? "You"
+                                : review.reviewer === "admin"
+                                  ? "Forest"
+                                  : friendName}
+                            </div>
+                            <div className="stars-display">
+                              {Array.from({ length: review.stars }).map((_, i) => (
+                                <i key={i} className="hn hn-star-solid" />
+                              ))}
+                            </div>
+                            <div className="entry-content" style={{ color: reviewColor }}>
+                              {review.review_text}
+                            </div>
+                            {review.recommend && (
+                              <div className="recommend-badge">
+                                <i className="hn hn-check-solid" /> Recommends
+                              </div>
+                            )}
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <div className="entry-meta">{formatDateCompact(archivedTopic.created_at)}</div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </Modal>
