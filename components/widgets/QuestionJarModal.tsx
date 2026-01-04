@@ -142,13 +142,13 @@ export function QuestionJarModal({ friendId, friendName }: QuestionJarModalProps
                   <div key={entry.id} className="entry">
                     <div
                       className="entry-title"
-                      style={{ color: getUserColorVar(entry.asked_by, friendId) }}
+                      style={{ color: getUserColorVar(entry.asked_by || "admin", friendId) }}
                     >
                       {askerInitial}: {entry.question_text}
                     </div>
                     <div
                       className="entry-content"
-                      style={{ color: getUserColorVar(entry.answered_by, friendId) }}
+                      style={{ color: getUserColorVar(entry.answered_by || "admin", friendId) }}
                     >
                       {answererInitial}: {entry.answer_text}
                     </div>

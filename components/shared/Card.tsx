@@ -9,16 +9,20 @@ interface CardProps {
   children: React.ReactNode;
   className?: string;
   onClick?: () => void;
+  style?: React.CSSProperties;
 }
 
-export function Card({ variant = "default", children, className, onClick }: CardProps) {
+export function Card({ variant = "default", children, className, onClick, style }: CardProps) {
   const variantClass = variant !== "default" ? styles[`card-${variant}`] : "";
 
   return (
     <div
       className={clsx(styles.card, variantClass, className)}
       onClick={onClick}
-      style={onClick ? { cursor: "pointer" } : undefined}
+      style={{
+        ...style,
+        ...(onClick ? { cursor: "pointer" } : undefined),
+      }}
     >
       {children}
     </div>
