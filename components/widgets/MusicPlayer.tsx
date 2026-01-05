@@ -15,6 +15,7 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
   const [currentSongId, setCurrentSongId] = useState<string | null>(selectedSongId || null);
   const [loadedSongs, setLoadedSongs] = useState<Song[]>(songs);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const isMountedRef = useRef(true);
 
   // Update loadedSongs when songs prop changes (only if different)
   useEffect(() => {
@@ -50,17 +51,49 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
     if (typeof window === "undefined") return;
 
     const audio = new Audio();
-    audio.preload = "auto";
+    // Use "none" instead of "auto" to prevent automatic loading that can cause abort errors
+    audio.preload = "none";
 
-    audio.addEventListener("play", () => setIsPlaying(true));
-    audio.addEventListener("pause", () => setIsPlaying(false));
-    audio.addEventListener("ended", () => setIsPlaying(false));
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => setIsPlaying(false);
+
+    // Add error handler to suppress abort errors
+    const handleError = (e: Event) => {
+      const audioElement = e.target as HTMLAudioElement;
+      // Suppress abort errors - they're harmless during cleanup or src changes
+      if (audioElement.error && audioElement.error.code === MediaError.MEDIA_ERR_ABORTED) {
+        return;
+      }
+    };
+
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("error", handleError);
 
     audioRef.current = audio;
 
     return () => {
-      audio.pause();
-      audio.src = "";
+      // Mark component as unmounted
+      isMountedRef.current = false;
+
+      // Remove event listeners first
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("error", handleError);
+
+      // Only pause if audio is actually playing to minimize abort errors
+      // Pausing while loading can cause abort errors, but they're harmless
+      if (!audio.paused) {
+        audio.pause();
+      }
+
+      // Don't clear src here - it can cause abort errors if media is still loading
+      // Pausing and removing listeners is sufficient cleanup.
+      // The audio element will be garbage collected when the component unmounts.
+
       audioRef.current = null;
     };
   }, []);
@@ -78,17 +111,30 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
   useEffect(() => {
     if (!selectedSongId || !loadedSongs || loadedSongs.length === 0 || !audioRef.current) return;
     if (currentSongId !== selectedSongId) return; // Wait for currentSongId to update
+    if (!isMountedRef.current) return; // Don't set src if component is unmounting
 
     const selectedSong = loadedSongs.find((s) => s.id === selectedSongId);
     if (!selectedSong || !selectedSong.mp3Url) return;
 
     // Auto-play immediately on mount
     const audio = audioRef.current;
-    audio.src = selectedSong.mp3Url;
-    audio.play().catch((error) => {
-      console.error("Error auto-playing song:", error);
-      // Auto-play might be blocked by browser, that's okay
-    });
+
+    // Only set src if it's different to avoid abort errors
+    if (audio.src !== selectedSong.mp3Url && isMountedRef.current) {
+      // Pause before changing src to prevent abort errors
+      audio.pause();
+      audio.src = selectedSong.mp3Url;
+    }
+
+    if (isMountedRef.current) {
+      audio.play().catch((error) => {
+        // Ignore abort errors - they're harmless
+        if (error.name !== "AbortError") {
+          console.error("Error auto-playing song:", error);
+        }
+        // Auto-play might be blocked by browser, that's okay
+      });
+    }
   }, [selectedSongId, loadedSongs, currentSongId]);
 
   // Support 1x1, 3x1, and 4x2 sizes
@@ -113,7 +159,10 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
 
     // If switching songs, update source
     if (currentSongId !== selectedSong.id) {
-      audio.src = selectedSong.mp3Url;
+      // Only set src if it's different to avoid abort errors
+      if (audio.src !== selectedSong.mp3Url) {
+        audio.src = selectedSong.mp3Url;
+      }
       setCurrentSongId(selectedSong.id);
     }
 
@@ -121,7 +170,10 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
       audio.pause();
     } else {
       audio.play().catch((error) => {
-        console.error("Error playing song:", error);
+        // Ignore abort errors - they're harmless
+        if (error.name !== "AbortError") {
+          console.error("Error playing song:", error);
+        }
       });
     }
   };
