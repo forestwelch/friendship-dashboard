@@ -79,8 +79,8 @@ export function SongManager({
   });
 
   useEffect(() => {
-    // Filter out old YouTube songs that don't have mp3Url
-    const validSongs = initialSongs.filter((song) => song.mp3Url && !("youtubeId" in song));
+    // Filter out songs that don't have mp3Url
+    const validSongs = initialSongs.filter((song) => song.mp3Url);
     setSongs(validSongs);
   }, [initialSongs]);
 

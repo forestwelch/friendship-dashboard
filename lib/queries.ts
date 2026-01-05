@@ -239,18 +239,17 @@ export async function getTop10Songs(): Promise<{ songs: Song[] }> {
   const data = await getGlobalContent("top_10_songs");
   if (data && typeof data === "object" && "songs" in data) {
     const songs = (data as { songs: unknown[] }).songs;
-    // Filter out old YouTube songs - only return songs with mp3Url
+    // Filter out invalid songs - only return songs with mp3Url
     const validSongs = songs.filter(
       (song: unknown): song is Song =>
         typeof song === "object" &&
         song !== null &&
         "mp3Url" in song &&
-        typeof (song as { mp3Url: unknown }).mp3Url === "string" &&
-        !("youtubeId" in song)
+        typeof (song as { mp3Url: unknown }).mp3Url === "string"
     );
     return { songs: validSongs };
   }
-  // Return empty array instead of mock YouTube data
+  // Return empty array if no data
   return { songs: [] };
 }
 
@@ -404,7 +403,7 @@ function getMockFriendPage(slug: string): FriendPageData | null {
 
 function getMockGlobalContent(contentType: string): unknown {
   if (contentType === "top_10_songs") {
-    // Return empty array - no more YouTube mock data
+    // Return empty array - no mock data
     return { songs: [] };
   }
   return null;

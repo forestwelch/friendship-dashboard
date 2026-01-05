@@ -55,6 +55,8 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
       }, 0);
       return () => clearTimeout(timer);
     }
+    // Return undefined explicitly for the if branch
+    return undefined;
   }, [isOpen]);
 
   const handleClose = useCallback(() => {

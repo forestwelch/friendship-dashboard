@@ -10,8 +10,8 @@ export async function GET() {
 
   try {
     const { songs } = await getTop10Songs();
-    // Filter out any old YouTube songs that might have slipped through
-    const validSongs = songs.filter((song) => song.mp3Url && !("youtubeId" in song));
+    // Filter out any invalid songs (must have mp3Url)
+    const validSongs = songs.filter((song) => song.mp3Url);
     return NextResponse.json({ songs: validSongs });
   } catch (error) {
     console.error("Error fetching songs:", error);
@@ -31,20 +31,19 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Invalid songs data" }, { status: 400 });
   }
 
-  // Validate and filter out any old YouTube songs
+  // Validate songs (must have mp3Url)
   const validSongs = songs.filter((song: unknown): song is Song => {
     return (
       typeof song === "object" &&
       song !== null &&
       "mp3Url" in song &&
-      typeof (song as { mp3Url: unknown }).mp3Url === "string" &&
-      !("youtubeId" in song)
+      typeof (song as { mp3Url: unknown }).mp3Url === "string"
     );
   });
 
   if (validSongs.length !== songs.length) {
     console.warn(
-      `Filtered out ${songs.length - validSongs.length} invalid songs (missing mp3Url or has youtubeId)`
+      `Filtered out ${songs.length - validSongs.length} invalid songs (missing mp3Url or has old format)`
     );
   }
 

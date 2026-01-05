@@ -26,13 +26,13 @@ export default function TestDashboardPage() {
       id: "1",
       title: "Test Song 1",
       artist: "Artist A",
-      youtubeId: "dQw4w9WgXcQ",
+      mp3Url: "https://example.com/test1.mp3",
     },
     {
       id: "2",
       title: "Test Song 2",
       artist: "Artist B",
-      youtubeId: "dQw4w9WgXcQ",
+      mp3Url: "https://example.com/test2.mp3",
     },
   ];
 
