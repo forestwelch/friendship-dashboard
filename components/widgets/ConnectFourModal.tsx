@@ -46,7 +46,7 @@ export function ConnectFourModal({
   const userContext = useUserContext();
   const currentUserId = getUserIdForFriend(userContext, friendId);
 
-  const { data: gameData } = useConnectFourGame(friendId, widgetId);
+  const { data: gameData, refetch } = useConnectFourGame(friendId, widgetId);
   const makeMoveMutation = useMakeMove(friendId, widgetId, currentUserId);
   const resetGameMutation = useResetGame(friendId, widgetId);
   useGameSubscription(friendId, widgetId);
@@ -141,6 +141,11 @@ export function ConnectFourModal({
     resetGameMutation.mutate();
   };
 
+  const handleRefresh = () => {
+    refetch();
+    playSound("open");
+  };
+
   const formatTimeAgo = (timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -160,6 +165,15 @@ export function ConnectFourModal({
       <Modal id={modalId} title="CONNECT FOUR" onClose={() => setOpenModal(null)}>
         <div className={styles.gameModal}>
           <div className={styles.resultScreen}>
+            <button
+              className={styles.refreshButton}
+              onClick={handleRefresh}
+              title="Refresh game"
+              aria-label="Refresh game"
+              style={{ position: "absolute", top: 0, right: 0 }}
+            >
+              <i className="hn hn-refresh" />
+            </button>
             {/* Show board with winning positions highlighted */}
             <div className={styles.boardContainer}>
               <div className={styles.board}>
@@ -281,6 +295,14 @@ export function ConnectFourModal({
               }}
             />
           </div>
+          <button
+            className={styles.refreshButton}
+            onClick={handleRefresh}
+            title="Refresh game"
+            aria-label="Refresh game"
+          >
+            <i className="hn hn-refresh" />
+          </button>
         </div>
 
         <div className={styles.boardContainer}>

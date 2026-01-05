@@ -8,6 +8,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: var(--space-md);
+  position: relative;
 }
 
 .playerInfo {
@@ -40,6 +42,31 @@
 .vs {
   margin: 0 var(--space-xs);
   opacity: 0.8;
+}
+
+.refreshButton {
+  padding: var(--space-sm);
+  background: transparent;
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: var(--font-size-lg);
+  transition: all 0.2s ease;
+}
+
+.refreshButton:hover {
+  background: var(--secondary);
+  box-shadow: var(--game-glow-primary);
+}
+
+.refreshButton:active {
+  transform: rotate(180deg);
 }
 
 .boardContainer {
@@ -158,6 +185,7 @@
   align-items: center;
   gap: var(--space-lg);
   padding: var(--space-xl);
+  position: relative;
 }
 
 .resultScreen .boardContainer {
