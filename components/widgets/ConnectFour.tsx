@@ -65,7 +65,7 @@ export function ConnectFour({
       return "CONNECT FOUR";
     }
     if (isMyTurn) {
-      return "Your turn!";
+      return "My turn";
     }
     return `${theirDisplayName}'s turn`;
   };

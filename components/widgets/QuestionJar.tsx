@@ -53,7 +53,7 @@ export function QuestionJar({ size, friendId, friendName }: QuestionJarProps) {
     }
   } else {
     // Your turn to ask
-    displayText = "Your turn to ask!";
+    displayText = "My turn";
   }
 
   return (
