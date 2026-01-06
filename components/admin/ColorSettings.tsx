@@ -5,6 +5,7 @@ import { playSound } from "@/lib/sounds";
 import { ColorPicker } from "./ColorPicker";
 import clsx from "clsx";
 import styles from "./ColorSettings.module.css";
+import { hslToHex, hexToHsl, isValidHex } from "@/lib/color-utils";
 
 interface ColorSettingsProps {
   friendId: string;
@@ -37,6 +38,7 @@ export function ColorSettings({
 }: ColorSettingsProps) {
   const [isOpen, setIsOpen] = useState(true); // Always open when component is rendered
   const [activeColorKey, setActiveColorKey] = useState<string | null>(null);
+  const [hexInputs, setHexInputs] = useState<Record<string, string>>({});
 
   const colorKeys = [
     { key: "primary", label: "Primary" },
@@ -125,42 +127,91 @@ export function ColorSettings({
               // List View
               <>
                 <div className={styles.colorList}>
-                  {colorKeys.map(({ key, label }) => (
-                    <div key={key} className={styles.colorItem}>
-                      <div
-                        className={styles.colorSwatch}
-                        style={{
-                          background: currentColors[key as keyof typeof currentColors],
-                        }}
-                        onClick={() => {
-                          setActiveColorKey(key);
-                          playSound("select");
-                        }}
-                      />
-                      <div className={styles.colorInfo}>
-                        <div className={styles.colorLabel} style={{ color: themeColors.text }}>
-                          {label}
+                  {colorKeys.map(({ key, label }) => {
+                    const currentHsl = currentColors[key as keyof typeof currentColors];
+                    const derivedHex = hslToHex(currentHsl);
+                    const displayHex = hexInputs[key] ?? derivedHex;
+
+                    return (
+                      <div key={key} className={styles.colorItem}>
+                        <div
+                          className={styles.colorSwatch}
+                          style={{
+                            background: currentHsl,
+                          }}
+                          onClick={() => {
+                            setActiveColorKey(key);
+                            playSound("select");
+                          }}
+                        />
+                        <div className={styles.colorInfo}>
+                          <div className={styles.colorLabel} style={{ color: themeColors.text }}>
+                            {label}
+                          </div>
+                          <input
+                            type="text"
+                            value={displayHex}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setHexInputs((prev) => ({ ...prev, [key]: value }));
+                              if (isValidHex(value)) {
+                                const hsl = hexToHsl(value);
+                                if (hsl) {
+                                  onColorChange(key, hsl);
+                                }
+                              }
+                            }}
+                            onBlur={(e) => {
+                              const value = e.target.value;
+                              if (isValidHex(value)) {
+                                const hsl = hexToHsl(value);
+                                if (hsl) {
+                                  onColorChange(key, hsl);
+                                }
+                                setHexInputs((prev) => {
+                                  const updated = { ...prev };
+                                  delete updated[key];
+                                  return updated;
+                                });
+                              } else {
+                                playSound("error");
+                                setHexInputs((prev) => {
+                                  const updated = { ...prev };
+                                  delete updated[key];
+                                  return updated;
+                                });
+                              }
+                            }}
+                            style={{
+                              width: "5.5rem",
+                              padding: "var(--space-xs)",
+                              fontSize: "var(--font-size-xs)",
+                              fontFamily: "monospace",
+                              background: themeColors.bg,
+                              border: "var(--border-width-md) solid " + themeColors.accent,
+                              borderRadius: "var(--radius-sm)",
+                              color: themeColors.text,
+                            }}
+                            placeholder="#000000"
+                          />
                         </div>
-                        <div className={styles.colorValue} style={{ color: themeColors.text }}>
-                          {currentColors[key as keyof typeof currentColors]}
-                        </div>
+                        <button
+                          onClick={() => {
+                            randomizeOne(key);
+                            playSound("blip");
+                          }}
+                          className={styles.randomizeButton}
+                          style={{
+                            background: themeColors.secondary,
+                            borderColor: themeColors.accent,
+                            color: themeColors.text,
+                          }}
+                        >
+                          <i className={clsx("hn", "hn-shuffle-solid", styles.randomizeIcon)} />
+                        </button>
                       </div>
-                      <button
-                        onClick={() => {
-                          randomizeOne(key);
-                          playSound("blip");
-                        }}
-                        className={styles.randomizeButton}
-                        style={{
-                          background: themeColors.secondary,
-                          borderColor: themeColors.accent,
-                          color: themeColors.text,
-                        }}
-                      >
-                        <i className={clsx("hn", "hn-shuffle-solid", styles.randomizeIcon)} />
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <button

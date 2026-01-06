@@ -7,6 +7,7 @@ import { DEFAULT_THEME_COLORS } from "@/lib/theme-defaults";
 import { Modal } from "@/components/Modal";
 import { FormField, Input } from "@/components/shared";
 import { useUIStore } from "@/lib/store/ui-store";
+import { hslToHex, hexToHsl, isValidHex } from "@/lib/color-utils";
 
 interface AddFriendModalProps {
   isOpen: boolean;
@@ -47,6 +48,7 @@ export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModa
     "primary" | "secondary" | "accent" | "bg" | "text"
   >("primary");
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [hexInputs, setHexInputs] = useState<Record<string, string>>({});
 
   const handleColorChange = (colorKey: string, value: string) => {
     setNewFriend((prev) => ({ ...prev, [colorKey]: value }));
@@ -172,49 +174,93 @@ export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModa
                 { key: "accent", label: "Accent" },
                 { key: "bg", label: "Background" },
                 { key: "text", label: "Text" },
-              ].map(({ key, label }) => (
-                <div
-                  key={key}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "var(--space-md)",
-                  }}
-                >
+              ].map(({ key, label }) => {
+                const colorKey = `color_${key}` as keyof typeof newFriend;
+                const currentHsl = newFriend[colorKey];
+                const derivedHex = hslToHex(currentHsl);
+                const displayHex = hexInputs[key] ?? derivedHex;
+
+                return (
                   <div
+                    key={key}
                     style={{
-                      width: "3rem",
-                      height: "1.5rem",
-                      background: newFriend[key as keyof typeof newFriend],
-                      border: "var(--border-width-md) solid var(--game-border)",
-                      borderRadius: "var(--radius-sm)",
-                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "var(--space-md)",
                     }}
-                    onClick={() => {
-                      setSelectedColor(key as typeof selectedColor);
-                      setShowColorPicker(true);
-                    }}
-                  />
-                  <div style={{ flex: 1 }}>
+                  >
+                    <div
+                      style={{
+                        width: "3rem",
+                        height: "1.5rem",
+                        background: currentHsl,
+                        border: "var(--border-width-md) solid var(--game-border)",
+                        borderRadius: "var(--radius-sm)",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setSelectedColor(key as typeof selectedColor);
+                        setShowColorPicker(true);
+                      }}
+                    />
                     <div
                       style={{
                         fontSize: "var(--font-size-xs)",
                         color: "var(--text)",
+                        width: "5rem",
                       }}
                     >
                       {label}
                     </div>
-                    <div
+                    <input
+                      type="text"
+                      value={displayHex}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setHexInputs((prev) => ({ ...prev, [key]: value }));
+                        if (isValidHex(value)) {
+                          const hsl = hexToHsl(value);
+                          if (hsl) {
+                            handleColorChange(colorKey, hsl);
+                          }
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const value = e.target.value;
+                        if (isValidHex(value)) {
+                          const hsl = hexToHsl(value);
+                          if (hsl) {
+                            handleColorChange(colorKey, hsl);
+                          }
+                          setHexInputs((prev) => {
+                            const updated = { ...prev };
+                            delete updated[key];
+                            return updated;
+                          });
+                        } else {
+                          playSound("error");
+                          setHexInputs((prev) => {
+                            const updated = { ...prev };
+                            delete updated[key];
+                            return updated;
+                          });
+                        }
+                      }}
                       style={{
+                        width: "5.5rem",
+                        padding: "var(--space-xs)",
                         fontSize: "var(--font-size-xs)",
+                        fontFamily: "monospace",
+                        background: "var(--bg)",
+                        border: "var(--border-width-md) solid var(--game-border)",
+                        borderRadius: "var(--radius-sm)",
                         color: "var(--text)",
                       }}
-                    >
-                      {newFriend[key as keyof typeof newFriend]}
-                    </div>
+                      placeholder="#000000"
+                    />
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
