@@ -22,3 +22,15 @@ export const GRID_HEIGHT_REM = GRID_ROWS * GRID_TILE_SIZE_REM + (GRID_ROWS - 1) 
 // String versions for CSS (with 'rem' suffix)
 export const GRID_TILE_SIZE = `${GRID_TILE_SIZE_REM}rem`;
 export const GRID_GAP = `${GRID_GAP_REM}rem`;
+
+// Z-Index Layers - centralized management
+// Use these constants to ensure proper layering
+export const Z_INDEX = {
+  BASE: 0,
+  GRID: 1,
+  WIDGET: 2,
+  ADMIN_OVERLAY: 100,
+  ADMIN_COMPONENT: 1000,
+  MODAL: 10000,
+  MODAL_OVERLAY: 20000, // For overlays/dialogs that appear above modals (e.g., confirmations)
+} as const;

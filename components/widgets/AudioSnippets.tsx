@@ -141,10 +141,27 @@ export function AudioSnippets({ size, friendId }: AudioSnippetsProps) {
   };
 
   const handlePlayRandom = () => {
-    if (snippets.length === 0) return;
+    if (snippets.length === 0) {
+      playSound("error");
+      return;
+    }
     const randomSnippet = snippets[Math.floor(Math.random() * snippets.length)];
     const audio = new Audio(randomSnippet.audio_url);
-    audio.play();
+
+    audio.onerror = () => {
+      playSound("error");
+    };
+
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          playSound("click");
+        })
+        .catch(() => {
+          playSound("error");
+        });
+    }
   };
 
   const handleOpenSoundboard = () => {

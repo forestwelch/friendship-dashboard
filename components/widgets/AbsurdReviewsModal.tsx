@@ -7,13 +7,15 @@ import {
   useCurrentTopic,
   useReviewsForTopic,
   useCreateTopic,
-  useSubmitReview,
   useAllRevealedTopics,
 } from "@/lib/queries-reviews-hooks";
+import { useQueryClient } from "@tanstack/react-query";
+import { submitReview } from "@/lib/queries-reviews";
 import { useIdentity } from "@/lib/identity-utils";
 import { FormField, Input, Textarea, Button, Card } from "@/components/shared";
 import { formatDateCompact } from "@/lib/date-utils";
 import { getUserColorVar } from "@/lib/color-utils";
+import { playSound } from "@/lib/sounds";
 
 interface AbsurdReviewsModalProps {
   friendId: string;
@@ -33,7 +35,8 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
   const { data: reviews = [] } = useReviewsForTopic(topic?.id || null);
   const { data: archivedTopics = [] } = useAllRevealedTopics(friendId);
   const createTopicMutation = useCreateTopic(friendId);
-  const submitReviewMutation = useSubmitReview(friendId, topic?.id || "");
+  const queryClient = useQueryClient();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const myReview = topic ? reviews.find((r) => r.reviewer === identity) : null;
   const otherReview = topic ? reviews.find((r) => r.reviewer !== identity) : null;
@@ -41,23 +44,26 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!topic || !reviewText.trim() || submitReviewMutation.isPending) return;
+    if (!topic || !topic.id || !reviewText.trim() || isSubmitting) return;
 
-    submitReviewMutation.mutate(
-      {
-        reviewer: identity,
-        stars,
-        reviewText: reviewText.trim(),
-        recommend,
-      },
-      {
-        onSuccess: () => {
-          setReviewText("");
-          setStars(3);
-          setRecommend(false);
-        },
+    setIsSubmitting(true);
+    try {
+      const result = await submitReview(topic.id, identity, stars, reviewText.trim(), recommend);
+      if (result) {
+        queryClient.invalidateQueries({ queryKey: ["reviews", topic.id] });
+        queryClient.invalidateQueries({ queryKey: ["review_topic", friendId] });
+        setReviewText("");
+        setStars(3);
+        setRecommend(false);
+        playSound("success");
+      } else {
+        playSound("error");
       }
-    );
+    } catch {
+      playSound("error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSetTopic = async (e: React.FormEvent) => {
@@ -148,9 +154,9 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
                 <Button
                   type="submit"
                   variant="primary"
-                  disabled={submitReviewMutation.isPending || !reviewText.trim()}
+                  disabled={isSubmitting || !reviewText.trim()}
                 >
-                  {submitReviewMutation.isPending ? "Submitting..." : "Submit Review"}
+                  {isSubmitting ? "Submitting..." : "Submit Review"}
                 </Button>
               </form>
             )}
