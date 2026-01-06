@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Widget } from "@/components/Widget";
 import { playSound } from "@/lib/sounds";
 import { useUIStore } from "@/lib/store/ui-store";
@@ -13,6 +14,7 @@ import {
 } from "@/lib/queries-connect-four";
 import { ADMIN_USER_ID } from "@/lib/constants";
 import { getUserColor } from "@/lib/color-utils";
+import { useUserContext, getUserIdForFriend, getUserDisplayName } from "@/lib/use-user-context";
 import styles from "./ConnectFour.module.css";
 
 interface ConnectFourProps {
@@ -44,6 +46,30 @@ export function ConnectFour({
   const game = gameData || config;
   const board = game?.board || createEmptyBoard();
 
+  // Get current user and turn info (hooks must be called unconditionally)
+  const userContext = useUserContext();
+  const currentUserId = getUserIdForFriend(userContext, friendId);
+  const playerOneId = game?.player_one_id || ADMIN_USER_ID;
+  const playerTwoId = game?.player_two_id || friendId;
+  const currentTurnId = game?.current_turn_id || playerOneId;
+  const status = game?.status || "active";
+  const isMyTurn = currentTurnId === currentUserId;
+
+  const theirDisplayName = useMemo(() => {
+    const otherPlayerId = currentUserId === playerOneId ? playerTwoId : playerOneId;
+    return getUserDisplayName(otherPlayerId, friendName);
+  }, [currentUserId, playerOneId, playerTwoId, friendName]);
+
+  const getTurnText = () => {
+    if (status !== "active") {
+      return "CONNECT FOUR";
+    }
+    if (isMyTurn) {
+      return "Your turn!";
+    }
+    return `${theirDisplayName}'s turn`;
+  };
+
   const handleClick = () => {
     setOpenModal(`connectfour-${widgetId}`);
     playSound("open");
@@ -52,9 +78,6 @@ export function ConnectFour({
   // Render full board preview (6x7)
   const renderFullBoard = () => {
     const displayBoard = board.length > 0 ? board : createEmptyBoard();
-    const game = gameData || config;
-    const playerOneId = game?.player_one_id || ADMIN_USER_ID;
-    const playerTwoId = game?.player_two_id || friendId;
     const moves = game?.moves || [];
 
     // Build a map of which player owns each piece by tracking moves
@@ -140,7 +163,7 @@ export function ConnectFour({
     return (
       <>
         <div className={styles.tile2x2} onClick={handleClick}>
-          <div className={styles.title}>CONNECT FOUR</div>
+          <div className={styles.title}>{getTurnText()}</div>
           {renderFullBoard()}
         </div>
         <ConnectFourModal
@@ -166,7 +189,7 @@ export function ConnectFour({
     return (
       <>
         <div className={tileClass} onClick={handleClick}>
-          <div className={styles.title}>CONNECT FOUR</div>
+          <div className={styles.title}>{getTurnText()}</div>
           {renderFullBoard()}
         </div>
         <ConnectFourModal
