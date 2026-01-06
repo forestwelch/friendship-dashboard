@@ -1,89 +1,82 @@
 /**
- * Audio recording utilities using MediaRecorder API
+ * Audio recording utilities - matching the working demo EXACTLY
+ * https://addpipe.com/media-recorder-api-demo-audio/
  */
 
-export async function startRecording(): Promise<MediaRecorder | null> {
+export async function startRecording(): Promise<{
+  recorder: MediaRecorder;
+  stream: MediaStream;
+  extension: string;
+} | null> {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mimeType = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "audio/mp4";
-    const recorder = new MediaRecorder(stream, { mimeType });
-    return recorder;
-  } catch (error) {
-    console.error("Error accessing microphone:", error);
+
+    // Match demo EXACTLY - simple format detection
+    let extension = "webm";
+    if (!MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+      extension = "ogg";
+    }
+
+    // Match demo EXACTLY - options with all the same properties
+    const mimeType = `audio/${extension};codecs=opus`;
+    const options: MediaRecorderOptions = {
+      audioBitsPerSecond: 256000,
+      videoBitsPerSecond: 2500000,
+      bitsPerSecond: 2628000,
+      mimeType: MediaRecorder.isTypeSupported(mimeType) ? mimeType : undefined,
+    };
+
+    const recorder = new MediaRecorder(stream, options);
+
+    return { recorder, stream, extension };
+  } catch {
     return null;
   }
 }
 
-export function recordForDuration(recorder: MediaRecorder, durationMs: number): Promise<Blob> {
+export function recordForDuration(
+  recorder: MediaRecorder,
+  stream: MediaStream,
+  extension: string,
+  durationMs: number
+): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const chunks: Blob[] = [];
-    let hasError = false;
-    const startTime = Date.now();
 
+    // Match demo EXACTLY - ondataavailable handler
     recorder.ondataavailable = (event) => {
-      if (event.data && event.data.size > 0) {
-        chunks.push(event.data);
-      }
-    };
+      // Match demo EXACTLY - push ALL data, no size check
+      chunks.push(event.data);
 
-    recorder.onstop = () => {
-      const actualDuration = (Date.now() - startTime) / 1000;
+      // Match demo EXACTLY - check state with == (loose equality)
+      if (recorder.state == "inactive") {
+        // Match demo EXACTLY - create blob with bitsPerSecond
+        const blob = new Blob(chunks, {
+          type: `audio/${extension}`,
+          bitsPerSecond: 128000,
+        } as BlobPropertyBag);
 
-      // Small delay to ensure all chunks are collected
-      setTimeout(() => {
-        if (hasError) {
-          reject(new Error("Recording error occurred"));
-          return;
-        }
-
-        if (chunks.length === 0) {
-          reject(new Error("No audio data recorded"));
-          return;
-        }
-
-        const blob = new Blob(chunks, { type: recorder.mimeType });
-
-        if (blob.size === 0) {
-          reject(new Error("Recorded blob is empty"));
-          return;
-        }
-
-        console.warn(
-          `Recording complete. Actual duration: ${actualDuration.toFixed(2)}s, Expected: ${(durationMs / 1000).toFixed(2)}s, Chunks: ${chunks.length}, Size: ${blob.size} bytes`
-        );
         resolve(blob);
-      }, 100);
+      }
     };
 
     recorder.onerror = (event) => {
-      hasError = true;
       reject(new Error(`Recording error: ${event.error?.message || "Unknown error"}`));
     };
 
-    // Note: recorder.start() should already be called before this function
-    // This function just handles the duration timing
-    if (recorder.state !== "recording") {
-      console.warn("Recorder not in recording state, attempting to start...");
-      try {
-        recorder.start(100); // Capture data every 100ms
-      } catch (error) {
-        reject(new Error(`Failed to start recording: ${error}`));
-        return;
-      }
-    }
+    // Match demo EXACTLY - start with 1 second chunks
+    recorder.start(1000);
 
+    // Stop after duration - match demo EXACTLY
     setTimeout(() => {
       if (recorder.state === "recording" || recorder.state === "paused") {
-        try {
-          recorder.stop();
-        } catch (error) {
-          console.error("Error stopping recorder:", error);
-        }
+        // Match demo EXACTLY - stop recorder first
+        recorder.stop();
+        // Match demo EXACTLY - stop tracks immediately after (like gumStream.getAudioTracks()[0].stop())
+        stream.getAudioTracks().forEach((track) => {
+          track.stop();
+        });
       }
-      // Stop all tracks to release microphone
-      recorder.stream.getTracks().forEach((track) => {
-        track.stop();
-      });
     }, durationMs);
   });
 }

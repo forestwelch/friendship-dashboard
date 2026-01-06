@@ -27,7 +27,6 @@ export async function DELETE(
       .single();
 
     if (fetchError || !snippet) {
-      console.error("Error fetching audio snippet:", fetchError);
       return NextResponse.json({ error: "Audio snippet not found" }, { status: 404 });
     }
 
@@ -49,7 +48,6 @@ export async function DELETE(
     const { error: deleteError } = await supabase.from("audio_snippets").delete().eq("id", id);
 
     if (deleteError) {
-      console.error("Error deleting audio snippet:", deleteError);
       return NextResponse.json({ error: "Failed to delete audio snippet" }, { status: 500 });
     }
 
@@ -57,15 +55,13 @@ export async function DELETE(
     if (fileName) {
       try {
         await supabase.storage.from("audio-snippets").remove([fileName]);
-      } catch (storageError) {
-        // Log but don't fail - file might already be deleted or not exist
-        console.warn("Error deleting audio file from storage:", storageError);
+      } catch {
+        // Don't fail - file might already be deleted or not exist
       }
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Error in DELETE /api/audio/[id]:", error);
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

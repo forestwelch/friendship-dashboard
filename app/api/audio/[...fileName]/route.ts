@@ -20,12 +20,9 @@ export async function GET(
       return NextResponse.json({ error: "File name required" }, { status: 400 });
     }
 
-    console.warn(`[Audio API] Requesting file: ${fileName}`);
-
     const supabase = getSupabaseAdmin();
 
     if (!supabase) {
-      console.error("[Audio API] Supabase admin client not available");
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
     }
 
@@ -33,11 +30,6 @@ export async function GET(
     const { data, error } = await supabase.storage.from("audio-snippets").download(fileName);
 
     if (error) {
-      console.error("[Audio API] Error downloading audio file:", {
-        error,
-        fileName,
-        message: error.message,
-      });
       // Check if it's a 404 error by checking the message
       const isNotFound =
         error.message?.toLowerCase().includes("not found") ||
@@ -53,22 +45,26 @@ export async function GET(
     }
 
     if (!data) {
-      console.error("[Audio API] No data returned for file:", fileName);
       return NextResponse.json({ error: "Audio file not found", fileName }, { status: 404 });
     }
 
-    // Get blob size for Content-Length header
-    const blobSize = data.size;
-    console.warn(`[Audio API] Successfully serving file: ${fileName} (${blobSize} bytes)`);
+    // Convert blob to array buffer to ensure proper serving
+    const arrayBuffer = await data.arrayBuffer();
+    const blobSize = arrayBuffer.byteLength;
 
-    // Use the blob's stream directly to avoid corruption
-    // This preserves the original file data without conversion
-    const stream = data.stream();
+    // Determine content type from file extension
+    const getContentType = (fileName: string): string => {
+      if (fileName.endsWith(".webm")) return "audio/webm";
+      if (fileName.endsWith(".ogg")) return "audio/ogg";
+      return "audio/webm"; // default
+    };
 
-    // Create a new Response with the stream
-    return new NextResponse(stream, {
+    const contentType = getContentType(fileName);
+
+    // Create a new Response with the array buffer
+    return new NextResponse(arrayBuffer, {
       headers: {
-        "Content-Type": "audio/webm",
+        "Content-Type": contentType,
         "Content-Length": blobSize.toString(),
         "Cache-Control": "public, max-age=3600",
         "Access-Control-Allow-Origin": "*",
@@ -77,11 +73,6 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("[Audio API] Unexpected error:", {
-      error,
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-    });
     return NextResponse.json(
       {
         error: "Internal server error",

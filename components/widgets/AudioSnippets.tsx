@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Widget } from "@/components/Widget";
 import { WidgetSize } from "@/lib/types";
 import { useUIStore } from "@/lib/store/ui-store";
@@ -27,6 +27,21 @@ export function AudioSnippets({ size, friendId }: AudioSnippetsProps) {
 
   const { data: snippets = [] } = useAudioSnippets(friendId);
   const uploadMutation = useUploadAudioSnippet(friendId);
+  const [recordingDots, setRecordingDots] = useState(1);
+
+  // Animate dots while recording (1, 2, 3, repeat)
+  useEffect(() => {
+    if (!isRecording) {
+      setRecordingDots(1);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setRecordingDots((prev) => (prev >= 3 ? 1 : prev + 1));
+    }, 500); // Change every 500ms
+
+    return () => clearInterval(interval);
+  }, [isRecording]);
 
   const handleStop = () => {
     if (!recorder || !isRecording) return;
@@ -68,41 +83,21 @@ export function AudioSnippets({ size, friendId }: AudioSnippetsProps) {
     setCountdown(null);
     setIsRecording(true);
 
-    const recorderInstance = await startRecording();
-    if (!recorderInstance) {
+    const recording = await startRecording();
+    if (!recording) {
       setIsRecording(false);
       return;
     }
 
+    const { recorder: recorderInstance, stream, extension } = recording;
     setRecorder(recorderInstance);
 
     try {
-      // Start recording BEFORE the countdown ends to ensure it's ready
-      // MediaRecorder.start() needs time to actually begin recording
-      recorderInstance.start(100);
+      // Match demo exactly - recordForDuration handles everything including stopping tracks
+      const blob = await recordForDuration(recorderInstance, stream, extension, 5000);
 
-      // Wait for recorder to actually start recording (browser needs time)
-      // This ensures we get the full 5 seconds of audio
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // Set up auto-stop after 5 seconds
-      const timeout = setTimeout(() => {
-        if (recorderInstance.state === "recording" || recorderInstance.state === "paused") {
-          recorderInstance.stop();
-        }
-        // Stop all tracks to release microphone
-        recorderInstance.stream.getTracks().forEach((track) => {
-          track.stop();
-        });
-        setIsRecording(false);
-        setRecorder(null);
-        setStopTimeout(null);
-      }, 5000);
-      setStopTimeout(timeout);
-
-      // Now record for up to 5 seconds (can be stopped early via handleStop)
-      // The promise will resolve when recorder.stop() is called (either manually or via timeout)
-      const blob = await recordForDuration(recorderInstance, 5000);
+      setIsRecording(false);
+      setRecorder(null);
 
       // Clear timeout if recording completed (either naturally or early)
       if (stopTimeout) {
@@ -119,24 +114,20 @@ export function AudioSnippets({ size, friendId }: AudioSnippetsProps) {
 
       // Validate blob before uploading
       if (!blob || blob.size === 0) {
-        console.error("Recorded blob is empty or invalid");
         playSound("error");
         setIsRecording(false);
         setRecorder(null);
         return;
       }
 
-      // Log blob info (duration analysis happens after upload when playing)
-      console.warn(`Recording complete. Blob size: ${blob.size} bytes, type: ${blob.type}`);
-
       const iconName = getRandomIcon();
+
       uploadMutation.mutate({
         audioBlob: blob,
         recordedBy: identity,
         iconName,
       });
-    } catch (error) {
-      console.error("Error recording:", error);
+    } catch {
       playSound("error");
       // Clear timeout on error
       if (stopTimeout) {
@@ -184,21 +175,32 @@ export function AudioSnippets({ size, friendId }: AudioSnippetsProps) {
         >
           {/* Record/Stop Button - replaces record with stop when recording */}
           {isRecording ? (
-            <Button onClick={handleStop} className="widget-button-flex" icon>
-              <i className="hn hn-upload" />
+            <Button onClick={handleStop} className="widget-button-flex rec-button recording" icon>
+              <div className="rec-indicator">
+                <span className="rec-icon-placeholder"></span>
+                <span className="rec-text-placeholder"></span>
+                <span className="rec-dots">
+                  <span className="rec-dot">{recordingDots >= 1 ? "." : ""}</span>
+                  <span className="rec-dot">{recordingDots >= 2 ? "." : ""}</span>
+                  <span className="rec-dot">{recordingDots >= 3 ? "." : ""}</span>
+                </span>
+              </div>
             </Button>
           ) : (
             <Button
               onClick={handleRecord}
               disabled={countdown !== null}
-              className="widget-button-flex"
+              className="widget-button-flex rec-button"
               icon
               sound={false}
             >
               {countdown !== null ? (
                 <span>{countdown}</span>
               ) : (
-                <i className="hn hn-comment-quote" />
+                <div className="rec-indicator">
+                  <span className="rec-circle"></span>
+                  <span className="rec-text">REC</span>
+                </div>
               )}
             </Button>
           )}

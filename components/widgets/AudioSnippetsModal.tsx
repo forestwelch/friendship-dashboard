@@ -32,60 +32,24 @@ export function AudioSnippetsModal({ friendId }: AudioSnippetsModalProps) {
   }, [snippets]);
 
   const handlePlay = (audioUrl: string) => {
-    // Validate URL before attempting to play (accepts both absolute and relative URLs)
     if (!audioUrl || (!audioUrl.startsWith("http") && !audioUrl.startsWith("/"))) {
-      console.error("Invalid audio URL:", audioUrl);
       playSound("error");
       return;
     }
 
-    const audio = new Audio();
+    const audio = new Audio(audioUrl);
 
-    // Set up error handler before setting src
-    audio.addEventListener("error", (e) => {
-      console.error("Error loading audio:", {
-        error: e,
-        url: audioUrl,
-        code: audio.error?.code,
-        message: audio.error?.message,
-      });
+    audio.onerror = () => {
       playSound("error");
-    });
+    };
 
-    // Verify audio duration when metadata loads
-    audio.addEventListener("loadedmetadata", () => {
-      try {
-        const duration = audio.duration;
-        if (duration && !isNaN(duration)) {
-          console.warn(`Playing audio snippet - Duration: ${duration.toFixed(2)}s`);
-          if (duration < 4.0) {
-            console.warn(`⚠️ Warning: Audio snippet is only ${duration.toFixed(2)}s, expected ~5s`);
-          }
-        }
-      } catch (error) {
-        console.error("Error reading audio metadata:", error);
-      }
-    });
-
-    // Set src and play
-    audio.src = audioUrl;
-
-    // Preload for better mobile performance
-    audio.preload = "auto";
-
-    // For mobile, ensure we handle user interaction requirement
     const playPromise = audio.play();
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
           playSound("click");
         })
-        .catch((error) => {
-          console.error("Error playing audio:", {
-            error,
-            url: audioUrl,
-            message: error.message,
-          });
+        .catch(() => {
           playSound("error");
         });
     }

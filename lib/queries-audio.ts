@@ -22,13 +22,11 @@ export async function getAudioSnippets(friendId: string): Promise<AudioSnippet[]
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching audio snippets:", error);
       return [];
     }
 
     return data || [];
-  } catch (error) {
-    console.error("Error in getAudioSnippets:", error);
+  } catch {
     return [];
   }
 }
@@ -46,26 +44,30 @@ export async function uploadAudioSnippet(
   try {
     // Validate blob
     if (!audioBlob || audioBlob.size === 0) {
-      console.error("Invalid audio blob: empty or null");
       return null;
     }
 
     // Check blob size (limit to 5MB as per migration notes, supports up to 5 seconds of audio)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (audioBlob.size > maxSize) {
-      console.error(`Audio blob too large: ${audioBlob.size} bytes (max: ${maxSize})`);
       return null;
     }
 
     // Use API route to avoid CORS issues with direct storage uploads
-    // This works around the 400/CORS error we're seeing
     const formData = new FormData();
-    formData.append("audio", audioBlob, "recording.webm");
+
+    // Determine filename extension from blob type
+    const getFileExtension = (mimeType: string): string => {
+      if (mimeType.includes("webm")) return "webm";
+      if (mimeType.includes("ogg")) return "ogg";
+      return "webm"; // default
+    };
+
+    const extension = getFileExtension(audioBlob.type || "audio/webm");
+    formData.append("audio", audioBlob, `recording.${extension}`);
     formData.append("friendId", friendId);
     formData.append("recordedBy", recordedBy);
     formData.append("iconName", iconName);
-
-    console.warn("Uploading via API route to avoid CORS issues...");
 
     const response = await fetch("/api/audio/upload", {
       method: "POST",
@@ -73,19 +75,13 @@ export async function uploadAudioSnippet(
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-      console.error("API upload error:", errorData);
+      await response.json().catch(() => ({ error: "Unknown error" }));
       return null;
     }
 
-    const { data } = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error in uploadAudioSnippet:", error);
-    if (error instanceof Error) {
-      console.error("Error message:", error.message);
-      console.error("Error stack:", error.stack);
-    }
+    const responseData = await response.json();
+    return responseData.data;
+  } catch {
     return null;
   }
 }
@@ -101,14 +97,12 @@ export async function deleteAudioSnippet(snippetId: string): Promise<boolean> {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-      console.error("API delete error:", errorData);
+      await response.json().catch(() => ({ error: "Unknown error" }));
       return false;
     }
 
     return true;
-  } catch (error) {
-    console.error("Error in deleteAudioSnippet:", error);
+  } catch {
     return false;
   }
 }
