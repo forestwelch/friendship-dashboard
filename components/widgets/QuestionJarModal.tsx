@@ -75,17 +75,22 @@ export function QuestionJarModal({ friendId, friendName }: QuestionJarModalProps
       <div className="modal-content">
         {/* Answer Section */}
         {unansweredQuestion && unansweredQuestion.asked_by !== identity && (
-          <div className="form-section">
-            <div className="form-title">Question:</div>
-            <div className="form-title-small">{unansweredQuestion.question_text}</div>
-            <form onSubmit={handleAnswerSubmit} className="form">
-              <FormField label="Your answer" required>
+          <div style={{ width: "100%" }}>
+            <div
+              className="form-title-small"
+              style={{ marginBottom: "var(--space-md)", textAlign: "center" }}
+            >
+              {unansweredQuestion.question_text}
+            </div>
+            <form onSubmit={handleAnswerSubmit} className="form" style={{ width: "100%" }}>
+              <FormField label="" required={false}>
                 <Textarea
                   value={answerText}
                   onChange={(e) => setAnswerText(e.target.value)}
                   placeholder="Your answer..."
                   rows={4}
                   required
+                  style={{ width: "100%" }}
                 />
               </FormField>
               <button
@@ -102,9 +107,9 @@ export function QuestionJarModal({ friendId, friendName }: QuestionJarModalProps
         {/* Ask Next Question Section */}
         {(!unansweredQuestion ||
           (unansweredQuestion.asked_by === identity && unansweredQuestion.answer_text)) && (
-          <div className="form-section form-section-accent">
+          <div style={{ width: "100%" }}>
             <div className="form-title">Ask Next Question:</div>
-            <form onSubmit={handleQuestionSubmit} className="form">
+            <form onSubmit={handleQuestionSubmit} className="form" style={{ width: "100%" }}>
               <FormField label="Your question" required>
                 <Textarea
                   value={nextQuestionText}
@@ -112,6 +117,7 @@ export function QuestionJarModal({ friendId, friendName }: QuestionJarModalProps
                   placeholder="Your question..."
                   rows={4}
                   required
+                  style={{ width: "100%" }}
                 />
               </FormField>
               <button
@@ -126,12 +132,10 @@ export function QuestionJarModal({ friendId, friendName }: QuestionJarModalProps
         )}
 
         {/* Archive Section */}
-        <div className="entries-list">
-          <div className="form-title">Archive:</div>
-          {entries.filter((e) => e.answer_text).length === 0 ? (
-            <div className="empty-state">No Q&As yet. Start the conversation!</div>
-          ) : (
-            entries
+        {entries.filter((e) => e.answer_text).length > 0 && (
+          <div className="entries-list">
+            <div className="form-title">Archive:</div>
+            {entries
               .filter((e) => e.answer_text)
               .map((entry) => {
                 const askerInitial = entry.asked_by === "admin" ? forestInitial : friendInitial;
@@ -157,9 +161,9 @@ export function QuestionJarModal({ friendId, friendName }: QuestionJarModalProps
                     </div>
                   </div>
                 );
-              })
-          )}
-        </div>
+              })}
+          </div>
+        )}
       </div>
     </Modal>
   );

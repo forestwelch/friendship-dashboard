@@ -8,7 +8,6 @@ import {
   useReviewsForTopic,
   useCreateTopic,
   useSubmitReview,
-  useRevealTopic,
   useAllRevealedTopics,
 } from "@/lib/queries-reviews-hooks";
 import { useIdentity } from "@/lib/identity-utils";
@@ -35,12 +34,10 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
   const { data: archivedTopics = [] } = useAllRevealedTopics(friendId);
   const createTopicMutation = useCreateTopic(friendId);
   const submitReviewMutation = useSubmitReview(friendId, topic?.id || "");
-  const revealTopicMutation = useRevealTopic(friendId, topic?.id || "");
 
   const myReview = topic ? reviews.find((r) => r.reviewer === identity) : null;
   const otherReview = topic ? reviews.find((r) => r.reviewer !== identity) : null;
   const hasBothReviews = reviews.length >= 2;
-  const isRevealed = topic?.status === "revealed";
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,11 +60,6 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
     );
   };
 
-  const handleReveal = () => {
-    if (!topic || isRevealed || revealTopicMutation.isPending) return;
-    revealTopicMutation.mutate();
-  };
-
   const handleSetTopic = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTopicName.trim() || createTopicMutation.isPending) return;
@@ -85,7 +77,7 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
         {!topic ? (
           // Set Topic Form (Forest only)
           identity === "admin" && (
-            <form onSubmit={handleSetTopic} className="form-section form">
+            <form onSubmit={handleSetTopic} className="form" style={{ width: "100%" }}>
               <div className="form-title">Set New Topic:</div>
               <FormField label="Topic name" required>
                 <Input
@@ -94,6 +86,7 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
                   onChange={(e) => setNewTopicName(e.target.value)}
                   placeholder="e.g., 'The concept of Tuesday'"
                   required
+                  style={{ width: "100%" }}
                 />
               </FormField>
               <Button
@@ -108,17 +101,17 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
         ) : (
           <>
             {/* Topic Display */}
-            <Card variant="accent" className="text-center">
+            <div className="text-center">
               <div className="form-title" style={{ fontSize: "var(--font-size-lg)" }}>
                 {topic.topic_name}
               </div>
-            </Card>
+            </div>
 
             {/* Submit Review Form */}
             {!myReview && (
-              <form onSubmit={handleSubmitReview} className="form-section form">
-                <FormField label="Star Rating (1-5)">
-                  <div className="star-rating-buttons">
+              <form onSubmit={handleSubmitReview} className="form" style={{ width: "100%" }}>
+                <FormField label="" required={false}>
+                  <div className="star-rating-buttons" style={{ justifyContent: "center" }}>
                     {[1, 2, 3, 4, 5].map((num) => (
                       <Button
                         key={num}
@@ -131,14 +124,16 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
                     ))}
                   </div>
                 </FormField>
-                <FormField label="Review (max 200 chars)" required>
+                <FormField label="" required={false}>
                   <Textarea
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
+                    placeholder="Your review..."
                     rows={3}
                     maxLength={200}
                     showCharCount
                     required
+                    style={{ width: "100%" }}
                   />
                 </FormField>
                 <div className="checkbox-field">
@@ -163,53 +158,42 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
             {/* View Reviews */}
             {hasBothReviews && (
               <div className="reviews-section">
-                {!isRevealed && (
-                  <Button
-                    onClick={handleReveal}
-                    variant="primary"
-                    disabled={revealTopicMutation.isPending}
-                  >
-                    Reveal Reviews
-                  </Button>
-                )}
-                {isRevealed && (
-                  <div className="reviews-grid">
-                    {[myReview, otherReview].map((review, idx) => {
-                      if (!review) return null;
-                      const reviewColor = getUserColorVar(review.reviewer, friendId);
-                      return (
-                        <Card key={idx} style={{ borderColor: reviewColor }}>
-                          <div className="entry-title" style={{ color: reviewColor }}>
-                            {review.reviewer === identity
-                              ? "You"
-                              : review.reviewer === "admin"
-                                ? "Forest"
-                                : friendName}
+                <div className="reviews-grid">
+                  {[myReview, otherReview].map((review, idx) => {
+                    if (!review) return null;
+                    const reviewColor = getUserColorVar(review.reviewer, friendId);
+                    return (
+                      <Card key={idx} style={{ borderColor: reviewColor }}>
+                        <div className="entry-title" style={{ color: reviewColor }}>
+                          {review.reviewer === identity
+                            ? "You"
+                            : review.reviewer === "admin"
+                              ? "Forest"
+                              : friendName}
+                        </div>
+                        <div className="stars-display">
+                          {Array.from({ length: review.stars }).map((_, i) => (
+                            <i key={i} className="hn hn-star-solid" />
+                          ))}
+                        </div>
+                        <div className="entry-content" style={{ color: reviewColor }}>
+                          {review.review_text}
+                        </div>
+                        {review.recommend && (
+                          <div className="recommend-badge">
+                            <i className="hn hn-check-solid" /> Recommends
                           </div>
-                          <div className="stars-display">
-                            {Array.from({ length: review.stars }).map((_, i) => (
-                              <i key={i} className="hn hn-star-solid" />
-                            ))}
-                          </div>
-                          <div className="entry-content" style={{ color: reviewColor }}>
-                            {review.review_text}
-                          </div>
-                          {review.recommend && (
-                            <div className="recommend-badge">
-                              <i className="hn hn-check-solid" /> Recommends
-                            </div>
-                          )}
-                        </Card>
-                      );
-                    })}
-                  </div>
-                )}
+                        )}
+                      </Card>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
             {/* Set Next Topic (Forest only) */}
-            {isRevealed && identity === "admin" && (
-              <form onSubmit={handleSetTopic} className="form-section form">
+            {hasBothReviews && identity === "admin" && (
+              <form onSubmit={handleSetTopic} className="form" style={{ width: "100%" }}>
                 <div className="form-title">Set Next Topic:</div>
                 <FormField label="Topic name" required>
                   <Input
@@ -218,6 +202,7 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
                     onChange={(e) => setNewTopicName(e.target.value)}
                     placeholder="e.g., 'The concept of Tuesday'"
                     required
+                    style={{ width: "100%" }}
                   />
                 </FormField>
                 <Button

@@ -26,7 +26,7 @@ export function QuestionJar({ size, friendId, friendName }: QuestionJarProps) {
   };
 
   // Support 2x2, 3x2, and 4x2 sizes
-  const [cols, rows] = size.split("x").map(Number);
+  const [cols] = size.split("x").map(Number);
   const isValidSize = size === "2x2" || size === "3x2" || size === "4x2";
 
   if (!isValidSize) {
@@ -63,20 +63,18 @@ export function QuestionJar({ size, friendId, friendName }: QuestionJarProps) {
           onClick={handleClick}
           className="widget-clickable"
           style={{
+            display: "flex",
             justifyContent: "center",
             alignItems: "center",
             textAlign: "center",
             padding: "var(--space-sm)",
+            width: "100%",
+            height: "100%",
           }}
         >
           <div
-            className="widget-content"
             style={{
               wordBreak: "break-word",
-              overflow: "hidden",
-              display: "-webkit-box",
-              WebkitLineClamp: rows >= 3 ? 6 : 4,
-              WebkitBoxOrient: "vertical",
               textAlign: "center",
               fontSize: cols >= 4 ? "var(--font-size-sm)" : "var(--font-size-xs)",
               lineHeight: 1.4,

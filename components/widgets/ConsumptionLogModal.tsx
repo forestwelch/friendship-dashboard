@@ -76,14 +76,15 @@ export function ConsumptionLogModal({
     <Modal id={modalId} title="Shared Consumption Log" onClose={() => setOpenModal(null)}>
       <div className="modal-content">
         {/* Add Entry Form */}
-        <form onSubmit={handleSubmit} className="form-section form-section-secondary form">
-          <FormField label="Title" required>
+        <form onSubmit={handleSubmit} className="form" style={{ width: "100%" }}>
+          <FormField label="Title" required={false}>
             <Input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
               maxLength={200}
+              style={{ width: "100%" }}
             />
           </FormField>
           <FormField label="Link (optional)">
@@ -92,9 +93,10 @@ export function ConsumptionLogModal({
               value={link}
               onChange={(e) => setLink(e.target.value)}
               placeholder="https://..."
+              style={{ width: "100%" }}
             />
           </FormField>
-          <FormField label="Thought (max 280 chars)" required>
+          <FormField label="Thoughts" required={false}>
             <Textarea
               value={thought}
               onChange={(e) => setThought(e.target.value)}
@@ -102,6 +104,7 @@ export function ConsumptionLogModal({
               rows={4}
               maxLength={280}
               showCharCount
+              style={{ width: "100%" }}
             />
           </FormField>
           <button
@@ -114,11 +117,9 @@ export function ConsumptionLogModal({
         </form>
 
         {/* Entries List */}
-        <div className="entries-list">
-          {entries.length === 0 ? (
-            <div className="empty-state">No entries yet. Be the first to add one!</div>
-          ) : (
-            entries.map((entry) => {
+        {entries.length > 0 && (
+          <div className="entries-list">
+            {entries.map((entry) => {
               const entryColor = getUserColorVar(entry.added_by, friendId);
 
               return (
@@ -145,9 +146,9 @@ export function ConsumptionLogModal({
                   </div>
                 </div>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        )}
       </div>
     </Modal>
   );

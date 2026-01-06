@@ -86,12 +86,16 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
           }}
         >
           <div
-            className="widget-title"
             style={{
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
+              fontSize: "var(--font-size-sm)",
+              fontWeight: "bold",
+              color: "var(--text)",
               width: "100%",
+              textAlign: "center",
+              overflow: "visible",
+              textOverflow: "clip",
+              whiteSpace: "normal",
+              wordBreak: "break-word",
             }}
           >
             {topic.topic_name}
@@ -117,10 +121,10 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
               <div
                 style={{
                   textAlign: "center",
-                  overflow: "hidden",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "100%",
                 }}
               >
                 {displayText}
