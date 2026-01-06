@@ -91,13 +91,13 @@ export function ConnectFour({
 
               // If we can't determine from moves, use a fallback based on cell value
               // This shouldn't happen, but just in case
+              // "you" = admin (player_one), "them" = friend (player_two)
               let pieceColor: string | null = null;
               if (ownerId) {
                 pieceColor = getUserColor(ownerId, friendId, themeColors);
               } else {
-                // Fallback: assume "you" pieces are from playerTwoId (friend) if no moves tracked
-                // This is imperfect but better than nothing
-                const fallbackOwnerId = cell === "you" ? playerTwoId : playerOneId;
+                // Fallback: "you" pieces are from playerOneId (admin), "them" pieces are from playerTwoId (friend)
+                const fallbackOwnerId = cell === "you" ? playerOneId : playerTwoId;
                 pieceColor = getUserColor(fallbackOwnerId, friendId, themeColors);
               }
 

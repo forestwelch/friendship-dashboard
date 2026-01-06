@@ -184,30 +184,17 @@ export function ConnectFourModal({
                       // Colors: friend always = primary (pink), admin always = secondary (green)
                       // playerOneId is always admin, playerTwoId is always friend
                       // Board stores "you" and "them" relative to the player who made the move
-                      // For winning screen, we need to determine actual player from moves or use a default
+                      // "you" = admin (player_one) moves, "them" = friend (player_two) moves
+                      // This is consistent regardless of who's viewing
                       const isWinning = isWinningCell(row, col);
                       let pieceColor: string | null = null;
 
                       if (cell === "you") {
-                        // "you" piece - in winning screen, assume it's the winner's piece
-                        // But we need to know which player won - use winnerId if available
-                        if (winnerId) {
-                          pieceColor = getUserColor(winnerId, friendId, themeColors);
-                        } else {
-                          // Fallback: use currentUserId (whoever is viewing)
-                          pieceColor = getUserColor(currentUserId, friendId, themeColors);
-                        }
+                        // "you" piece = admin (player_one) = secondary color
+                        pieceColor = getUserColor(playerOneId, friendId, themeColors);
                       } else if (cell === "them") {
-                        // "them" piece - the other player
-                        if (winnerId) {
-                          const otherPlayerId =
-                            winnerId === playerOneId ? playerTwoId : playerOneId;
-                          pieceColor = getUserColor(otherPlayerId, friendId, themeColors);
-                        } else {
-                          const otherPlayerId =
-                            currentUserId === playerOneId ? playerTwoId : playerOneId;
-                          pieceColor = getUserColor(otherPlayerId, friendId, themeColors);
-                        }
+                        // "them" piece = friend (player_two) = primary color
+                        pieceColor = getUserColor(playerTwoId, friendId, themeColors);
                       }
 
                       return (
@@ -354,17 +341,16 @@ export function ConnectFourModal({
                         // Colors: friend always = primary (pink), admin always = secondary (green)
                         // playerOneId is always admin, playerTwoId is always friend
                         // Board stores "you" and "them" relative to the player who made the move
-                        // We need to map "you"/"them" to actual player IDs based on who's viewing
+                        // "you" = admin (player_one) moves, "them" = friend (player_two) moves
+                        // This is consistent regardless of who's viewing
                         let pieceColor: string | null = null;
 
                         if (cell === "you") {
-                          // "you" piece belongs to currentUserId (whoever is viewing)
-                          pieceColor = getUserColor(currentUserId, friendId, themeColors);
+                          // "you" piece = admin (player_one) = secondary color
+                          pieceColor = getUserColor(playerOneId, friendId, themeColors);
                         } else if (cell === "them") {
-                          // "them" piece belongs to the other player
-                          const otherPlayerId =
-                            currentUserId === playerOneId ? playerTwoId : playerOneId;
-                          pieceColor = getUserColor(otherPlayerId, friendId, themeColors);
+                          // "them" piece = friend (player_two) = primary color
+                          pieceColor = getUserColor(playerTwoId, friendId, themeColors);
                         } else if (showGhostPiece) {
                           // Ghost piece shows the color of the player whose turn it is
                           const ghostColor = getUserColor(currentTurnId, friendId, themeColors);
