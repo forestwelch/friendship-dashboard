@@ -46,10 +46,14 @@ export function ConnectFourModal({
   const userContext = useUserContext();
   const currentUserId = getUserIdForFriend(userContext, friendId);
 
-  const { data: gameData, refetch } = useConnectFourGame(friendId, widgetId);
+  // Use realtime subscription when modal is open, with polling fallback
+  const { data: gameData, refetch } = useConnectFourGame(friendId, widgetId, {
+    refetchInterval: isOpen ? 3000 : undefined, // Poll every 3 seconds when modal is open (fallback)
+  });
   const makeMoveMutation = useMakeMove(friendId, widgetId, currentUserId);
   const resetGameMutation = useResetGame(friendId, widgetId);
-  useGameSubscription(friendId, widgetId);
+  // Only subscribe when modal is open
+  useGameSubscription(friendId, widgetId, { enabled: isOpen });
 
   const game = gameData || config;
   const board = game?.board || createEmptyBoard();

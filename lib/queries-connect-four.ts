@@ -99,7 +99,11 @@ function initializeGame(friendId: string): ConnectFourData {
   };
 }
 
-export function useConnectFourGame(friendId: string, _widgetId: string) {
+export function useConnectFourGame(
+  friendId: string,
+  _widgetId: string,
+  options?: { refetchInterval?: number }
+) {
   return useQuery({
     queryKey: ["connect_four", friendId],
     queryFn: async () => {
@@ -132,6 +136,7 @@ export function useConnectFourGame(friendId: string, _widgetId: string) {
       return newGame;
     },
     staleTime: 1000 * 60 * 1, // 1 minute (shorter for real-time game)
+    refetchInterval: options?.refetchInterval,
   });
 }
 
@@ -300,10 +305,17 @@ export function useMakeMove(friendId: string, _widgetId: string, currentUserId: 
   });
 }
 
-export function useGameSubscription(friendId: string, _widgetId: string) {
+export function useGameSubscription(
+  friendId: string,
+  _widgetId: string,
+  options?: { enabled?: boolean }
+) {
   const queryClient = useQueryClient();
+  const enabled = options?.enabled !== false; // Default to true for backward compatibility
 
   useEffect(() => {
+    if (!enabled) return;
+
     const channel = supabase
       .channel(`connect_four:${friendId}`)
       .on(
@@ -326,12 +338,36 @@ export function useGameSubscription(friendId: string, _widgetId: string) {
           playSound("opponent_move");
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        // Note: We don't need to handle subscription failures here because
+        // polling via refetchInterval in useConnectFourGame will continue
+        // to fetch updates regardless of subscription status. The subscription
+        // is an optimization for real-time updates, but polling ensures
+        // updates always work even if subscription fails.
+        if (status === "SUBSCRIBED") {
+          // Subscription active - real-time updates will be received
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+          // Subscription failed or closed - polling will handle updates
+          // No action needed as refetchInterval continues polling
+        }
+      });
 
     return () => {
       channel.unsubscribe();
     };
-  }, [friendId, queryClient]);
+  }, [friendId, queryClient, enabled]);
+}
+
+/**
+ * Polling hook for fallback or widget updates
+ * Uses React Query's refetchInterval for efficient polling
+ * Note: Polling is actually handled by refetchInterval in useConnectFourGame,
+ * so this hook is just a placeholder for future enhancements if needed.
+ */
+export function useGamePolling(_friendId: string, _widgetId: string, _intervalMs: number) {
+  // This hook doesn't need to do anything - the polling is handled by refetchInterval
+  // in useConnectFourGame. This is just a placeholder for consistency.
+  return null;
 }
 
 export function useResetGame(friendId: string, _widgetId: string) {

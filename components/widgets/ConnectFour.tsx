@@ -7,11 +7,7 @@ import { useUIStore } from "@/lib/store/ui-store";
 import { ThemeColors, WidgetSize } from "@/lib/types";
 import { ConnectFourModal } from "./ConnectFourModal";
 import { createEmptyBoard, BOARD_ROWS, BOARD_COLS } from "@/lib/connect-four-logic";
-import {
-  ConnectFourData,
-  useConnectFourGame,
-  useGameSubscription,
-} from "@/lib/queries-connect-four";
+import { ConnectFourData, useConnectFourGame } from "@/lib/queries-connect-four";
 import { ADMIN_USER_ID } from "@/lib/constants";
 import { getUserColor } from "@/lib/color-utils";
 import { useUserContext, getUserIdForFriend, getUserDisplayName } from "@/lib/use-user-context";
@@ -36,11 +32,10 @@ export function ConnectFour({
 }: ConnectFourProps) {
   const { setOpenModal } = useUIStore();
 
-  // Add real-time updates for preview tiles
-  const { data: gameData } = useConnectFourGame(friendId, widgetId);
-  useGameSubscription(friendId, widgetId);
-
-  // Removed polling - rely on real-time subscriptions for better performance
+  // Use polling for widget updates (cheap, every 5 seconds)
+  const { data: gameData } = useConnectFourGame(friendId, widgetId, {
+    refetchInterval: 5000, // Poll every 5 seconds
+  });
 
   // Use live data from query, fallback to config prop
   const game = gameData || config;
