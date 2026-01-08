@@ -40,31 +40,19 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
     );
   }
 
-  if (!topic) {
-    return (
-      <>
-        <Widget size={size}>
-          <div onClick={handleClick} className="widget-empty-state">
-            No topic set. Click to set one!
-          </div>
-        </Widget>
-        <AbsurdReviewsModal friendId={friendId} friendName={friendName} />
-      </>
-    );
-  }
-
   const myReview = reviews.find((r) => r.reviewer === identity);
   const otherReview = reviews.find((r) => r.reviewer !== identity);
   const hasBothReviews = myReview && otherReview;
+  const otherPersonName = identity === "admin" ? friendName : "Forest";
 
+  // Determine display text based on three states
   let displayText = "";
-
-  if (!myReview) {
-    displayText = `Awaiting your review...`;
-  } else if (!otherReview) {
-    displayText = `Awaiting ${identity === "admin" ? friendName : "Forest"}'s review...`;
+  if (!topic) {
+    displayText = "Waiting for topic...";
+  } else if (hasBothReviews) {
+    displayText = `View ${otherPersonName}'s review`;
   } else {
-    displayText = `${myReview.stars} vs ${otherReview.stars}`;
+    displayText = topic.topic_name;
   }
 
   return (
@@ -80,7 +68,6 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
             alignItems: "center",
             textAlign: "center",
             padding: "var(--space-sm)",
-            gap: "var(--space-xs)",
           }}
         >
           <div
@@ -96,53 +83,8 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
               wordBreak: "break-word",
             }}
           >
-            {topic.topic_name}
+            {displayText}
           </div>
-          <div
-            className="widget-content"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "var(--space-xs)",
-              justifyContent: "center",
-              flex: 1,
-              minHeight: 0,
-            }}
-          >
-            {hasBothReviews ? (
-              <>
-                {myReview.stars} <i className="hn hn-star-solid" style={{ fontSize: "0.7rem" }} />{" "}
-                vs {otherReview.stars}{" "}
-                <i className="hn hn-star-solid" style={{ fontSize: "0.7rem" }} />
-              </>
-            ) : (
-              <div
-                style={{
-                  textAlign: "center",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "100%",
-                }}
-              >
-                {displayText}
-              </div>
-            )}
-          </div>
-          {myReview && !otherReview && (
-            <div
-              className="widget-badge"
-              style={{
-                fontSize: "var(--font-size-xs)",
-                display: "flex",
-                alignItems: "center",
-                gap: "var(--space-xs)",
-              }}
-            >
-              <i className="hn hn-check-solid" />
-              <span>Your review ready</span>
-            </div>
-          )}
         </div>
       </Widget>
       <AbsurdReviewsModal friendId={friendId} friendName={friendName} />
