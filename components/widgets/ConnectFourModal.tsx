@@ -47,7 +47,7 @@ export function ConnectFourModal({
   const currentUserId = getUserIdForFriend(userContext, friendId);
 
   // Use realtime subscription when modal is open, with polling fallback
-  const { data: gameData, refetch } = useConnectFourGame(friendId, widgetId, {
+  const { data: gameData } = useConnectFourGame(friendId, widgetId, {
     refetchInterval: isOpen ? 3000 : undefined, // Poll every 3 seconds when modal is open (fallback)
   });
   const makeMoveMutation = useMakeMove(friendId, widgetId, currentUserId);
@@ -56,9 +56,9 @@ export function ConnectFourModal({
   useGameSubscription(friendId, widgetId, { enabled: isOpen });
 
   const game = gameData || config;
-  const board = game?.board || createEmptyBoard();
+  const board = useMemo(() => game?.board || createEmptyBoard(), [game?.board]);
   const status = game?.status || "active";
-  const moves = game?.moves || [];
+  const moves = useMemo(() => game?.moves || [], [game?.moves]);
 
   // Get player IDs and determine current turn
   const playerOneId = game?.player_one_id || ADMIN_USER_ID;
@@ -145,23 +145,22 @@ export function ConnectFourModal({
     resetGameMutation.mutate();
   };
 
-  const handleRefresh = () => {
-    refetch();
-    playSound("open");
-  };
+  // Find the position of the most recent move
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  const lastMovePosition = useMemo(() => {
+    if (moves.length === 0) return null;
+    const lastMove = moves[moves.length - 1];
+    const column = lastMove.column;
 
-  const formatTimeAgo = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-
-    if (diffMins < 1) return "just now";
-    if (diffMins === 1) return "1 minute ago";
-    return `${diffMins} minutes ago`;
-  };
-
-  const lastMove = moves.length > 0 ? moves[moves.length - 1] : null;
+    // Find the topmost piece in that column (most recently placed)
+    // Pieces fill from bottom to top, so the last move is at the lowest row index with a piece
+    for (let row = 0; row < BOARD_ROWS; row++) {
+      if (board[row][column] !== null) {
+        return { row, col: column };
+      }
+    }
+    return null;
+  }, [moves, board]);
 
   // Win/Loss/Draw screen
   if (status === "won" || status === "lost" || status === "draw") {
@@ -169,15 +168,6 @@ export function ConnectFourModal({
       <Modal id={modalId} title="CONNECT FOUR" onClose={() => setOpenModal(null)}>
         <div className={styles.gameModal}>
           <div className={styles.resultScreen}>
-            <button
-              className={styles.refreshButton}
-              onClick={handleRefresh}
-              title="Refresh game"
-              aria-label="Refresh game"
-              style={{ position: "absolute", top: 0, right: 0 }}
-            >
-              <i className="hn hn-refresh" />
-            </button>
             {/* Show board with winning positions highlighted */}
             <div className={styles.boardContainer}>
               <div className={styles.board}>
@@ -191,6 +181,8 @@ export function ConnectFourModal({
                       // "you" = admin (player_one) moves, "them" = friend (player_two) moves
                       // This is consistent regardless of who's viewing
                       const isWinning = isWinningCell(row, col);
+                      const isLastMove =
+                        lastMovePosition?.row === row && lastMovePosition?.col === col;
                       let pieceColor: string | null = null;
 
                       if (cell === "you") {
@@ -210,7 +202,14 @@ export function ConnectFourModal({
                             <div
                               className={`${styles.piece} ${isWinning ? styles.winningPiece : ""}`}
                               style={{ backgroundColor: pieceColor }}
-                            />
+                            >
+                              {isLastMove && (
+                                <i
+                                  className="hn hn-face-thinking-solid"
+                                  style={{ fontSize: "1.5rem", color: "var(--text)" }}
+                                />
+                              )}
+                            </div>
                           ) : null}
                         </div>
                       );
@@ -286,14 +285,6 @@ export function ConnectFourModal({
               }}
             />
           </div>
-          <button
-            className={styles.refreshButton}
-            onClick={handleRefresh}
-            title="Refresh game"
-            aria-label="Refresh game"
-          >
-            <i className="hn hn-refresh" />
-          </button>
         </div>
 
         <div className={styles.boardContainer}>
@@ -314,6 +305,7 @@ export function ConnectFourModal({
 
                   // Colors are consistent: "you" = player_one (primary), "them" = player_two (secondary)
                   const isWinning = isWinningCell(row, col);
+                  const isLastMove = lastMovePosition?.row === row && lastMovePosition?.col === col;
 
                   return (
                     <div
@@ -375,7 +367,14 @@ export function ConnectFourModal({
                             <div
                               className={`${styles.piece} ${isWinning ? styles.winningPiece : ""}`}
                               style={{ backgroundColor: pieceColor }}
-                            />
+                            >
+                              {isLastMove && (
+                                <i
+                                  className="hn hn-face-thinking-solid"
+                                  style={{ fontSize: "1.5rem", color: "var(--text)" }}
+                                />
+                              )}
+                            </div>
                           );
                         }
                         return null;
@@ -394,12 +393,6 @@ export function ConnectFourModal({
           )}
           {status === "active" && !isMyTurn && (
             <div className={styles.turnIndicator}>Waiting for {theirDisplayName}...</div>
-          )}
-          {lastMove && (
-            <div className={styles.moveHistory}>
-              Last move: {lastMove.player_id === currentUserId ? myDisplayName : theirDisplayName}{" "}
-              played column {lastMove.column + 1} ({formatTimeAgo(lastMove.timestamp)})
-            </div>
           )}
         </div>
       </div>
