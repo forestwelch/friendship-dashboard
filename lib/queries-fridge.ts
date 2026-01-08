@@ -58,7 +58,7 @@ export const DEFAULT_INVENTORY: Record<string, number> = {
   "!": 3,
   "?": 2,
   "&": 1,
-  "hn-tiktok": 2,
+  ".": 3,
   "hn-heart-solid": 2,
   "hn-crown-solid": 1,
   "hn-headphones-solid": 1,

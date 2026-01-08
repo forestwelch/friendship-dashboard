@@ -820,10 +820,49 @@ textarea.game-input {
   padding: 0;
   box-shadow: none;
   font-style: normal; /* Prevent icons from being italicized */
+  touch-action: none; /* Prevent default touch behaviors for smoother dragging */
 }
 
 .fridge-magnet i {
   font-style: normal; /* Ensure icons are not italicized */
+}
+
+.fridge-magnet-label {
+  position: relative;
+  display: inline-block;
+}
+
+.fridge-magnet-edit {
+  position: absolute;
+  font-size: 15px;
+  font-family: "Dogica", monospace;
+  font-weight: bold;
+  padding: 0;
+  margin: 0;
+  border: 2px solid var(--accent);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  display: none;
+  z-index: 1001;
+  border-radius: var(--radius-xs);
+  box-sizing: border-box;
+}
+
+.fridge-magnet-dragging {
+  pointer-events: none;
+}
+
+.fridge-return-button {
+  pointer-events: none; /* Don't interfere with drag detection */
+}
+
+.fridge-return-button-active {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  box-shadow:
+    var(--border-width) var(--border-width) 0 var(--accent),
+    inset calc(var(--border-width) * -1) calc(var(--border-width) * -1) 0 rgba(0, 0, 0, 0.3) !important;
 }
 
 .fridge-bank {
