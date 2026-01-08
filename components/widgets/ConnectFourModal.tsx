@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { playSound } from "@/lib/sounds";
 import { useUIStore } from "@/lib/store/ui-store";
 import { ThemeColors } from "@/lib/types";
@@ -103,6 +103,32 @@ export function ConnectFourModal({
   const [hoveredColumn, setHoveredColumn] = useState<number | null>(null);
   const [animatingColumn, setAnimatingColumn] = useState<number | null>(null);
   const [previousHoveredColumn, setPreviousHoveredColumn] = useState<number | null>(null);
+  const previousMovesLengthRef = useRef(moves.length);
+  const previousIsMyTurnRef = useRef(isMyTurn);
+  const hoveredColumnRef = useRef<number | null>(null);
+
+  // Track hovered column in a ref for comparison
+  useEffect(() => {
+    hoveredColumnRef.current = hoveredColumn;
+  }, [hoveredColumn]);
+
+  // Clear hovered column when board state changes or when it's no longer user's turn
+  // Use a callback pattern to avoid synchronous setState in effect
+  useEffect(() => {
+    const movesChanged = moves.length !== previousMovesLengthRef.current;
+    const turnChanged = isMyTurn !== previousIsMyTurnRef.current;
+
+    if ((movesChanged || turnChanged) && hoveredColumnRef.current !== null) {
+      // Schedule state update for next tick to avoid synchronous setState
+      requestAnimationFrame(() => {
+        setHoveredColumn(null);
+        setPreviousHoveredColumn(null);
+      });
+    }
+
+    previousMovesLengthRef.current = moves.length;
+    previousIsMyTurnRef.current = isMyTurn;
+  }, [moves.length, isMyTurn]);
 
   const handleColumnClick = useCallback(
     (column: number) => {
@@ -115,6 +141,10 @@ export function ConnectFourModal({
         playSound("error");
         return;
       }
+
+      // Clear hover state when making a move
+      setHoveredColumn(null);
+      setPreviousHoveredColumn(null);
 
       // Optimistic update: animate piece drop
       setAnimatingColumn(column);
@@ -328,6 +358,18 @@ export function ConnectFourModal({
                       onMouseLeave={() => {
                         setHoveredColumn(null);
                         setPreviousHoveredColumn(null);
+                      }}
+                      onTouchStart={() => {
+                        // On mobile, show ghost preview on touch start (similar to hover on desktop)
+                        if (status === "active" && isMyTurn) {
+                          if (previousHoveredColumn !== col) {
+                            setHoveredColumn(col);
+                            setPreviousHoveredColumn(col);
+                            playSound("game_hover");
+                          } else {
+                            setHoveredColumn(col);
+                          }
+                        }
                       }}
                       style={{
                         cursor: status === "active" && isMyTurn ? "pointer" : "default",

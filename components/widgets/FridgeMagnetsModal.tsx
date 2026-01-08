@@ -59,6 +59,8 @@ function DraggableMagnet({
 
   const magnetSize = 32;
   const justFinishedDraggingRef = useRef(false);
+  const hasDraggedRef = useRef(false);
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   // Sync position when magnet prop changes (after drag completes)
   // Skip sync immediately after drag to prevent flash
@@ -194,6 +196,14 @@ function DraggableMagnet({
       const offsetX = touch.clientX - rect.left;
       const offsetY = touch.clientY - rect.top;
 
+      // Track touch start position to detect drags
+      touchStartRef.current = {
+        x: touch.clientX,
+        y: touch.clientY,
+        time: Date.now(),
+      };
+      hasDraggedRef.current = false;
+
       dragStateRef.current = {
         isDragging: true,
         offsetX,
@@ -207,6 +217,15 @@ function DraggableMagnet({
         if (!magnetRef.current || !dragStateRef.current) return;
 
         const touch = e.touches[0];
+
+        // Mark that a drag has occurred if touch moved significantly
+        if (touchStartRef.current) {
+          const dx = Math.abs(touch.clientX - touchStartRef.current.x);
+          const dy = Math.abs(touch.clientY - touchStartRef.current.y);
+          if (dx > 5 || dy > 5) {
+            hasDraggedRef.current = true;
+          }
+        }
 
         // Check if hovering over return button
         const returnButton = document.querySelector(".fridge-return-button") as HTMLElement;
@@ -262,10 +281,16 @@ function DraggableMagnet({
           dragStateRef.current = null;
           setIsDragging(false);
           justFinishedDraggingRef.current = true;
+          hasDraggedRef.current = true; // Mark as dragged to prevent click
           if (onRemove) {
             onRemove(index);
             playSound("move");
           }
+          // Clear touch start ref after a delay to prevent click handler from firing
+          setTimeout(() => {
+            touchStartRef.current = null;
+            hasDraggedRef.current = false;
+          }, 300);
           document.removeEventListener("touchmove", handleTouchMove);
           document.removeEventListener("touchend", handleTouchEnd);
           return;
@@ -283,6 +308,13 @@ function DraggableMagnet({
         if (onMove && canvasWidth && canvasHeight) {
           onMove(index, finalPos.x, finalPos.y);
         }
+
+        // Clear touch start ref after a delay to prevent click handler from firing
+        // The click event fires after touchend, so we need to prevent it
+        setTimeout(() => {
+          touchStartRef.current = null;
+          hasDraggedRef.current = false;
+        }, 300);
 
         document.removeEventListener("touchmove", handleTouchMove);
         document.removeEventListener("touchend", handleTouchEnd);
@@ -311,6 +343,13 @@ function DraggableMagnet({
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
       if (isInBank || isDragging || isEditing) return;
+
+      // Prevent click if a touch drag occurred
+      if (hasDraggedRef.current) {
+        hasDraggedRef.current = false;
+        touchStartRef.current = null;
+        return;
+      }
 
       // Check if this was a drag (mouse moved significantly)
       if (clickStartRef.current) {
@@ -407,7 +446,17 @@ function DraggableMagnet({
         handleMouseDown(e);
       }}
       onTouchStart={handleTouchStart}
-      onClick={handleClick}
+      onClick={(e) => {
+        // Prevent click if a drag occurred (touch devices)
+        if (hasDraggedRef.current) {
+          e.preventDefault();
+          e.stopPropagation();
+          hasDraggedRef.current = false;
+          touchStartRef.current = null;
+          return;
+        }
+        handleClick(e);
+      }}
     >
       <span ref={labelRef} className="fridge-magnet-label">
         {displayValue}
