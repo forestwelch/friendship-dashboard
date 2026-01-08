@@ -180,6 +180,19 @@ export function WidgetConfigModal({
     if (!widget) return null;
     switch (widget.widget_type) {
       case "music_player": {
+        const selectedSongIds = (config.playlistSongIds as string[]) || [];
+
+        const handleSongToggle = (songId: string) => {
+          const currentIds = selectedSongIds;
+          const newIds = currentIds.includes(songId)
+            ? currentIds.filter((id) => id !== songId)
+            : [...currentIds, songId];
+          setConfig({
+            ...config,
+            playlistSongIds: newIds,
+          });
+        };
+
         return (
           <div
             style={{
@@ -189,7 +202,7 @@ export function WidgetConfigModal({
             }}
           >
             <label className="game-heading-3" style={{ margin: 0 }}>
-              Select Song
+              Select Songs for Playlist
             </label>
             {loadingSongs ? (
               <div
@@ -199,31 +212,68 @@ export function WidgetConfigModal({
                 Loading songs...
               </div>
             ) : (
-              <select
-                className="game-input"
-                value={(config.selectedSongId as string) || ""}
-                onChange={(e) =>
-                  setConfig({
-                    ...config,
-                    selectedSongId: e.target.value,
-                  })
-                }
+              <div
                 style={{
-                  fontFamily: "inherit",
-                  padding: "var(--space-md)",
-                  minHeight: "2.5rem",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "var(--space-sm)",
+                  maxHeight: "300px",
+                  overflowY: "auto",
+                  border: "1px solid var(--border-color, #333)",
+                  borderRadius: "4px",
+                  padding: "var(--space-sm)",
                 }}
               >
-                <option value="">-- Select a song --</option>
-                {availableSongs.map((song) => (
-                  <option key={song.id} value={song.id}>
-                    {song.title} - {song.artist}
-                  </option>
-                ))}
-              </select>
+                {availableSongs.length === 0 ? (
+                  <div
+                    className="game-text-muted"
+                    style={{ padding: "var(--space-md)", textAlign: "center" }}
+                  >
+                    No songs available
+                  </div>
+                ) : (
+                  availableSongs.map((song) => (
+                    <label
+                      key={song.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "var(--space-sm)",
+                        padding: "var(--space-xs)",
+                        cursor: "pointer",
+                        borderRadius: "4px",
+                        transition: "background-color 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                          "var(--hover-bg, rgba(255,255,255,0.05))";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedSongIds.includes(song.id)}
+                        onChange={() => handleSongToggle(song.id)}
+                        style={{
+                          cursor: "pointer",
+                          width: "18px",
+                          height: "18px",
+                        }}
+                      />
+                      <span style={{ flex: 1 }}>
+                        {song.title} - {song.artist}
+                      </span>
+                    </label>
+                  ))
+                )}
+              </div>
             )}
             <div className="game-text-muted" style={{ fontSize: "var(--font-size-xs)" }}>
-              The selected song will auto-play when the friend visits the page.
+              {selectedSongIds.length > 0
+                ? `${selectedSongIds.length} song${selectedSongIds.length === 1 ? "" : "s"} selected. A random song will start playing when the page loads, and songs will shuffle through.`
+                : "Select songs to create a playlist. A random song will start playing when the page loads."}
             </div>
           </div>
         );

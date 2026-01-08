@@ -48,6 +48,7 @@ export const WidgetRenderer = memo(function WidgetRenderer({
         <MusicPlayer
           size={widget.size}
           songs={songs}
+          playlistSongIds={widget.config?.playlistSongIds as string[] | undefined}
           selectedSongId={widget.config?.selectedSongId as string | undefined}
         />
       );

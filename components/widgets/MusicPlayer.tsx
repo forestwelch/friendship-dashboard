@@ -1,26 +1,46 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Widget } from "@/components/Widget";
 import { WidgetSize, Song } from "@/lib/types";
 
 interface MusicPlayerProps {
   size: WidgetSize;
   songs?: Song[];
-  selectedSongId?: string;
+  playlistSongIds?: string[];
+  selectedSongId?: string; // Backward compatibility
 }
 
-export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerProps) {
+// Fisher-Yates shuffle algorithm
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+export function MusicPlayer({
+  size,
+  songs = [],
+  playlistSongIds,
+  selectedSongId,
+}: MusicPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSongId, setCurrentSongId] = useState<string | null>(selectedSongId || null);
   const [loadedSongs, setLoadedSongs] = useState<Song[]>(songs);
+  const [shuffledPlaylist, setShuffledPlaylist] = useState<Song[]>([]);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isMountedRef = useRef(true);
+  const hasInitializedRef = useRef(false);
+  const hasAutoPlayedRef = useRef(false);
+  const shouldAutoPlayNextRef = useRef(false);
 
   // Update loadedSongs when songs prop changes (only if different)
   useEffect(() => {
     if (songs.length > 0 && JSON.stringify(songs) !== JSON.stringify(loadedSongs)) {
-      // Use requestAnimationFrame to avoid synchronous setState
       requestAnimationFrame(() => {
         setLoadedSongs(songs);
       });
@@ -42,29 +62,161 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
         }
       })
       .catch((error) => {
-        console.error("Error fetching songs:", error);
+        console.error("[MusicPlayer] Error fetching songs:", error);
       });
   }, [songs]);
+
+  // Build playlist from playlistSongIds or fallback to selectedSongId or all songs
+  useEffect(() => {
+    if (loadedSongs.length === 0) {
+      return;
+    }
+
+    let playlistToUse: Song[] = [];
+
+    if (playlistSongIds && playlistSongIds.length > 0) {
+      // Use playlist from config
+      playlistToUse = loadedSongs.filter((song) => playlistSongIds.includes(song.id));
+    } else if (selectedSongId) {
+      // Backward compatibility: use selectedSongId
+      const song = loadedSongs.find((s) => s.id === selectedSongId);
+      if (song) {
+        playlistToUse = [song];
+      } else {
+        console.warn("[MusicPlayer] selectedSongId not found in loadedSongs:", selectedSongId);
+      }
+    } else if (loadedSongs.length > 0) {
+      // Fallback: use all songs
+      playlistToUse = loadedSongs;
+    }
+
+    // Shuffle the playlist
+    if (playlistToUse.length > 0) {
+      const shuffled = shuffleArray(playlistToUse);
+
+      // Batch state updates
+      requestAnimationFrame(() => {
+        setShuffledPlaylist(shuffled);
+
+        // Randomly pick initial song (only if not already set via selectedSongId)
+        if (!hasInitializedRef.current) {
+          const randomIndex = Math.floor(Math.random() * shuffled.length);
+          const initialSong = shuffled[randomIndex];
+          setCurrentIndex(randomIndex);
+          setCurrentSongId(initialSong.id);
+          hasInitializedRef.current = true;
+        }
+      });
+    } else {
+      console.warn("[MusicPlayer] No songs in playlist, clearing shuffled playlist");
+      requestAnimationFrame(() => {
+        setShuffledPlaylist([]);
+      });
+    }
+  }, [loadedSongs, playlistSongIds, selectedSongId]);
+
+  const currentSong = shuffledPlaylist[currentIndex] || null;
+
+  // Define handleNext before useEffect that uses it
+  const handleNext = useCallback(() => {
+    if (shuffledPlaylist.length === 0 || !audioRef.current) {
+      console.warn("[MusicPlayer] Cannot go to next: no playlist or audio ref");
+      return;
+    }
+
+    // Move to next song in shuffled playlist (wrap around)
+    const nextIndex = (currentIndex + 1) % shuffledPlaylist.length;
+    const nextSong = shuffledPlaylist[nextIndex];
+
+    if (!nextSong) {
+      console.warn("[MusicPlayer] No next song found");
+      return;
+    }
+
+    // Validate mp3Url
+    if (!nextSong.mp3Url || nextSong.mp3Url.trim() === "") {
+      console.warn("[MusicPlayer] Cannot play next song: no valid mp3Url", nextSong);
+      return;
+    }
+
+    // Mark that we should auto-play after advancing
+    shouldAutoPlayNextRef.current = true;
+
+    // Update state - the effect will handle setting source and playing
+    setCurrentIndex(nextIndex);
+    setCurrentSongId(nextSong.id);
+  }, [shuffledPlaylist, currentIndex]);
+
+  const handleTogglePlayPause = useCallback(() => {
+    if (!currentSong || !audioRef.current) {
+      console.warn("[MusicPlayer] Cannot toggle: no current song or audio ref");
+      return;
+    }
+
+    // Validate mp3Url
+    if (!currentSong.mp3Url || currentSong.mp3Url.trim() === "") {
+      console.warn("[MusicPlayer] Cannot play song: no valid mp3Url", currentSong);
+      return;
+    }
+
+    const audio = audioRef.current;
+
+    // If switching songs, update source
+    if (currentSongId !== currentSong.id) {
+      if (audio.src !== currentSong.mp3Url && isMountedRef.current) {
+        try {
+          audio.pause();
+          audio.src = currentSong.mp3Url;
+          // Load the new source before playing
+          audio.load();
+        } catch (error) {
+          console.error("[MusicPlayer] Error setting audio source:", error);
+          return;
+        }
+      }
+      setCurrentSongId(currentSong.id);
+    }
+
+    if (isPlaying && currentSongId === currentSong.id) {
+      audio.pause();
+    } else {
+      audio.play().catch((error) => {
+        if (error.name !== "AbortError") {
+          console.error("[MusicPlayer] Error playing song:", error);
+        }
+      });
+    }
+  }, [currentSong, currentSongId, isPlaying]);
 
   // Initialize audio element
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const audio = new Audio();
-    // Use "none" instead of "auto" to prevent automatic loading that can cause abort errors
     audio.preload = "none";
 
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleEnded = () => setIsPlaying(false);
+    const handlePlay = () => {
+      setIsPlaying(true);
+    };
+    const handlePause = () => {
+      setIsPlaying(false);
+    };
+    const handleEnded = () => {
+      setIsPlaying(false);
+      // Auto-play next song when current song ends
+      handleNext();
+    };
 
-    // Add error handler to suppress abort errors
     const handleError = (e: Event) => {
       const audioElement = e.target as HTMLAudioElement;
-      // Suppress abort errors - they're harmless during cleanup or src changes
       if (audioElement.error && audioElement.error.code === MediaError.MEDIA_ERR_ABORTED) {
         return;
       }
+      console.error("[MusicPlayer] Audio error:", {
+        code: audioElement.error?.code,
+        message: audioElement.error?.message,
+        src: audioElement.src,
+      });
     };
 
     audio.addEventListener("play", handlePlay);
@@ -73,69 +225,123 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
     audio.addEventListener("error", handleError);
 
     audioRef.current = audio;
+    isMountedRef.current = true;
 
     return () => {
-      // Mark component as unmounted
       isMountedRef.current = false;
-
-      // Remove event listeners first
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
       audio.removeEventListener("ended", handleEnded);
       audio.removeEventListener("error", handleError);
 
-      // Only pause if audio is actually playing to minimize abort errors
-      // Pausing while loading can cause abort errors, but they're harmless
       if (!audio.paused) {
         audio.pause();
       }
 
-      // Don't clear src here - it can cause abort errors if media is still loading
-      // Pausing and removing listeners is sufficient cleanup.
-      // The audio element will be garbage collected when the component unmounts.
-
       audioRef.current = null;
     };
-  }, []);
+  }, [handleNext]);
 
-  // Update currentSongId when selectedSongId prop changes
+  // Update audio source when currentSong changes
   useEffect(() => {
-    if (selectedSongId && selectedSongId !== currentSongId) {
-      requestAnimationFrame(() => {
-        setCurrentSongId(selectedSongId);
-      });
+    if (!currentSong || !audioRef.current || !isMountedRef.current) {
+      return;
     }
-  }, [selectedSongId, currentSongId]);
 
-  // Auto-play selected song on page load
+    // Validate mp3Url
+    if (!currentSong.mp3Url || currentSong.mp3Url.trim() === "") {
+      console.warn("[MusicPlayer] Song has no valid mp3Url:", currentSong);
+      return;
+    }
+
+    const audio = audioRef.current;
+    const shouldAutoPlay = shouldAutoPlayNextRef.current;
+    shouldAutoPlayNextRef.current = false; // Reset flag
+
+    // Only update if the source is different
+    try {
+      if (audio.src !== currentSong.mp3Url) {
+        audio.pause();
+        audio.src = currentSong.mp3Url;
+        audio.load();
+
+        // If we're advancing to next song, wait for it to load then play
+        if (shouldAutoPlay) {
+          const handleCanPlay = () => {
+            audio.removeEventListener("canplay", handleCanPlay);
+            if (isMountedRef.current) {
+              audio.play().catch((error) => {
+                if (error.name !== "AbortError") {
+                  console.error("[MusicPlayer] Error playing next song:", error);
+                }
+              });
+            }
+          };
+
+          audio.addEventListener("canplay", handleCanPlay);
+
+          // If already loaded, play immediately
+          if (audio.readyState >= 2) {
+            audio.removeEventListener("canplay", handleCanPlay);
+            if (isMountedRef.current) {
+              audio.play().catch((error) => {
+                if (error.name !== "AbortError") {
+                  console.error("[MusicPlayer] Error playing next song:", error);
+                }
+              });
+            }
+          }
+        }
+      } else if (shouldAutoPlay) {
+        // Source is already set, just play
+        if (isMountedRef.current) {
+          audio.play().catch((error) => {
+            if (error.name !== "AbortError") {
+              console.error("[MusicPlayer] Error playing next song:", error);
+            }
+          });
+        }
+      }
+    } catch (error) {
+      console.error("[MusicPlayer] Error setting audio source:", error);
+    }
+  }, [currentSong]);
+
+  // Auto-play selected song on page load (restore original behavior)
   useEffect(() => {
-    if (!selectedSongId || !loadedSongs || loadedSongs.length === 0 || !audioRef.current) return;
-    if (currentSongId !== selectedSongId) return; // Wait for currentSongId to update
-    if (!isMountedRef.current) return; // Don't set src if component is unmounting
+    if (!currentSong || !currentSong.mp3Url || !audioRef.current) {
+      return;
+    }
+    if (currentSongId !== currentSong.id) {
+      return; // Wait for currentSongId to update
+    }
+    if (!isMountedRef.current) {
+      return; // Don't set src if component is unmounting
+    }
+    if (hasAutoPlayedRef.current) {
+      return; // Already auto-played
+    }
 
-    const selectedSong = loadedSongs.find((s) => s.id === selectedSongId);
-    if (!selectedSong || !selectedSong.mp3Url) return;
-
-    // Auto-play immediately on mount
     const audio = audioRef.current;
 
     // Only set src if it's different to avoid abort errors
-    if (audio.src !== selectedSong.mp3Url && isMountedRef.current) {
+    if (audio.src !== currentSong.mp3Url && isMountedRef.current) {
       // Pause before changing src to prevent abort errors
       audio.pause();
-      audio.src = selectedSong.mp3Url;
+      audio.src = currentSong.mp3Url;
     }
 
     if (isMountedRef.current) {
+      hasAutoPlayedRef.current = true;
       audio.play().catch((error) => {
         // Ignore abort errors - they're harmless
         if (error.name !== "AbortError") {
-          console.error("Error auto-playing song:", error);
+          console.error("[MusicPlayer] Error auto-playing song:", error);
         }
         // Auto-play might be blocked by browser, that's okay
       });
     }
-  }, [selectedSongId, loadedSongs, currentSongId]);
+  }, [currentSong, currentSongId]);
 
   // Support 1x1, 3x1, and 4x2 sizes
   const isValidSize = size === "1x1" || size === "3x1" || size === "4x2";
@@ -148,36 +354,6 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
     );
   }
 
-  const selectedSong = selectedSongId
-    ? loadedSongs.find((s) => s.id === selectedSongId)
-    : loadedSongs[0] || null;
-
-  const handleTogglePlayPause = () => {
-    if (!selectedSong || !selectedSong.mp3Url || !audioRef.current) return;
-
-    const audio = audioRef.current;
-
-    // If switching songs, update source
-    if (currentSongId !== selectedSong.id) {
-      // Only set src if it's different to avoid abort errors
-      if (audio.src !== selectedSong.mp3Url) {
-        audio.src = selectedSong.mp3Url;
-      }
-      setCurrentSongId(selectedSong.id);
-    }
-
-    if (isPlaying && currentSongId === selectedSong.id) {
-      audio.pause();
-    } else {
-      audio.play().catch((error) => {
-        // Ignore abort errors - they're harmless
-        if (error.name !== "AbortError") {
-          console.error("Error playing song:", error);
-        }
-      });
-    }
-  };
-
   // 1x1: Just play button
   if (size === "1x1") {
     return (
@@ -185,7 +361,7 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
         <div className="music-player-control" onClick={handleTogglePlayPause}>
           <i
             className={
-              isPlaying && currentSongId === selectedSong?.id
+              isPlaying && currentSongId === currentSong?.id
                 ? "hn hn-pause-solid music-player-icon"
                 : "hn hn-play-solid music-player-icon"
             }
@@ -195,7 +371,144 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
     );
   }
 
-  // 3x1 and 4x2: Play button + song info
+  // 3x1: Three columns - Play button, Title/Artist, Next button
+  if (size === "3x1") {
+    return (
+      <Widget size={size}>
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "var(--space-sm)",
+            height: "100%",
+            width: "100%",
+            overflow: "hidden",
+          }}
+        >
+          {/* Play/Pause button - Left column (absolutely positioned) */}
+          <div
+            className="widget-clickable"
+            onClick={handleTogglePlayPause}
+            style={{
+              position: "absolute",
+              left: "var(--space-sm)",
+              top: "50%",
+              transform: "translateY(-50%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              width: "2rem",
+              zIndex: 1,
+            }}
+          >
+            <i
+              className={
+                isPlaying && currentSongId === currentSong?.id
+                  ? "hn hn-pause-solid"
+                  : "hn hn-play-solid"
+              }
+              style={{ fontSize: "20px" }}
+            />
+          </div>
+
+          {/* Song info - Middle column (centered, constrained by button positions) */}
+          {currentSong ? (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "flex-start",
+                overflow: "hidden",
+                paddingLeft: "2.5rem",
+                paddingRight: "2.5rem",
+                width: "100%",
+                minWidth: 0,
+                maxWidth: "100%",
+              }}
+            >
+              <div
+                className="widget-title"
+                style={{
+                  marginBottom: "var(--space-xs)",
+                  textAlign: "left",
+                  width: "100%",
+                  overflow: "hidden",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  lineHeight: "1.3",
+                  fontSize: "calc(var(--font-size-sm) * 0.9)",
+                  wordBreak: "break-word",
+                  hyphens: "auto",
+                }}
+              >
+                {currentSong.title || "Untitled"}
+              </div>
+              <div
+                className="widget-content"
+                style={{
+                  fontSize: "var(--font-size-xs)",
+                  textAlign: "left",
+                  width: "100%",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  maxWidth: "100%",
+                }}
+              >
+                {currentSong.artist || "Unknown Artist"}
+              </div>
+            </div>
+          ) : (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--text)",
+                opacity: 0.6,
+                fontSize: "var(--font-size-xs)",
+                paddingLeft: "2.5rem",
+                paddingRight: "2.5rem",
+                width: "100%",
+              }}
+            >
+              No song selected
+            </div>
+          )}
+
+          {/* Next button - Right column (absolutely positioned) */}
+          <div
+            className="widget-clickable"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNext();
+            }}
+            style={{
+              position: "absolute",
+              right: "var(--space-sm)",
+              top: "50%",
+              transform: "translateY(-50%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              width: "2rem",
+              zIndex: 1,
+            }}
+          >
+            <i className="hn hn-shuffle-solid" style={{ fontSize: "20px" }} />
+          </div>
+        </div>
+      </Widget>
+    );
+  }
+
+  // 4x2: Original layout (play button + song info)
   return (
     <Widget size={size}>
       <div
@@ -224,14 +537,14 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
         >
           <i
             className={
-              isPlaying && currentSongId === selectedSong?.id
+              isPlaying && currentSongId === currentSong?.id
                 ? "hn hn-pause-solid"
                 : "hn hn-play-solid"
             }
-            style={{ fontSize: size === "4x2" ? "3rem" : "2rem" }}
+            style={{ fontSize: "3rem" }}
           />
         </div>
-        {selectedSong && (
+        {currentSong && (
           <div
             style={{
               flex: 1,
@@ -254,7 +567,7 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
                 whiteSpace: "nowrap",
               }}
             >
-              {selectedSong.title}
+              {currentSong.title}
             </div>
             <div
               className="widget-content"
@@ -267,7 +580,7 @@ export function MusicPlayer({ size, songs = [], selectedSongId }: MusicPlayerPro
                 whiteSpace: "nowrap",
               }}
             >
-              {selectedSong.artist}
+              {currentSong.artist}
             </div>
           </div>
         )}

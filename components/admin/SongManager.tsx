@@ -4,6 +4,92 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Song } from "@/lib/types";
 import { playSound } from "@/lib/sounds";
 
+// Component for playing a song in the admin panel
+function SongPlayButton({ song }: { song: Song }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const audio = new Audio();
+    audio.preload = "none";
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => setIsPlaying(false);
+    const handleError = (e: Event) => {
+      const audioElement = e.target as HTMLAudioElement;
+      if (audioElement.error && audioElement.error.code === MediaError.MEDIA_ERR_ABORTED) {
+        return;
+      }
+      console.error("[SongPlayButton] Audio error:", {
+        code: audioElement.error?.code,
+        message: audioElement.error?.message,
+        src: audioElement.src,
+      });
+      setIsPlaying(false);
+    };
+
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("error", handleError);
+
+    audioRef.current = audio;
+
+    return () => {
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("error", handleError);
+
+      if (!audio.paused) {
+        audio.pause();
+      }
+
+      audioRef.current = null;
+    };
+  }, []);
+
+  const handleTogglePlay = () => {
+    if (!song.mp3Url || !audioRef.current) {
+      console.warn("[SongPlayButton] No mp3Url or audio ref");
+      return;
+    }
+
+    const audio = audioRef.current;
+
+    // Set source if needed
+    if (audio.src !== song.mp3Url) {
+      audio.pause();
+      audio.src = song.mp3Url;
+      audio.load();
+    }
+
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play().catch((error) => {
+        if (error.name !== "AbortError") {
+          console.error("[SongPlayButton] Error playing song:", error);
+        }
+      });
+    }
+  };
+
+  return (
+    <button
+      className="game-button"
+      onClick={handleTogglePlay}
+      style={{ fontSize: "var(--font-size-xs)" }}
+      title={isPlaying ? "Pause" : "Play"}
+    >
+      <i className={isPlaying ? "hn hn-pause-solid" : "hn hn-play-solid"} />
+    </button>
+  );
+}
+
 interface SongManagerProps {
   initialSongs?: Song[];
   onSave?: (songs: Song[]) => Promise<void>;
@@ -381,6 +467,7 @@ export function SongManager({
                       )}
                     </div>
                     <div className="game-flex game-flex-gap-sm">
+                      <SongPlayButton song={song} />
                       <button
                         className="game-button"
                         onClick={() => handleEditSong(index)}
