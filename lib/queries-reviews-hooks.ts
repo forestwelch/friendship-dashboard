@@ -33,6 +33,7 @@ export function useCreateTopic(friendId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["review_topic", friendId] });
+      queryClient.invalidateQueries({ queryKey: ["revealed_topics", friendId] });
       playSound("success");
     },
     onError: () => {
@@ -61,6 +62,8 @@ export function useSubmitReview(friendId: string, topicId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reviews", topicId] });
       queryClient.invalidateQueries({ queryKey: ["review_topic", friendId] });
+      // Invalidate archive when both reviews are submitted (topic becomes "both_reviewed")
+      queryClient.invalidateQueries({ queryKey: ["revealed_topics", friendId] });
       playSound("success");
     },
     onError: () => {

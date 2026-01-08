@@ -52,6 +52,8 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
       if (result) {
         queryClient.invalidateQueries({ queryKey: ["reviews", topic.id] });
         queryClient.invalidateQueries({ queryKey: ["review_topic", friendId] });
+        // Invalidate archive when both reviews are submitted (topic becomes "both_reviewed")
+        queryClient.invalidateQueries({ queryKey: ["revealed_topics", friendId] });
         setReviewText("");
         setStars(3);
         setRecommend(false);

@@ -55,7 +55,7 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
 
   const myReview = reviews.find((r) => r.reviewer === identity);
   const otherReview = reviews.find((r) => r.reviewer !== identity);
-  const isRevealed = topic.status === "revealed";
+  const hasBothReviews = myReview && otherReview;
 
   let displayText = "";
 
@@ -63,8 +63,6 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
     displayText = `Awaiting your review...`;
   } else if (!otherReview) {
     displayText = `Awaiting ${identity === "admin" ? friendName : "Forest"}'s review...`;
-  } else if (!isRevealed) {
-    displayText = "Reviews ready! Click to reveal";
   } else {
     displayText = `${myReview.stars} vs ${otherReview.stars}`;
   }
@@ -111,7 +109,7 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
               minHeight: 0,
             }}
           >
-            {isRevealed && myReview && otherReview ? (
+            {hasBothReviews ? (
               <>
                 {myReview.stars} <i className="hn hn-star-solid" style={{ fontSize: "0.7rem" }} />{" "}
                 vs {otherReview.stars}{" "}

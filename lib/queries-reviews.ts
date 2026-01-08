@@ -177,15 +177,15 @@ export async function getAllRevealedTopics(friendId: string): Promise<ReviewTopi
   }
 
   try {
+    // Fetch all topics for this friend
     const { data: topics, error } = await supabase
       .from("review_topics")
       .select("*")
       .eq("friend_id", friendId)
-      .eq("status", "revealed")
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching revealed topics:", error);
+      console.error("Error fetching topics:", error);
       return [];
     }
 
@@ -202,7 +202,7 @@ export async function getAllRevealedTopics(friendId: string): Promise<ReviewTopi
 
     if (reviewsError) {
       console.error("Error fetching reviews:", reviewsError);
-      return topics.map((topic) => ({ ...topic, reviews: [] }));
+      return [];
     }
 
     // Group reviews by topic_id
@@ -213,8 +213,14 @@ export async function getAllRevealedTopics(friendId: string): Promise<ReviewTopi
       reviewsByTopic.set(review.topic_id, existing);
     });
 
+    // Filter to only topics that have both reviews (2 reviews)
+    // This ensures all completed reviews appear in the archive, regardless of status
+    const topicsWithBothReviews = topics.filter(
+      (topic) => (reviewsByTopic.get(topic.id) || []).length >= 2
+    );
+
     // Combine topics with their reviews
-    return topics.map((topic) => ({
+    return topicsWithBothReviews.map((topic) => ({
       ...topic,
       reviews: reviewsByTopic.get(topic.id) || [],
     }));
