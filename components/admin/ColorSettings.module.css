@@ -1,27 +1,31 @@
 /* ColorSettings Styles */
 
-.backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--game-overlay-bg-70);
-  z-index: 10000;
-}
-
 .panel {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  /* Default to bottom right on desktop, centered on mobile */
+  bottom: 20px;
+  right: 20px;
   width: 320px;
   max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
   border: var(--border-width-lg) solid var(--accent);
   border-radius: var(--radius-md);
   padding: var(--space-lg);
   z-index: 10001;
   box-shadow: var(--game-shadow-xl);
+  user-select: none;
+}
+
+/* On mobile, center the panel */
+@media (max-width: 768px) {
+  .panel {
+    top: 50%;
+    left: 50%;
+    bottom: auto;
+    right: auto;
+    transform: translate(-50%, -50%);
+  }
 }
 
 .panelHeader {
@@ -29,6 +33,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-lg);
+  user-select: none;
 }
 
 .panelTitle {
@@ -57,7 +62,18 @@
 .colorItem {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--space-sm);
+  width: 100%;
+}
+
+.colorLabel {
+  font-size: var(--font-size-xs);
+  font-weight: bold;
+  min-width: 6rem;
+  text-transform: uppercase;
+  height: 32px;
+  display: flex;
+  align-items: center;
 }
 
 .colorSwatch {
@@ -66,15 +82,8 @@
   border: var(--border-width-md) solid var(--game-border);
   border-radius: var(--radius-sm);
   cursor: pointer;
-}
-
-.colorInfo {
-  flex: 1;
-}
-
-.colorLabel {
-  font-size: var(--font-size-xs);
-  opacity: 0.7;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .colorValue {
@@ -116,14 +125,4 @@
 
 .randomizeAllIcon {
   font-size: 12px;
-}
-
-.backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--game-overlay-bg-70);
-  z-index: 10000;
 }

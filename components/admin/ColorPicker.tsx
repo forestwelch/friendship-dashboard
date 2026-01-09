@@ -13,6 +13,8 @@ export function ColorPicker({ currentColor, onColorChange, onColorConfirm }: Col
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const [hoverColor, setHoverColor] = useState<string | null>(null);
+  // Store the original color when component mounts (before any changes)
+  const [originalColor] = useState<string>(currentColor);
 
   // 64x64 Grid
   const GRID_SIZE = 64;
@@ -161,48 +163,34 @@ export function ColorPicker({ currentColor, onColorChange, onColorConfirm }: Col
       <div
         style={{
           display: "flex",
-          gap: "var(--space-md)",
+          gap: "var(--space-xs)",
           fontSize: "var(--font-size-xs)",
           fontFamily: "monospace",
           width: "100%",
-          justifyContent: "space-between",
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
+        <span>CURR</span>
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "var(--space-xs)",
+            width: "32px",
+            height: "32px",
+            background: originalColor,
+            border: "var(--border-width-md) solid var(--game-border)",
+            borderRadius: "var(--radius-sm)",
           }}
-        >
-          <div
-            style={{
-              width: "12px",
-              height: "12px",
-              background: currentColor,
-              border: "1px solid var(--game-border)",
-            }}
-          />
-          <span>CURR</span>
-        </div>
-
+        />
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "var(--space-xs)",
+            width: "32px",
+            height: "32px",
+            background: hoverColor || originalColor,
+            border: "var(--border-width-md) solid var(--game-border)",
+            borderRadius: "var(--radius-sm)",
           }}
-        >
-          <span>NEW</span>
-          <div
-            style={{
-              width: "12px",
-              height: "12px",
-              background: hoverColor || currentColor,
-              border: "1px solid var(--game-border)",
-            }}
-          />
-        </div>
+        />
+        <span>NEW</span>
       </div>
     </div>
   );

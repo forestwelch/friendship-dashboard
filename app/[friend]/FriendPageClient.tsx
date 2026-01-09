@@ -22,6 +22,7 @@ interface FriendPageClientProps {
   songs: Song[];
   pixelArtMap: Map<string, string>;
   pixelArtBySize: Map<string, string>;
+  forceViewMode?: boolean; // If true, always use view mode regardless of admin route
 }
 
 export function FriendPageClient({
@@ -30,10 +31,11 @@ export function FriendPageClient({
   songs,
   pixelArtMap: initialPixelArtMap,
   pixelArtBySize,
+  forceViewMode = false,
 }: FriendPageClientProps) {
   const userContext = useUserContext();
-  // Only allow edit mode if user is admin (detected from URL path)
-  const [isEditMode, setIsEditMode] = useState(userContext.isAdmin);
+  // Only allow edit mode if user is admin (detected from URL path) and not forced to view mode
+  const [isEditMode, setIsEditMode] = useState(forceViewMode ? false : userContext.isAdmin);
 
   // If admin route, start in edit mode by default
   // If friend route, always stay in view mode
@@ -274,46 +276,144 @@ export function FriendPageClient({
   );
 
   const handleRandomizeAll = useCallback(async () => {
-    // Generate harmonious colors (Game Boy style - limited palette)
-    const palettes = [
+    // Improved default palettes with more distinct primary/secondary colors
+    const defaultPalettes = [
       {
         primary: "#4a9eff",
-        secondary: "#6abfff",
+        secondary: "#ff6b6b",
         accent: "#2a7fff",
         bg: "#0a1a2e",
         text: "#c8e0ff",
-      }, // Blue
+      }, // Blue/Red
       {
         primary: "#ff6b6b",
-        secondary: "#ff8e8e",
+        secondary: "#8bac0f",
         accent: "#ff4a4a",
         bg: "#2e0a0a",
         text: "#ffd0d0",
-      }, // Red
+      }, // Red/Green
       {
         primary: "#8bac0f",
-        secondary: "#9bbc0f",
+        secondary: "#fbbf24",
         accent: "#6a8a0a",
         bg: "#0f380f",
         text: "#c8e890",
-      }, // Green
+      }, // Green/Yellow
       {
         primary: "#da4167",
-        secondary: "#e85a7a",
+        secondary: "#4a9eff",
         accent: "#c8325a",
         bg: "#1e0f1a",
         text: "#ffd0e0",
-      }, // Pink
+      }, // Pink/Blue
       {
         primary: "#fbbf24",
-        secondary: "#fcd34d",
+        secondary: "#da4167",
         accent: "#f59e0b",
         bg: "#1a0f0a",
         text: "#fef3c7",
-      }, // Yellow
+      }, // Yellow/Pink
+      {
+        primary: "#9b59b6",
+        secondary: "#e67e22",
+        accent: "#8e44ad",
+        bg: "#1a0f1a",
+        text: "#e8d5f0",
+      }, // Purple/Orange
+      {
+        primary: "#e67e22",
+        secondary: "#3498db",
+        accent: "#d35400",
+        bg: "#1a0f0a",
+        text: "#ffe8d5",
+      }, // Orange/Blue
+      {
+        primary: "#3498db",
+        secondary: "#e74c3c",
+        accent: "#2980b9",
+        bg: "#0a1a2e",
+        text: "#d5e8ff",
+      }, // Blue/Red
+      {
+        primary: "#e74c3c",
+        secondary: "#f39c12",
+        accent: "#c0392b",
+        bg: "#2e0a0a",
+        text: "#ffd0d0",
+      }, // Red/Yellow
+      {
+        primary: "#16a085",
+        secondary: "#e74c3c",
+        accent: "#138d75",
+        bg: "#0a1a1a",
+        text: "#d0ffe8",
+      }, // Teal/Red
+      {
+        primary: "#f39c12",
+        secondary: "#9b59b6",
+        accent: "#e67e22",
+        bg: "#1a0f0a",
+        text: "#fff3d5",
+      }, // Yellow/Purple
+      {
+        primary: "#1abc9c",
+        secondary: "#e74c3c",
+        accent: "#16a085",
+        bg: "#0a1a1a",
+        text: "#d0fff8",
+      }, // Cyan/Red
+      {
+        primary: "#34495e",
+        secondary: "#e67e22",
+        accent: "#2c3e50",
+        bg: "#0a0a0a",
+        text: "#ecf0f1",
+      }, // Dark Gray/Orange
+      {
+        primary: "#e91e63",
+        secondary: "#00bcd4",
+        accent: "#c2185b",
+        bg: "#1a0f14",
+        text: "#ffd0e0",
+      }, // Pink/Cyan
+      {
+        primary: "#00bcd4",
+        secondary: "#ff9800",
+        accent: "#0097a7",
+        bg: "#0a1a1a",
+        text: "#d0f8ff",
+      }, // Cyan/Orange
     ];
 
-    const randomPalette = palettes[Math.floor(Math.random() * palettes.length)];
+    let randomPalette;
+
+    try {
+      // Try to fetch saved palettes first
+      const response = await fetch("/api/content/color-palettes");
+      const data = await response.json();
+      const savedPalettes = data.palettes || [];
+
+      if (savedPalettes.length > 0) {
+        // Use saved palettes
+        const randomIndex = Math.floor(Math.random() * savedPalettes.length);
+        const selected = savedPalettes[randomIndex];
+        randomPalette = {
+          primary: selected.primary,
+          secondary: selected.secondary,
+          accent: selected.accent,
+          bg: selected.bg,
+          text: selected.text,
+        };
+      } else {
+        // Fall back to defaults
+        randomPalette = defaultPalettes[Math.floor(Math.random() * defaultPalettes.length)];
+      }
+    } catch (error) {
+      // On error, use defaults
+      console.error("Error fetching palettes, using defaults:", error);
+      randomPalette = defaultPalettes[Math.floor(Math.random() * defaultPalettes.length)];
+    }
+
     setTheme(randomPalette);
 
     // Save to database
@@ -394,6 +494,7 @@ export function FriendPageClient({
     };
 
     const handleSetEditMode = (e: Event) => {
+      if (forceViewMode) return; // Don't allow changing edit mode if forced to view mode
       const customEvent = e as CustomEvent<boolean>;
       setIsEditMode(customEvent.detail);
     };
@@ -416,7 +517,7 @@ export function FriendPageClient({
       window.removeEventListener("admin-set-edit-mode", handleSetEditMode);
       window.removeEventListener("admin-toggle-colors", handleToggleColors);
     };
-  }, [userContext.isAdmin, handleSave, isEditMode]);
+  }, [userContext.isAdmin, handleSave, isEditMode, forceViewMode]);
 
   // Sync edit mode changes to navigation whenever it changes
   useEffect(() => {

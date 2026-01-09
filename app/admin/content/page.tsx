@@ -38,6 +38,18 @@ export default function ContentPage() {
               </div>
               <span className="game-heading-2 content-card-title">IMAGES</span>
             </Link>
+
+            {/* Color Palettes Card */}
+            <Link
+              href="/admin/content/color-palettes"
+              className="game-card game-card-hover content-card-link"
+              onClick={() => playSound("click")}
+            >
+              <div className="content-card-icon">
+                <i className={clsx("hn", "hn-fill-solid")} />
+              </div>
+              <span className="game-heading-2 content-card-title">COLOR PALETTES</span>
+            </Link>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { playSound } from "@/lib/sounds";
 import { ColorPicker } from "./ColorPicker";
 import clsx from "clsx";
@@ -40,6 +40,77 @@ export function ColorSettings({
   const [activeColorKey, setActiveColorKey] = useState<string | null>(null);
   const [hexInputs, setHexInputs] = useState<Record<string, string>>({});
 
+  // Store original colors when component mounts - use useState with lazy initialization
+  const [originalColors] = useState<typeof currentColors>(() => currentColors);
+  const [originalColorForPicker, setOriginalColorForPicker] = useState<string | null>(null);
+
+  // Dragging state
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Handle drag start
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (!panelRef.current) return;
+      const rect = panelRef.current.getBoundingClientRect();
+
+      // Convert from CSS positioning (bottom/right) to absolute positioning (top/left)
+      // This happens on first drag
+      if (position === null) {
+        setPosition({
+          x: rect.left,
+          y: rect.top,
+        });
+      }
+
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+      setIsDragging(true);
+      e.preventDefault(); // Prevent text selection while dragging
+    },
+    [position]
+  );
+
+  // Handle drag
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (position === null) return;
+
+      // Calculate new position
+      const newX = e.clientX - dragOffset.x;
+      const newY = e.clientY - dragOffset.y;
+
+      // Constrain to viewport
+      const panelWidth = panelRef.current?.offsetWidth || 320;
+      const panelHeight = panelRef.current?.offsetHeight || 500;
+      const constrainedX = Math.max(0, Math.min(newX, window.innerWidth - panelWidth));
+      const constrainedY = Math.max(0, Math.min(newY, window.innerHeight - panelHeight));
+
+      setPosition({
+        x: constrainedX,
+        y: constrainedY,
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging, dragOffset, position]);
+
   const colorKeys = [
     { key: "primary", label: "Primary" },
     { key: "secondary", label: "Secondary" },
@@ -48,24 +119,25 @@ export function ColorSettings({
     { key: "text", label: "Text" },
   ];
 
-  const randomizeOne = useCallback(
-    (key: string) => {
-      // Generate colors that work well together (Game Boy style)
-      // Math.random() is only called when button is clicked, not during render
-      const hues = [200, 0, 120, 300, 40]; // Blue, Red, Green, Magenta, Yellow
-      const hue = hues[Math.floor(Math.random() * hues.length)];
-      const saturation = 70 + Math.random() * 20;
-      const lightness = 30 + Math.random() * 40;
-      const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-      onColorChange(key, color);
-    },
-    [onColorChange]
-  );
-
   const handleClose = () => {
+    // Revert all colors to original when closing
+    Object.keys(originalColors).forEach((key) => {
+      onColorChange(key, originalColors[key as keyof typeof originalColors]);
+    });
     setIsOpen(false);
     setActiveColorKey(null);
+    setOriginalColorForPicker(null);
     onClose?.();
+    playSound("close");
+  };
+
+  const handleCancelColorPicker = () => {
+    if (activeColorKey && originalColorForPicker !== null) {
+      // Revert the color being edited to its original value
+      onColorChange(activeColorKey, originalColorForPicker);
+    }
+    setActiveColorKey(null);
+    setOriginalColorForPicker(null);
     playSound("close");
   };
 
@@ -75,13 +147,28 @@ export function ColorSettings({
       {isOpen && (
         <>
           <div
+            ref={panelRef}
             className={styles.panel}
             style={{
               background: themeColors.bg,
               borderColor: themeColors.accent,
+              cursor: isDragging ? "grabbing" : "default",
+              ...(position && {
+                left: `${position.x}px`,
+                top: `${position.y}px`,
+                bottom: "auto",
+                right: "auto",
+                transform: "none",
+              }),
             }}
           >
-            <div className={styles.panelHeader}>
+            <div
+              className={styles.panelHeader}
+              onMouseDown={handleMouseDown}
+              style={{
+                cursor: "grab",
+              }}
+            >
               <h3
                 className={clsx("game-heading-2", styles.panelTitle)}
                 style={{ color: themeColors.text }}
@@ -91,20 +178,16 @@ export function ColorSettings({
               <button
                 onClick={() => {
                   if (activeColorKey) {
-                    setActiveColorKey(null);
-                    playSound("close");
+                    handleCancelColorPicker();
                   } else {
                     handleClose();
                   }
                 }}
+                onMouseDown={(e) => e.stopPropagation()}
                 className={styles.closeButton}
                 style={{ color: themeColors.text }}
               >
-                {activeColorKey ? (
-                  <i className={clsx("hn", "hn-arrow-left-solid", styles.closeIcon)} />
-                ) : (
-                  <i className="hn hn-times-solid" />
-                )}
+                <i className="hn hn-times-solid" />
               </button>
             </div>
 
@@ -134,107 +217,96 @@ export function ColorSettings({
 
                     return (
                       <div key={key} className={styles.colorItem}>
+                        <div className={styles.colorLabel} style={{ color: themeColors.text }}>
+                          {label.toUpperCase()}
+                        </div>
+                        <input
+                          type="text"
+                          value={displayHex}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setHexInputs((prev) => ({ ...prev, [key]: value }));
+                            if (isValidHex(value)) {
+                              const hsl = hexToHsl(value);
+                              if (hsl) {
+                                onColorChange(key, hsl);
+                              }
+                            }
+                          }}
+                          onBlur={(e) => {
+                            const value = e.target.value;
+                            if (isValidHex(value)) {
+                              const hsl = hexToHsl(value);
+                              if (hsl) {
+                                onColorChange(key, hsl);
+                              }
+                              setHexInputs((prev) => {
+                                const updated = { ...prev };
+                                delete updated[key];
+                                return updated;
+                              });
+                            } else {
+                              playSound("error");
+                              setHexInputs((prev) => {
+                                const updated = { ...prev };
+                                delete updated[key];
+                                return updated;
+                              });
+                            }
+                          }}
+                          style={{
+                            width: "6rem",
+                            height: "32px",
+                            padding: "var(--space-xs)",
+                            fontSize: "var(--font-size-sm)",
+                            fontFamily: "monospace",
+                            background: themeColors.bg,
+                            border: "var(--border-width-md) solid " + themeColors.accent,
+                            borderRadius: "var(--radius-sm)",
+                            color: themeColors.text,
+                            boxSizing: "border-box",
+                          }}
+                          placeholder="#000000"
+                        />
                         <div
                           className={styles.colorSwatch}
                           style={{
                             background: currentHsl,
                           }}
                           onClick={() => {
+                            // Store the original color when entering the picker
+                            setOriginalColorForPicker(
+                              currentColors[key as keyof typeof currentColors]
+                            );
                             setActiveColorKey(key);
                             playSound("select");
                           }}
                         />
-                        <div className={styles.colorInfo}>
-                          <div className={styles.colorLabel} style={{ color: themeColors.text }}>
-                            {label}
-                          </div>
-                          <input
-                            type="text"
-                            value={displayHex}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              setHexInputs((prev) => ({ ...prev, [key]: value }));
-                              if (isValidHex(value)) {
-                                const hsl = hexToHsl(value);
-                                if (hsl) {
-                                  onColorChange(key, hsl);
-                                }
-                              }
-                            }}
-                            onBlur={(e) => {
-                              const value = e.target.value;
-                              if (isValidHex(value)) {
-                                const hsl = hexToHsl(value);
-                                if (hsl) {
-                                  onColorChange(key, hsl);
-                                }
-                                setHexInputs((prev) => {
-                                  const updated = { ...prev };
-                                  delete updated[key];
-                                  return updated;
-                                });
-                              } else {
-                                playSound("error");
-                                setHexInputs((prev) => {
-                                  const updated = { ...prev };
-                                  delete updated[key];
-                                  return updated;
-                                });
-                              }
-                            }}
-                            style={{
-                              width: "5.5rem",
-                              padding: "var(--space-xs)",
-                              fontSize: "var(--font-size-xs)",
-                              fontFamily: "monospace",
-                              background: themeColors.bg,
-                              border: "var(--border-width-md) solid " + themeColors.accent,
-                              borderRadius: "var(--radius-sm)",
-                              color: themeColors.text,
-                            }}
-                            placeholder="#000000"
-                          />
-                        </div>
-                        <button
-                          onClick={() => {
-                            randomizeOne(key);
-                            playSound("blip");
-                          }}
-                          className={styles.randomizeButton}
-                          style={{
-                            background: themeColors.secondary,
-                            borderColor: themeColors.accent,
-                            color: themeColors.text,
-                          }}
-                        >
-                          <i className={clsx("hn", "hn-shuffle-solid", styles.randomizeIcon)} />
-                        </button>
                       </div>
                     );
                   })}
                 </div>
 
-                <button
-                  onClick={() => {
-                    onRandomizeAll?.();
-                    playSound("select");
-                  }}
-                  className={styles.randomizeAllButton}
-                  style={{
-                    background: themeColors.primary,
-                    color: themeColors.bg,
-                    borderColor: themeColors.accent,
-                  }}
-                >
-                  <i className={clsx("hn", "hn-shuffle-solid", styles.randomizeAllIcon)} />
-                  RANDOMIZE ALL
-                </button>
+                {onRandomizeAll && (
+                  <button
+                    onClick={() => {
+                      onRandomizeAll();
+                      playSound("select");
+                    }}
+                    className={styles.randomizeAllButton}
+                    style={{
+                      background: themeColors.primary,
+                      color: themeColors.bg,
+                      borderColor: themeColors.accent,
+                    }}
+                  >
+                    <i className={clsx("hn", "hn-shuffle-solid", styles.randomizeAllIcon)} />
+                    RANDOMIZE ALL
+                  </button>
+                )}
               </>
             )}
           </div>
-
-          {/* Backdrop */}
-          <div className={styles.backdrop} onClick={handleClose} />
         </>
       )}
     </>
