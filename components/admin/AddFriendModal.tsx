@@ -8,6 +8,7 @@ import { Modal } from "@/components/Modal";
 import { FormField, Input } from "@/components/shared";
 import { useUIStore } from "@/lib/store/ui-store";
 import { hslToHex, hexToHsl, isValidHex } from "@/lib/color-utils";
+import { Friend } from "@/lib/types";
 
 interface AddFriendModalProps {
   isOpen: boolean;
@@ -17,6 +18,9 @@ interface AddFriendModalProps {
 
 export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModalProps) {
   const { setOpenModal } = useUIStore();
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+  const [isLoadingFriends, setIsLoadingFriends] = useState(false);
 
   // Sync modal state with UI store
   useEffect(() => {
@@ -24,6 +28,30 @@ export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModa
       setOpenModal("add-friend-modal");
     }
   }, [isOpen, setOpenModal]);
+
+  // Fetch friends list when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const fetchFriends = async () => {
+        setIsLoadingFriends(true);
+        try {
+          const response = await fetch("/api/friends");
+          if (response.ok) {
+            const data = await response.json();
+            setFriends(data.friends || []);
+          }
+        } catch (error) {
+          console.error("Error fetching friends:", error);
+        } finally {
+          setIsLoadingFriends(false);
+        }
+      };
+      fetchFriends();
+    } else {
+      // Reset template selection when modal closes
+      setSelectedTemplateId("");
+    }
+  }, [isOpen]);
 
   const handleClose = () => {
     setOpenModal(null);
@@ -101,6 +129,55 @@ export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModa
         throw new Error(error.error || "Failed to create friend");
       }
 
+      const data = await response.json();
+      const newFriendId = data.friend.id;
+
+      // If a template is selected, copy widgets from template friend
+      if (selectedTemplateId) {
+        try {
+          // Fetch widgets from template friend
+          const widgetsResponse = await fetch(`/api/widgets/${selectedTemplateId}`);
+          if (widgetsResponse.ok) {
+            const widgetsData = await widgetsResponse.json();
+            const templateWidgets = widgetsData.widgets || [];
+
+            if (templateWidgets.length > 0) {
+              // Copy widgets to new friend (only structure, not data)
+              const widgetsToCopy = templateWidgets.map(
+                (w: {
+                  widget_type: string;
+                  size: string;
+                  position_x: number;
+                  position_y: number;
+                  config: Record<string, unknown>;
+                }) => ({
+                  widget_type: w.widget_type,
+                  size: w.size,
+                  position_x: w.position_x,
+                  position_y: w.position_y,
+                  // Copy config but clear any data-specific fields
+                  config: {},
+                })
+              );
+
+              // Save widgets to new friend
+              const saveWidgetsResponse = await fetch(`/api/widgets/${newFriendId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ widgets: widgetsToCopy }),
+              });
+
+              if (!saveWidgetsResponse.ok) {
+                console.warn("Failed to copy widgets from template, but friend was created");
+              }
+            }
+          }
+        } catch (widgetError) {
+          console.error("Error copying widgets from template:", widgetError);
+          // Don't fail the whole operation if widget copying fails
+        }
+      }
+
       playSound("success");
       const resetFriend = {
         name: "",
@@ -111,6 +188,7 @@ export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModa
         color_text: DEFAULT_THEME_COLORS.text,
       };
       setNewFriend(resetFriend);
+      setSelectedTemplateId("");
       onFriendAdded();
       handleClose();
     } catch (error) {
@@ -137,6 +215,46 @@ export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModa
               placeholder="Daniel"
               autoFocus
             />
+          </FormField>
+
+          <FormField label="Template (Optional)">
+            <select
+              value={selectedTemplateId}
+              onChange={(e) => {
+                setSelectedTemplateId(e.target.value);
+                playSound("select");
+              }}
+              style={{
+                width: "100%",
+                padding: "var(--space-xs)",
+                fontSize: "var(--font-size-sm)",
+                fontFamily: "inherit",
+                background: "var(--bg)",
+                border: "var(--border-width-md) solid var(--game-border)",
+                borderRadius: "var(--radius-sm)",
+                color: "var(--text)",
+                cursor: "pointer",
+              }}
+              disabled={isLoadingFriends}
+            >
+              <option value="">None - Start from scratch</option>
+              {friends.map((friend) => (
+                <option key={friend.id} value={friend.id}>
+                  {friend.display_name}
+                </option>
+              ))}
+            </select>
+            {selectedTemplateId && (
+              <div
+                style={{
+                  fontSize: "var(--font-size-xs)",
+                  color: "var(--text-secondary)",
+                  marginTop: "var(--space-xs)",
+                }}
+              >
+                Widget layout will be copied from template (without data)
+              </div>
+            )}
           </FormField>
 
           {/* Color Settings */}
