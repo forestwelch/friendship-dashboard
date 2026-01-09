@@ -204,7 +204,12 @@
   color: var(--text);
   font-family: "Dogica", monospace;
   font-weight: bold;
+  font-style: normal; /* Prevent icons from being italicized */
   pointer-events: none;
+}
+
+.magnet-preview i {
+  font-style: normal; /* Ensure icons are not italicized */
 }
 
 .widget-error-message {

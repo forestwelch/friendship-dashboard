@@ -46,19 +46,37 @@ export function ConsumptionLog({ size, friendId, friendName }: ConsumptionLogPro
   const displayThought = mostRecent?.thought || "Click to add your first entry";
 
   // Format unread count badge
-  const badgeText =
-    unreadCount > 0
-      ? displayTitle && displayTitle.length > 20
-        ? `new rec!`
-        : `new rec ${displayTitle}`
-      : null;
+  const badgeText = unreadCount > 0 && displayTitle ? `New recommendation: ${displayTitle}` : null;
 
   return (
     <>
       <Widget size={size}>
-        <div onClick={handleClick} className="widget-clickable">
+        <div
+          onClick={handleClick}
+          className="widget-clickable"
+          style={
+            unreadCount > 0 && badgeText
+              ? {
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  textAlign: "center",
+                  padding: "var(--space-sm)",
+                }
+              : undefined
+          }
+        >
           {unreadCount > 0 && badgeText && (
-            <div className="widget-badge" style={{ marginBottom: "var(--space-xs)" }}>
+            <div
+              className="widget-badge"
+              style={{
+                wordBreak: "break-word",
+                textAlign: "center",
+                fontSize: "var(--font-size-xs)",
+                lineHeight: 1.4,
+              }}
+            >
               {badgeText}
             </div>
           )}
