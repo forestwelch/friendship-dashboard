@@ -5,22 +5,27 @@ import { FriendWidget } from "@/lib/queries";
 import { WidgetConfig, WidgetSize } from "@/lib/types";
 import { playSound } from "@/lib/sounds";
 import {
-  processImageToPixelData,
-  pixelDataToBase64,
   base64ToPixelData,
-  renderPixelDataAsWebP,
+  renderPixelDataAsPNG,
   PIXEL_GRID_SIZE,
   ThemeColors,
 } from "@/lib/pixel-data-processing";
 
 interface ImageItem {
   id: string;
-  pixel_data?: string | null; // New format: base64-encoded Uint8Array
-  base_image_data?: string | null; // Old format: base64 image (for backward compatibility)
-  size: string;
+  pixel_data?: string | null; // base64-encoded Uint8Array
+  preview?: string | null; // Pre-generated grayscale PNG preview
   width?: number;
   height?: number;
+  album_id?: string | null;
   created_at: string;
+}
+
+interface Album {
+  id: string;
+  name: string;
+  created_at: string;
+  imageCount: number;
 }
 
 interface WidgetConfigModalProps {
@@ -59,10 +64,12 @@ export function WidgetConfigModal({
   const [selectedSize, setSelectedSize] = useState<WidgetSize | null>(null);
   const [availableImages, setAvailableImages] = useState<ImageItem[]>([]);
   const [loadingImages, setLoadingImages] = useState(false);
-  const [processingImages, setProcessingImages] = useState<Set<string>>(new Set());
+  const [processingImages, _setProcessingImages] = useState<Set<string>>(new Set());
   const [previewCache, setPreviewCache] = useState<Map<string, string>>(new Map());
   const widgetIdRef = useRef<string | null>(null);
   const imagesFetchedRef = useRef(false);
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState<"all" | "uncategorized" | string>("all");
 
   // Update config when widget changes (only when widget ID changes)
   useEffect(() => {
@@ -73,6 +80,22 @@ export function WidgetConfigModal({
       imagesFetchedRef.current = false; // Reset fetch flag for new widget
     }
   }, [widget]);
+
+  // Fetch albums on mount
+  useEffect(() => {
+    const fetchAlbums = async () => {
+      try {
+        const response = await fetch("/api/albums");
+        if (response.ok) {
+          const data = await response.json();
+          setAlbums(data.albums || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch albums:", err);
+      }
+    };
+    fetchAlbums();
+  }, []);
 
   // Fetch available images for pixel_art widgets (only once per widget type)
   useEffect(() => {
@@ -91,6 +114,32 @@ export function WidgetConfigModal({
     }
   }, [widget?.widget_type]);
 
+  // Filter out deleted images from selectedImageIds when availableImages changes
+  useEffect(() => {
+    if (
+      widget?.widget_type === "pixel_art" &&
+      availableImages.length > 0 &&
+      config.imageIds &&
+      config.imageIds.length > 0
+    ) {
+      const availableImageIds = new Set(availableImages.map((img) => img.id));
+      const validImageIds = config.imageIds.filter((id: string) => availableImageIds.has(id));
+
+      // If some images were deleted, update config to remove them
+      if (validImageIds.length !== config.imageIds.length) {
+        const validImages = availableImages.filter((img) => validImageIds.includes(img.id));
+        setConfig((prev) => ({
+          ...prev,
+          imageIds: validImageIds,
+          pixelData: validImages
+            .map((i) => i.pixel_data)
+            .filter((pd): pd is string => pd !== null && pd !== undefined),
+        }));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableImages, widget?.widget_type]);
+
   const handleSave = () => {
     if (selectedSize && selectedSize !== widget?.size) {
       onSave(config, selectedSize);
@@ -101,7 +150,7 @@ export function WidgetConfigModal({
     onClose();
   };
 
-  // Generate WebP previews for pixel data images (async, non-blocking)
+  // Generate previews for pixel data images with friend's theme colors (async, non-blocking)
   useEffect(() => {
     if (!friendColors || availableImages.length === 0) return;
 
@@ -124,13 +173,13 @@ export function WidgetConfigModal({
                   bg: friendColors?.bg || "#0a1a2e",
                   text: friendColors?.text || "#c8e0ff",
                 };
-                const webpDataUrl = await renderPixelDataAsWebP(
+                const previewDataUrl = await renderPixelDataAsPNG(
                   pixelData,
                   themeColors,
                   gridSize,
                   gridSize
                 );
-                newCache.set(img.id, webpDataUrl);
+                newCache.set(img.id, previewDataUrl);
               } catch (error) {
                 console.error(`Error generating preview for image ${img.id}:`, error);
               }
@@ -283,7 +332,7 @@ export function WidgetConfigModal({
         // Transition type selection
         const transitionType = (config.transitionType as string) || "scanline";
 
-        // Get selected image IDs - check pixelData (new format) or imageIds/imageUrls (backward compatibility)
+        // Get selected image IDs - check pixelData or imageIds
         let selectedImageIds: string[] = config.imageIds || [];
 
         // If we have pixelData but no imageIds, extract IDs from pixelData array
@@ -296,13 +345,27 @@ export function WidgetConfigModal({
             .map((img) => img.id);
         }
 
-        // Backward compatibility: if we have imageUrls but no imageIds
-        if (selectedImageIds.length === 0 && config.imageUrls && config.imageUrls.length > 0) {
-          const imageUrls = config.imageUrls;
-          selectedImageIds = availableImages
-            .filter((img) => img.base_image_data && imageUrls.includes(img.base_image_data))
-            .map((img) => img.id);
-        }
+        // Filter images based on selected filter
+        const filteredImages =
+          selectedFilter === "all"
+            ? availableImages
+            : selectedFilter === "uncategorized"
+              ? availableImages.filter((img) => !img.album_id)
+              : availableImages.filter((img) => img.album_id === selectedFilter);
+
+        const handleSelectAllInAlbum = () => {
+          const allIds = filteredImages.map((img) => img.id);
+          const allSelectedImages = availableImages.filter((i) => allIds.includes(i.id));
+          setConfig((prev) => ({
+            ...prev,
+            imageIds: allIds,
+            pixelData: allSelectedImages
+              .map((i) => i.pixel_data)
+              .filter((pd): pd is string => pd !== null && pd !== undefined),
+          }));
+          playSound("select");
+        };
+
         return (
           <div
             style={{
@@ -311,9 +374,99 @@ export function WidgetConfigModal({
               gap: "var(--space-md)",
             }}
           >
-            <label className="game-heading-3" style={{ margin: 0 }}>
-              Select Images for Slideshow
-            </label>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "var(--space-sm)",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "var(--space-sm)",
+                }}
+              >
+                <label className="game-heading-3" style={{ margin: 0 }}>
+                  Select Images for Slideshow
+                </label>
+                {selectedImageIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playSound("click");
+                      setConfig((prev) => ({
+                        ...prev,
+                        imageIds: [],
+                        pixelData: [],
+                      }));
+                    }}
+                    style={{
+                      padding: "var(--space-xs) var(--space-sm)",
+                      fontSize: "var(--font-size-xs)",
+                      cursor: "pointer",
+                      border: "var(--border-width-md) solid var(--game-border)",
+                      borderRadius: "var(--radius-sm)",
+                      background: "var(--game-surface)",
+                      color: "var(--text)",
+                    }}
+                  >
+                    Reset Selection
+                  </button>
+                )}
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "var(--space-sm)",
+                  alignItems: "center",
+                }}
+              >
+                <select
+                  value={selectedFilter}
+                  onChange={(e) => {
+                    playSound("click");
+                    setSelectedFilter(e.target.value);
+                  }}
+                  style={{
+                    padding: "var(--space-xs) var(--space-sm)",
+                    fontSize: "var(--font-size-sm)",
+                    border: "var(--border-width-md) solid var(--game-border)",
+                    borderRadius: "var(--radius-sm)",
+                    background: "var(--game-surface)",
+                    color: "var(--text)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <option value="all">All Images</option>
+                  <option value="uncategorized">Uncategorized</option>
+                  {albums.map((album) => (
+                    <option key={album.id} value={album.id}>
+                      {album.name} ({album.imageCount})
+                    </option>
+                  ))}
+                </select>
+                {selectedFilter !== "all" && filteredImages.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleSelectAllInAlbum}
+                    style={{
+                      padding: "var(--space-xs) var(--space-sm)",
+                      fontSize: "var(--font-size-xs)",
+                      cursor: "pointer",
+                      border: "var(--border-width-md) solid var(--game-border)",
+                      borderRadius: "var(--radius-sm)",
+                      background: "var(--game-surface)",
+                      color: "var(--text)",
+                    }}
+                  >
+                    Select All ({filteredImages.length})
+                  </button>
+                )}
+              </div>
+            </div>
             {loadingImages ? (
               <div
                 className="game-text-muted"
@@ -344,18 +497,27 @@ export function WidgetConfigModal({
                   alignContent: "start",
                 }}
               >
-                {availableImages.map((img) => {
+                {filteredImages.map((img) => {
                   const isSelected = selectedImageIds.includes(img.id);
                   const isProcessing = processingImages.has(img.id);
 
-                  // Use pixel_data if available (new format), otherwise fall back to base_image_data (old format)
-                  const imageSrc = img.pixel_data
-                    ? null // Will render programmatically
-                    : img.base_image_data || null;
-
-                  // Render pixel data preview using cached WebP
+                  // Use preview if available (fast), otherwise use cached preview or show loading
                   let pixelPreview: React.ReactNode = null;
-                  if (img.pixel_data) {
+                  if (img.preview) {
+                    // Use stored preview (fast)
+                    pixelPreview = (
+                      <img
+                        src={img.preview}
+                        alt="Pixel art preview"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "contain",
+                          imageRendering: "pixelated",
+                        }}
+                      />
+                    );
+                  } else if (img.pixel_data) {
                     const cachedPreview = previewCache.get(img.id);
                     if (cachedPreview) {
                       pixelPreview = (
@@ -407,14 +569,11 @@ export function WidgetConfigModal({
                         pixelData: remainingImages
                           .map((i) => i.pixel_data)
                           .filter((pd): pd is string => pd !== null && pd !== undefined),
-                        imageUrls: remainingImages
-                          .map((i) => i.base_image_data)
-                          .filter((url): url is string => url !== null && url !== undefined),
                       }));
                       return;
                     }
 
-                    // Selecting - update immediately, process async if needed
+                    // Selecting - update immediately
                     if (img.pixel_data) {
                       // Already has pixel_data - fast path
                       setConfig((prev) => {
@@ -427,64 +586,6 @@ export function WidgetConfigModal({
                             .filter((pd): pd is string => pd !== null && pd !== undefined),
                         };
                       });
-                    } else if (img.base_image_data && !isProcessing) {
-                      // Need to process - do it async without blocking UI
-                      setProcessingImages((prev) => new Set(prev).add(img.id));
-
-                      // Update config immediately with placeholder
-                      setConfig((prev) => ({
-                        ...prev,
-                        imageIds: newIds,
-                      }));
-
-                      // Process in background
-                      (async () => {
-                        try {
-                          const response = await fetch(img.base_image_data!);
-                          const blob = await response.blob();
-                          const file = new File([blob], "image.png", { type: "image/png" });
-                          const pixelDataArray = await processImageToPixelData(file);
-                          const pixelDataBase64 = pixelDataToBase64(pixelDataArray);
-
-                          // Update config with processed data
-                          setConfig((prev) => {
-                            const selectedImages = availableImages.filter((i) =>
-                              newIds.includes(i.id)
-                            );
-                            return {
-                              ...prev,
-                              pixelData: selectedImages
-                                .map((imageItem) => {
-                                  if (imageItem.id === img.id) {
-                                    return pixelDataBase64;
-                                  }
-                                  return imageItem.pixel_data || null;
-                                })
-                                .filter((pd): pd is string => pd !== null),
-                            };
-                          });
-                        } catch (error) {
-                          console.error(`Error processing image ${img.id}:`, error);
-                          // Fallback to base_image_data
-                          setConfig((prev) => {
-                            const selectedImages = availableImages.filter((i) =>
-                              newIds.includes(i.id)
-                            );
-                            return {
-                              ...prev,
-                              imageUrls: selectedImages
-                                .map((i) => i.base_image_data)
-                                .filter((url): url is string => url !== null && url !== undefined),
-                            };
-                          });
-                        } finally {
-                          setProcessingImages((prev) => {
-                            const next = new Set(prev);
-                            next.delete(img.id);
-                            return next;
-                          });
-                        }
-                      })();
                     }
                   };
 
@@ -508,18 +609,7 @@ export function WidgetConfigModal({
                         /* Transition removed for performance */
                       }}
                     >
-                      {imageSrc ? (
-                        <img
-                          src={imageSrc}
-                          alt=""
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                            imageRendering: "pixelated",
-                          }}
-                        />
-                      ) : pixelPreview ? (
+                      {pixelPreview ? (
                         pixelPreview
                       ) : (
                         <div

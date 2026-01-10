@@ -281,14 +281,11 @@ export async function getPersonalContent(friendId: string, contentType: string):
 }
 
 /**
- * Save pixel art image (supports both old base_image_data and new pixel_data)
+ * Save pixel art image with pixel_data and preview
  */
 export async function savePixelArtImage(
-  friendId: string | null, // Allow null for global images
-  widgetId: string | null,
-  size: WidgetSize,
-  imageData?: string, // Old format: base64 image data
-  pixelData?: string // New format: base64-encoded Uint8Array
+  pixelData: string, // Required: base64-encoded Uint8Array
+  preview: string // Required: base64 PNG preview
 ): Promise<string | null> {
   if (!isSupabaseConfigured()) {
     // Mock: Would save pixel art image
@@ -297,24 +294,11 @@ export async function savePixelArtImage(
 
   try {
     const insertData: Record<string, unknown> = {
-      friend_id: friendId,
-      widget_id: widgetId,
-      size,
+      pixel_data: pixelData,
+      preview: preview,
+      width: 256,
+      height: 256,
     };
-
-    // Use pixel_data if provided (new format), otherwise fall back to base_image_data (old format)
-    if (pixelData) {
-      insertData.pixel_data = pixelData;
-      insertData.width = 128; // Updated to match PIXEL_GRID_SIZE
-      insertData.height = 128;
-      insertData.base_image_data = null; // Explicitly set to null for new format
-    } else if (imageData) {
-      insertData.base_image_data = imageData;
-      // Old format - no pixel_data
-    } else {
-      console.error("Error saving pixel art: No imageData or pixelData provided");
-      return null;
-    }
 
     const { data, error } = await supabase
       .from("pixel_art_images")
@@ -331,6 +315,205 @@ export async function savePixelArtImage(
   } catch (error) {
     console.error("Error in savePixelArtImage:", error);
     return null;
+  }
+}
+
+/**
+ * Get all albums with image counts
+ */
+export async function getAllAlbums(): Promise<
+  Array<{ id: string; name: string; created_at: string; imageCount: number }>
+> {
+  if (!isSupabaseConfigured()) {
+    return [];
+  }
+
+  try {
+    const { data: albums, error: albumsError } = await supabase
+      .from("albums")
+      .select("id, name, created_at")
+      .order("name", { ascending: true });
+
+    if (albumsError) {
+      console.error("Error fetching albums:", albumsError);
+      return [];
+    }
+
+    // Get image counts for each album
+    const albumsWithCounts = await Promise.all(
+      (albums || []).map(async (album) => {
+        const { count } = await supabase
+          .from("pixel_art_images")
+          .select("*", { count: "exact", head: true })
+          .eq("album_id", album.id);
+
+        return {
+          ...album,
+          imageCount: count || 0,
+        };
+      })
+    );
+
+    return albumsWithCounts;
+  } catch (error) {
+    console.error("Error in getAllAlbums:", error);
+    return [];
+  }
+}
+
+/**
+ * Create a new album
+ */
+export async function createAlbum(
+  name: string
+): Promise<{ id: string; name: string; created_at: string } | null> {
+  if (!isSupabaseConfigured()) {
+    return null;
+  }
+
+  try {
+    const trimmedName = name.trim();
+
+    // Check for duplicate name
+    const { data: existing } = await supabase
+      .from("albums")
+      .select("id")
+      .eq("name", trimmedName)
+      .single();
+
+    if (existing) {
+      throw new Error("Album with this name already exists");
+    }
+
+    const { data, error } = await supabase
+      .from("albums")
+      .insert({ name: trimmedName })
+      .select("id, name, created_at")
+      .single();
+
+    if (error) {
+      console.error("Error creating album:", error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in createAlbum:", error);
+    return null;
+  }
+}
+
+/**
+ * Rename an album
+ */
+export async function renameAlbum(
+  id: string,
+  name: string
+): Promise<{ id: string; name: string } | null> {
+  if (!isSupabaseConfigured()) {
+    return null;
+  }
+
+  try {
+    const trimmedName = name.trim();
+
+    // Check for duplicate name (excluding current album)
+    const { data: existing } = await supabase
+      .from("albums")
+      .select("id")
+      .eq("name", trimmedName)
+      .neq("id", id)
+      .single();
+
+    if (existing) {
+      throw new Error("Album with this name already exists");
+    }
+
+    const { data, error } = await supabase
+      .from("albums")
+      .update({ name: trimmedName })
+      .eq("id", id)
+      .select("id, name")
+      .single();
+
+    if (error) {
+      console.error("Error renaming album:", error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in renameAlbum:", error);
+    return null;
+  }
+}
+
+/**
+ * Delete an album (sets all images to uncategorized)
+ */
+export async function deleteAlbum(id: string): Promise<boolean> {
+  if (!isSupabaseConfigured()) {
+    return false;
+  }
+
+  try {
+    // Set all images with this album_id to null (uncategorized)
+    const { error: updateError } = await supabase
+      .from("pixel_art_images")
+      .update({ album_id: null })
+      .eq("album_id", id);
+
+    if (updateError) {
+      console.error("Error updating images:", updateError);
+      return false;
+    }
+
+    // Delete the album
+    const { error: deleteError } = await supabase.from("albums").delete().eq("id", id);
+
+    if (deleteError) {
+      console.error("Error deleting album:", deleteError);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error in deleteAlbum:", error);
+    return false;
+  }
+}
+
+/**
+ * Update images' album assignment
+ */
+export async function updateImageAlbums(
+  imageIds: string[],
+  albumId: string | null
+): Promise<number> {
+  if (!isSupabaseConfigured()) {
+    return 0;
+  }
+
+  try {
+    const updateData: { album_id: string | null } = {
+      album_id: albumId === null || albumId === "null" || albumId === "" ? null : albumId,
+    };
+
+    const { data, error } = await supabase
+      .from("pixel_art_images")
+      .update(updateData)
+      .in("id", imageIds)
+      .select("id");
+
+    if (error) {
+      console.error("Error updating image albums:", error);
+      return 0;
+    }
+
+    return data?.length || 0;
+  } catch (error) {
+    console.error("Error in updateImageAlbums:", error);
+    return 0;
   }
 }
 

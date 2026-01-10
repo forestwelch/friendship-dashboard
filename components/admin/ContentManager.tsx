@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { getTop10Songs } from "@/lib/queries";
-import { Song, WidgetSize } from "@/lib/types";
+import { Song } from "@/lib/types";
 import { SongManager } from "./SongManager";
 import { ImageManager } from "./ImageManager";
 import { usePathname } from "next/navigation";
@@ -11,8 +11,7 @@ import { AddContentNav } from "@/app/admin/content/AddContentNav";
 interface ImageItem {
   id: string;
   pixel_data?: string | null;
-  base_image_data?: string | null;
-  size: WidgetSize;
+  preview?: string | null;
   width?: number;
   height?: number;
   created_at: string;
@@ -29,12 +28,16 @@ export function ContentManager() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [selectedImagesCount, setSelectedImagesCount] = useState(0);
+  const [albums, setAlbums] = useState<
+    Array<{ id: string; name: string; created_at: string; imageCount: number }>
+  >([]);
 
   // Refs for child component methods
   const addSongRef = useRef<(() => void) | null>(null);
   const saveSongsRef = useRef<(() => void) | null>(null);
   const uploadImagesRef = useRef<(() => void) | null>(null);
   const deleteImagesRef = useRef<(() => void) | null>(null);
+  const addToAlbumRef = useRef<((albumId: string | null) => void) | null>(null);
   const selectedCountRef = useRef<(() => number) | null>(null);
 
   useEffect(() => {
@@ -46,6 +49,12 @@ export function ContentManager() {
         setTopSongs(data.songs);
         // Fetch images
         await fetchImages();
+        // Fetch albums
+        const albumsResponse = await fetch("/api/albums");
+        if (albumsResponse.ok) {
+          const albumsData = await albumsResponse.json();
+          setAlbums(albumsData.albums || []);
+        }
       } catch (err) {
         console.error("Failed to fetch content:", err);
         setError("Failed to load content.");
@@ -137,6 +146,12 @@ export function ContentManager() {
     }
   }, []);
 
+  const handleAddToAlbumClick = useCallback((albumId: string | null) => {
+    if (addToAlbumRef.current) {
+      addToAlbumRef.current(albumId);
+    }
+  }, []);
+
   // Update selected images count
   useEffect(() => {
     const updateCount = () => {
@@ -155,7 +170,9 @@ export function ContentManager() {
         onSaveSongs={handleSaveSongsClick}
         onUploadImages={handleUploadImagesClick}
         onDeleteImages={handleDeleteImagesClick}
+        onAddToAlbum={handleAddToAlbumClick}
         selectedImagesCount={selectedImagesCount}
+        albums={albums}
         saving={saving}
       />
       <div
@@ -210,12 +227,22 @@ export function ContentManager() {
           ) : (
             <ImageManager
               initialImages={images}
-              onImagesChange={(newImages) => setImages(newImages)}
+              onImagesChange={(newImages) => {
+                setImages(newImages);
+                // Refresh albums to update counts
+                fetch("/api/albums")
+                  .then((res) => res.json())
+                  .then((data) => setAlbums(data.albums || []))
+                  .catch(() => {});
+              }}
               onUploadRef={(fn) => {
                 uploadImagesRef.current = fn;
               }}
               onDeleteRef={(fn) => {
                 deleteImagesRef.current = fn;
+              }}
+              onAddToAlbumRef={(fn) => {
+                addToAlbumRef.current = fn;
               }}
               onSelectedCountRef={(fn) => {
                 selectedCountRef.current = fn;

@@ -4,9 +4,14 @@ import React, { useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { Navigation } from "@/components/Navigation";
 import Link from "next/link";
-import { cropImageToSize, getThemePalette, ColorPalette } from "@/lib/image-processing";
+import { getThemePalette, ColorPalette } from "@/lib/image-processing";
 import { WidgetSize } from "@/lib/types";
 import { savePixelArtImage } from "@/lib/queries";
+import {
+  processImageToPixelData,
+  pixelDataToBase64,
+  generatePreview,
+} from "@/lib/pixel-data-processing";
 
 // Get theme class helper (same as friend page)
 function getThemeClass(slug: string): string {
@@ -46,8 +51,8 @@ export default function AdminUploadPage() {
     setPalette(getThemePalette());
   }, []);
 
-  // Calculate dimensions based on widget size
-  const getDimensions = (size: WidgetSize) => {
+  // Calculate dimensions based on widget size (kept for potential future use)
+  const _getDimensions = (size: WidgetSize) => {
     const tileSize = 80;
     const gap = 8;
 
@@ -112,7 +117,7 @@ export default function AdminUploadPage() {
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !palette) return;
+    if (!file) return;
 
     setProcessing(true);
 
@@ -121,9 +126,10 @@ export default function AdminUploadPage() {
       const processedFile = await convertHeicToPng(file);
       setSelectedFile(processedFile);
 
-      const { width, height } = getDimensions(selectedSize);
-      const pixelArt = await cropImageToSize(processedFile, width, height, 4, palette);
-      setPreview(pixelArt);
+      // Generate preview for display
+      const pixelDataArray = await processImageToPixelData(processedFile);
+      const previewDataUrl = await generatePreview(pixelDataArray, 256, 256);
+      setPreview(previewDataUrl);
     } catch (error) {
       console.error("Error processing image:", error);
       alert(error instanceof Error ? error.message : "Error processing image. Please try again.");
@@ -134,12 +140,13 @@ export default function AdminUploadPage() {
 
   const handleSizeChange = async (size: WidgetSize) => {
     setSelectedSize(size);
-    if (selectedFile && palette) {
+    if (selectedFile) {
       setProcessing(true);
       try {
-        const { width, height } = getDimensions(size);
-        const pixelArt = await cropImageToSize(selectedFile, width, height, 4, palette);
-        setPreview(pixelArt);
+        // Regenerate preview (always 256x256, size is handled at render time)
+        const pixelDataArray = await processImageToPixelData(selectedFile);
+        const previewDataUrl = await generatePreview(pixelDataArray, 256, 256);
+        setPreview(previewDataUrl);
       } catch (error) {
         console.error("Error processing image:", error);
         alert("Error processing image. Please try again.");
@@ -150,29 +157,19 @@ export default function AdminUploadPage() {
   };
 
   const handleSave = async () => {
-    if (!preview) return;
+    if (!selectedFile) return;
 
     setProcessing(true);
     try {
-      // Fetch friend data to get friend_id - use fetch API since we're in client component
-      const response = await fetch(`/api/friends/${friend}`);
-      if (!response.ok) {
-        throw new Error("Friend not found");
-      }
-      const pageData = await response.json();
+      // Process image to pixel data (256x256 grayscale intensity array)
+      const pixelDataArray = await processImageToPixelData(selectedFile);
+      const pixelDataBase64 = pixelDataToBase64(pixelDataArray);
 
-      if (!pageData || !pageData.friend) {
-        alert("Error: Friend not found");
-        return;
-      }
+      // Generate preview (grayscale PNG)
+      const previewDataUrl = await generatePreview(pixelDataArray, 256, 256);
 
       // Save pixel art image to Supabase
-      const imageId = await savePixelArtImage(
-        pageData.friend.id,
-        null, // widget_id - can be set later when linking to a widget
-        selectedSize,
-        preview // base64 image data
-      );
+      const imageId = await savePixelArtImage(pixelDataBase64, previewDataUrl);
 
       if (imageId) {
         alert("Pixel art saved successfully!");

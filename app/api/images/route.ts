@@ -2,35 +2,46 @@ import { NextRequest, NextResponse } from "next/server";
 import { savePixelArtImage } from "@/lib/queries";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   if (!isSupabaseConfigured()) {
     return NextResponse.json({ images: [] });
   }
 
   try {
+    const { searchParams } = new URL(request.url);
+    const albumId = searchParams.get("albumId"); // Filter by album (null for uncategorized)
+
     // Fetching global images
-    // Only fetch pixel_data (not base_image_data) for performance - 4KB vs MB
-    const { data, error } = await supabase
+    let query = supabase
       .from("pixel_art_images")
-      .select("id, pixel_data, size, width, height, created_at")
-      .is("friend_id", null) // Only global images
+      .select("id, pixel_data, preview, width, height, album_id, created_at")
       .order("created_at", { ascending: false })
       .limit(100); // Limit to prevent huge payloads
 
-    // Fetched images
+    // Filter by album if specified
+    if (albumId === "null" || albumId === "") {
+      // Uncategorized images (album_id is null)
+      query = query.is("album_id", null);
+    } else if (albumId) {
+      // Specific album
+      query = query.eq("album_id", albumId);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("[API] Error fetching images:", error);
       return NextResponse.json({ error: "Failed to fetch images" }, { status: 500 });
     }
 
-    // Return only pixel_data (new format, 4KB) - skip base_image_data for performance
+    // Return pixel_data and preview
     const images = (data || []).map((img) => ({
       id: img.id,
-      pixel_data: img.pixel_data || null, // New format: base64-encoded Uint8Array (4KB)
-      size: img.size,
-      width: img.width || 128, // Default to 128x128
-      height: img.height || 128,
+      pixel_data: img.pixel_data || null,
+      preview: img.preview || null,
+      width: img.width || 256,
+      height: img.height || 256,
+      album_id: img.album_id || null,
       created_at: img.created_at,
     }));
 
@@ -49,26 +60,14 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const file = formData.get("file") as File;
-    const pixelData = formData.get("pixel_data") as string | null; // New format: pre-processed pixel data
+    const pixelData = formData.get("pixel_data") as string | null;
+    const preview = formData.get("preview") as string | null;
 
-    if (!file && !pixelData) {
-      return NextResponse.json({ error: "Missing file or pixel_data" }, { status: 400 });
+    if (!pixelData || !preview) {
+      return NextResponse.json({ error: "Missing pixel_data or preview" }, { status: 400 });
     }
 
-    let imageId: string | null = null;
-
-    if (pixelData) {
-      // New format: pixel_data is already processed client-side
-      imageId = await savePixelArtImage(null, null, "2x2", undefined, pixelData);
-    } else if (file) {
-      // Old format: convert file to base64 (for backward compatibility)
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const base64 = buffer.toString("base64");
-      const base64DataUrl = `data:${file.type};base64,${base64}`;
-      imageId = await savePixelArtImage(null, null, "2x2", base64DataUrl);
-    }
+    const imageId = await savePixelArtImage(pixelData, preview);
 
     if (!imageId) {
       return NextResponse.json({ error: "Failed to save image" }, { status: 500 });
@@ -78,7 +77,7 @@ export async function POST(request: NextRequest) {
     if (isSupabaseConfigured()) {
       const { data, error } = await supabase
         .from("pixel_art_images")
-        .select("id, pixel_data, base_image_data, size, width, height, created_at")
+        .select("id, pixel_data, preview, width, height, album_id, created_at")
         .eq("id", imageId)
         .single();
 
@@ -90,9 +89,10 @@ export async function POST(request: NextRequest) {
         image: {
           id: data.id,
           pixel_data: data.pixel_data || null,
-          size: data.size,
-          width: data.width || 128,
-          height: data.height || 128,
+          preview: data.preview || null,
+          width: data.width || 256,
+          height: data.height || 256,
+          album_id: data.album_id || null,
           created_at: data.created_at,
         },
       });
@@ -101,10 +101,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       image: {
         id: imageId,
-        pixel_data: pixelData || null,
-        size: "2x2",
-        width: 128,
-        height: 128,
+        pixel_data: pixelData,
+        preview: preview,
+        width: 256,
+        height: 256,
+        album_id: null,
         created_at: new Date().toISOString(),
       },
     });
@@ -139,6 +140,42 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error in DELETE /api/images:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
+  }
+
+  try {
+    const body = await request.json();
+    const { imageIds, albumId } = body;
+
+    if (!imageIds || !Array.isArray(imageIds) || imageIds.length === 0) {
+      return NextResponse.json({ error: "imageIds array is required" }, { status: 400 });
+    }
+
+    // albumId can be null (to remove from album) or a UUID string
+    const updateData: { album_id: string | null } = {
+      album_id: albumId === null || albumId === "null" || albumId === "" ? null : albumId,
+    };
+
+    const { data, error } = await supabase
+      .from("pixel_art_images")
+      .update(updateData)
+      .in("id", imageIds)
+      .select("id");
+
+    if (error) {
+      console.error("[API] Error updating images:", error);
+      return NextResponse.json({ error: "Failed to update images" }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, updated: data?.length || 0 });
+  } catch (error) {
+    console.error("[API] Error in PATCH /api/images:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

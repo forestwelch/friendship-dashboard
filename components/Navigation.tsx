@@ -12,6 +12,8 @@ interface NavigationProps {
     onClick: () => void;
     isActive?: boolean;
     disabled?: boolean;
+    hasDropdown?: boolean;
+    dropdownItems?: Array<{ label: string; onClick: () => void }>;
   }[];
   addFriendAction?: {
     onClick: () => void;
@@ -67,29 +69,79 @@ export function Navigation(
       {adminActions && adminActions.length > 0 && (
         <>
           {adminActions.map((action, index) => (
-            <button
+            <div
               key={index}
-              onClick={() => {
-                if (!action.disabled) {
-                  action.onClick();
-                  playSound("click");
-                }
-              }}
-              disabled={action.disabled}
-              className={clsx(
-                "game-nav-link",
-                styles.navLink,
-                styles.subAction,
-                action.isActive && "active"
-              )}
               style={{
-                cursor: action.disabled ? "not-allowed" : "pointer",
-                fontFamily: "inherit",
-                opacity: action.disabled ? 0.5 : 1,
+                position: "relative",
+                display: "inline-block",
               }}
             >
-              {action.label}
-            </button>
+              <button
+                onClick={() => {
+                  if (!action.disabled) {
+                    action.onClick();
+                    if (!action.hasDropdown) {
+                      playSound("click");
+                    }
+                  }
+                }}
+                disabled={action.disabled}
+                className={clsx(
+                  "game-nav-link",
+                  styles.navLink,
+                  styles.subAction,
+                  action.isActive && "active"
+                )}
+                style={{
+                  cursor: action.disabled ? "not-allowed" : "pointer",
+                  fontFamily: "inherit",
+                  opacity: action.disabled ? 0.5 : 1,
+                }}
+              >
+                {action.label}
+              </button>
+              {action.hasDropdown && action.dropdownItems && action.dropdownItems.length > 0 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    marginTop: "var(--space-xs)",
+                    background: "var(--game-surface)",
+                    border: "var(--border-width-md) solid var(--game-border)",
+                    borderRadius: "var(--radius-sm)",
+                    padding: "var(--space-xs)",
+                    zIndex: 1000,
+                    minWidth: "12rem",
+                    maxHeight: "20rem",
+                    overflowY: "auto",
+                  }}
+                >
+                  {action.dropdownItems.map((item, itemIndex) => (
+                    <button
+                      key={itemIndex}
+                      onClick={() => {
+                        item.onClick();
+                        playSound("click");
+                      }}
+                      style={{
+                        width: "100%",
+                        padding: "var(--space-xs) var(--space-sm)",
+                        textAlign: "left",
+                        background: "transparent",
+                        border: "none",
+                        color: "var(--text)",
+                        cursor: "pointer",
+                        fontSize: "var(--font-size-sm)",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </>
       )}

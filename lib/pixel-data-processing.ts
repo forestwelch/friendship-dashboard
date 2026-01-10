@@ -1,6 +1,6 @@
 /**
  * Programmatic pixel rendering utilities
- * Converts images to 128x128 grayscale intensity arrays and renders with theme colors
+ * Converts images to 256x256 grayscale intensity arrays and renders with theme colors
  */
 
 export interface ThemeColors {
@@ -12,12 +12,12 @@ export interface ThemeColors {
 }
 
 // Configuration constants
-export const PIXEL_GRID_SIZE = 128; // Grid size for new images (can be increased for more detail)
-export const QUANTIZATION_LEVELS = 128; // Increased from 64 for smoother gradients and more granularity
+export const PIXEL_GRID_SIZE = 256; // Grid size for new images (256x256 for more detail)
+export const QUANTIZATION_LEVELS = 128; // Higher levels = more detail, less washed-out
 
 /**
  * Process image file to 256x256 pixel data array
- * Steps: Upload → Crop to square → Resize to 256x256 → Extract grayscale intensities → Quantize to 128 levels
+ * Steps: Upload → Crop to square → Resize to 256x256 → Extract grayscale intensities → Quantize to 64 levels
  */
 export async function processImageToPixelData(imageFile: File): Promise<Uint8Array> {
   return new Promise((resolve, reject) => {
@@ -37,7 +37,7 @@ export async function processImageToPixelData(imageFile: File): Promise<Uint8Arr
         const x = (img.width - size) / 2;
         const y = (img.height - size) / 2;
 
-        // Resize to 256x256 for more detail
+        // Resize to 256x256
         canvas.width = PIXEL_GRID_SIZE;
         canvas.height = PIXEL_GRID_SIZE;
 
@@ -57,7 +57,7 @@ export async function processImageToPixelData(imageFile: File): Promise<Uint8Arr
           // Convert to grayscale intensity (0-255)
           const intensity = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
 
-          // Quantize to 128 levels (0-127) for more color variety
+          // Quantize to 64 levels (0-63) for more washed-out, toned-down look
           const quantized = quantizeIntensity(intensity, QUANTIZATION_LEVELS);
 
           // Store in pixel array (row-major order)
@@ -211,8 +211,8 @@ function getLuminance(color: string): number {
  * Improved contrast by ensuring proper dark-to-light mapping
  */
 export function mapIntensityToThemeColor(intensityLevel: number, themeColors: ThemeColors): string {
-  // Normalize intensity to 0-1 range
-  const normalized = Math.max(0, Math.min(1, intensityLevel / 127));
+  // Normalize intensity to 0-1 range (QUANTIZATION_LEVELS - 1 = max value)
+  const normalized = Math.max(0, Math.min(1, intensityLevel / (QUANTIZATION_LEVELS - 1)));
 
   // Get all available theme colors and sort by luminance (darkest to lightest)
   const availableColors = [
@@ -242,17 +242,15 @@ export function mapIntensityToThemeColor(intensityLevel: number, themeColors: Th
       : uniqueColors[uniqueColors.length - 2] || lightest;
 
   // Define color stops with better distribution for contrast
-  // Use a curve that preserves more dark values and compresses mid-tones
   const colorStops = [
-    { pos: 0.0, color: darkest }, // Darkest (0-40% of range)
+    { pos: 0.0, color: darkest }, // Darkest
     { pos: 0.4, color: midDark }, // Medium-dark
     { pos: 0.7, color: midLight }, // Medium-light
     { pos: 1.0, color: lightest }, // Lightest
   ];
 
-  // Apply a slight gamma curve to improve contrast (darker values get more range)
-  // This helps prevent washed-out appearance
-  const contrastAdjusted = Math.pow(normalized, 0.85); // Slight gamma correction
+  // Use normalized value directly (no gamma correction, no curve manipulation)
+  const contrastAdjusted = normalized;
 
   // Find which two color stops to blend between
   let stopIndex = 0;
@@ -355,9 +353,9 @@ export function renderPixelDataAsSVG(
 }
 
 /**
- * Render pixel data as WebP image data URL (much faster than SVG for previews)
+ * Render pixel data as PNG image data URL (much faster than SVG for previews)
  */
-export function renderPixelDataAsWebP(
+export function renderPixelDataAsPNG(
   pixelData: Uint8Array,
   themeColors: ThemeColors,
   width: number = PIXEL_GRID_SIZE,
@@ -400,23 +398,79 @@ export function renderPixelDataAsWebP(
 
       ctx.putImageData(imageData, 0, 0);
 
-      // Convert to WebP
-      canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              resolve(reader.result as string);
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          } else {
-            reject(new Error("Failed to create blob"));
-          }
-        },
-        "image/webp",
-        0.9 // Quality
-      );
+      // Convert to PNG
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            resolve(reader.result as string);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        } else {
+          reject(new Error("Failed to create blob"));
+        }
+      }, "image/png");
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+/**
+ * Generate grayscale preview from pixel data (no color mapping)
+ * Intensity values (0-127) are directly converted to grayscale RGB (0-255)
+ * This is simpler and faster than color mapping, and provides a neutral preview
+ * Returns a PNG data URL
+ */
+export async function generatePreview(
+  pixelData: Uint8Array,
+  width: number = PIXEL_GRID_SIZE,
+  height: number = PIXEL_GRID_SIZE
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d", { alpha: false });
+
+      if (!ctx) {
+        reject(new Error("Could not get canvas context"));
+        return;
+      }
+
+      ctx.imageSmoothingEnabled = false;
+      const imageData = ctx.createImageData(width, height);
+      const data = imageData.data;
+
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const index = y * width + x;
+          const intensityLevel = pixelData[index]; // 0 to (QUANTIZATION_LEVELS - 1)
+          const maxIntensity = QUANTIZATION_LEVELS - 1;
+          const grayscaleValue = Math.round((intensityLevel / maxIntensity) * 255); // 0-255
+          const pixelIndex = (y * width + x) * 4;
+          data[pixelIndex] = grayscaleValue; // R
+          data[pixelIndex + 1] = grayscaleValue; // G
+          data[pixelIndex + 2] = grayscaleValue; // B
+          data[pixelIndex + 3] = 255; // Alpha
+        }
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+
+      // Convert to PNG
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        } else {
+          reject(new Error("Failed to create blob"));
+        }
+      }, "image/png");
     } catch (error) {
       reject(error);
     }
