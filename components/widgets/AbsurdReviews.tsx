@@ -52,7 +52,7 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
   } else if (hasBothReviews) {
     displayText = `View ${otherPersonName}'s review`;
   } else {
-    displayText = topic.topic_name;
+    displayText = `rate: ${topic.topic_name}`;
   }
 
   return (

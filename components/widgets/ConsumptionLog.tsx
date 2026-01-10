@@ -46,7 +46,7 @@ export function ConsumptionLog({ size, friendId, friendName }: ConsumptionLogPro
   const displayThought = mostRecent?.thought || "Click to add your first entry";
 
   // Format unread count badge
-  const badgeText = unreadCount > 0 && displayTitle ? `New recommendation: ${displayTitle}` : null;
+  const badgeText = unreadCount > 0 && displayTitle ? `check out: ${displayTitle}` : null;
 
   return (
     <>
@@ -69,12 +69,13 @@ export function ConsumptionLog({ size, friendId, friendName }: ConsumptionLogPro
         >
           {unreadCount > 0 && badgeText && (
             <div
-              className="widget-badge"
               style={{
                 wordBreak: "break-word",
                 textAlign: "center",
                 fontSize: "var(--font-size-xs)",
                 lineHeight: 1.4,
+                color: "var(--text)",
+                fontWeight: "bold",
               }}
             >
               {badgeText}
