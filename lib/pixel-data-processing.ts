@@ -44,6 +44,23 @@ export async function processImageToPixelData(imageFile: File): Promise<Uint8Arr
         // Draw cropped and resized image
         ctx.drawImage(img, x, y, size, size, 0, 0, PIXEL_GRID_SIZE, PIXEL_GRID_SIZE);
 
+        // Apply slight blur to reduce crispness
+        if ("filter" in ctx) {
+          const blurCanvas = document.createElement("canvas");
+          blurCanvas.width = PIXEL_GRID_SIZE;
+          blurCanvas.height = PIXEL_GRID_SIZE;
+          const blurCtx = blurCanvas.getContext("2d");
+          if (blurCtx) {
+            // Apply blur filter and draw from main canvas
+            blurCtx.filter = "blur(0.5px)";
+            blurCtx.drawImage(canvas, 0, 0);
+            // Copy blurred result back to main canvas
+            ctx.clearRect(0, 0, PIXEL_GRID_SIZE, PIXEL_GRID_SIZE);
+            ctx.filter = "none";
+            ctx.drawImage(blurCanvas, 0, 0);
+          }
+        }
+
         // Extract pixel data
         const imageData = ctx.getImageData(0, 0, PIXEL_GRID_SIZE, PIXEL_GRID_SIZE);
         const pixelData = new Uint8Array(PIXEL_GRID_SIZE * PIXEL_GRID_SIZE);
