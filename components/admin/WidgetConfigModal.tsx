@@ -506,6 +506,7 @@ export function WidgetConfigModal({
                   if (img.preview) {
                     // Use stored preview (fast)
                     pixelPreview = (
+                      /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={img.preview}
                         alt="Pixel art preview"
@@ -521,6 +522,7 @@ export function WidgetConfigModal({
                     const cachedPreview = previewCache.get(img.id);
                     if (cachedPreview) {
                       pixelPreview = (
+                        /* eslint-disable-next-line @next/next/no-img-element */
                         <img
                           src={cachedPreview}
                           alt="Pixel art preview"

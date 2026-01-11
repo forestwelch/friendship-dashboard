@@ -1615,6 +1615,7 @@ export default function ImageTuningPage() {
                               }
                             }}
                           >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={canvas.toDataURL()}
                               alt={`${variation.label} - Image ${image.id.substring(0, 8)}`}

@@ -406,6 +406,7 @@ export function ImageManager({
           if (img.preview) {
             // Use stored preview (fast)
             imagePreview = (
+              /* eslint-disable-next-line @next/next/no-img-element */
               <img src={img.preview} alt="Image preview" className={styles.imagePreviewImg} />
             );
           } else if (img.pixel_data) {
@@ -413,6 +414,7 @@ export function ImageManager({
             const cachedPreview = previewCache.get(img.id);
             if (cachedPreview) {
               imagePreview = (
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={cachedPreview}
                   alt="Pixel art preview"

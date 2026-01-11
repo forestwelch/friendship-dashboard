@@ -285,6 +285,7 @@ export default function AdminUploadPage() {
                 <div className="game-heading-3" style={{ margin: 0 }}>
                   Preview ({selectedSize})
                 </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={preview}
                   alt="Pixel art preview"
