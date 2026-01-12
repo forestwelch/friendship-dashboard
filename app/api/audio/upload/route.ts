@@ -76,6 +76,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to save audio snippet metadata" }, { status: 500 });
     }
 
+    // Database trigger automatically updates friend_widgets.last_updated_at
+    // when audio_snippets table changes (see migration 036)
+
     return NextResponse.json({ data });
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

@@ -240,6 +240,9 @@ export async function updateFridgeState(
       return null;
     }
 
+    // Database trigger automatically updates friend_widgets.last_updated_at
+    // when fridge_state table changes (see migration 036)
+
     return data;
   } catch (error) {
     console.error("Error in updateFridgeState:", error);

@@ -9,12 +9,13 @@ import { WidgetLibrary } from "@/components/admin/WidgetLibrary";
 import { WidgetConfigModal } from "@/components/admin/WidgetConfigModal";
 import { Friend, WidgetSize, WidgetPosition, Song } from "@/lib/types";
 import { ThemeColors } from "@/lib/theme-context";
-import { FriendWidget } from "@/lib/queries";
+import { FriendWidget, getWidgetInteractions } from "@/lib/queries";
 import { canPlaceWidget, findAvailablePosition } from "@/lib/widget-utils";
 import { playSound } from "@/lib/sounds";
 import { useThemeContext } from "@/lib/theme-context";
 import { useUserContext } from "@/lib/use-user-context";
 import { GRID_COLS, GRID_ROWS } from "@/lib/constants";
+import { hasNewContent } from "@/lib/widget-notifications";
 
 interface FriendPageClientProps {
   friend: Friend;
@@ -82,6 +83,58 @@ export function FriendPageClient({
 
   // State for pixel art/images map to allow updates
   const [pixelArtMap, setPixelArtMap] = useState<Map<string, string>>(initialPixelArtMap);
+
+  // State for widget interactions (for notification system)
+  const [widgetInteractions, setWidgetInteractions] = useState<
+    Record<string, { last_interacted_at: string }>
+  >({});
+
+  // Fetch widget interactions on mount
+  useEffect(() => {
+    const fetchInteractions = async () => {
+      // For now, use the dashboard's friend ID as the viewer
+      // In a multi-user system, this would be the logged-in user's friend ID
+      const viewerFriendId = friend.id;
+      const widgetIds = widgets.map((w) => w.id);
+      const interactions = await getWidgetInteractions(viewerFriendId, widgetIds);
+      setWidgetInteractions(interactions);
+    };
+    fetchInteractions();
+  }, [friend.id, widgets]);
+
+  // Update widget interaction when user hovers or taps
+  const handleWidgetInteraction = useCallback(
+    async (widgetId: string) => {
+      // Don't update interaction in edit mode
+      if (isEditMode) return;
+
+      // For now, use the dashboard's friend ID as the viewer
+      const viewerFriendId = friend.id;
+
+      try {
+        const response = await fetch("/api/widgets/interactions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            friend_widget_id: widgetId,
+            viewer_friend_id: viewerFriendId,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Update local state optimistically
+          setWidgetInteractions((prev) => ({
+            ...prev,
+            [widgetId]: { last_interacted_at: data.last_interacted_at },
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to update widget interaction:", error);
+      }
+    },
+    [friend.id, isEditMode]
+  );
 
   const handleDelete = useCallback(
     (widgetId: string) => {
@@ -564,6 +617,44 @@ export function FriendPageClient({
 
               const isHovered = hoveredWidget === widget.id && isEditMode && !movingWidgetId;
 
+              // Calculate notification state (only in view mode, not edit mode)
+              // hasNotification = widget.last_updated_at > user.last_interacted_at
+              const widgetInteraction = widgetInteractions[widget.id];
+              const widgetHasNewContent =
+                !isEditMode &&
+                hasNewContent(widget.last_updated_at, widgetInteraction?.last_interacted_at);
+
+              // #region agent log
+              if (!isEditMode) {
+                fetch("http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    location: "app/[friend]/FriendPageClient.tsx:625",
+                    message: "Widget notification check",
+                    data: {
+                      widgetId: widget.id,
+                      widgetType: widget.widget_type,
+                      lastUpdatedAt: widget.last_updated_at,
+                      lastInteractedAt: widgetInteraction?.last_interacted_at || null,
+                      hasNewContent: widgetHasNewContent,
+                    },
+                    timestamp: Date.now(),
+                    sessionId: "debug-session",
+                    runId: "run1",
+                    hypothesisId: "B",
+                  }),
+                }).catch(() => {});
+              }
+              // #endregion
+
+              // Build container class names - only add "has-new-content" if there's actually new content
+              const containerClasses = ["widget-container"];
+              if (widgetHasNewContent) {
+                containerClasses.push("has-new-content");
+              }
+              // No special styling for widgets without new content - they look normal
+
               return (
                 <GridItem
                   key={widget.id}
@@ -572,15 +663,35 @@ export function FriendPageClient({
                 >
                   <div
                     data-widget-item={widget.id}
-                    style={{
-                      position: "relative",
-                      width: "100%",
-                      height: "100%",
-                    }}
-                    onMouseEnter={() =>
-                      isEditMode && !movingWidgetId && setHoveredWidget(widget.id)
+                    className={containerClasses.join(" ")}
+                    style={
+                      {
+                        position: "relative",
+                        width: "100%",
+                        height: "100%",
+                        // Add glow effect for new content widgets using inline style
+                        // ...(widgetHasNewContent
+                        //   ? {
+                        //       boxShadow: `0 0 8px ${themeColors.secondary}40`, // 40 = ~25% opacity in hex
+                        //     }
+                        //   : {}),
+                      } as React.CSSProperties
                     }
+                    onMouseEnter={() => {
+                      if (isEditMode && !movingWidgetId) {
+                        setHoveredWidget(widget.id);
+                      } else if (!isEditMode) {
+                        // Track interaction on hover (for notification system)
+                        handleWidgetInteraction(widget.id);
+                      }
+                    }}
                     onMouseLeave={() => setHoveredWidget(null)}
+                    onTouchStart={() => {
+                      if (!isEditMode) {
+                        // Track interaction on tap (for notification system)
+                        handleWidgetInteraction(widget.id);
+                      }
+                    }}
                   >
                     <WidgetRenderer
                       widget={widget}
@@ -591,6 +702,12 @@ export function FriendPageClient({
                       friendName={friend.display_name}
                       onUpdateWidgetConfig={handleUpdateWidgetConfig}
                     />
+                    {/* Star icon for new content widgets */}
+                    {/*{widgetHasNewContent && (
+                      <div className="widget-new-content-indicator">
+                        <i className="hn hn-star-solid" />
+                      </div>
+                    )}*/}
                     {isHovered && (
                       <AdminOverlay
                         widgetId={widget.id}

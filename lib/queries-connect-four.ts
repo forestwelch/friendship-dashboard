@@ -226,6 +226,26 @@ export function useMakeMove(friendId: string, _widgetId: string, currentUserId: 
         .single();
 
       if (error) throw error;
+
+      // #region agent log
+      fetch("http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          location: "lib/queries-connect-four.ts:224",
+          message: "Connect4 move made",
+          data: { friendId, widgetId: _widgetId, status: updatedConfig.status },
+          timestamp: Date.now(),
+          sessionId: "debug-session",
+          runId: "run1",
+          hypothesisId: "C",
+        }),
+      }).catch(() => {});
+      // #endregion
+
+      // Database trigger automatically updates friend_widgets.last_updated_at
+      // when connect_four_games table changes (see migration 036)
+
       return convertLegacyGame(data.config as Partial<ConnectFourData>, friendId);
     },
     onMutate: async (column) => {
