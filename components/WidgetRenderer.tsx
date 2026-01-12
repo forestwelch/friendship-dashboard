@@ -4,7 +4,6 @@ import React, { memo } from "react";
 import {
   MusicPlayer,
   PixelArt,
-  PersonalityQuiz,
   ConnectFour,
   ConsumptionLog,
   QuestionJar,
@@ -12,8 +11,9 @@ import {
   AbsurdReviews,
   FridgeMagnets,
 } from "@/components/widgets";
+import { PersonalityQuiz } from "@/components/widgets/_unused/PersonalityQuiz";
 import { FriendWidget } from "@/lib/queries";
-import { ConnectFourData } from "@/lib/queries-connect-four";
+import { ConnectFourData } from "@/components/widgets";
 import { useTheme } from "@/lib/theme-context";
 
 interface WidgetRendererProps {

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { playSound } from "@/lib/sounds";
 import { ColorPicker } from "./ColorPicker";
 import { DEFAULT_THEME_COLORS } from "@/lib/theme-defaults";
-import { Modal } from "@/components/Modal";
+import { Modal } from "@/components/shared";
 import { FormField, Input } from "@/components/shared";
 import { useUIStore } from "@/lib/store/ui-store";
 import { hslToHex, hexToHsl, isValidHex } from "@/lib/color-utils";

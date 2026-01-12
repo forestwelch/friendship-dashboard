@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { WidgetSize } from "@/lib/types";
 import { WidgetLibrary } from "@/components/admin/WidgetLibrary";
 import { playSound } from "@/lib/sounds";
-import { Navigation } from "@/components/Navigation";
+import { Navigation } from "@/components/shared";
 
 export default function WidgetLibraryPage() {
   const router = useRouter();

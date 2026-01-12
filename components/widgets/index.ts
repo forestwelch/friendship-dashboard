@@ -1,9 +1,15 @@
 export { MusicPlayer } from "./MusicPlayer";
 export { PixelArt, PixelArtMemo } from "./PixelArt";
-export { PersonalityQuiz } from "./PersonalityQuiz";
+export { PersonalityQuiz } from "./_unused/PersonalityQuiz";
 export { ConnectFour } from "./ConnectFour";
+export type { ConnectFourData } from "./ConnectFour";
 export { ConsumptionLog } from "./ConsumptionLog";
+export type { ConsumptionEntry } from "./ConsumptionLog";
 export { QuestionJar } from "./QuestionJar";
+export type { QuestionJarEntry } from "./QuestionJar";
 export { AudioSnippets } from "./AudioSnippets";
+export type { AudioSnippet } from "./AudioSnippets";
 export { AbsurdReviews } from "./AbsurdReviews";
+export type { ReviewTopic, Review } from "./AbsurdReviews";
 export { FridgeMagnets } from "./FridgeMagnets";
+export type { Magnet, FridgeState } from "./FridgeMagnets";

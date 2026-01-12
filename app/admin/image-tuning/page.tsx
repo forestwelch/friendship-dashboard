@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Navigation } from "@/components/Navigation";
+import { Navigation } from "@/components/shared";
 import Link from "next/link";
 import { base64ToPixelData, ThemeColors, PIXEL_GRID_SIZE } from "@/lib/pixel-data-processing";
 import { DEFAULT_THEME_COLORS } from "@/lib/theme-defaults";

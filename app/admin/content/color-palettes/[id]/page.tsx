@@ -3,11 +3,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { playSound } from "@/lib/sounds";
-import { Navigation } from "@/components/Navigation";
+import { Navigation } from "@/components/shared";
 import { FriendPageClient } from "@/app/[friend]/FriendPageClient";
 import { Friend } from "@/lib/types";
 import { FriendWidget } from "@/lib/queries";
-import { ColorPalette } from "@/lib/queries-color-palettes";
+import { ColorPalette } from "@/lib/queries/color-palettes";
 import { ColorSettings } from "@/components/admin/ColorSettings";
 import { ThemeProvider, useThemeContext } from "@/lib/theme-context";
 import { hexToHsl, hslToHex } from "@/lib/color-utils";

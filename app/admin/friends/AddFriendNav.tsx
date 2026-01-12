@@ -1,6 +1,6 @@
 "use client";
 
-import { Navigation } from "@/components/Navigation";
+import { Navigation } from "@/components/shared";
 import { playSound } from "@/lib/sounds";
 
 export function AddFriendNav() {

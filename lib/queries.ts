@@ -25,7 +25,7 @@ export interface FriendPageData {
 }
 
 // Re-export common functions
-export { getInboxItems, updateInboxItemStatus, createInboxItem } from "./queries-inbox";
+export { getInboxItems, updateInboxItemStatus, createInboxItem } from "./queries/inbox";
 
 /**
  * Get widget interactions for a viewer friend

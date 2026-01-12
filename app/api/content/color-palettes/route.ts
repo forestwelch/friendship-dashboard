@@ -5,7 +5,7 @@ import {
   updateColorPalette,
   deleteColorPalette,
   ColorPalette,
-} from "@/lib/queries-color-palettes";
+} from "@/lib/queries/color-palettes";
 
 export async function GET() {
   try {

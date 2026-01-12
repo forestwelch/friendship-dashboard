@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { playSound } from "@/lib/sounds";
-import { Navigation } from "@/components/Navigation";
-import { ColorPalette } from "@/lib/queries-color-palettes";
+import { Navigation } from "@/components/shared";
+import { ColorPalette } from "@/lib/queries/color-palettes";
 import "@/styles/content-page.css";
 
 export default function ColorPalettesPage() {

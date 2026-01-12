@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { useParams } from "next/navigation";
-import { Navigation } from "@/components/Navigation";
+import { Navigation } from "@/components/shared";
 import Link from "next/link";
 import { getThemePalette, ColorPalette } from "@/lib/image-processing";
 import { WidgetSize } from "@/lib/types";

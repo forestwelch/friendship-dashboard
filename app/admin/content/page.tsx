@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { playSound } from "@/lib/sounds";
-import { Navigation } from "@/components/Navigation";
+import { Navigation } from "@/components/shared";
 import clsx from "clsx";
 import "@/styles/content-page.css";
 

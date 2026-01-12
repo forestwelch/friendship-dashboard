@@ -1,6 +1,6 @@
 "use client";
 
-import { Navigation } from "@/components/Navigation";
+import { Navigation } from "@/components/shared";
 import { playSound } from "@/lib/sounds";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";

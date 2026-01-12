@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigation } from "@/components/Navigation";
+import { Navigation } from "@/components/shared";
 import { InboxManager } from "@/components/admin/InboxManager";
 
 export default function AdminInboxPage() {
