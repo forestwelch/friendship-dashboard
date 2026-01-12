@@ -4,18 +4,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { FriendWidget } from "@/lib/queries";
 import { WidgetConfig, WidgetSize } from "@/lib/types";
 import { playSound } from "@/lib/sounds";
-import {
-  base64ToPixelData,
-  renderPixelDataAsPNG,
-  PIXEL_GRID_SIZE,
-  ThemeColors,
-} from "@/lib/pixel-data-processing";
 import styles from "./WidgetConfigModal.module.css";
 
 interface ImageItem {
   id: string;
   pixel_data?: string | null; // base64-encoded Uint8Array
-  preview?: string | null; // Pre-generated grayscale PNG preview
+  preview: string; // Required: Pre-generated grayscale PNG preview
   width?: number;
   height?: number;
   album_id?: string | null;
@@ -33,13 +27,6 @@ interface WidgetConfigModalProps {
   widget: FriendWidget | null;
   onClose: () => void;
   onSave: (config: WidgetConfig, size?: WidgetSize) => void;
-  friendColors?: {
-    primary: string;
-    secondary: string;
-    accent: string;
-    bg: string;
-    text: string;
-  };
 }
 
 // Widget size options by type
@@ -55,18 +42,11 @@ const WIDGET_SIZES: Record<string, WidgetSize[]> = {
   fridge_magnets: ["2x3", "3x4", "4x6"],
 };
 
-export function WidgetConfigModal({
-  widget,
-  onClose,
-  onSave,
-  friendColors,
-}: WidgetConfigModalProps) {
+export function WidgetConfigModal({ widget, onClose, onSave }: WidgetConfigModalProps) {
   const [config, setConfig] = useState<WidgetConfig>({});
   const [selectedSize, setSelectedSize] = useState<WidgetSize | null>(null);
   const [availableImages, setAvailableImages] = useState<ImageItem[]>([]);
   const [loadingImages, setLoadingImages] = useState(false);
-  const [processingImages, _setProcessingImages] = useState<Set<string>>(new Set());
-  const [previewCache, setPreviewCache] = useState<Map<string, string>>(new Map());
   const widgetIdRef = useRef<string | null>(null);
   const imagesFetchedRef = useRef(false);
   const [albums, setAlbums] = useState<Album[]>([]);
@@ -150,58 +130,6 @@ export function WidgetConfigModal({
     playSound("success");
     onClose();
   };
-
-  // Generate previews for pixel data images with friend's theme colors (async, non-blocking)
-  useEffect(() => {
-    if (!friendColors || availableImages.length === 0) return;
-
-    const generatePreviews = async () => {
-      const newCache = new Map(previewCache);
-      const promises: Promise<void>[] = [];
-
-      for (const img of availableImages) {
-        const pixelDataStr = img.pixel_data;
-        if (pixelDataStr && !newCache.has(img.id)) {
-          promises.push(
-            (async () => {
-              try {
-                const pixelData = base64ToPixelData(pixelDataStr);
-                const gridSize = img.width || PIXEL_GRID_SIZE;
-                const themeColors: ThemeColors = {
-                  primary: friendColors?.primary || "#4a9eff",
-                  secondary: friendColors?.secondary || "#6abfff",
-                  accent: friendColors?.accent || "#2a7fff",
-                  bg: friendColors?.bg || "#0a1a2e",
-                  text: friendColors?.text || "#c8e0ff",
-                };
-                const previewDataUrl = await renderPixelDataAsPNG(
-                  pixelData,
-                  themeColors,
-                  gridSize,
-                  gridSize
-                );
-                newCache.set(img.id, previewDataUrl);
-              } catch (error) {
-                console.error(`Error generating preview for image ${img.id}:`, error);
-              }
-            })()
-          );
-        }
-      }
-
-      // Process in batches to avoid blocking
-      const batchSize = 5;
-      for (let i = 0; i < promises.length; i += batchSize) {
-        const batch = promises.slice(i, i + batchSize);
-        await Promise.all(batch);
-        // Update cache after each batch for progressive loading
-        setPreviewCache(new Map(newCache));
-      }
-    };
-
-    generatePreviews();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [availableImages.map((img) => img.id).join(","), friendColors]);
 
   // Music player song selection state - hooks must be called before conditional return
   const [availableSongs, setAvailableSongs] = useState<
@@ -381,36 +309,23 @@ export function WidgetConfigModal({
               <div className={styles.imageGrid}>
                 {filteredImages.map((img) => {
                   const isSelected = selectedImageIds.includes(img.id);
-                  const isProcessing = processingImages.has(img.id);
 
-                  // Use preview if available (fast), otherwise use cached preview or show loading
-                  let pixelPreview: React.ReactNode = null;
-                  if (img.preview) {
-                    // Use stored preview (fast)
-                    pixelPreview = (
-                      /* eslint-disable-next-line @next/next/no-img-element */
+                  // Preview is required - all images must have preview
+                  if (!img.preview) {
+                    console.error(`Image ${img.id} is missing required preview property`);
+                    return null;
+                  }
+
+                  const pixelPreview = (
+                    <div className={styles.imagePreviewWrapper}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={img.preview}
                         alt="Pixel art preview"
                         className={styles.imagePreview}
                       />
-                    );
-                  } else if (img.pixel_data) {
-                    const cachedPreview = previewCache.get(img.id);
-                    if (cachedPreview) {
-                      pixelPreview = (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img
-                          src={cachedPreview}
-                          alt="Pixel art preview"
-                          className={styles.imagePreview}
-                        />
-                      );
-                    } else {
-                      // Show loading state while generating preview
-                      pixelPreview = <div className={styles.loadingPreview}>Loading...</div>;
-                    }
-                  }
+                    </div>
+                  );
 
                   const handleImageClick = () => {
                     playSound("click");
@@ -456,7 +371,7 @@ export function WidgetConfigModal({
                         isSelected
                           ? styles.imageItemContainerSelected
                           : styles.imageItemContainerUnselected
-                      } ${isProcessing ? styles.imageItemContainerProcessing : ""}`}
+                      }`}
                       style={
                         {
                           "--image-border-width": isSelected ? "0.125rem" : "0.0625rem",
@@ -466,15 +381,8 @@ export function WidgetConfigModal({
                         } as React.CSSProperties
                       }
                     >
-                      {pixelPreview ? (
-                        pixelPreview
-                      ) : (
-                        <div className={styles.loadingPreview}>Pixel Data</div>
-                      )}
-                      {isProcessing && (
-                        <div className={styles.processingOverlay}>Processing...</div>
-                      )}
-                      {isSelected && !isProcessing && (
+                      {pixelPreview}
+                      {isSelected && (
                         <div className={styles.checkmarkContainer}>
                           <i className="hn hn-check-solid" />
                         </div>

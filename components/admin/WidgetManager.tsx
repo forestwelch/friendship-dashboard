@@ -480,13 +480,6 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
             setWidgets(newWidgets);
             setConfiguringWidget(null);
           }}
-          friendColors={{
-            primary: friend.color_primary,
-            secondary: friend.color_secondary,
-            accent: friend.color_accent,
-            bg: friend.color_bg,
-            text: friend.color_text,
-          }}
         />
       )}
     </div>

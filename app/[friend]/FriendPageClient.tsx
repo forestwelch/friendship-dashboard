@@ -849,7 +849,6 @@ export function FriendPageClient({
       {configuringWidget && (
         <WidgetConfigModal
           widget={configuringWidget}
-          friendColors={themeColors}
           onClose={() => {
             setConfiguringWidget(null);
             playSound("close");
