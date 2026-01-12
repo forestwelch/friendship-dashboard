@@ -117,7 +117,6 @@ export function PixelArtConfigModal({ widget, onClose, onSave }: PixelArtConfigM
   return (
     <BaseWidgetConfigModal
       title={`Configure ${widget.widget_name}`}
-      widgetType={widget.widget_type}
       selectedSize={selectedSize}
       availableSizes={WIDGET_SIZES}
       onSizeChange={setSelectedSize}

@@ -43,14 +43,13 @@ export function DefaultWidgetConfigModal({
   return (
     <BaseWidgetConfigModal
       title={`Configure ${widget.widget_name}`}
-      widgetType={widget.widget_type}
       selectedSize={selectedSize}
       availableSizes={availableSizes}
       onSizeChange={setSelectedSize}
       onClose={onClose}
       onSave={handleSave}
     >
-      {/* No additional configuration options for this widget type */}
+      <></>
     </BaseWidgetConfigModal>
   );
 }

@@ -7,7 +7,6 @@ import styles from "./WidgetConfigModal.module.css";
 
 interface BaseWidgetConfigModalProps {
   title: string;
-  widgetType: string;
   selectedSize: WidgetSize | null;
   availableSizes: WidgetSize[];
   onSizeChange: (size: WidgetSize) => void;
@@ -18,7 +17,6 @@ interface BaseWidgetConfigModalProps {
 
 export function BaseWidgetConfigModal({
   title,
-  widgetType,
   selectedSize,
   availableSizes,
   onSizeChange,

@@ -21,10 +21,9 @@ export function MusicPlayerConfigModal({ widget, onClose, onSave }: MusicPlayerC
   const [availableSongs, setAvailableSongs] = useState<
     Array<{ id: string; title: string; artist: string }>
   >([]);
-  const [loadingSongs, setLoadingSongs] = useState(false);
+  const [loadingSongs, setLoadingSongs] = useState(true);
 
   useEffect(() => {
-    setLoadingSongs(true);
     fetch("/api/content/songs")
       .then((res) => res.json())
       .then((data) => {
@@ -64,7 +63,6 @@ export function MusicPlayerConfigModal({ widget, onClose, onSave }: MusicPlayerC
   return (
     <BaseWidgetConfigModal
       title={`Configure ${widget.widget_name}`}
-      widgetType={widget.widget_type}
       selectedSize={selectedSize}
       availableSizes={WIDGET_SIZES}
       onSizeChange={setSelectedSize}
