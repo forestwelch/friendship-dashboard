@@ -6,6 +6,7 @@ import { WidgetSize } from "@/lib/types";
 import { WidgetLibrary } from "@/components/admin/WidgetLibrary";
 import { playSound } from "@/lib/sounds";
 import { Navigation } from "@/components/shared";
+import styles from "./page.module.css";
 
 export default function WidgetLibraryPage() {
   const router = useRouter();

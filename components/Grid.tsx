@@ -55,10 +55,11 @@ interface GridItemProps {
   children: React.ReactNode;
   ref?: React.Ref<HTMLDivElement>;
   style?: React.CSSProperties;
+  className?: string;
 }
 
 export const GridItem = React.forwardRef<HTMLDivElement, GridItemProps>(function GridItem(
-  { position, size, children, style: customStyle },
+  { position, size, children, style: customStyle, className },
   ref
 ) {
   const [cols, rows] = size.split("x").map(Number);
@@ -66,7 +67,7 @@ export const GridItem = React.forwardRef<HTMLDivElement, GridItemProps>(function
   return (
     <div
       ref={ref}
-      className={styles.gridItem}
+      className={`${styles.gridItem} ${className || ""}`}
       data-col={position.x + 1}
       data-row={position.y + 1}
       data-cols={cols}

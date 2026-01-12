@@ -803,9 +803,9 @@ export function FriendPageClient({
                             )}
                             style={
                               isHovered && isValid
-                                ? {
+                                ? ({
                                     "--tile-box-shadow": "var(--game-glow-blue)",
-                                  }
+                                  } as React.CSSProperties)
                                 : undefined
                             }
                           />
