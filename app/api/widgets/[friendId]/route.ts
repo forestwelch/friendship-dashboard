@@ -195,13 +195,21 @@ export async function PUT(
     }).catch(() => {});
     // #endregion
 
+    // Type for existing widget row
+    type ExistingWidgetRow = {
+      id: string;
+      widget_id: string;
+      position_x: number;
+      position_y: number;
+      size: WidgetSize;
+      config: Record<string, unknown>;
+      last_updated_at: string | null;
+    };
+
     // Create a map of existing widgets by ID for quick lookup
-    const existingWidgetsById = new Map<
-      string,
-      typeof existingWidgets extends (infer T)[] ? T : never
-    >();
+    const existingWidgetsById = new Map<string, ExistingWidgetRow>();
     (existingWidgets || []).forEach((ew) => {
-      existingWidgetsById.set(ew.id, ew);
+      existingWidgetsById.set(ew.id, ew as ExistingWidgetRow);
     });
 
     // Separate widgets into updates (by ID) and inserts (new widgets)
@@ -213,10 +221,7 @@ export async function PUT(
 
     // Create a map of existing widgets by widget_type for matching
     // Since frontend doesn't send IDs, we match by widget_type (assuming one per type, except pixel_art)
-    const existingWidgetsByType = new Map<
-      string,
-      typeof existingWidgets extends (infer T)[] ? T[] : never[]
-    >();
+    const existingWidgetsByType = new Map<string, ExistingWidgetRow[]>();
     (existingWidgets || []).forEach((ew) => {
       // Get widget type from widget_id lookup
       const widgetType = Array.from(widgetTypeMap.entries()).find(
@@ -237,7 +242,7 @@ export async function PUT(
       }
 
       // Try to find existing widget by ID first (if frontend sends it)
-      let existingWidget: typeof existingWidgets extends (infer T)[] ? T | null : null = null;
+      let existingWidget: ExistingWidgetRow | null = null;
 
       if (w.id && existingWidgetsById.has(w.id)) {
         existingWidget = existingWidgetsById.get(w.id)!;
