@@ -3,8 +3,6 @@ import { Navigation } from "@/components/Navigation";
 import { FriendPageClient } from "@/app/[friend]/FriendPageClient";
 import { Friend } from "@/lib/types";
 import { FriendWidget } from "@/lib/queries";
-import { Song } from "@/lib/types";
-
 // Mock friend for music player widget testing
 const mockFriend: Friend = {
   id: "test-music-player",
@@ -52,12 +50,6 @@ const mockWidgets: FriendWidget[] = [
   },
 ];
 
-// Sample songs for testing
-const mockSongs: Song[] = [
-  { id: "1", title: "Test Song 1", artist: "Test Artist", mp3Url: "https://example.com/test1.mp3" },
-  { id: "2", title: "Test Song 2", artist: "Test Artist", mp3Url: "https://example.com/test2.mp3" },
-];
-
 export default function MusicPlayerTestPage() {
   return (
     <>
@@ -65,7 +57,6 @@ export default function MusicPlayerTestPage() {
       <FriendPageClient
         friend={mockFriend}
         initialWidgets={mockWidgets}
-        songs={mockSongs}
         pixelArtMap={new Map()}
         pixelArtBySize={new Map()}
       />

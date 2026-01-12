@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { getTop10Songs } from "@/lib/queries";
 import { Song } from "@/lib/types";
 import { SongManager } from "./SongManager";
 import { ImageManager } from "./ImageManager";
@@ -44,9 +43,10 @@ export function ContentManager() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Fetch songs
-        const data = await getTop10Songs();
-        setTopSongs(data.songs);
+        // Fetch songs from API
+        const songsResponse = await fetch("/api/content/songs");
+        const songsData = await songsResponse.json();
+        setTopSongs(songsData.songs || []);
         // Fetch images
         await fetchImages();
         // Fetch albums
@@ -106,7 +106,7 @@ export function ContentManager() {
   const handleSaveSongs = async (songs: Song[]) => {
     setSaving(true);
     try {
-      const response = await fetch("/api/content/top_10_songs", {
+      const response = await fetch("/api/content/songs", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ songs }),

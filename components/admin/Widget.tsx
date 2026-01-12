@@ -54,7 +54,7 @@ export function EditableWidget({
             pointerEvents: "auto",
           }}
         >
-          <WidgetRenderer widget={widget} songs={[]} />
+          <WidgetRenderer widget={widget} />
         </div>
         {editingWidget === widget.id && (
           <div className="widget-edit-menu">

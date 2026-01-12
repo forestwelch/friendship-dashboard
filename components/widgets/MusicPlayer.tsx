@@ -6,7 +6,6 @@ import { WidgetSize, Song } from "@/lib/types";
 
 interface MusicPlayerProps {
   size: WidgetSize;
-  songs?: Song[];
   playlistSongIds?: string[];
   selectedSongId?: string; // Backward compatibility
 }
@@ -21,15 +20,10 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
-export function MusicPlayer({
-  size,
-  songs = [],
-  playlistSongIds,
-  selectedSongId,
-}: MusicPlayerProps) {
+export function MusicPlayer({ size, playlistSongIds, selectedSongId }: MusicPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSongId, setCurrentSongId] = useState<string | null>(selectedSongId || null);
-  const [loadedSongs, setLoadedSongs] = useState<Song[]>(songs);
+  const [loadedSongs, setLoadedSongs] = useState<Song[]>([]);
   const [shuffledPlaylist, setShuffledPlaylist] = useState<Song[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -38,23 +32,9 @@ export function MusicPlayer({
   const hasAutoPlayedRef = useRef(false);
   const shouldAutoPlayNextRef = useRef(false);
 
-  // Update loadedSongs when songs prop changes (only if different)
+  // Fetch songs from API
   useEffect(() => {
-    if (songs.length > 0 && JSON.stringify(songs) !== JSON.stringify(loadedSongs)) {
-      requestAnimationFrame(() => {
-        setLoadedSongs(songs);
-      });
-    }
-  }, [songs, loadedSongs]);
-
-  // Fetch songs if not provided
-  useEffect(() => {
-    if (songs.length > 0) {
-      return; // Don't fetch if songs are provided
-    }
-
-    // Fetch from API if no songs provided
-    fetch("/api/content/top_10_songs")
+    fetch("/api/content/songs")
       .then((res) => res.json())
       .then((data) => {
         if (data.songs && Array.isArray(data.songs)) {
@@ -64,7 +44,7 @@ export function MusicPlayer({
       .catch((error) => {
         console.error("[MusicPlayer] Error fetching songs:", error);
       });
-  }, [songs]);
+  }, []);
 
   // Build playlist from playlistSongIds or fallback to selectedSongId or all songs
   useEffect(() => {

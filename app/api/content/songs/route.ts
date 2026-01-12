@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
-import { getTop10Songs } from "@/lib/queries";
+import { supabase, getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
 import { Song } from "@/lib/types";
 
 export async function GET() {
@@ -9,10 +8,30 @@ export async function GET() {
   }
 
   try {
-    const { songs } = await getTop10Songs();
-    // Filter out any invalid songs (must have mp3Url)
-    const validSongs = songs.filter((song) => song.mp3Url);
-    return NextResponse.json({ songs: validSongs });
+    const { data, error } = await supabase
+      .from("global_content")
+      .select("data")
+      .eq("content_type", "songs")
+      .single();
+
+    if (error || !data) {
+      return NextResponse.json({ songs: [] });
+    }
+
+    const songsData = data.data;
+    if (songsData && typeof songsData === "object" && "songs" in songsData) {
+      const songs = (songsData as { songs: unknown[] }).songs;
+      const validSongs = songs.filter(
+        (song: unknown): song is Song =>
+          typeof song === "object" &&
+          song !== null &&
+          "mp3Url" in song &&
+          typeof (song as { mp3Url: unknown }).mp3Url === "string"
+      );
+      return NextResponse.json({ songs: validSongs });
+    }
+
+    return NextResponse.json({ songs: [] });
   } catch (error) {
     console.error("Error fetching songs:", error);
     return NextResponse.json({ songs: [] });
@@ -31,7 +50,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Invalid songs data" }, { status: 400 });
   }
 
-  // Validate songs (must have mp3Url)
   const validSongs = songs.filter((song: unknown): song is Song => {
     return (
       typeof song === "object" &&
@@ -41,18 +59,11 @@ export async function PUT(request: NextRequest) {
     );
   });
 
-  if (validSongs.length !== songs.length) {
-    console.warn(
-      `Filtered out ${songs.length - validSongs.length} invalid songs (missing mp3Url or has old format)`
-    );
-  }
-
   try {
     const adminClient = getSupabaseAdmin();
-    // Update or insert global content
     const { error } = await adminClient.from("global_content").upsert(
       {
-        content_type: "top_10_songs",
+        content_type: "songs",
         data: { songs: validSongs },
         updated_at: new Date().toISOString(),
       },
@@ -68,7 +79,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error in PUT /api/content/top_10_songs:", error);
+    console.error("Error in PUT /api/content/songs:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

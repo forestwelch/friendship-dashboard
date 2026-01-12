@@ -14,12 +14,10 @@ import {
 } from "@/components/widgets";
 import { FriendWidget } from "@/lib/queries";
 import { ConnectFourData } from "@/lib/queries-connect-four";
-import { Song } from "@/lib/types";
 import { useTheme } from "@/lib/theme-context";
 
 interface WidgetRendererProps {
   widget: FriendWidget;
-  songs?: Song[];
   pixelArtImageUrl?: string;
   onUploadImage?: (file: File) => Promise<void>;
   friendId?: string;
@@ -32,7 +30,6 @@ interface WidgetRendererProps {
  */
 export const WidgetRenderer = memo(function WidgetRenderer({
   widget,
-  songs = [],
   pixelArtImageUrl,
   onUploadImage: _onUploadImage,
   friendId,
@@ -47,7 +44,6 @@ export const WidgetRenderer = memo(function WidgetRenderer({
       return (
         <MusicPlayer
           size={widget.size}
-          songs={songs}
           playlistSongIds={widget.config?.playlistSongIds as string[] | undefined}
           selectedSongId={widget.config?.selectedSongId as string | undefined}
         />

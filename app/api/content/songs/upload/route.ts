@@ -16,12 +16,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Validate file type
     if (!mp3File.type.startsWith("audio/")) {
       return NextResponse.json({ error: "File must be an audio file" }, { status: 400 });
     }
 
-    // Validate file size (limit to 10MB for MP3s)
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (mp3File.size > maxSize) {
       return NextResponse.json(
@@ -32,13 +30,12 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseAdmin();
 
-    // Upload to Supabase Storage
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(2, 9);
     const fileName = `songs/${timestamp}-${randomId}.mp3`;
 
     const { error: uploadError } = await supabase.storage
-      .from("audio-snippets") // Reuse existing audio storage bucket
+      .from("audio-snippets")
       .upload(fileName, mp3File, {
         contentType: mp3File.type || "audio/mpeg",
         upsert: false,
@@ -50,14 +47,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to upload MP3 file" }, { status: 500 });
     }
 
-    // Get public URL (or signed URL if bucket is private)
     const { data: urlData, error: urlError } = await supabase.storage
       .from("audio-snippets")
       .createSignedUrl(fileName, 31536000); // 1 year expiry
 
     let mp3Url: string;
     if (urlError || !urlData) {
-      // Fallback to public URL if signed URL fails
       const { data: publicUrlData } = supabase.storage
         .from("audio-snippets")
         .getPublicUrl(fileName);
@@ -66,7 +61,6 @@ export async function POST(request: NextRequest) {
       mp3Url = urlData.signedUrl;
     }
 
-    // Return the URL and metadata (saving to global_content will be done separately)
     return NextResponse.json({
       mp3Url,
       fileName,

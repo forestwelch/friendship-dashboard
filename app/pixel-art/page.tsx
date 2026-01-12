@@ -58,7 +58,6 @@ export default function PixelArtTestPage() {
       <FriendPageClient
         friend={mockFriend}
         initialWidgets={mockWidgets}
-        songs={[]}
         pixelArtMap={new Map()}
         pixelArtBySize={new Map()}
       />
