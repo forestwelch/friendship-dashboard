@@ -362,3 +362,66 @@
   padding: var(--space-md);
   min-height: 2.5rem;
 }
+
+.imageItemContainer {
+  aspect-ratio: 1;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  border: var(--image-border-width, 0.0625rem) solid var(--image-border-color, var(--game-border));
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imageItemContainerSelected {
+  border-color: var(--primary);
+  border-width: 0.125rem;
+}
+
+.imageItemContainerUnselected {
+  border-color: var(--game-border);
+  border-width: 0.0625rem;
+}
+
+.imageItemContainerProcessing {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.checkmarkContainer {
+  position: absolute;
+  top: var(--space-xs);
+  right: var(--space-xs);
+  width: 1.5rem;
+  height: 1.5rem;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: var(--game-shadow-sm);
+}
+
+.checkmarkContainer i {
+  color: var(--bg);
+  font-size: var(--font-size-xs);
+}
+
+.processingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--game-overlay-bg-80);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  font-size: var(--font-size-xs);
+  color: var(--text);
+}

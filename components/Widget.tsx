@@ -11,5 +11,5 @@ interface WidgetProps {
 }
 
 export function Widget({ size: _size, children, className = "" }: WidgetProps) {
-  return <div className={`${styles.widgetContainer} ${className}`}>{children}</div>;
+  return <div className={`widget ${styles.widgetContainer} ${className}`}>{children}</div>;
 }

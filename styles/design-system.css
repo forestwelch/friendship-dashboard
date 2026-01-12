@@ -1121,6 +1121,7 @@ textarea.game-input {
 
 .snippet-icon {
   font-size: 3rem;
+  color: var(--text);
 }
 
 .snippet-button-wrapper {

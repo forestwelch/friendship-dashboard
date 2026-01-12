@@ -52,15 +52,15 @@
 }
 
 .colorList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-md) var(--space-md);
+  padding: var(--space-md);
+  align-items: center;
 }
 
 .colorRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
+  display: contents;
 }
 
 .colorSwatch {
@@ -70,10 +70,14 @@
   border: var(--border-width-md) solid var(--game-border);
   border-radius: var(--radius-sm);
   cursor: pointer;
+  flex-shrink: 0;
+  justify-self: start;
 }
 
 .colorLabel {
   color: var(--panel-text-color, var(--text));
+  white-space: nowrap;
+  min-width: fit-content;
 }
 
 .colorInfo {
@@ -111,9 +115,7 @@
 }
 
 .colorItem {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
+  display: contents;
 }
 
 .colorInput {
@@ -127,6 +129,7 @@
   border-radius: var(--radius-sm);
   color: var(--panel-text-color, var(--text));
   box-sizing: border-box;
+  justify-self: start;
 }
 
 .randomizeAllButton {
@@ -137,4 +140,14 @@
 
 .randomizeAllIcon {
   margin-right: var(--space-xs);
+}
+
+.randomizeAllButton {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
 }

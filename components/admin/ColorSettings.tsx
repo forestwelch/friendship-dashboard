@@ -189,19 +189,21 @@ export function ColorSettings({
 
             {activeColorKey ? (
               // Color Picker View
-              <ColorPicker
-                currentColor={currentColors[activeColorKey as keyof typeof currentColors]}
-                onColorChange={(color) => {
-                  // Optional: Live preview or wait for confirm?
-                  // User asked for "Hover preview click to confirm".
-                  // So we can update immediately on hover/change for preview.
-                  onColorChange(activeColorKey, color);
-                }}
-                onColorConfirm={(color) => {
-                  onColorChange(activeColorKey, color);
-                  setActiveColorKey(null); // Go back to list
-                }}
-              />
+              <div className={styles.panelContent}>
+                <ColorPicker
+                  currentColor={currentColors[activeColorKey as keyof typeof currentColors]}
+                  onColorChange={(color) => {
+                    // Optional: Live preview or wait for confirm?
+                    // User asked for "Hover preview click to confirm".
+                    // So we can update immediately on hover/change for preview.
+                    onColorChange(activeColorKey, color);
+                  }}
+                  onColorConfirm={(color) => {
+                    onColorChange(activeColorKey, color);
+                    setActiveColorKey(null); // Go back to list
+                  }}
+                />
+              </div>
             ) : (
               // List View
               <>
@@ -273,23 +275,25 @@ export function ColorSettings({
                 </div>
 
                 {onRandomizeAll && (
-                  <button
-                    onClick={() => {
-                      onRandomizeAll();
-                      playSound("select");
-                    }}
-                    className={styles.randomizeAllButton}
-                    style={
-                      {
-                        "--randomize-bg": themeColors.primary,
-                        "--randomize-color": themeColors.bg,
-                        "--randomize-border": themeColors.accent,
-                      } as React.CSSProperties
-                    }
-                  >
-                    <i className={clsx("hn", "hn-shuffle-solid", styles.randomizeAllIcon)} />
-                    RANDOMIZE ALL
-                  </button>
+                  <div className={styles.panelContent}>
+                    <button
+                      onClick={() => {
+                        onRandomizeAll();
+                        playSound("select");
+                      }}
+                      className={`game-button ${styles.randomizeAllButton}`}
+                      style={
+                        {
+                          "--randomize-bg": themeColors.primary,
+                          "--randomize-color": themeColors.bg,
+                          "--randomize-border": themeColors.accent,
+                        } as React.CSSProperties
+                      }
+                    >
+                      <i className={clsx("hn", "hn-shuffle-solid", styles.randomizeAllIcon)} />
+                      RANDOMIZE ALL
+                    </button>
+                  </div>
                 )}
               </>
             )}
