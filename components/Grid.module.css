@@ -33,8 +33,8 @@
 .gridItem {
   position: relative;
   z-index: var(--widget-z-index, 1);
-  grid-column: calc(var(--grid-col) / span var(--grid-cols-span));
-  grid-row: calc(var(--grid-row) / span var(--grid-rows-span));
+  grid-column: var(--grid-col) / span var(--grid-cols-span);
+  grid-row: var(--grid-row) / span var(--grid-rows-span);
   width: calc(
     var(--grid-cols-span) * var(--grid-tile-size) + (var(--grid-cols-span) - 1) * var(--grid-gap)
   );
