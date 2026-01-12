@@ -321,29 +321,10 @@ export function WidgetConfigModal({
         };
 
         return (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--space-md)",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--space-sm)",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: "var(--space-sm)",
-                }}
-              >
-                <label className="game-heading-3" style={{ margin: 0 }}>
+          <div className={styles.slideshowSection}>
+            <div className={styles.slideshowControls}>
+              <div className={styles.slideshowHeader}>
+                <label className={`game-heading-3 ${styles.slideshowLabel}`}>
                   Select Images for Slideshow
                 </label>
                 {selectedImageIds.length > 0 && (
@@ -504,25 +485,18 @@ export function WidgetConfigModal({
               </div>
             )}
             {selectedImageIds.length > 0 && (
-              <div className="game-text-muted" style={{ fontSize: "var(--font-size-xs)" }}>
+              <div className={`game-text-muted ${styles.slideshowHelpText}`}>
                 {selectedImageIds.length} image
                 {selectedImageIds.length !== 1 ? "s" : ""} selected. Images will cycle with cascade
                 animation.
               </div>
             )}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--space-sm)",
-                marginTop: "var(--space-md)",
-              }}
-            >
-              <label className="game-heading-3" style={{ margin: 0 }}>
+            <div className={styles.transitionSection}>
+              <label className={`game-heading-3 ${styles.transitionLabel}`}>
                 Transition Effect
               </label>
               <select
-                className="game-input"
+                className={`game-input ${styles.transitionSelect}`}
                 value={transitionType}
                 onChange={(e) =>
                   setConfig({
@@ -530,17 +504,12 @@ export function WidgetConfigModal({
                     transitionType: e.target.value,
                   })
                 }
-                style={{
-                  fontFamily: "inherit",
-                  padding: "var(--space-md)",
-                  minHeight: "2.5rem",
-                }}
               >
                 <option value="scanline">Scanline Sweep</option>
                 <option value="dissolve">Random Dissolve</option>
                 <option value="boot-up">Gameboy Boot-up</option>
               </select>
-              <div className="game-text-muted" style={{ fontSize: "var(--font-size-xs)" }}>
+              <div className={`game-text-muted ${styles.slideshowHelpText}`}>
                 Transition effect runs on page load and when cycling to next image.
               </div>
             </div>

@@ -12,6 +12,7 @@ import { ColorSettings } from "@/components/admin/ColorSettings";
 import { ThemeProvider, useThemeContext } from "@/lib/theme-context";
 import { hexToHsl, hslToHex } from "@/lib/color-utils";
 import "@/styles/content-page.css";
+import styles from "./page.module.css";
 
 // Default colors for new palettes (in hex)
 const DEFAULT_COLORS_HEX = {
@@ -56,9 +57,8 @@ function PreviewPanel({
 
   return (
     <div
+      className={styles.previewPanel}
       style={{
-        flex: 1,
-        overflow: "auto",
         background: hslToHex(draftColors.bg),
       }}
     >
@@ -362,64 +362,18 @@ export default function ColorPaletteEditPage() {
   return (
     <ThemeProvider>
       <Navigation />
-      <div
-        style={{
-          display: "flex",
-          height: "100vh",
-          overflow: "hidden",
-        }}
-      >
+      <div className={styles.container}>
         {/* Left Panel - Color Editor */}
-        <div
-          style={{
-            width: "400px",
-            flexShrink: 0,
-            background: "var(--bg)",
-            borderRight: "var(--border-width-lg) solid var(--accent)",
-            display: "flex",
-            flexDirection: "column",
-            overflowY: "auto",
-            paddingTop: "calc(var(--space-xl) + 60px)",
-          }}
-        >
-          <div style={{ padding: "var(--space-lg)" }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "var(--space-lg)",
-              }}
-            >
+        <div className={styles.leftPanel}>
+          <div className={styles.leftPanelContent}>
+            <div className={styles.header}>
               <h2 className="game-heading-2">{isNew ? "NEW PALETTE" : "EDIT PALETTE"}</h2>
-              <button
-                onClick={handleCancel}
-                className="game-button"
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "var(--text)",
-                  fontSize: "var(--font-size-xl)",
-                  padding: "var(--space-xs)",
-                }}
-              >
+              <button onClick={handleCancel} className={`game-button ${styles.closeButton}`}>
                 <i className="hn hn-times-solid" />
               </button>
             </div>
 
-            {error && (
-              <div
-                style={{
-                  color: "var(--accent)",
-                  marginBottom: "var(--space-md)",
-                  padding: "var(--space-sm)",
-                  background: "var(--secondary)",
-                  borderRadius: "var(--radius-sm)",
-                }}
-              >
-                {error}
-              </div>
-            )}
+            {error && <div className={styles.errorMessage}>{error}</div>}
 
             <ColorSettings
               friendId="preview"
@@ -429,37 +383,15 @@ export default function ColorPaletteEditPage() {
               onRandomizeAll={undefined}
             />
 
-            <button
-              onClick={handleShuffleColors}
-              className="game-button"
-              style={{
-                width: "100%",
-                marginTop: "var(--space-md)",
-                background: "var(--secondary)",
-                color: "var(--bg)",
-                borderColor: "var(--accent)",
-              }}
-            >
+            <button onClick={handleShuffleColors} className={`game-button ${styles.shuffleButton}`}>
               SHUFFLE COLORS
             </button>
 
-            <div
-              style={{
-                display: "flex",
-                gap: "var(--space-sm)",
-                marginTop: "var(--space-lg)",
-              }}
-            >
+            <div className={styles.buttonGroup}>
               {editingPalette && (
                 <button
                   onClick={handleClonePalette}
-                  className="game-button"
-                  style={{
-                    flex: 1,
-                    background: "var(--secondary)",
-                    color: "var(--bg)",
-                    borderColor: "var(--accent)",
-                  }}
+                  className={`game-button ${styles.cloneButton}`}
                   disabled={saving}
                 >
                   CLONE
@@ -467,13 +399,7 @@ export default function ColorPaletteEditPage() {
               )}
               <button
                 onClick={handleSave}
-                className="game-button"
-                style={{
-                  flex: 1,
-                  background: "var(--primary)",
-                  color: "var(--bg)",
-                  borderColor: "var(--accent)",
-                }}
+                className={`game-button ${styles.saveButton}`}
                 disabled={saving}
               >
                 {saving ? "SAVING..." : "SAVE"}
@@ -481,12 +407,7 @@ export default function ColorPaletteEditPage() {
               {editingPalette && (
                 <button
                   onClick={handleDelete}
-                  className="game-button"
-                  style={{
-                    background: "var(--accent)",
-                    color: "var(--bg)",
-                    borderColor: "var(--accent)",
-                  }}
+                  className={`game-button ${styles.deleteButton}`}
                   disabled={saving}
                 >
                   DELETE

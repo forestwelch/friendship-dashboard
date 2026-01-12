@@ -272,11 +272,7 @@ export function ConnectFourModal({
                   <h2 className={styles.resultTitle}>DRAW</h2>
                 </>
               )}
-              <button
-                className={styles.playAgainButton}
-                onClick={handlePlayAgain}
-                style={{ minHeight: "44px" }}
-              >
+              <button className={styles.playAgainButton} onClick={handlePlayAgain}>
                 PLAY AGAIN
               </button>
             </div>

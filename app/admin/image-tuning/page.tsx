@@ -5,6 +5,7 @@ import { Navigation } from "@/components/shared";
 import Link from "next/link";
 import { base64ToPixelData, ThemeColors, PIXEL_GRID_SIZE } from "@/lib/pixel-data-processing";
 import { DEFAULT_THEME_COLORS } from "@/lib/theme-defaults";
+import styles from "./page.module.css";
 
 interface ImageItem {
   id: string;
@@ -686,24 +687,9 @@ export default function ImageTuningPage() {
   return (
     <>
       <Navigation />
-      <div
-        className="admin-page"
-        style={{
-          paddingTop: `calc(var(--height-button) + var(--space-md))`,
-          width: "100%",
-          maxWidth: "100%",
-          background: "var(--admin-bg)",
-          color: "var(--admin-text)",
-          overflowX: "hidden",
-          overflowY: "scroll",
-          height: "100vh",
-        }}
-      >
-        <div
-          className="game-container"
-          style={{ paddingTop: "var(--space-2xl)", paddingBottom: "var(--space-2xl)" }}
-        >
-          <div className="game-breadcrumb" style={{ marginBottom: "var(--space-xl)" }}>
+      <div className={`admin-page ${styles.pageContainer}`}>
+        <div className={`game-container ${styles.container}`}>
+          <div className={`game-breadcrumb ${styles.breadcrumb}`}>
             <Link href="/" className="game-link">
               Home
             </Link>
@@ -715,47 +701,21 @@ export default function ImageTuningPage() {
             <span className="game-breadcrumb-current">Image Tuning</span>
           </div>
 
-          <h1 className="game-heading-1" style={{ marginBottom: "var(--space-xl)" }}>
-            Image Conversion Tuning
-          </h1>
+          <h1 className={`game-heading-1 ${styles.heading}`}>Image Conversion Tuning</h1>
 
-          <div
-            className="game-card"
-            style={{ marginBottom: "var(--space-lg)", padding: "var(--space-md)" }}
-          >
-            <p className="game-text-muted" style={{ margin: 0 }}>
+          <div className={`game-card ${styles.introCard}`}>
+            <p className={`game-text-muted ${styles.introText}`}>
               Adjust parameters to control how uploaded images are converted and displayed with
               theme colors. Changes affect how stored intensity values map to colors on the profile.
             </p>
-            <div
-              style={{
-                marginTop: "var(--space-md)",
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--space-md)",
-              }}
-            >
+            <div className={styles.controlsSection}>
               {/* Friend Selector */}
               <div>
-                <label
-                  className="game-heading-3"
-                  style={{ marginBottom: "var(--space-sm)", display: "block" }}
-                >
-                  Theme Colors
-                </label>
+                <label className={`game-heading-3 ${styles.label}`}>Theme Colors</label>
                 <select
                   value={selectedFriendSlug || ""}
                   onChange={(e) => setSelectedFriendSlug(e.target.value || null)}
-                  style={{
-                    width: "100%",
-                    padding: "var(--space-sm)",
-                    fontSize: "var(--font-size-sm)",
-                    border: "var(--border-width-md) solid var(--game-border)",
-                    borderRadius: "var(--radius-sm)",
-                    background: "var(--game-surface)",
-                    color: "var(--text)",
-                    cursor: "pointer",
-                  }}
+                  className={styles.select}
                 >
                   <option value="">Default (Grayscale)</option>
                   {friends.map((friend) => (
@@ -767,37 +727,23 @@ export default function ImageTuningPage() {
               </div>
 
               {/* Color Swatches */}
-              <div
-                style={{
-                  display: "flex",
-                  gap: "var(--space-sm)",
-                  flexWrap: "wrap",
-                  alignItems: "center",
-                }}
-              >
-                <span className="game-text-muted" style={{ fontSize: "var(--font-size-sm)" }}>
+              <div className={styles.colorSwatchesContainer}>
+                <span className={`game-text-muted ${styles.colorSwatchesLabel}`}>
                   Current colors:
                 </span>
-                <div style={{ display: "flex", gap: "var(--space-xs)" }}>
+                <div className={styles.colorSwatches}>
                   {Object.entries(themeColors).map(([name, color]) => (
                     <div
                       key={name}
                       title={`${name}: ${color}`}
-                      style={{
-                        width: "1.5rem",
-                        height: "1.5rem",
-                        backgroundColor: color,
-                        border: "var(--border-width-md) solid var(--game-border)",
-                        borderRadius: "var(--radius-sm)",
-                        boxShadow: "var(--game-shadow-sm)",
-                      }}
+                      className={styles.colorSwatch}
+                      style={{ backgroundColor: color }}
                     />
                   ))}
                 </div>
                 <button
-                  className="game-button"
+                  className={`game-button ${styles.randomizeButton}`}
                   onClick={randomizeThemeColors}
-                  style={{ marginLeft: "auto", fontSize: "var(--font-size-xs)" }}
                 >
                   Randomize Colors
                 </button>
@@ -808,51 +754,21 @@ export default function ImageTuningPage() {
           {loading ? (
             <div className="game-text-muted">Loading...</div>
           ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "minmax(300px, 1fr) 2fr",
-                gap: "var(--space-xl)",
-                alignItems: "start",
-              }}
-            >
+            <div className={styles.mainGrid}>
               {/* Controls */}
-              <div
-                className="game-card"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "var(--space-lg)",
-                  position: "sticky",
-                  top: "var(--space-md)",
-                  maxHeight: "calc(100vh - var(--space-xl))",
-                  overflowY: "auto",
-                }}
-              >
-                <div
-                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-                >
-                  <h2 className="game-heading-2" style={{ margin: 0 }}>
-                    Parameters
-                  </h2>
-                  <div style={{ display: "flex", gap: "var(--space-xs)" }}>
+              <div className={`game-card ${styles.controlsCard}`}>
+                <div className={styles.controlsHeader}>
+                  <h2 className={`game-heading-2 ${styles.controlsHeaderTitle}`}>Parameters</h2>
+                  <div className={styles.controlsHeaderButtons}>
                     <button
-                      className="game-button"
+                      className={`game-button ${styles.headerButton}`}
                       onClick={randomizeParams}
-                      style={{
-                        fontSize: "var(--font-size-xs)",
-                        padding: "var(--space-xs) var(--space-sm)",
-                      }}
                     >
                       Random
                     </button>
                     <button
-                      className="game-button"
+                      className={`game-button ${styles.headerButton}`}
                       onClick={resetToDefaults}
-                      style={{
-                        fontSize: "var(--font-size-xs)",
-                        padding: "var(--space-xs) var(--space-sm)",
-                      }}
                     >
                       Reset
                     </button>
@@ -861,25 +777,11 @@ export default function ImageTuningPage() {
 
                 {/* Image Selector */}
                 <div>
-                  <label
-                    className="game-heading-3"
-                    style={{ marginBottom: "var(--space-sm)", display: "block" }}
-                  >
-                    Select Image
-                  </label>
+                  <label className={`game-heading-3 ${styles.label}`}>Select Image</label>
                   <select
                     value={selectedImageId || ""}
                     onChange={(e) => setSelectedImageId(e.target.value)}
-                    style={{
-                      width: "100%",
-                      padding: "var(--space-sm)",
-                      fontSize: "var(--font-size-sm)",
-                      border: "var(--border-width-md) solid var(--game-border)",
-                      borderRadius: "var(--radius-sm)",
-                      background: "var(--game-surface)",
-                      color: "var(--text)",
-                      cursor: "pointer",
-                    }}
+                    className={styles.select}
                   >
                     {images.map((img) => (
                       <option key={img.id} value={img.id}>
@@ -891,14 +793,7 @@ export default function ImageTuningPage() {
 
                 {/* Quantization Levels */}
                 <div>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "var(--space-xs)",
-                      fontSize: "var(--font-size-sm)",
-                      fontWeight: "bold",
-                    }}
-                  >
+                  <label className={styles.paramLabel}>
                     Quantization Levels:{" "}
                     {editingParam === "quantizationLevels" ? (
                       <input
@@ -916,24 +811,12 @@ export default function ImageTuningPage() {
                           }
                         }}
                         autoFocus
-                        style={{
-                          width: "4rem",
-                          padding: "2px 4px",
-                          fontSize: "var(--font-size-sm)",
-                          border: "var(--border-width-md) solid var(--admin-accent)",
-                          borderRadius: "var(--radius-sm)",
-                          background: "var(--game-surface)",
-                          color: "var(--text)",
-                        }}
+                        className={styles.paramInput}
                       />
                     ) : (
                       <span
                         onClick={() => startEditing("quantizationLevels")}
-                        style={{
-                          cursor: "pointer",
-                          textDecoration: "underline",
-                          textDecorationStyle: "dotted",
-                        }}
+                        className={styles.paramValue}
                       >
                         {tuningParams.quantizationLevels}
                       </span>
@@ -946,12 +829,9 @@ export default function ImageTuningPage() {
                     step="1"
                     value={tuningParams.quantizationLevels}
                     onChange={(e) => updateParam("quantizationLevels", parseInt(e.target.value))}
-                    style={{ width: "100%", cursor: "pointer" }}
+                    className={styles.paramSlider}
                   />
-                  <div
-                    className="game-text-muted"
-                    style={{ fontSize: "var(--font-size-xs)", marginTop: "var(--space-xs)" }}
-                  >
+                  <div className={`game-text-muted ${styles.paramHelp}`}>
                     Number of distinct intensity levels. Higher = more detail, less washed-out.
                     Current default: 64
                   </div>
@@ -959,14 +839,7 @@ export default function ImageTuningPage() {
 
                 {/* Color Stop 1 */}
                 <div>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "var(--space-xs)",
-                      fontSize: "var(--font-size-sm)",
-                      fontWeight: "bold",
-                    }}
-                  >
+                  <label className={styles.paramLabel}>
                     Darkest Stop:{" "}
                     {editingParam === "colorStop1" ? (
                       <input
@@ -985,24 +858,12 @@ export default function ImageTuningPage() {
                           }
                         }}
                         autoFocus
-                        style={{
-                          width: "4rem",
-                          padding: "2px 4px",
-                          fontSize: "var(--font-size-sm)",
-                          border: "var(--border-width-md) solid var(--admin-accent)",
-                          borderRadius: "var(--radius-sm)",
-                          background: "var(--game-surface)",
-                          color: "var(--text)",
-                        }}
+                        className={styles.paramInput}
                       />
                     ) : (
                       <span
                         onClick={() => startEditing("colorStop1")}
-                        style={{
-                          cursor: "pointer",
-                          textDecoration: "underline",
-                          textDecorationStyle: "dotted",
-                        }}
+                        className={styles.paramValue}
                       >
                         {tuningParams.colorStop1.toFixed(2)}
                       </span>
@@ -1015,20 +876,13 @@ export default function ImageTuningPage() {
                     step="0.01"
                     value={tuningParams.colorStop1}
                     onChange={(e) => updateParam("colorStop1", parseFloat(e.target.value))}
-                    style={{ width: "100%", cursor: "pointer" }}
+                    className={styles.paramSlider}
                   />
                 </div>
 
                 {/* Color Stop 2 */}
                 <div>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "var(--space-xs)",
-                      fontSize: "var(--font-size-sm)",
-                      fontWeight: "bold",
-                    }}
-                  >
+                  <label className={styles.paramLabel}>
                     Mid-Dark Stop:{" "}
                     {editingParam === "colorStop2" ? (
                       <input
@@ -1047,24 +901,12 @@ export default function ImageTuningPage() {
                           }
                         }}
                         autoFocus
-                        style={{
-                          width: "4rem",
-                          padding: "2px 4px",
-                          fontSize: "var(--font-size-sm)",
-                          border: "var(--border-width-md) solid var(--admin-accent)",
-                          borderRadius: "var(--radius-sm)",
-                          background: "var(--game-surface)",
-                          color: "var(--text)",
-                        }}
+                        className={styles.paramInput}
                       />
                     ) : (
                       <span
                         onClick={() => startEditing("colorStop2")}
-                        style={{
-                          cursor: "pointer",
-                          textDecoration: "underline",
-                          textDecorationStyle: "dotted",
-                        }}
+                        className={styles.paramValue}
                       >
                         {tuningParams.colorStop2.toFixed(2)}
                       </span>
@@ -1077,20 +919,13 @@ export default function ImageTuningPage() {
                     step="0.01"
                     value={tuningParams.colorStop2}
                     onChange={(e) => updateParam("colorStop2", parseFloat(e.target.value))}
-                    style={{ width: "100%", cursor: "pointer" }}
+                    className={styles.paramSlider}
                   />
                 </div>
 
                 {/* Color Stop 3 */}
                 <div>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "var(--space-xs)",
-                      fontSize: "var(--font-size-sm)",
-                      fontWeight: "bold",
-                    }}
-                  >
+                  <label className={styles.paramLabel}>
                     Mid-Light Stop:{" "}
                     {editingParam === "colorStop3" ? (
                       <input
@@ -1109,24 +944,12 @@ export default function ImageTuningPage() {
                           }
                         }}
                         autoFocus
-                        style={{
-                          width: "4rem",
-                          padding: "2px 4px",
-                          fontSize: "var(--font-size-sm)",
-                          border: "var(--border-width-md) solid var(--admin-accent)",
-                          borderRadius: "var(--radius-sm)",
-                          background: "var(--game-surface)",
-                          color: "var(--text)",
-                        }}
+                        className={styles.paramInput}
                       />
                     ) : (
                       <span
                         onClick={() => startEditing("colorStop3")}
-                        style={{
-                          cursor: "pointer",
-                          textDecoration: "underline",
-                          textDecorationStyle: "dotted",
-                        }}
+                        className={styles.paramValue}
                       >
                         {tuningParams.colorStop3.toFixed(2)}
                       </span>
@@ -1139,20 +962,13 @@ export default function ImageTuningPage() {
                     step="0.01"
                     value={tuningParams.colorStop3}
                     onChange={(e) => updateParam("colorStop3", parseFloat(e.target.value))}
-                    style={{ width: "100%", cursor: "pointer" }}
+                    className={styles.paramSlider}
                   />
                 </div>
 
                 {/* Color Stop 4 */}
                 <div>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "var(--space-xs)",
-                      fontSize: "var(--font-size-sm)",
-                      fontWeight: "bold",
-                    }}
-                  >
+                  <label className={styles.paramLabel}>
                     Lightest Stop:{" "}
                     {editingParam === "colorStop4" ? (
                       <input
@@ -1171,24 +987,12 @@ export default function ImageTuningPage() {
                           }
                         }}
                         autoFocus
-                        style={{
-                          width: "4rem",
-                          padding: "2px 4px",
-                          fontSize: "var(--font-size-sm)",
-                          border: "var(--border-width-md) solid var(--admin-accent)",
-                          borderRadius: "var(--radius-sm)",
-                          background: "var(--game-surface)",
-                          color: "var(--text)",
-                        }}
+                        className={styles.paramInput}
                       />
                     ) : (
                       <span
                         onClick={() => startEditing("colorStop4")}
-                        style={{
-                          cursor: "pointer",
-                          textDecoration: "underline",
-                          textDecorationStyle: "dotted",
-                        }}
+                        className={styles.paramValue}
                       >
                         {tuningParams.colorStop4.toFixed(2)}
                       </span>
@@ -1201,20 +1005,13 @@ export default function ImageTuningPage() {
                     step="0.01"
                     value={tuningParams.colorStop4}
                     onChange={(e) => updateParam("colorStop4", parseFloat(e.target.value))}
-                    style={{ width: "100%", cursor: "pointer" }}
+                    className={styles.paramSlider}
                   />
                 </div>
 
                 {/* Contrast Gamma */}
                 <div>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "var(--space-xs)",
-                      fontSize: "var(--font-size-sm)",
-                      fontWeight: "bold",
-                    }}
-                  >
+                  <label className={styles.paramLabel}>
                     Contrast (Gamma):{" "}
                     {editingParam === "contrastGamma" ? (
                       <input
@@ -1233,24 +1030,12 @@ export default function ImageTuningPage() {
                           }
                         }}
                         autoFocus
-                        style={{
-                          width: "4rem",
-                          padding: "2px 4px",
-                          fontSize: "var(--font-size-sm)",
-                          border: "var(--border-width-md) solid var(--admin-accent)",
-                          borderRadius: "var(--radius-sm)",
-                          background: "var(--game-surface)",
-                          color: "var(--text)",
-                        }}
+                        className={styles.paramInput}
                       />
                     ) : (
                       <span
                         onClick={() => startEditing("contrastGamma")}
-                        style={{
-                          cursor: "pointer",
-                          textDecoration: "underline",
-                          textDecorationStyle: "dotted",
-                        }}
+                        className={styles.paramValue}
                       >
                         {tuningParams.contrastGamma.toFixed(2)}
                       </span>
@@ -1263,113 +1048,46 @@ export default function ImageTuningPage() {
                     step="0.1"
                     value={tuningParams.contrastGamma}
                     onChange={(e) => updateParam("contrastGamma", parseFloat(e.target.value))}
-                    style={{ width: "100%", cursor: "pointer" }}
+                    className={styles.paramSlider}
                   />
                 </div>
 
                 {/* Current Values Display */}
-                <div
-                  className="game-card"
-                  style={{
-                    marginTop: "var(--space-md)",
-                    padding: "var(--space-md)",
-                    background: "var(--game-surface)",
-                  }}
-                >
-                  <h3 className="game-heading-3" style={{ marginBottom: "var(--space-sm)" }}>
-                    Current Values (JSON)
-                  </h3>
-                  <pre
-                    style={{
-                      fontSize: "var(--font-size-xs)",
-                      fontFamily: "monospace",
-                      whiteSpace: "pre-wrap",
-                      wordBreak: "break-all",
-                      margin: 0,
-                      padding: "var(--space-sm)",
-                      background: "var(--bg)",
-                      borderRadius: "var(--radius-sm)",
-                      overflow: "auto",
-                      maxHeight: "200px",
-                    }}
-                  >
+                <div className={`game-card ${styles.valuesCard}`}>
+                  <h3 className={`game-heading-3 ${styles.valuesTitle}`}>Current Values (JSON)</h3>
+                  <pre className={styles.valuesPre}>
                     {JSON.stringify({ ...tuningParams, themeColors }, null, 2)}
                   </pre>
                 </div>
               </div>
 
               {/* Preview Section - same layout as before */}
-              <div
-                className="game-card"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "var(--space-lg)",
-                }}
-              >
+              <div className={`game-card ${styles.previewCard}`}>
                 <h2 className="game-heading-2">Previews</h2>
 
                 {/* Reference Previews */}
                 <div>
-                  <h3
-                    className="game-heading-3"
-                    style={{ marginBottom: "var(--space-md)", textAlign: "center" }}
-                  >
+                  <h3 className={`game-heading-3 ${styles.previewSectionTitle}`}>
                     Reference (Default Settings)
                   </h3>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: "var(--space-lg)",
-                      marginBottom: "var(--space-xl)",
-                    }}
-                  >
-                    <div style={{ textAlign: "center" }}>
-                      <div
-                        className="game-text-muted"
-                        style={{ marginBottom: "var(--space-xs)", fontSize: "var(--font-size-sm)" }}
-                      >
+                  <div className={styles.referenceGrid}>
+                    <div className={styles.previewItem}>
+                      <div className={`game-text-muted ${styles.previewLabel}`}>
                         128×128 (Default)
                       </div>
                       {selectedImageId ? (
-                        <canvas
-                          ref={reference128Ref}
-                          style={{
-                            maxWidth: "100%",
-                            width: "auto",
-                            height: "auto",
-                            imageRendering: "pixelated",
-                            border: "var(--border-width-lg) solid var(--game-border)",
-                            borderRadius: "var(--radius-sm)",
-                            background: "var(--game-surface)",
-                          }}
-                        />
+                        <canvas ref={reference128Ref} className={styles.canvas} />
                       ) : (
                         <div className="game-text-muted">Select an image</div>
                       )}
                     </div>
 
-                    <div style={{ textAlign: "center" }}>
-                      <div
-                        className="game-text-muted"
-                        style={{ marginBottom: "var(--space-xs)", fontSize: "var(--font-size-sm)" }}
-                      >
+                    <div className={styles.previewItem}>
+                      <div className={`game-text-muted ${styles.previewLabel}`}>
                         256×256 (Default)
                       </div>
                       {selectedImageId ? (
-                        <canvas
-                          ref={reference256Ref}
-                          style={{
-                            maxWidth: "100%",
-                            width: "auto",
-                            height: "auto",
-                            imageRendering: "pixelated",
-                            border: "var(--border-width-lg) solid var(--game-border)",
-                            borderRadius: "var(--radius-sm)",
-                            background: "var(--game-surface)",
-                          }}
-                        />
+                        <canvas ref={reference256Ref} className={styles.canvas} />
                       ) : (
                         <div className="game-text-muted">Select an image</div>
                       )}
@@ -1379,64 +1097,28 @@ export default function ImageTuningPage() {
 
                 {/* Live Previews */}
                 <div>
-                  <h3
-                    className="game-heading-3"
-                    style={{ marginBottom: "var(--space-md)", textAlign: "center" }}
-                  >
+                  <h3 className={`game-heading-3 ${styles.previewSectionTitle}`}>
                     Live Preview (Updates with Changes)
                   </h3>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: "var(--space-lg)",
-                      marginBottom: "var(--space-xl)",
-                    }}
-                  >
-                    <div style={{ textAlign: "center" }}>
-                      <div
-                        className="game-text-muted"
-                        style={{ marginBottom: "var(--space-xs)", fontSize: "var(--font-size-sm)" }}
-                      >
-                        128×128
-                      </div>
+                  <div className={styles.referenceGrid}>
+                    <div className={styles.previewItem}>
+                      <div className={`game-text-muted ${styles.previewLabel}`}>128×128</div>
                       {selectedImageId ? (
                         <canvas
                           ref={live128Ref}
-                          style={{
-                            maxWidth: "100%",
-                            width: "auto",
-                            height: "auto",
-                            imageRendering: "pixelated",
-                            border: "var(--border-width-lg) solid var(--admin-accent)",
-                            borderRadius: "var(--radius-sm)",
-                            background: "var(--game-surface)",
-                          }}
+                          className={`${styles.canvas} ${styles.liveCanvas}`}
                         />
                       ) : (
                         <div className="game-text-muted">Select an image to preview</div>
                       )}
                     </div>
 
-                    <div style={{ textAlign: "center" }}>
-                      <div
-                        className="game-text-muted"
-                        style={{ marginBottom: "var(--space-xs)", fontSize: "var(--font-size-sm)" }}
-                      >
-                        256×256
-                      </div>
+                    <div className={styles.previewItem}>
+                      <div className={`game-text-muted ${styles.previewLabel}`}>256×256</div>
                       {selectedImageId ? (
                         <canvas
                           ref={live256Ref}
-                          style={{
-                            maxWidth: "100%",
-                            width: "auto",
-                            height: "auto",
-                            imageRendering: "pixelated",
-                            border: "var(--border-width-lg) solid var(--admin-accent)",
-                            borderRadius: "var(--radius-sm)",
-                            background: "var(--game-surface)",
-                          }}
+                          className={`${styles.canvas} ${styles.liveCanvas}`}
                         />
                       ) : (
                         <div className="game-text-muted">Select an image to preview</div>
@@ -1447,23 +1129,15 @@ export default function ImageTuningPage() {
 
                 {/* Original Grayscale Preview */}
                 {selectedImageId && images.find((img) => img.id === selectedImageId)?.preview && (
-                  <div style={{ marginTop: "var(--space-lg)", textAlign: "center", width: "100%" }}>
-                    <h3 className="game-heading-3" style={{ marginBottom: "var(--space-md)" }}>
+                  <div className={styles.originalPreview}>
+                    <h3 className={`game-heading-3 ${styles.originalTitle}`}>
                       Original Grayscale Preview
                     </h3>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={images.find((img) => img.id === selectedImageId)?.preview || ""}
                       alt="Original"
-                      style={{
-                        maxWidth: "100%",
-                        maxHeight: "50vh",
-                        width: "auto",
-                        height: "auto",
-                        imageRendering: "pixelated",
-                        border: "var(--border-width-md) solid var(--game-border)",
-                        borderRadius: "var(--radius-sm)",
-                      }}
+                      className={styles.originalImage}
                     />
                   </div>
                 )}
@@ -1473,59 +1147,21 @@ export default function ImageTuningPage() {
 
           {/* Processing Variations Section */}
           {recentImages.length > 0 && (
-            <div
-              className="game-card"
-              style={{
-                marginTop: "var(--space-2xl)",
-                padding: "var(--space-lg)",
-              }}
-            >
-              <h2 className="game-heading-1" style={{ marginBottom: "var(--space-lg)" }}>
-                Processing Variations
-              </h2>
+            <div className={`game-card ${styles.variationsCard}`}>
+              <h2 className={`game-heading-1 ${styles.variationsTitle}`}>Processing Variations</h2>
 
-              <div
-                className="game-card"
-                style={{
-                  marginBottom: "var(--space-lg)",
-                  padding: "var(--space-md)",
-                  background: "var(--game-surface)",
-                }}
-              >
-                <h3 className="game-heading-3" style={{ marginBottom: "var(--space-sm)" }}>
+              <div className={`game-card ${styles.variationsInfoCard}`}>
+                <h3 className={`game-heading-3 ${styles.variationsInfoTitle}`}>
                   Colors Being Used:
                 </h3>
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "var(--space-sm)",
-                    alignItems: "center",
-                  }}
-                >
+                <div className={styles.colorsList}>
                   {getUsedColors(themeColors).map((colorInfo) => (
-                    <div
-                      key={colorInfo.name}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "var(--space-xs)",
-                        padding: "var(--space-xs) var(--space-sm)",
-                        background: "var(--admin-surface)",
-                        border: "var(--border-width-md) solid var(--game-border)",
-                        borderRadius: "var(--radius-sm)",
-                      }}
-                    >
+                    <div key={colorInfo.name} className={styles.colorItem}>
                       <div
-                        style={{
-                          width: "1.5rem",
-                          height: "1.5rem",
-                          backgroundColor: colorInfo.color,
-                          border: "var(--border-width-sm) solid var(--game-border)",
-                          borderRadius: "var(--radius-xs)",
-                        }}
+                        className={styles.colorItemSwatch}
+                        style={{ backgroundColor: colorInfo.color }}
                       />
-                      <span className="game-text-muted" style={{ fontSize: "var(--font-size-xs)" }}>
+                      <span className={`game-text-muted ${styles.colorItemLabel}`}>
                         {colorInfo.name} (L:{colorInfo.luminance.toFixed(2)})
                       </span>
                     </div>
@@ -1541,53 +1177,22 @@ export default function ImageTuningPage() {
               </div>
 
               <div
+                className={styles.variationsGrid}
                 style={{
-                  display: "grid",
                   gridTemplateColumns: `repeat(${processingVariations.length}, 1fr)`,
-                  gap: "var(--space-md)",
-                  overflowX: "auto",
-                  paddingBottom: "var(--space-md)",
                 }}
               >
                 {processingVariations.map((variation) => (
-                  <div key={variation.id} style={{ minWidth: "200px" }}>
-                    <div
-                      style={{
-                        padding: "var(--space-sm)",
-                        background: "var(--game-surface)",
-                        border: "var(--border-width-md) solid var(--game-border)",
-                        borderRadius: "var(--radius-sm)",
-                        marginBottom: "var(--space-sm)",
-                      }}
-                    >
-                      <div
-                        className="game-heading-3"
-                        style={{
-                          fontSize: "var(--font-size-xs)",
-                          marginBottom: "var(--space-xs)",
-                          textAlign: "center",
-                        }}
-                      >
+                  <div key={variation.id} className={styles.variationColumn}>
+                    <div className={styles.variationHeader}>
+                      <div className={`game-heading-3 ${styles.variationLabel}`}>
                         {variation.label}
                       </div>
-                      <div
-                        className="game-text-muted"
-                        style={{
-                          fontSize: "var(--font-size-xs)",
-                          textAlign: "center",
-                          marginBottom: "var(--space-xs)",
-                        }}
-                      >
+                      <div className={`game-text-muted ${styles.variationDescription}`}>
                         {variation.description}
                       </div>
                     </div>
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr",
-                        gap: "var(--space-sm)",
-                      }}
-                    >
+                    <div className={styles.variationImages}>
                       {recentImages.map((image) => {
                         const key = `${image.id}-${variation.id}`;
                         const canvas = variationCanvases.get(key);
@@ -1596,16 +1201,7 @@ export default function ImageTuningPage() {
                         return (
                           <div
                             key={key}
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              padding: "var(--space-xs)",
-                              background: "var(--admin-surface)",
-                              border: "var(--border-width-sm) solid var(--game-border)",
-                              borderRadius: "var(--radius-sm)",
-                              cursor: "pointer",
-                            }}
+                            className={styles.variationImageContainer}
                             onClick={() => {
                               const newWindow = window.open();
                               if (newWindow) {
@@ -1619,12 +1215,7 @@ export default function ImageTuningPage() {
                             <img
                               src={canvas.toDataURL()}
                               alt={`${variation.label} - Image ${image.id.substring(0, 8)}`}
-                              style={{
-                                maxWidth: "100%",
-                                height: "auto",
-                                imageRendering: "pixelated",
-                                border: "var(--border-width-sm) solid var(--game-border)",
-                              }}
+                              className={styles.variationImage}
                             />
                           </div>
                         );

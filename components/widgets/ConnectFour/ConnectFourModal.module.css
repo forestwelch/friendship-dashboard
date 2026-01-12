@@ -254,6 +254,7 @@
   font-size: var(--font-size-md);
   font-weight: bold;
   cursor: pointer;
+  min-height: 44px;
 
   display: flex;
   align-items: center;

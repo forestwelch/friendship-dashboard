@@ -1,0 +1,101 @@
+.pageContainer {
+  padding-top: calc(var(--height-button) + var(--space-md));
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  overflow-x: hidden;
+}
+
+.container {
+  padding-top: var(--space-2xl);
+  padding-bottom: var(--space-2xl);
+}
+
+.breadcrumb {
+  margin-bottom: var(--space-xl);
+}
+
+.breadcrumbLink {
+  margin-left: auto;
+}
+
+.heading {
+  margin-bottom: var(--space-xl);
+}
+
+.uploadCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  max-width: 37.5rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.fileInput {
+  display: none;
+}
+
+.chooseButton {
+  width: 100%;
+}
+
+.sizeButton {
+  flex: 1;
+}
+
+.previewCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+.previewTitle {
+  margin: 0;
+}
+
+.previewImage {
+  max-width: 100%;
+  image-rendering: pixelated;
+  border: var(--border-width-lg) solid var(--admin-accent);
+  border-radius: var(--radius-sm);
+}
+
+.saveButton {
+  width: 100%;
+}
+
+.saveIcon {
+  margin-right: var(--space-xs);
+}
+
+.paletteCard {
+  margin-top: var(--space-lg);
+}
+
+.paletteTitle {
+  margin-bottom: var(--space-md);
+}
+
+.paletteContainer {
+  flex-wrap: wrap;
+}
+
+.paletteItem {
+  align-items: center;
+}
+
+.colorSwatch {
+  width: 2rem;
+  height: 2rem;
+  border: var(--border-width-md) solid var(--admin-accent);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--game-shadow-sm);
+}
+
+.paletteLabel {
+  text-transform: capitalize;
+}

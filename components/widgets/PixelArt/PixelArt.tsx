@@ -10,6 +10,7 @@ import {
   mapIntensityToThemeColor,
 } from "@/lib/pixel-data-processing";
 import { GRID_TILE_SIZE_REM, GRID_GAP_REM } from "@/lib/constants";
+import styles from "./PixelArt.module.css";
 
 export type TransitionType = "scanline" | "dissolve" | "boot-up";
 
@@ -216,28 +217,13 @@ export function PixelArt({
   if (useProgrammaticRendering && currentPixelData && themeColors) {
     return (
       <Widget size={size}>
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            position: "relative",
-            overflow: "hidden",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <div className={styles.container}>
           {/* Optimized canvas rendering - instant changes, no transitions */}
           <canvas
             ref={canvasRef}
             width={canvasSize}
             height={canvasSize}
-            style={{
-              width: "100%",
-              height: "100%",
-              imageRendering: "pixelated",
-              objectFit: "contain",
-            }}
+            className={styles.canvas}
           />
         </div>
       </Widget>
@@ -247,14 +233,7 @@ export function PixelArt({
   // Fallback to image-based rendering (backward compatibility) - simplified, no DOM tiles
   return (
     <Widget size={size}>
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
+      <div className={styles.imageContainer}>
         {/* Simple image rendering - instant changes, no transitions */}
         {currentImage && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -267,12 +246,7 @@ export function PixelArt({
               console.error("Failed to load image");
               setImageLoaded(false);
             }}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              imageRendering: "pixelated",
-            }}
+            className={styles.image}
           />
         )}
       </div>
