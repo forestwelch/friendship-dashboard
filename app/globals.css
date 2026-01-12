@@ -1,12 +1,11 @@
-@import "@hackernoon/pixel-icon-library/fonts/iconfont.css";
-@import "../styles/widgets.css";
-@import "../styles/admin-components.css";
-/* Import design system first */
+/* All @import rules must be at the top */
 @import "../styles/design-system.css";
 @import "../styles/responsive.css";
-/* Import admin styles (will use design system variables) */
 @import "../styles/admin.css";
 @import "../styles/friend-page.css";
+@import "../styles/widgets.css";
+@import "../styles/admin-components.css";
+@import "@hackernoon/pixel-icon-library/fonts/iconfont.css";
 
 /* Dogica Pixel Font - Pixel art version for retro aesthetic */
 @font-face {
@@ -53,13 +52,6 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 body {
