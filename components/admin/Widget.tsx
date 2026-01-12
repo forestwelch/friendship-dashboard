@@ -4,6 +4,7 @@ import React from "react";
 import { FriendWidget } from "@/lib/queries";
 import { GridItem } from "@/components/Grid";
 import { WidgetRenderer } from "@/components/WidgetRenderer";
+import styles from "./Widget.module.css";
 
 interface EditableWidgetProps {
   widget: FriendWidget;
@@ -28,16 +29,14 @@ export function EditableWidget({
     <GridItem
       position={{ x: widget.position_x, y: widget.position_y }}
       size={widget.size}
-      style={{
-        zIndex: 10,
-      }}
+      style={
+        {
+          "--widget-z-index": 10,
+        } as React.CSSProperties
+      }
     >
       <div
-        style={{
-          position: "relative",
-          width: "100%",
-          height: "100%",
-        }}
+        className={styles.editableWidgetContainer}
         onMouseEnter={(e) => {
           e.stopPropagation();
           onEdit();
@@ -47,13 +46,7 @@ export function EditableWidget({
           // Don't clear editingWidget on mouse leave - let it persist
         }}
       >
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            pointerEvents: "auto",
-          }}
-        >
+        <div className={styles.editableWidgetContent}>
           <WidgetRenderer widget={widget} />
         </div>
         {editingWidget === widget.id && (

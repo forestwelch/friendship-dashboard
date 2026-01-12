@@ -2,6 +2,8 @@
 
 import React from "react";
 import { useTheme } from "@/lib/theme-context";
+import styles from "./ViewEditToggle.module.css";
+import clsx from "clsx";
 
 interface ViewEditToggleProps {
   isEditMode: boolean;
@@ -12,58 +14,24 @@ export function ViewEditToggle({ isEditMode, onToggle }: ViewEditToggleProps) {
   const _theme = useTheme();
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "var(--space-xs)",
-        background: "transparent",
-        border: "var(--border-width-md) solid var(--accent)",
-        borderRadius: "var(--radius-sm)",
-        padding: "2px",
-      }}
-    >
+    <div className={styles.toggleContainer}>
       <button
         onClick={() => onToggle(false)}
-        style={{
-          padding: "var(--space-xs) var(--space-sm)",
-          fontSize: "var(--font-size-sm)",
-          fontWeight: "bold",
-          background: !isEditMode ? "var(--primary)" : "transparent",
-          color: !isEditMode ? "var(--bg)" : "var(--text)",
-          border: "none",
-          borderRadius: "var(--radius-sm)",
-          cursor: "pointer",
-          /* Transition removed for performance */
-          textTransform: "uppercase",
-          height: "var(--height-button)",
-          minHeight: "var(--height-button)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+        className={clsx(
+          styles.toggleButton,
+          styles.toggleButtonView,
+          !isEditMode && styles.toggleButtonViewActive
+        )}
       >
         VIEW
       </button>
       <button
         onClick={() => onToggle(true)}
-        style={{
-          padding: "var(--space-xs) var(--space-sm)",
-          fontSize: "var(--font-size-sm)",
-          fontWeight: "bold",
-          background: isEditMode ? "var(--secondary)" : "transparent",
-          color: isEditMode ? "var(--text)" : "var(--text)",
-          border: "none",
-          borderRadius: "var(--radius-sm)",
-          cursor: "pointer",
-          /* Transition removed for performance */
-          textTransform: "uppercase",
-          height: "var(--height-button)",
-          minHeight: "var(--height-button)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+        className={clsx(
+          styles.toggleButton,
+          styles.toggleButtonEdit,
+          isEditMode && styles.toggleButtonEditActive
+        )}
       >
         EDIT
       </button>

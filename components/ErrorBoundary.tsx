@@ -2,6 +2,7 @@
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { playSound } from "@/lib/sounds";
+import styles from "./ErrorBoundary.module.css";
 
 interface Props {
   children: ReactNode;
@@ -36,48 +37,18 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div
-          style={{
-            padding: "var(--space-lg)",
-            border: "2px solid var(--accent)",
-            borderRadius: "var(--radius-md)",
-            background: "var(--bg)",
-            color: "var(--text)",
-            margin: "var(--space-md)",
-          }}
-        >
-          <h2 style={{ marginTop: 0, color: "var(--accent)" }}>Something went wrong</h2>
-          <details style={{ marginTop: "var(--space-md)" }}>
-            <summary style={{ cursor: "pointer", marginBottom: "var(--space-sm)" }}>
-              Error details
-            </summary>
-            <pre
-              style={{
-                background: "var(--secondary)",
-                padding: "var(--space-sm)",
-                borderRadius: "var(--radius-sm)",
-                overflow: "auto",
-                fontSize: "var(--font-size-xs)",
-              }}
-            >
-              {this.state.error?.message}
-            </pre>
+        <div className={styles.errorContainer}>
+          <h2 className={styles.errorTitle}>Something went wrong</h2>
+          <details className={styles.errorDetails}>
+            <summary className={styles.errorSummary}>Error details</summary>
+            <pre className={styles.errorPre}>{this.state.error?.message}</pre>
           </details>
           <button
             onClick={() => {
               this.setState({ hasError: false, error: null });
               window.location.reload();
             }}
-            style={{
-              marginTop: "var(--space-md)",
-              padding: "var(--space-sm) var(--space-md)",
-              background: "var(--primary)",
-              border: "2px solid var(--accent)",
-              borderRadius: "var(--radius-sm)",
-              color: "var(--text)",
-              cursor: "pointer",
-              minHeight: "44px",
-            }}
+            className={styles.errorButton}
           >
             Reload Page
           </button>

@@ -94,7 +94,7 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
             }}
           >
             <div className={clsx("game-flex", "game-flex-gap-sm", styles.header)}>
-              <i className={`hn ${widget.icon}`} style={{ fontSize: "1.5rem" }} />
+              <i className={`hn ${widget.icon} ${styles.icon}`} />
               <div className={clsx("game-heading-3", styles.name)}>{widget.name}</div>
             </div>
             <div className={clsx("game-text-muted", styles.description)}>{widget.description}</div>

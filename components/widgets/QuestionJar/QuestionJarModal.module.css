@@ -1,0 +1,20 @@
+.formFullWidth {
+  width: 100%;
+}
+
+.formFieldFullWidth {
+  width: 100%;
+}
+
+.formTitleCentered {
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+
+.entryTitle {
+  color: var(--entry-color, var(--text));
+}
+
+.entryContent {
+  color: var(--entry-color, var(--text));
+}

@@ -58,13 +58,7 @@ export function InboxManager() {
   };
 
   return (
-    <div
-      className="game-container"
-      style={{
-        paddingTop: "var(--space-2xl)",
-        paddingBottom: "var(--space-2xl)",
-      }}
-    >
+    <div className={`game-container ${styles.container}`}>
       <div className={clsx("game-breadcrumb", styles.breadcrumb)}>
         <Link href="/admin" className="game-link">
           Admin
@@ -104,53 +98,22 @@ export function InboxManager() {
         <div className={styles.itemsList}>
           {items.map((item) => (
             <div key={item.id} className={clsx("game-card", styles.itemCard)}>
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "bold",
-                    marginBottom: "8px",
-                  }}
-                >
-                  From: {item.friend_name}
-                </div>
-                <div
-                  style={{
-                    fontSize: "12px",
-                    opacity: 0.8,
-                    marginBottom: "8px",
-                    textTransform: "capitalize",
-                  }}
-                >
-                  Type: {item.type.replace("_", " ")}
-                </div>
+              <div className={styles.itemContent}>
+                <div className={styles.fromText}>From: {item.friend_name}</div>
+                <div className={styles.typeText}>Type: {item.type.replace("_", " ")}</div>
                 {item.type === "recommendation" && (
                   <div>
-                    <div style={{ fontSize: "14px", fontWeight: "bold" }}>
-                      {String(item.data.title || "")}
-                    </div>
-                    <div style={{ fontSize: "12px", opacity: 0.8 }}>
-                      {String(item.data.type || "")}
-                    </div>
+                    <div className={styles.titleText}>{String(item.data.title || "")}</div>
+                    <div className={styles.subtitleText}>{String(item.data.type || "")}</div>
                     {item.data.description != null && (
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          marginTop: "4px",
-                          opacity: 0.7,
-                        }}
-                      >
-                        {String(item.data.description)}
-                      </div>
+                      <div className={styles.descriptionText}>{String(item.data.description)}</div>
                     )}
                   </div>
                 )}
                 {item.type === "hangout_proposal" && (
                   <div>
-                    <div className="game-heading-3" style={{ marginBottom: "var(--space-xs)" }}>
-                      Proposed Hangout
-                    </div>
-                    <div className="game-text-muted" style={{ marginBottom: "var(--space-xs)" }}>
+                    <div className={`game-heading-3 ${styles.hangoutTitle}`}>Proposed Hangout</div>
+                    <div className={`game-text-muted ${styles.hangoutDate}`}>
                       {item.data.date != null && (
                         <>
                           {formatDateCompact(String(item.data.date))}{" "}
@@ -159,61 +122,47 @@ export function InboxManager() {
                       )}
                     </div>
                     {item.data.message != null && (
-                      <div className="game-text-muted" style={{ marginTop: "var(--space-xs)" }}>
+                      <div className={`game-text-muted ${styles.hangoutMessage}`}>
                         {String(item.data.message)}
                       </div>
                     )}
                   </div>
                 )}
-                <div
-                  className="game-text-muted"
-                  style={{ fontSize: "10px", marginTop: "var(--space-sm)" }}
-                >
+                <div className={`game-text-muted ${styles.dateText}`}>
                   {formatDateCompact(item.created_at)}
                 </div>
               </div>
               {item.status === "pending" && (
                 <div className="game-flex game-flex-gap-sm">
                   <button
-                    className="game-button game-button-success"
+                    className={`game-button game-button-success ${styles.actionButton}`}
                     onClick={() => handleApprove(item.id)}
-                    style={{ fontSize: "11px" }}
                   >
-                    <i className="hn hn-check-solid" style={{ marginRight: "var(--space-xs)" }} />{" "}
-                    Approve
+                    <i className={`hn hn-check-solid ${styles.actionIcon}`} /> Approve
                   </button>
                   <button
-                    className="game-button game-button-danger"
+                    className={`game-button game-button-danger ${styles.actionButton}`}
                     onClick={() => handleReject(item.id)}
-                    style={{ fontSize: "11px" }}
                   >
-                    <i className="hn hn-times-solid" style={{ marginRight: "var(--space-xs)" }} />{" "}
-                    Reject
+                    <i className={`hn hn-times-solid ${styles.actionIcon}`} /> Reject
                   </button>
                 </div>
               )}
               {item.status !== "pending" && (
                 <div
-                  className="game-button"
-                  style={{
-                    fontSize: "11px",
-                    background:
-                      item.status === "approved"
-                        ? "var(--game-accent-green)"
-                        : "var(--game-surface)",
-                    color: item.status === "approved" ? "var(--bg)" : "var(--text)",
-                    cursor: "default",
-                  }}
+                  className={`${styles.statusBadge} ${
+                    item.status === "approved"
+                      ? styles.statusBadgeApproved
+                      : styles.statusBadgeRejected
+                  }`}
                 >
                   {item.status === "approved" ? (
                     <>
-                      <i className="hn hn-check-solid" style={{ marginRight: "var(--space-xs)" }} />{" "}
-                      Approved
+                      <i className={`hn hn-check-solid ${styles.actionIcon}`} /> Approved
                     </>
                   ) : (
                     <>
-                      <i className="hn hn-times-solid" style={{ marginRight: "var(--space-xs)" }} />{" "}
-                      Rejected
+                      <i className={`hn hn-times-solid ${styles.actionIcon}`} /> Rejected
                     </>
                   )}
                 </div>

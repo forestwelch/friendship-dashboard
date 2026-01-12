@@ -1,18 +1,7 @@
 .card {
-  padding: var(--space-md);
-  border: 2px solid var(--secondary);
-  border-radius: var(--radius-sm);
-  background-color: var(--bg);
+  /* Base card styles */
 }
 
-.card-primary {
-  border-color: var(--primary);
-}
-
-.card-accent {
-  border-color: var(--accent);
-}
-
-.card-secondary {
-  border-color: var(--secondary);
+.cardBorderColor {
+  border-color: var(--card-border-color, var(--accent));
 }

@@ -1,0 +1,9 @@
+.pageContainer {
+  padding-top: calc(var(--height-button) + var(--space-md));
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  overflow-x: hidden;
+}

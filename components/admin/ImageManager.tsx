@@ -313,18 +313,12 @@ export function ImageManager({
   };
 
   return (
-    <div style={{ width: "100%" }}>
+    <div className={styles.container}>
       {/* Album Creation Section */}
-      <div
-        style={{
-          display: "flex",
-          gap: "var(--space-sm)",
-          marginBottom: "var(--space-md)",
-          alignItems: "center",
-        }}
-      >
+      <div className={styles.albumSection}>
         <input
           type="text"
+          className={styles.albumInput}
           value={newAlbumName}
           onChange={(e) => setNewAlbumName(e.target.value)}
           onKeyDown={(e) => {
@@ -333,21 +327,13 @@ export function ImageManager({
             }
           }}
           placeholder="New album name..."
-          style={{
-            flex: 1,
-            padding: "var(--space-sm)",
-            fontSize: "var(--font-size-sm)",
-            border: "var(--border-width-md) solid var(--game-border)",
-            borderRadius: "var(--radius-sm)",
-            background: "var(--game-surface)",
-            color: "var(--text)",
-          }}
         />
         <button
-          className="game-button"
+          className={`game-button ${styles.createButton} ${
+            !newAlbumName.trim() || creatingAlbum ? styles.createButtonDisabled : ""
+          }`}
           onClick={handleCreateAlbum}
           disabled={!newAlbumName.trim() || creatingAlbum}
-          style={{ opacity: !newAlbumName.trim() || creatingAlbum ? 0.5 : 1 }}
         >
           {creatingAlbum ? "Creating..." : "Create Album"}
         </button>
@@ -355,42 +341,31 @@ export function ImageManager({
 
       {/* Pagination Controls */}
       {images.length > imagesPerPage && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "var(--space-md)",
-            padding: "var(--space-sm)",
-          }}
-        >
+        <div className={styles.pagination}>
           <button
-            className="game-button"
+            className={`game-button ${styles.paginationButton} ${
+              currentPage === 1 ? styles.paginationButtonDisabled : ""
+            }`}
             onClick={() => {
               setCurrentPage((prev) => Math.max(1, prev - 1));
               playSound("select");
             }}
             disabled={currentPage === 1}
-            style={{ opacity: currentPage === 1 ? 0.5 : 1 }}
           >
             Previous
           </button>
-          <span
-            style={{
-              fontSize: "var(--font-size-sm)",
-              color: "var(--text)",
-            }}
-          >
+          <span className={styles.paginationText}>
             Page {currentPage} of {totalPages} ({images.length} total)
           </span>
           <button
-            className="game-button"
+            className={`game-button ${styles.paginationButton} ${
+              currentPage === totalPages ? styles.paginationButtonDisabled : ""
+            }`}
             onClick={() => {
               setCurrentPage((prev) => Math.min(totalPages, prev + 1));
               playSound("select");
             }}
             disabled={currentPage === totalPages}
-            style={{ opacity: currentPage === totalPages ? 0.5 : 1 }}
           >
             Next
           </button>
@@ -422,14 +397,7 @@ export function ImageManager({
                 />
               );
             } else {
-              imagePreview = (
-                <div
-                  className={styles.imagePreviewError}
-                  style={{ fontSize: "var(--font-size-xs)" }}
-                >
-                  Loading...
-                </div>
-              );
+              imagePreview = <div className={styles.imagePreviewError}>Loading...</div>;
             }
           } else {
             imagePreview = <div className={styles.imagePreviewError}>No preview</div>;
@@ -441,8 +409,11 @@ export function ImageManager({
             <div
               key={img.id}
               onClick={() => toggleSelection(img.id)}
-              className={clsx(styles.imageItem, isSelected && styles.selected)}
-              style={{ position: "relative" }}
+              className={clsx(
+                styles.imageItem,
+                isSelected && styles.selected,
+                styles.imageItemRelative
+              )}
             >
               <div className={clsx(styles.imagePreviewInner, isSelected && styles.selected)}>
                 {imagePreview}
@@ -453,23 +424,7 @@ export function ImageManager({
                 </div>
               )}
               {album && (
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "0.25rem",
-                    left: "0.25rem",
-                    background: "var(--game-overlay-bg-50)",
-                    color: "var(--text)",
-                    padding: "0.125rem 0.375rem",
-                    borderRadius: "var(--radius-xs)",
-                    fontSize: "var(--font-size-xs)",
-                    maxWidth: "calc(100% - 0.5rem)",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                  title={album.name}
-                >
+                <div className={styles.albumBadge} title={album.name}>
                   {album.name}
                 </div>
               )}

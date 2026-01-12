@@ -1,0 +1,37 @@
+.pageContainer {
+  padding-top: calc(var(--height-button) + var(--space-md));
+  min-height: 100vh;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  overflow-x: hidden;
+}
+
+.contentContainer {
+  padding-top: var(--space-3xl);
+  padding-bottom: var(--space-3xl);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3xl);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-3xl);
+}
+
+.deleteAllButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.friendsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
+  gap: var(--space-xl);
+  margin-bottom: var(--space-3xl);
+}

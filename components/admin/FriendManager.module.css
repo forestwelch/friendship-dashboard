@@ -1,79 +1,223 @@
-/* Example CSS Module - you can use these instead of inline styles */
-
-.container {
+.pageContainer {
   padding-top: calc(var(--height-button) + var(--space-md));
   width: 100%;
   max-width: 100%;
   min-height: 100vh;
+  background: var(--admin-bg);
+  color: var(--admin-text);
   overflow-x: hidden;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
 }
 
-.content {
-  padding: var(--space-md);
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+.contentContainer {
+  padding-top: var(--space-3xl);
+  padding-bottom: var(--space-3xl);
 }
 
-.breadcrumb {
-  margin-bottom: var(--space-md);
-  flex-shrink: 0;
+.title {
+  margin-bottom: var(--space-3xl);
+  font-size: var(--font-size-3xl);
 }
 
-.heading {
-  margin-bottom: var(--space-md);
-  flex-shrink: 0;
+.friendsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
+  gap: var(--space-xl);
+  margin-bottom: var(--space-3xl);
 }
 
-.addButton {
-  margin-bottom: var(--space-md);
-  flex-shrink: 0;
-}
-
-.form {
-  margin-bottom: var(--space-md);
+.addFormContainer {
+  margin-bottom: var(--space-3xl);
   padding: var(--space-lg);
-  flex-shrink: 0;
+  border: var(--border-width-md) solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
 }
 
-.formFields {
+.addFormTitle {
+  margin-bottom: var(--space-md);
+}
+
+.formRow {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.formField {
+  flex: 1;
+}
+
+.colorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+.colorLabel {
+  margin: 0;
+}
+
+.randomizeButton {
+  font-size: var(--font-size-xs);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.randomizeIcon {
+  margin-right: var(--space-xs);
+}
+
+.colorList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.colorRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.colorSwatch {
+  width: 3rem;
+  height: 1.5rem;
+  background: var(--color-swatch-bg, var(--primary));
+  border: var(--border-width-md) solid var(--game-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.colorLabelText {
+  font-size: var(--font-size-xs);
+  color: var(--text);
+  width: 5rem;
+}
+
+.hexInput {
+  width: 5.5rem;
+  padding: var(--space-xs);
+  font-size: var(--font-size-xs);
+  font-family: monospace;
+  background: var(--bg);
+  border: var(--border-width-md) solid var(--game-border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+}
+
+.buttonRow {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: flex-end;
+  margin-top: var(--space-md);
+}
+
+.loadingMessage {
+  padding: 2rem;
+  text-align: center;
+  color: var(--admin-text);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3xl);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-3xl);
+}
+
+.deleteAllButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.addFormCard {
+  margin-bottom: var(--space-xl);
+  padding: var(--space-lg);
+}
+
+.addFormTitle {
+  margin-bottom: var(--space-md);
+}
+
+.formContainer {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
 }
 
-.grid {
-  flex: 1;
-  overflow-y: auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
-  gap: var(--space-xl);
+.nameLabel {
+  margin-bottom: var(--space-xs);
+  display: block;
 }
 
-.friendCard {
-  text-decoration: none;
-  padding: var(--space-xl);
-  text-align: center;
+.colorHeader {
+  margin-bottom: var(--space-sm);
+}
+
+.colorLabel {
+  margin: 0;
+}
+
+.randomizeButton {
+  font-size: var(--font-size-xs);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.randomizeIcon {
+  margin-right: var(--space-xs);
+}
+
+.colorList {
   display: flex;
   flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.colorRow {
+  display: flex;
   align-items: center;
-  gap: var(--space-lg);
-  border-width: var(--border-width-lg);
+  gap: var(--space-md);
 }
 
-.friendAvatar {
-  width: 4rem;
-  height: 4rem;
+.colorSwatch {
+  width: 3rem;
+  height: 1.5rem;
+  background: var(--color-swatch-bg, var(--primary));
+  border: var(--border-width-md) solid var(--game-border);
   border-radius: var(--radius-sm);
-  border-width: var(--border-width-lg);
-  box-shadow: var(--game-shadow-md);
+  cursor: pointer;
 }
 
-.friendName {
-  margin: 0;
-  font-size: var(--font-size-xl);
+.colorInfo {
+  flex: 1;
+}
+
+.colorInfoText {
+  font-size: var(--font-size-xs);
+  color: var(--text);
+}
+
+.buttonRow {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: flex-end;
+}
+
+.loadingGridItem {
+  grid-column: 1 / -1;
+  padding: var(--space-xl);
+  text-align: center;
+}
+
+.emptyGridItem {
+  grid-column: 1 / -1;
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--text);
 }

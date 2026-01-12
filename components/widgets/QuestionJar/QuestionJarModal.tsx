@@ -8,6 +8,7 @@ import { useIdentity } from "@/lib/identity-utils";
 import { FormField, Textarea } from "@/components/shared";
 import { formatDateCompact } from "@/lib/date-utils";
 import { getUserColorVar } from "@/lib/color-utils";
+import styles from "./QuestionJarModal.module.css";
 
 interface QuestionJarModalProps {
   friendId: string;
@@ -71,14 +72,11 @@ export function QuestionJarModal({ friendId, friendName }: QuestionJarModalProps
       <div className="modal-content">
         {/* Answer Section */}
         {unansweredQuestion && unansweredQuestion.asked_by !== identity && (
-          <div style={{ width: "100%" }}>
-            <div
-              className="form-title-small"
-              style={{ marginBottom: "var(--space-md)", textAlign: "center" }}
-            >
+          <div className={styles.formFullWidth}>
+            <div className={`form-title-small ${styles.formTitleCentered}`}>
               {unansweredQuestion.question_text}
             </div>
-            <form onSubmit={handleAnswerSubmit} className="form" style={{ width: "100%" }}>
+            <form onSubmit={handleAnswerSubmit} className={`form ${styles.formFullWidth}`}>
               <FormField label="" required={false}>
                 <Textarea
                   value={answerText}
@@ -86,7 +84,7 @@ export function QuestionJarModal({ friendId, friendName }: QuestionJarModalProps
                   placeholder="Your answer..."
                   rows={4}
                   required
-                  style={{ width: "100%" }}
+                  className={styles.formFieldFullWidth}
                 />
               </FormField>
               <button
@@ -103,9 +101,9 @@ export function QuestionJarModal({ friendId, friendName }: QuestionJarModalProps
         {/* Ask Next Question Section */}
         {(!unansweredQuestion ||
           (unansweredQuestion.asked_by === identity && unansweredQuestion.answer_text)) && (
-          <div style={{ width: "100%" }}>
+          <div className={styles.formFullWidth}>
             <div className="form-title">Ask Next Question:</div>
-            <form onSubmit={handleQuestionSubmit} className="form" style={{ width: "100%" }}>
+            <form onSubmit={handleQuestionSubmit} className={`form ${styles.formFullWidth}`}>
               <FormField label="Your question" required>
                 <Textarea
                   value={nextQuestionText}
@@ -113,7 +111,7 @@ export function QuestionJarModal({ friendId, friendName }: QuestionJarModalProps
                   placeholder="Your question..."
                   rows={4}
                   required
-                  style={{ width: "100%" }}
+                  className={styles.formFieldFullWidth}
                 />
               </FormField>
               <button

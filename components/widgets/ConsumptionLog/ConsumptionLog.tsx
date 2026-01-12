@@ -7,6 +7,7 @@ import { useUIStore } from "@/lib/store/ui-store";
 import { ConsumptionLogModal } from "./ConsumptionLogModal";
 import { useConsumptionEntries } from "./queries";
 import { useIdentity } from "@/lib/identity-utils";
+import styles from "./ConsumptionLog.module.css";
 
 interface ConsumptionLogProps {
   size: WidgetSize;
@@ -53,34 +54,11 @@ export function ConsumptionLog({ size, friendId, friendName }: ConsumptionLogPro
       <Widget size={size}>
         <div
           onClick={handleClick}
-          className="widget-clickable"
-          style={
-            unreadCount > 0 && badgeText
-              ? {
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  textAlign: "center",
-                  padding: "var(--space-sm)",
-                }
-              : undefined
-          }
+          className={`widget-clickable ${
+            unreadCount > 0 && badgeText ? styles.widgetClickableBadge : ""
+          }`}
         >
-          {unreadCount > 0 && badgeText && (
-            <div
-              style={{
-                wordBreak: "break-word",
-                textAlign: "center",
-                fontSize: "var(--font-size-xs)",
-                lineHeight: 1.4,
-                color: "var(--text)",
-                fontWeight: "bold",
-              }}
-            >
-              {badgeText}
-            </div>
-          )}
+          {unreadCount > 0 && badgeText && <div className={styles.badgeText}>{badgeText}</div>}
           {unreadCount === 0 && (
             <>
               <div className="widget-title">{displayTitle}</div>

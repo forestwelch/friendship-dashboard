@@ -149,30 +149,27 @@ export function ColorSettings({
           <div
             ref={panelRef}
             className={styles.panel}
-            style={{
-              background: themeColors.bg,
-              borderColor: themeColors.accent,
-              cursor: isDragging ? "grabbing" : "default",
-              ...(position && {
-                left: `${position.x}px`,
-                top: `${position.y}px`,
-                bottom: "auto",
-                right: "auto",
-                transform: "none",
-              }),
-            }}
+            style={
+              {
+                "--panel-bg": themeColors.bg,
+                "--panel-border-color": themeColors.accent,
+                "--panel-text-color": themeColors.text,
+                "--panel-cursor": isDragging ? "grabbing" : "default",
+                background: themeColors.bg,
+                borderColor: themeColors.accent,
+                cursor: isDragging ? "grabbing" : "default",
+                ...(position && {
+                  left: `${position.x}px`,
+                  top: `${position.y}px`,
+                  bottom: "auto",
+                  right: "auto",
+                  transform: "none",
+                }),
+              } as React.CSSProperties
+            }
           >
-            <div
-              className={styles.panelHeader}
-              onMouseDown={handleMouseDown}
-              style={{
-                cursor: "grab",
-              }}
-            >
-              <h3
-                className={clsx("game-heading-2", styles.panelTitle)}
-                style={{ color: themeColors.text }}
-              >
+            <div className={styles.panelHeader} onMouseDown={handleMouseDown}>
+              <h3 className={clsx("game-heading-2", styles.panelTitle)}>
                 {activeColorKey ? `EDIT ${activeColorKey.toUpperCase()}` : "COLOR SETTINGS"}
               </h3>
               <button
@@ -185,7 +182,6 @@ export function ColorSettings({
                 }}
                 onMouseDown={(e) => e.stopPropagation()}
                 className={styles.closeButton}
-                style={{ color: themeColors.text }}
               >
                 <i className="hn hn-times-solid" />
               </button>
@@ -217,11 +213,10 @@ export function ColorSettings({
 
                     return (
                       <div key={key} className={styles.colorItem}>
-                        <div className={styles.colorLabel} style={{ color: themeColors.text }}>
-                          {label.toUpperCase()}
-                        </div>
+                        <div className={styles.colorLabel}>{label.toUpperCase()}</div>
                         <input
                           type="text"
+                          className={styles.colorInput}
                           value={displayHex}
                           onChange={(e) => {
                             const value = e.target.value;
@@ -254,25 +249,15 @@ export function ColorSettings({
                               });
                             }
                           }}
-                          style={{
-                            width: "6rem",
-                            height: "32px",
-                            padding: "var(--space-xs)",
-                            fontSize: "var(--font-size-sm)",
-                            fontFamily: "monospace",
-                            background: themeColors.bg,
-                            border: "var(--border-width-md) solid " + themeColors.accent,
-                            borderRadius: "var(--radius-sm)",
-                            color: themeColors.text,
-                            boxSizing: "border-box",
-                          }}
                           placeholder="#000000"
                         />
                         <div
                           className={styles.colorSwatch}
-                          style={{
-                            background: currentHsl,
-                          }}
+                          style={
+                            {
+                              "--color-swatch-bg": currentHsl,
+                            } as React.CSSProperties
+                          }
                           onClick={() => {
                             // Store the original color when entering the picker
                             setOriginalColorForPicker(
@@ -294,11 +279,13 @@ export function ColorSettings({
                       playSound("select");
                     }}
                     className={styles.randomizeAllButton}
-                    style={{
-                      background: themeColors.primary,
-                      color: themeColors.bg,
-                      borderColor: themeColors.accent,
-                    }}
+                    style={
+                      {
+                        "--randomize-bg": themeColors.primary,
+                        "--randomize-color": themeColors.bg,
+                        "--randomize-border": themeColors.accent,
+                      } as React.CSSProperties
+                    }
                   >
                     <i className={clsx("hn", "hn-shuffle-solid", styles.randomizeAllIcon)} />
                     RANDOMIZE ALL

@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { playSound } from "@/lib/sounds";
+import styles from "./ColorPicker.module.css";
 
 interface ColorPickerProps {
   currentColor: string;
@@ -99,35 +100,13 @@ export function ColorPicker({ currentColor, onColorChange, onColorConfirm }: Col
   }, [hoverColor, onColorConfirm]);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--space-sm)",
-        alignItems: "center",
-      }}
-    >
-      <div
-        style={{
-          position: "relative",
-          border: "var(--border-width-md) solid var(--game-border)",
-          borderRadius: "var(--radius-sm)",
-          boxShadow: "var(--game-shadow-sm)",
-          overflow: "hidden",
-          cursor: "crosshair",
-          background: "var(--bg)",
-          display: "flex",
-        }}
-      >
+    <div className={styles.container}>
+      <div className={styles.canvasWrapper}>
         <canvas
           ref={canvasRef}
           width={GRID_SIZE}
           height={GRID_SIZE}
-          style={{
-            width: "256px", // Display size (4x scale of 64px)
-            height: "256px",
-            imageRendering: "pixelated",
-          }}
+          className={styles.canvas}
           onMouseMove={handleMouseMove}
           onMouseLeave={() => {
             setIsHovering(false);
@@ -140,55 +119,23 @@ export function ColorPicker({ currentColor, onColorChange, onColorConfirm }: Col
         />
 
         {/* Crosshair indicator */}
-        {isHovering && (
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-              background: "transparent",
-            }}
-          >
-            {/* We can't easily draw a crosshair over the exact pixel without calculating coordinates again. 
-                But the cursor: crosshair handles most of it. 
-                Maybe just a border highlight? */}
-          </div>
-        )}
+        {isHovering && <div className={styles.crosshairOverlay} />}
       </div>
 
       {/* Preview values */}
-      <div
-        style={{
-          display: "flex",
-          gap: "var(--space-xs)",
-          fontSize: "var(--font-size-xs)",
-          fontFamily: "monospace",
-          width: "100%",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+      <div className={styles.previewContainer}>
         <span>CURR</span>
         <div
-          style={{
-            width: "32px",
-            height: "32px",
-            background: originalColor,
-            border: "var(--border-width-md) solid var(--game-border)",
-            borderRadius: "var(--radius-sm)",
-          }}
+          className={styles.colorSwatch}
+          style={{ "--color-swatch-bg": originalColor } as React.CSSProperties}
         />
         <div
-          style={{
-            width: "32px",
-            height: "32px",
-            background: hoverColor || originalColor,
-            border: "var(--border-width-md) solid var(--game-border)",
-            borderRadius: "var(--radius-sm)",
-          }}
+          className={styles.colorSwatch}
+          style={
+            {
+              "--color-swatch-bg": hoverColor || originalColor,
+            } as React.CSSProperties
+          }
         />
         <span>NEW</span>
       </div>

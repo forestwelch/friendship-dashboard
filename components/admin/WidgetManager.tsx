@@ -13,6 +13,7 @@ import { useUndoRedo } from "./UndoRedo";
 import Link from "next/link";
 import { EditableWidget } from "./Widget";
 import { GRID_COLS, GRID_ROWS } from "@/lib/constants";
+import styles from "./WidgetManager.module.css";
 
 interface WidgetManagerProps {
   friend: Friend;
@@ -249,29 +250,9 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
   } as React.CSSProperties;
 
   return (
-    <div
-      className="admin-page"
-      style={{
-        width: "100%",
-        height: "100vh",
-        padding: "0",
-        background: "var(--admin-bg)",
-        color: "var(--admin-text)",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-      }}
-    >
+    <div className={`admin-page ${styles.pageContainer}`}>
       {/* Compact header bar */}
-      <div
-        className="game-flex game-flex-between"
-        style={{
-          padding: "var(--space-md) var(--space-lg)",
-          borderBottom: "2px solid var(--game-border)",
-          flexShrink: 0,
-          background: "var(--bg)",
-        }}
-      >
+      <div className={`game-flex game-flex-between ${styles.headerBar}`}>
         <div className="game-breadcrumb">
           <Link href="/admin" className="game-link">
             Admin
@@ -285,16 +266,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
       </div>
 
       {/* Compact button bar */}
-      <div
-        className="game-flex game-flex-gap-sm"
-        style={{
-          padding: "var(--space-md) var(--space-lg)",
-          flexWrap: "wrap",
-          flexShrink: 0,
-          borderBottom: "2px solid var(--game-border)",
-          background: "var(--bg)",
-        }}
-      >
+      <div className={`game-flex game-flex-gap-sm ${styles.buttonBar}`}>
         <button
           className="game-button game-button-primary"
           onClick={() => setShowAddMenu(!showAddMenu)}
@@ -328,7 +300,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
           ↷
         </button>
         <button
-          className="game-button game-button-success"
+          className={`game-button game-button-success ${styles.saveButton}`}
           onClick={async () => {
             try {
               playSound("click");
@@ -361,46 +333,27 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
               alert(`Failed to save layout: ${errorMessage}`);
             }
           }}
-          style={{ marginLeft: "auto" }}
         >
-          <i className="hn hn-save-solid" style={{ marginRight: "var(--space-xs)" }} /> Save Layout
+          <i className={`hn hn-save-solid ${styles.saveIcon}`} /> Save Layout
         </button>
       </div>
 
       {showAddMenu && (
-        <div
-          className="game-card"
-          style={{ margin: "var(--space-md) var(--space-lg)", flexShrink: 0 }}
-        >
+        <div className={`game-card ${styles.addMenuCard}`}>
           <WidgetLibrary onSelectWidget={(type, size) => handleAddWidget(type, size)} />
         </div>
       )}
 
       {/* Widget preview area with friend theme */}
-      <div
-        style={{
-          flex: 1,
-          overflow: "auto",
-          padding: "var(--space-lg)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "flex-start",
-          background: "var(--bg)",
-        }}
-      >
+      <div className={styles.previewArea}>
         <div
-          style={{
-            ...widgetPreviewTheme,
-            border: "3px solid var(--game-border)",
-            padding: "var(--space-lg)",
-            background: friend.color_bg,
-            position: "relative",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            boxShadow: "var(--game-shadow-lg)",
-            borderRadius: "var(--radius-md)",
-          }}
+          className={styles.previewContainer}
+          style={
+            {
+              "--preview-bg": friend.color_bg,
+              ...widgetPreviewTheme,
+            } as React.CSSProperties
+          }
         >
           <Grid>
             {/* Render all widgets except the one being moved */}
@@ -458,7 +411,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                         key={`move-${pos.x}-${pos.y}`}
                         position={pos}
                         size="1x1"
-                        style={{ zIndex: 5 }}
+                        className={styles.widgetOverlay}
                       >
                         <div
                           onClick={() => {
@@ -474,31 +427,15 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                           onMouseLeave={() => {
                             setHoveredPosition(null);
                           }}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            border:
-                              isHovered && isValid
-                                ? "3px solid var(--primary)"
-                                : isPartOfHoverArea && isValid && hoveredPosition
-                                  ? "2px solid var(--primary)"
-                                  : isValid
-                                    ? "2px dashed var(--accent)"
-                                    : "1px dashed var(--game-border)",
-                            background:
-                              isHovered && isValid
-                                ? "var(--game-overlay-primary-20)"
-                                : isPartOfHoverArea && isValid && hoveredPosition
-                                  ? "var(--game-overlay-secondary-10)"
-                                  : isValid
-                                    ? "var(--game-overlay-secondary-10)"
-                                    : "transparent",
-                            /* Transition removed for performance */
-                            opacity: isHovered ? 1 : isValid ? 0.4 : 0.2,
-                            borderRadius: "var(--radius-sm)",
-                            cursor: isValid ? "pointer" : "not-allowed",
-                            boxShadow: isHovered && isValid ? "var(--game-glow-blue)" : "none",
-                          }}
+                          className={`${styles.moveTile} ${
+                            isValid
+                              ? isHovered
+                                ? styles.moveTileHovered
+                                : isPartOfHoverArea && hoveredPosition
+                                  ? styles.moveTileHoverArea
+                                  : styles.moveTileValid
+                              : styles.moveTileInvalid
+                          }`}
                         />
                       </GridItem>
                     );
@@ -509,11 +446,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                   <GridItem
                     position={hoveredPosition}
                     size={movingWidget.size}
-                    style={{
-                      zIndex: 15,
-                      opacity: 0.6,
-                      pointerEvents: "none",
-                    }}
+                    className={styles.movingWidgetPreview}
                   >
                     <WidgetRenderer widget={movingWidget} />
                   </GridItem>
@@ -524,17 +457,9 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
 
           {/* Cancel move button */}
           {movingWidgetId && (
-            <div
-              style={{
-                position: "absolute",
-                top: "var(--space-md)",
-                left: "var(--space-md)",
-                zIndex: 100,
-              }}
-            >
+            <div className={styles.cancelMoveContainer}>
               <button className="game-button game-button-danger" onClick={handleCancelMove}>
-                <i className="hn hn-times-solid" style={{ marginRight: "var(--space-xs)" }} />{" "}
-                Cancel Move (ESC)
+                <i className={`hn hn-times-solid ${styles.cancelIcon}`} /> Cancel Move (ESC)
               </button>
             </div>
           )}

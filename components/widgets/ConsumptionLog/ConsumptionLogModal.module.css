@@ -1,0 +1,20 @@
+.formFullWidth {
+  width: 100%;
+}
+
+.formFieldFullWidth {
+  width: 100%;
+}
+
+.entryTitle {
+  color: var(--entry-color, var(--text));
+}
+
+.entryLink {
+  color: var(--entry-color, var(--text));
+  text-decoration: underline;
+}
+
+.entryContent {
+  color: var(--entry-color, var(--text));
+}

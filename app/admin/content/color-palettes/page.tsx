@@ -5,6 +5,7 @@ import { playSound } from "@/lib/sounds";
 import { Navigation } from "@/components/shared";
 import { ColorPalette } from "@/lib/queries/color-palettes";
 import "@/styles/content-page.css";
+import styles from "./page.module.css";
 
 export default function ColorPalettesPage() {
   const [palettes, setPalettes] = useState<ColorPalette[]>([]);
@@ -61,21 +62,13 @@ export default function ColorPalettesPage() {
         <div className="game-container content-container">
           <h1 className="game-heading-1 content-title">COLOR PALETTES</h1>
 
-          {error && (
-            <div style={{ color: "var(--accent)", marginBottom: "var(--space-md)" }}>{error}</div>
-          )}
+          {error && <div className={styles.errorMessage}>{error}</div>}
 
           <button
             onClick={() => {
               window.location.href = `/admin/content/color-palettes/new`;
             }}
-            className="game-button"
-            style={{
-              marginBottom: "var(--space-lg)",
-              background: "var(--primary)",
-              color: "var(--bg)",
-              borderColor: "var(--accent)",
-            }}
+            className={`game-button ${styles.createButton}`}
           >
             CREATE NEW PALETTE
           </button>
@@ -83,106 +76,52 @@ export default function ColorPalettesPage() {
           {loading ? (
             <div>Loading palettes...</div>
           ) : palettes.length === 0 ? (
-            <div style={{ opacity: 0.7 }}>No palettes saved yet. Create one to get started!</div>
+            <div className={styles.emptyState}>
+              No palettes saved yet. Create one to get started!
+            </div>
           ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-                gap: "var(--space-md)",
-              }}
-            >
+            <div className={styles.palettesGrid}>
               {palettes.map((palette) => (
                 <div
                   key={palette.id}
-                  className="game-card"
-                  style={{
-                    cursor: "pointer",
-                    padding: "var(--space-md)",
-                    border: "var(--border-width-md) solid var(--accent)",
-                  }}
+                  className={`game-card ${styles.paletteCard}`}
                   onClick={() => {
                     window.location.href = `/admin/content/color-palettes/${palette.id}`;
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "var(--space-xs)",
-                      marginBottom: "var(--space-sm)",
-                    }}
-                  >
+                  <div className={styles.colorSwatches}>
                     <div
-                      style={{
-                        width: "24px",
-                        height: "24px",
-                        background: palette.primary,
-                        border: "1px solid var(--game-border)",
-                        borderRadius: "var(--radius-sm)",
-                      }}
+                      className={styles.colorSwatch}
+                      style={{ background: palette.primary } as React.CSSProperties}
                       title="Primary"
                     />
                     <div
-                      style={{
-                        width: "24px",
-                        height: "24px",
-                        background: palette.secondary,
-                        border: "1px solid var(--game-border)",
-                        borderRadius: "var(--radius-sm)",
-                      }}
+                      className={styles.colorSwatch}
+                      style={{ background: palette.secondary } as React.CSSProperties}
                       title="Secondary"
                     />
                     <div
-                      style={{
-                        width: "24px",
-                        height: "24px",
-                        background: palette.accent,
-                        border: "1px solid var(--game-border)",
-                        borderRadius: "var(--radius-sm)",
-                      }}
+                      className={styles.colorSwatch}
+                      style={{ background: palette.accent } as React.CSSProperties}
                       title="Accent"
                     />
                     <div
-                      style={{
-                        width: "24px",
-                        height: "24px",
-                        background: palette.bg,
-                        border: "1px solid var(--game-border)",
-                        borderRadius: "var(--radius-sm)",
-                      }}
+                      className={styles.colorSwatch}
+                      style={{ background: palette.bg } as React.CSSProperties}
                       title="Background"
                     />
                     <div
-                      style={{
-                        width: "24px",
-                        height: "24px",
-                        background: palette.text,
-                        border: "1px solid var(--game-border)",
-                        borderRadius: "var(--radius-sm)",
-                      }}
+                      className={styles.colorSwatch}
+                      style={{ background: palette.text } as React.CSSProperties}
                       title="Text"
                     />
                   </div>
-                  <div
-                    style={{
-                      fontSize: "var(--font-size-xs)",
-                      opacity: 0.7,
-                      marginBottom: "var(--space-sm)",
-                    }}
-                  >
+                  <div className={styles.paletteDate}>
                     {new Date(palette.created_at).toLocaleDateString()}
                   </div>
                   <button
                     onClick={(e) => handleDelete(palette.id, e)}
-                    className="game-button"
-                    style={{
-                      width: "100%",
-                      background: "var(--secondary)",
-                      color: "var(--bg)",
-                      borderColor: "var(--accent)",
-                      fontSize: "var(--font-size-xs)",
-                      padding: "var(--space-xs)",
-                    }}
+                    className={`game-button ${styles.deleteButton}`}
                   >
                     DELETE
                   </button>

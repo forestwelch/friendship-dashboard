@@ -1,0 +1,17 @@
+.widgetClickableCentered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-sm);
+  width: 100%;
+  height: 100%;
+}
+
+.displayText {
+  word-break: break-word;
+  text-align: center;
+  /* Dynamic font size based on widget size */
+  font-size: var(--display-font-size, var(--font-size-xs));
+  line-height: 1.4;
+}

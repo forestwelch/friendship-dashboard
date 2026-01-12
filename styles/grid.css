@@ -24,10 +24,21 @@
   z-index: 0;
   position: relative;
   background-color: var(--grid-tile-bg);
+  /* Dynamic positioning via CSS custom properties */
+  grid-column: var(--grid-col);
+  grid-row: var(--grid-row);
 }
 
 /* Grid item positioning using CSS custom properties */
 .grid-item {
   position: relative;
   z-index: 1;
+  grid-column: calc(var(--grid-col) / span var(--grid-cols-span));
+  grid-row: calc(var(--grid-row) / span var(--grid-rows-span));
+  width: calc(
+    var(--grid-cols-span) * var(--grid-tile-size) + (var(--grid-cols-span) - 1) * var(--grid-gap)
+  );
+  height: calc(
+    var(--grid-rows-span) * var(--grid-tile-size) + (var(--grid-rows-span) - 1) * var(--grid-gap)
+  );
 }

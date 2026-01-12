@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Song } from "@/lib/types";
 import { playSound } from "@/lib/sounds";
+import styles from "./SongManager.module.css";
 
 // Component for playing a song in the admin panel
 function SongPlayButton({ song }: { song: Song }) {
@@ -80,9 +81,8 @@ function SongPlayButton({ song }: { song: Song }) {
 
   return (
     <button
-      className="game-button"
+      className={`game-button ${styles.playButton}`}
       onClick={handleTogglePlay}
-      style={{ fontSize: "var(--font-size-xs)" }}
       title={isPlaying ? "Pause" : "Play"}
     >
       <i className={isPlaying ? "hn hn-pause-solid" : "hn hn-play-solid"} />
@@ -277,74 +277,38 @@ export function SongManager({
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        overflow: "hidden",
-        gap: "var(--space-md)",
-      }}
-    >
+    <div className={styles.container}>
       <input
         ref={fileInputRef}
         type="file"
         accept="audio/*"
-        style={{ display: "none" }}
+        className={styles.hidden}
         onChange={handleFileChange}
       />
       {showAddForm && (
-        <div
-          className="game-card"
-          style={{
-            flexShrink: 0,
-            background: "var(--admin-surface)",
-            borderColor: "var(--admin-accent)",
-          }}
-        >
-          <h3
-            className="game-heading-3"
-            style={{ marginBottom: "var(--space-md)", color: "var(--admin-text)" }}
-          >
-            Add New Song
-          </h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)" }}>
+        <div className={`game-card ${styles.addFormCard}`}>
+          <h3 className={`game-heading-3 ${styles.addFormTitle}`}>Add New Song</h3>
+          <div className={styles.formGrid}>
             <input
               type="text"
-              className="game-input"
+              className={`game-input ${styles.formInput}`}
               placeholder="Song Title"
               value={newSong.title || ""}
               onChange={(e) => setNewSong({ ...newSong, title: e.target.value })}
-              style={{
-                background: "var(--admin-bg)",
-                borderColor: "var(--admin-accent)",
-                color: "var(--admin-text)",
-              }}
             />
             <input
               type="text"
-              className="game-input"
+              className={`game-input ${styles.formInput}`}
               placeholder="Artist"
               value={newSong.artist || ""}
               onChange={(e) => setNewSong({ ...newSong, artist: e.target.value })}
-              style={{
-                background: "var(--admin-bg)",
-                borderColor: "var(--admin-accent)",
-                color: "var(--admin-text)",
-              }}
             />
             <button
-              className="game-button"
+              className={`game-button ${styles.submitButton} ${
+                uploading ? styles.submitButtonUploading : ""
+              } ${!newSong.title || !newSong.artist ? styles.submitButtonDisabled : ""}`}
               onClick={handleAddSong}
               disabled={uploading || !newSong.title || !newSong.artist}
-              style={{
-                background: uploading ? "var(--admin-accent)" : "var(--admin-primary)",
-                borderColor: "var(--admin-accent)",
-                color: "var(--admin-text)",
-                gridColumn: "1 / -1",
-                opacity: uploading || !newSong.title || !newSong.artist ? 0.6 : 1,
-                cursor: uploading || !newSong.title || !newSong.artist ? "not-allowed" : "pointer",
-              }}
             >
               {uploading ? "Uploading..." : "Select MP3 File"}
             </button>
@@ -352,94 +316,47 @@ export function SongManager({
         </div>
       )}
 
-      <div
-        className="game-card"
-        style={{
-          flex: 1,
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          background: "var(--admin-surface)",
-          borderColor: "var(--admin-accent)",
-        }}
-      >
+      <div className={`game-card ${styles.songsCard}`}>
         {songs.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "var(--space-2xl)",
-              color: "var(--admin-text)",
-              opacity: 0.6,
-            }}
-          >
+          <div className={styles.emptyState}>
             No songs yet. Click &quot;Add Song&quot; to get started!
           </div>
         ) : (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--space-sm)",
-              overflowY: "auto",
-              flex: 1,
-            }}
-          >
+          <div className={styles.songsList}>
             {songs.map((song, index) => (
-              <div
-                key={song.id || index}
-                className="game-card"
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "var(--space-md)",
-                  background: "var(--admin-bg)",
-                  borderColor: "var(--admin-accent)",
-                }}
-              >
+              <div key={song.id || index} className={`game-card ${styles.songCard}`}>
                 {editingIndex === index ? (
-                  <div
-                    style={{
-                      flex: 1,
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "8px",
-                    }}
-                  >
+                  <div className={styles.editForm}>
                     <input
                       type="text"
-                      className="game-input"
+                      className={`game-input ${styles.editInput}`}
                       value={editSong.title || ""}
                       onChange={(e) => setEditSong({ ...editSong, title: e.target.value })}
                       placeholder="Title"
-                      style={{ fontSize: "var(--font-size-xs)", padding: "var(--space-sm)" }}
                     />
                     <input
                       type="text"
-                      className="game-input"
+                      className={`game-input ${styles.editInput}`}
                       value={editSong.artist || ""}
                       onChange={(e) => setEditSong({ ...editSong, artist: e.target.value })}
                       placeholder="Artist"
-                      style={{ fontSize: "var(--font-size-xs)", padding: "var(--space-sm)" }}
                     />
-                    <div className="game-text-muted" style={{ fontSize: "var(--font-size-xs)" }}>
+                    <div className={`game-text-muted ${styles.helperText}`}>
                       MP3 URL: {editSong.mp3Url || "N/A"}
                     </div>
                     <div className="game-flex game-flex-gap-sm">
                       <button
-                        className="game-button game-button-success"
+                        className={`game-button game-button-success ${styles.editActions}`}
                         onClick={handleSaveEdit}
-                        style={{ fontSize: "var(--font-size-xs)" }}
                       >
                         Save
                       </button>
                       <button
-                        className="game-button"
+                        className={`game-button ${styles.editActions}`}
                         onClick={() => {
                           setEditingIndex(null);
                           setEditSong({});
                         }}
-                        style={{ fontSize: "var(--font-size-xs)" }}
                       >
                         Cancel
                       </button>
@@ -447,21 +364,11 @@ export function SongManager({
                   </div>
                 ) : (
                   <>
-                    <div style={{ flex: 1 }}>
-                      <div
-                        className="game-heading-3"
-                        style={{ marginBottom: "var(--space-xs)", fontSize: "var(--font-size-sm)" }}
-                      >
-                        {song.title}
-                      </div>
-                      <div className="game-text-muted" style={{ marginBottom: "var(--space-xs)" }}>
-                        {song.artist}
-                      </div>
+                    <div className={styles.songDisplay}>
+                      <div className={`game-heading-3 ${styles.songTitle}`}>{song.title}</div>
+                      <div className={`game-text-muted ${styles.songArtist}`}>{song.artist}</div>
                       {song.mp3Url && (
-                        <div
-                          className="game-text-muted"
-                          style={{ fontSize: "var(--font-size-xs)", marginTop: "var(--space-xs)" }}
-                        >
+                        <div className={`game-text-muted ${styles.songUrl}`}>
                           MP3 URL: {song.mp3Url.substring(0, 50)}...
                         </div>
                       )}
@@ -469,16 +376,14 @@ export function SongManager({
                     <div className="game-flex game-flex-gap-sm">
                       <SongPlayButton song={song} />
                       <button
-                        className="game-button"
+                        className={`game-button ${styles.songActions}`}
                         onClick={() => handleEditSong(index)}
-                        style={{ fontSize: "var(--font-size-xs)" }}
                       >
                         Edit
                       </button>
                       <button
-                        className="game-button game-button-danger"
+                        className={`game-button game-button-danger ${styles.songActions}`}
                         onClick={() => handleDeleteSong(index)}
-                        style={{ fontSize: "var(--font-size-xs)" }}
                       >
                         Delete
                       </button>

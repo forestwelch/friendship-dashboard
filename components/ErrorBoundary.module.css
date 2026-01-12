@@ -1,0 +1,41 @@
+.errorContainer {
+  padding: var(--space-lg);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  color: var(--text);
+  margin: var(--space-md);
+}
+
+.errorTitle {
+  margin-top: 0;
+  color: var(--accent);
+}
+
+.errorDetails {
+  margin-top: var(--space-md);
+}
+
+.errorSummary {
+  cursor: pointer;
+  margin-bottom: var(--space-sm);
+}
+
+.errorPre {
+  background: var(--secondary);
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  overflow: auto;
+  font-size: var(--font-size-xs);
+}
+
+.errorButton {
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--primary);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  cursor: pointer;
+  min-height: 44px;
+}

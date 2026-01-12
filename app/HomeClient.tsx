@@ -7,6 +7,7 @@ import { FriendCard } from "@/components/FriendCard";
 import { AddFriendModal } from "@/components/admin/AddFriendModal";
 import { useUIStore } from "@/lib/store/ui-store";
 import { playSound } from "@/lib/sounds";
+import styles from "./HomeClient.module.css";
 
 interface HomeClientProps {
   friends: Friend[];
@@ -107,65 +108,18 @@ export function HomeClient({ friends: initialFriends }: HomeClientProps) {
   };
 
   return (
-    <div
-      className="admin-page"
-      style={{
-        paddingTop: `calc(var(--height-button) + var(--space-md))`,
-        width: "100%",
-        maxWidth: "100%",
-        minHeight: "100vh",
-        background: "var(--admin-bg)",
-        color: "var(--admin-text)",
-        overflowX: "hidden",
-      }}
-    >
-      <div
-        className="game-container"
-        style={{
-          paddingTop: "var(--space-3xl)",
-          paddingBottom: "var(--space-3xl)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "var(--space-3xl)",
-          }}
-        >
-          <h1
-            className="game-heading-1"
-            style={{
-              margin: 0,
-              fontSize: "var(--font-size-3xl)",
-            }}
-          >
-            FRIENDSHIP DASHBOARD
-          </h1>
+    <div className={`admin-page ${styles.pageContainer}`}>
+      <div className={`game-container ${styles.contentContainer}`}>
+        <div className={styles.header}>
+          <h1 className={`game-heading-1 ${styles.title}`}>FRIENDSHIP DASHBOARD</h1>
           {friends.length > 0 && (
-            <button
-              className="game-button"
-              onClick={handleDeleteAll}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "var(--space-xs)",
-              }}
-            >
+            <button className={`game-button ${styles.deleteAllButton}`} onClick={handleDeleteAll}>
               <i className="hn hn-trash-alt-solid" />
               DELETE ALL
             </button>
           )}
         </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(17.5rem, 1fr))",
-            gap: "var(--space-xl)",
-            marginBottom: "var(--space-3xl)",
-          }}
-        >
+        <div className={styles.friendsGrid}>
           {friends.map((friend) => (
             <FriendCard
               key={friend.id}

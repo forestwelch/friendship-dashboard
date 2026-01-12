@@ -10,6 +10,7 @@ import {
   PIXEL_GRID_SIZE,
   ThemeColors,
 } from "@/lib/pixel-data-processing";
+import styles from "./WidgetConfigModal.module.css";
 
 interface ImageItem {
   id: string;
@@ -243,75 +244,28 @@ export function WidgetConfigModal({
         };
 
         return (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--space-md)",
-            }}
-          >
-            <label className="game-heading-3" style={{ margin: 0 }}>
+          <div className={styles.configSection}>
+            <label className={`game-heading-3 ${styles.configLabel}`}>
               Select Songs for Playlist
             </label>
             {loadingSongs ? (
-              <div
-                className="game-text-muted"
-                style={{ padding: "var(--space-lg)", textAlign: "center" }}
-              >
-                Loading songs...
-              </div>
+              <div className={`game-text-muted ${styles.configContent}`}>Loading songs...</div>
             ) : (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "var(--space-sm)",
-                  maxHeight: "300px",
-                  overflowY: "auto",
-                  border: "1px solid var(--border-color, #333)",
-                  borderRadius: "4px",
-                  padding: "var(--space-sm)",
-                }}
-              >
+              <div className={styles.songList}>
                 {availableSongs.length === 0 ? (
-                  <div
-                    className="game-text-muted"
-                    style={{ padding: "var(--space-md)", textAlign: "center" }}
-                  >
+                  <div className={`game-text-muted ${styles.configContentSmall}`}>
                     No songs available
                   </div>
                 ) : (
                   availableSongs.map((song) => (
-                    <label
-                      key={song.id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "var(--space-sm)",
-                        padding: "var(--space-xs)",
-                        cursor: "pointer",
-                        borderRadius: "4px",
-                        transition: "background-color 0.2s",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor =
-                          "var(--hover-bg, rgba(255,255,255,0.05))";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                      }}
-                    >
+                    <label key={song.id} className={styles.songItem}>
                       <input
                         type="checkbox"
                         checked={selectedSongIds.includes(song.id)}
                         onChange={() => handleSongToggle(song.id)}
-                        style={{
-                          cursor: "pointer",
-                          width: "18px",
-                          height: "18px",
-                        }}
+                        className={styles.checkbox}
                       />
-                      <span style={{ flex: 1 }}>
+                      <span className={styles.songItemText}>
                         {song.title} - {song.artist}
                       </span>
                     </label>
@@ -319,7 +273,7 @@ export function WidgetConfigModal({
                 )}
               </div>
             )}
-            <div className="game-text-muted" style={{ fontSize: "var(--font-size-xs)" }}>
+            <div className={`game-text-muted ${styles.helperText}`}>
               {selectedSongIds.length > 0
                 ? `${selectedSongIds.length} song${selectedSongIds.length === 1 ? "" : "s"} selected. A random song will start playing when the page loads, and songs will shuffle through.`
                 : "Select songs to create a playlist. A random song will start playing when the page loads."}
@@ -403,42 +357,20 @@ export function WidgetConfigModal({
                         pixelData: [],
                       }));
                     }}
-                    style={{
-                      padding: "var(--space-xs) var(--space-sm)",
-                      fontSize: "var(--font-size-xs)",
-                      cursor: "pointer",
-                      border: "var(--border-width-md) solid var(--game-border)",
-                      borderRadius: "var(--radius-sm)",
-                      background: "var(--game-surface)",
-                      color: "var(--text)",
-                    }}
+                    className={styles.resetButton}
                   >
                     Reset Selection
                   </button>
                 )}
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  gap: "var(--space-sm)",
-                  alignItems: "center",
-                }}
-              >
+              <div className={styles.filterRow}>
                 <select
                   value={selectedFilter}
                   onChange={(e) => {
                     playSound("click");
                     setSelectedFilter(e.target.value);
                   }}
-                  style={{
-                    padding: "var(--space-xs) var(--space-sm)",
-                    fontSize: "var(--font-size-sm)",
-                    border: "var(--border-width-md) solid var(--game-border)",
-                    borderRadius: "var(--radius-sm)",
-                    background: "var(--game-surface)",
-                    color: "var(--text)",
-                    cursor: "pointer",
-                  }}
+                  className={styles.filterSelect}
                 >
                   <option value="all">All Images</option>
                   <option value="uncategorized">Uncategorized</option>
@@ -452,15 +384,7 @@ export function WidgetConfigModal({
                   <button
                     type="button"
                     onClick={handleSelectAllInAlbum}
-                    style={{
-                      padding: "var(--space-xs) var(--space-sm)",
-                      fontSize: "var(--font-size-xs)",
-                      cursor: "pointer",
-                      border: "var(--border-width-md) solid var(--game-border)",
-                      borderRadius: "var(--radius-sm)",
-                      background: "var(--game-surface)",
-                      color: "var(--text)",
-                    }}
+                    className={styles.selectAllButton}
                   >
                     Select All ({filteredImages.length})
                   </button>
@@ -468,35 +392,12 @@ export function WidgetConfigModal({
               </div>
             </div>
             {loadingImages ? (
-              <div
-                className="game-text-muted"
-                style={{ padding: "var(--space-lg)", textAlign: "center" }}
-              >
+              <div className={`game-text-muted ${styles.loadingContainer}`}>
                 <div>Loading images...</div>
-                <div
-                  style={{
-                    fontSize: "var(--font-size-xs)",
-                    marginTop: "var(--space-xs)",
-                    opacity: 0.7,
-                  }}
-                >
-                  Fetching from database...
-                </div>
+                <div className={styles.loadingSubtext}>Fetching from database...</div>
               </div>
             ) : (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(6.25rem, 1fr))",
-                  gap: "var(--space-sm)",
-                  maxHeight: "18.75rem",
-                  overflowY: "auto",
-                  padding: "var(--space-sm)",
-                  border: "var(--border-width-md) solid var(--game-border)",
-                  borderRadius: "var(--radius-sm)",
-                  alignContent: "start",
-                }}
-              >
+              <div className={styles.imageGrid}>
                 {filteredImages.map((img) => {
                   const isSelected = selectedImageIds.includes(img.id);
                   const isProcessing = processingImages.has(img.id);
@@ -510,12 +411,7 @@ export function WidgetConfigModal({
                       <img
                         src={img.preview}
                         alt="Pixel art preview"
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "contain",
-                          imageRendering: "pixelated",
-                        }}
+                        className={styles.imagePreview}
                       />
                     );
                   } else if (img.pixel_data) {
@@ -526,32 +422,12 @@ export function WidgetConfigModal({
                         <img
                           src={cachedPreview}
                           alt="Pixel art preview"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "contain",
-                            imageRendering: "pixelated",
-                          }}
+                          className={styles.imagePreview}
                         />
                       );
                     } else {
                       // Show loading state while generating preview
-                      pixelPreview = (
-                        <div
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            background: "var(--game-surface)",
-                            fontSize: "var(--font-size-xs)",
-                            color: "var(--text)",
-                          }}
-                        >
-                          Loading...
-                        </div>
-                      );
+                      pixelPreview = <div className={styles.loadingPreview}>Loading...</div>;
                     }
                   }
 
@@ -595,77 +471,30 @@ export function WidgetConfigModal({
                     <div
                       key={img.id}
                       onClick={handleImageClick}
-                      style={{
-                        position: "relative",
-                        aspectRatio: "1/1",
-                        width: "100%",
-                        minHeight: "6.25rem",
-                        border: isSelected
-                          ? "0.125rem solid var(--primary)"
-                          : "0.0625rem solid var(--game-border)",
-                        borderRadius: "var(--radius-sm)",
-                        overflow: "hidden",
-                        backgroundColor: "var(--game-surface)",
-                        cursor: "pointer",
-                        opacity: isSelected ? 1 : 0.7,
-                        /* Transition removed for performance */
-                      }}
+                      className={`${styles.imageItemContainer} ${
+                        isSelected
+                          ? styles.imageItemContainerSelected
+                          : styles.imageItemContainerUnselected
+                      } ${isProcessing ? styles.imageItemContainerProcessing : ""}`}
+                      style={
+                        {
+                          "--image-border-width": isSelected ? "0.125rem" : "0.0625rem",
+                          "--image-border-color": isSelected
+                            ? "var(--primary)"
+                            : "var(--game-border)",
+                        } as React.CSSProperties
+                      }
                     >
                       {pixelPreview ? (
                         pixelPreview
                       ) : (
-                        <div
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            background: "var(--game-surface)",
-                            fontSize: "var(--font-size-xs)",
-                            color: "var(--text)",
-                          }}
-                        >
-                          Pixel Data
-                        </div>
+                        <div className={styles.loadingPreview}>Pixel Data</div>
                       )}
                       {isProcessing && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            background: "var(--game-overlay-bg-50)",
-                            color: "var(--text)",
-                            fontSize: "var(--font-size-xs)",
-                          }}
-                        >
-                          Processing...
-                        </div>
+                        <div className={styles.processingOverlay}>Processing...</div>
                       )}
                       {isSelected && !isProcessing && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "0.25rem",
-                            right: "0.25rem",
-                            background: "var(--primary)",
-                            color: "var(--bg)",
-                            borderRadius: "50%",
-                            width: "1.25rem",
-                            height: "1.25rem",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "var(--font-size-xs)",
-                            fontWeight: "bold",
-                          }}
-                        >
+                        <div className={styles.checkmarkContainer}>
                           <i className="hn hn-check-solid" />
                         </div>
                       )}
@@ -730,43 +559,13 @@ export function WidgetConfigModal({
   if (!widget) return null;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: "var(--game-overlay-bg-80)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-      }}
-      onClick={onClose}
-    >
-      <div
-        className="game-card"
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          maxWidth: "37.5rem",
-          width: "90%",
-          maxHeight: "calc(100vh - 2rem)" /* Ensure X button is always visible with padding */,
-          overflow: "hidden" /* No scrolling - content must fit */,
-          padding: "var(--space-xl)",
-          position: "relative" /* Ensure close button positioning works */,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <div className="game-flex game-flex-between" style={{ marginBottom: "var(--space-lg)" }}>
-          <h2 className="game-heading-2" style={{ margin: 0 }}>
-            Configure {widget.widget_name}
-          </h2>
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={`game-card ${styles.modalContent}`} onClick={(e) => e.stopPropagation()}>
+        <div className={`game-flex game-flex-between ${styles.modalHeader}`}>
+          <h2 className={`game-heading-2 ${styles.modalTitle}`}>Configure {widget.widget_name}</h2>
           <button
-            className="game-button game-button-icon"
+            className={`game-button game-button-icon ${styles.closeButton}`}
             onClick={onClose}
-            style={{ minWidth: "2rem", minHeight: "2rem" }}
           >
             <i className="hn hn-times-solid" />
           </button>
@@ -774,11 +573,9 @@ export function WidgetConfigModal({
 
         {/* Size Selection */}
         {widget && WIDGET_SIZES[widget.widget_type] && (
-          <div style={{ marginBottom: "var(--space-lg)" }}>
-            <h3 className="game-heading-3" style={{ marginBottom: "var(--space-sm)" }}>
-              Widget Size
-            </h3>
-            <div className="game-flex game-flex-gap-sm" style={{ flexWrap: "wrap" }}>
+          <div className={styles.configSection}>
+            <h3 className={`game-heading-3 ${styles.configSectionTitle}`}>Widget Size</h3>
+            <div className={`game-flex game-flex-gap-sm ${styles.sizeButtons}`}>
               {WIDGET_SIZES[widget.widget_type].map((size) => (
                 <button
                   key={size}
@@ -794,10 +591,7 @@ export function WidgetConfigModal({
 
         {renderConfigFields()}
 
-        <div
-          className="game-flex game-flex-gap-md"
-          style={{ marginTop: "var(--space-xl)", justifyContent: "flex-end" }}
-        >
+        <div className={`game-flex game-flex-gap-md ${styles.buttonRow}`}>
           <button className="game-button" onClick={onClose}>
             Cancel
           </button>

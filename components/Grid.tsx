@@ -3,7 +3,7 @@
 import React from "react";
 import { WidgetPosition, WidgetSize } from "@/lib/types";
 import { GRID_COLS, GRID_ROWS } from "@/lib/constants";
-import "@/styles/grid.css";
+import styles from "./Grid.module.css";
 
 interface GridProps {
   children: React.ReactNode;
@@ -21,20 +21,24 @@ export function Grid({ children }: GridProps) {
   return (
     <div
       data-grid-container
-      className="grid-layout"
+      className={styles.gridLayout}
       data-cols={GRID_COLS}
       data-rows={GRID_ROWS}
+      // CSS custom properties are set inline because grid dimensions come from constants
       style={{ "--grid-cols": GRID_COLS, "--grid-rows": GRID_ROWS } as React.CSSProperties}
     >
       {/* Background grid tiles - muted squares using theme colors */}
+      {/* CSS custom properties are set inline because each tile's position is dynamic */}
       {allTiles.map((tile) => (
         <div
           key={`bg-${tile.x}-${tile.y}`}
-          className="grid-tile-bg"
+          className={styles.gridTileBg}
+          data-grid-col={tile.x + 1}
+          data-grid-row={tile.y + 1}
           style={
             {
-              gridColumn: `${tile.x + 1}`,
-              gridRow: `${tile.y + 1}`,
+              "--grid-col": tile.x + 1,
+              "--grid-row": tile.y + 1,
             } as React.CSSProperties
           }
         />
@@ -62,21 +66,18 @@ export const GridItem = React.forwardRef<HTMLDivElement, GridItemProps>(function
   return (
     <div
       ref={ref}
-      className="grid-item"
+      className={styles.gridItem}
       data-col={position.x + 1}
       data-row={position.y + 1}
       data-cols={cols}
       data-rows={rows}
+      // CSS custom properties are set inline because position and size are dynamic props
       style={
         {
           "--grid-col": position.x + 1,
           "--grid-row": position.y + 1,
           "--grid-cols-span": cols,
           "--grid-rows-span": rows,
-          gridColumn: `${position.x + 1} / span ${cols}`,
-          gridRow: `${position.y + 1} / span ${rows}`,
-          width: `calc(${cols} * var(--grid-tile-size) + ${cols - 1} * var(--grid-gap))`,
-          height: `calc(${rows} * var(--grid-tile-size) + ${rows - 1} * var(--grid-gap))`,
           ...customStyle,
         } as React.CSSProperties
       }

@@ -16,6 +16,8 @@ import { useThemeContext } from "@/lib/theme-context";
 import { useUserContext } from "@/lib/use-user-context";
 import { GRID_COLS, GRID_ROWS } from "@/lib/constants";
 import { hasNewContent } from "@/lib/widget-notifications";
+import clsx from "clsx";
+import styles from "./FriendPageClient.module.css";
 
 interface FriendPageClientProps {
   friend: Friend;
@@ -578,29 +580,19 @@ export function FriendPageClient({
 
   return (
     <div
-      style={{
-        ...themeStyle,
-        paddingTop: "0", // No padding - nav is fixed and doesn't affect layout
-        width: "100%",
-        maxWidth: "100%",
-        minHeight: "100vh",
-        background: themeColors.bg,
-        position: "relative",
-        overflowX: "hidden",
-      }}
+      className={styles.pageContainer}
+      style={
+        {
+          ...themeStyle,
+          background: themeColors.bg,
+        } as React.CSSProperties
+      }
     >
       {/* Grid container - allows scrolling and scaling */}
       <div
         ref={gridRef}
         data-grid-container-wrapper
-        className="grid-container-wrapper"
-        style={{
-          position: "relative",
-          width: "100%",
-          maxWidth: "100%",
-          height: "100vh",
-          minHeight: "100vh",
-        }}
+        className={`grid-container-wrapper ${styles.gridWrapper}`}
       >
         <Grid>
           {/* Render widgets, excluding the one being moved */}
@@ -661,20 +653,7 @@ export function FriendPageClient({
                 >
                   <div
                     data-widget-item={widget.id}
-                    className={containerClasses.join(" ")}
-                    style={
-                      {
-                        position: "relative",
-                        width: "100%",
-                        height: "100%",
-                        // Add glow effect for new content widgets using inline style
-                        // ...(widgetHasNewContent
-                        //   ? {
-                        //       boxShadow: `0 0 8px ${themeColors.secondary}40`, // 40 = ~25% opacity in hex
-                        //     }
-                        //   : {}),
-                      } as React.CSSProperties
-                    }
+                    className={`${containerClasses.join(" ")} relative w-full h-full`}
                     onMouseEnter={() => {
                       if (isEditMode && !movingWidgetId) {
                         setHoveredWidget(widget.id);
@@ -785,7 +764,7 @@ export function FriendPageClient({
                           key={`move-${pos.x}-${pos.y}`}
                           position={pos}
                           size="1x1"
-                          style={{ zIndex: 5 }}
+                          className={styles.editModeOverlay}
                         >
                           <div
                             onClick={() => {
@@ -813,33 +792,22 @@ export function FriendPageClient({
                               }
                               setHoveredPosition(null);
                             }}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              border:
-                                isHovered && isValid
-                                  ? "3px solid var(--primary)"
-                                  : isPartOfHoverArea && isValid && hoveredPosition
-                                    ? "2px solid var(--primary)"
-                                    : isValid
-                                      ? "2px dashed var(--accent)"
-                                      : "1px dashed var(--game-border)",
-                              background:
-                                isHovered && isValid
-                                  ? "var(--game-overlay-primary-20)"
-                                  : isPartOfHoverArea && isValid && hoveredPosition
-                                    ? "var(--game-overlay-secondary-10)"
-                                    : isValid
-                                      ? "var(--game-overlay-secondary-10)"
-                                      : "transparent",
-                              opacity: isHovered ? 1 : isValid ? 0.4 : 0.2,
-                              borderRadius: "var(--radius-sm)",
-                              cursor: isValid ? "pointer" : "not-allowed",
-                              boxShadow: isHovered && isValid ? "var(--game-glow-blue)" : "none",
-                              touchAction: "manipulation",
-                              minHeight: "44px",
-                              minWidth: "44px",
-                            }}
+                            className={clsx(
+                              styles.moveableTile,
+                              isValid ? styles.moveableTileValid : styles.moveableTileInvalid,
+                              isHovered && isValid && styles.moveableTileHovered,
+                              isPartOfHoverArea &&
+                                isValid &&
+                                hoveredPosition &&
+                                styles.moveableTileHoverArea
+                            )}
+                            style={
+                              isHovered && isValid
+                                ? {
+                                    "--tile-box-shadow": "var(--game-glow-blue)",
+                                  }
+                                : undefined
+                            }
                           />
                         </GridItem>
                       );
@@ -850,11 +818,7 @@ export function FriendPageClient({
                     <GridItem
                       position={hoveredPosition}
                       size={movingWidget.size}
-                      style={{
-                        zIndex: 15,
-                        opacity: 0.6,
-                        pointerEvents: "none",
-                      }}
+                      className={styles.movingWidgetPreview}
                     >
                       <WidgetRenderer
                         widget={movingWidget}
@@ -873,17 +837,9 @@ export function FriendPageClient({
 
         {/* Cancel move button */}
         {movingWidgetId && (
-          <div
-            style={{
-              position: "absolute",
-              top: "var(--space-md)",
-              left: "var(--space-md)",
-              zIndex: 100,
-            }}
-          >
+          <div className={styles.cancelMoveButton}>
             <button className="game-button game-button-danger" onClick={handleCancelMove}>
-              <i className="hn hn-times-solid" style={{ marginRight: "var(--space-xs)" }} /> Cancel
-              Move (ESC)
+              <i className={`hn hn-times-solid ${styles.cancelIcon}`} /> Cancel Move (ESC)
             </button>
           </div>
         )}
@@ -953,50 +909,30 @@ export function FriendPageClient({
       {/* Widget Library - Navigate to page instead of modal */}
       {showWidgetLibrary && (
         <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: themeColors.bg,
-            zIndex: 2000,
-            overflow: "auto",
-          }}
+          className={styles.widgetLibraryOverlay}
+          style={
+            {
+              "--theme-secondary": themeColors.secondary,
+              "--theme-accent": themeColors.accent,
+              "--theme-bg": themeColors.bg,
+              "--theme-text": themeColors.text,
+            } as React.CSSProperties
+          }
         >
-          <div style={{ padding: "var(--space-xl)" }}>
-            <div style={{ marginBottom: "var(--space-lg)" }}>
+          <div className={styles.widgetLibraryContent}>
+            <div className={styles.widgetLibraryHeader}>
               <button
                 onClick={() => {
                   setShowWidgetLibrary(false);
                   playSound("close");
                 }}
-                className="game-button"
-                style={{
-                  background: themeColors.secondary,
-                  borderColor: themeColors.accent,
-                  color: themeColors.bg,
-                }}
+                className={`game-button ${styles.backButton}`}
               >
-                <i
-                  className="hn hn-arrow-left-solid"
-                  style={{
-                    fontSize: "var(--font-size-xs)",
-                    marginRight: "var(--space-xs)",
-                  }}
-                />
+                <i className={`hn hn-arrow-left-solid ${styles.backIcon}`} />
                 BACK
               </button>
             </div>
-            <h1
-              className="game-heading-1"
-              style={{
-                marginBottom: "var(--space-xl)",
-                color: themeColors.text,
-              }}
-            >
-              WIDGET LIBRARY
-            </h1>
+            <h1 className={`game-heading-1 ${styles.widgetLibraryTitle}`}>WIDGET LIBRARY</h1>
             <WidgetLibrary onSelectWidget={handleAddWidget} />
           </div>
         </div>

@@ -157,6 +157,7 @@
 }
 
 .piecePreview {
+  background-color: var(--piece-color);
   width: 80%;
   height: 80%;
   border-radius: 0;

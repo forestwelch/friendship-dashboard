@@ -62,12 +62,7 @@ export function FridgeMagnets({ size, friendId }: FridgeMagnetsProps) {
         <div
           ref={previewRef}
           onClick={handleClick}
-          className="widget-clickable fridge-preview"
-          style={{
-            width: "100%",
-            height: "100%",
-            position: "relative",
-          }}
+          className="widget-clickable fridge-preview w-full h-full relative"
         >
           {magnets
             .filter((m) => !m.inBank)
@@ -82,19 +77,17 @@ export function FridgeMagnets({ size, friendId }: FridgeMagnetsProps) {
                 <div
                   key={idx}
                   className="magnet-preview"
-                  style={{
-                    left: `${constrainedX}px`,
-                    top: `${constrainedY}px`,
-                    fontSize: `${magnetSize}px`,
-                    color: magnet.color || "#FFFFFF",
-                    transform: magnet.rotation ? `rotate(${magnet.rotation}deg)` : undefined,
-                  }}
+                  style={
+                    {
+                      "--magnet-left": `${constrainedX}px`,
+                      "--magnet-top": `${constrainedY}px`,
+                      "--magnet-font-size": `${magnetSize}px`,
+                      "--magnet-color": magnet.color || "#FFFFFF",
+                      "--magnet-rotation": magnet.rotation ? `${magnet.rotation}deg` : "0deg",
+                    } as React.CSSProperties
+                  }
                 >
-                  {magnet.type === "icon" ? (
-                    <i className={magnet.value} style={{ fontSize: "inherit" }} />
-                  ) : (
-                    magnet.value
-                  )}
+                  {magnet.type === "icon" ? <i className={magnet.value} /> : magnet.value}
                 </div>
               );
             })}

@@ -71,17 +71,7 @@ export const WidgetRenderer = memo(function WidgetRenderer({
       // Fallback to image-based rendering (backward compatibility)
       if (!imageUrls && !pixelArtImageUrl) {
         return (
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "var(--text)",
-              fontSize: "var(--font-size-sm)",
-            }}
-          >
+          <div className="w-full h-full flex items-center justify-center text-center game-text-muted">
             No image
           </div>
         );
@@ -171,17 +161,7 @@ export const WidgetRenderer = memo(function WidgetRenderer({
 
     default:
       return (
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "var(--text)",
-            fontSize: "var(--font-size-sm)",
-          }}
-        >
+        <div className="w-full h-full flex items-center justify-center text-center game-text-muted">
           Unknown widget: {widget.widget_type}
         </div>
       );

@@ -9,6 +9,7 @@ import { FormField, Input } from "@/components/shared";
 import { useUIStore } from "@/lib/store/ui-store";
 import { hslToHex, hexToHsl, isValidHex } from "@/lib/color-utils";
 import { Friend } from "@/lib/types";
+import styles from "./AddFriendModal.module.css";
 
 interface AddFriendModalProps {
   isOpen: boolean;
@@ -224,17 +225,7 @@ export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModa
                 setSelectedTemplateId(e.target.value);
                 playSound("select");
               }}
-              style={{
-                width: "100%",
-                padding: "var(--space-xs)",
-                fontSize: "var(--font-size-sm)",
-                fontFamily: "inherit",
-                background: "var(--bg)",
-                border: "var(--border-width-md) solid var(--game-border)",
-                borderRadius: "var(--radius-sm)",
-                color: "var(--text)",
-                cursor: "pointer",
-              }}
+              className={styles.templateSelect}
               disabled={isLoadingFriends}
             >
               <option value="">None - Start from scratch</option>
@@ -245,13 +236,7 @@ export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModa
               ))}
             </select>
             {selectedTemplateId && (
-              <div
-                style={{
-                  fontSize: "var(--font-size-xs)",
-                  color: "var(--text-secondary)",
-                  marginTop: "var(--space-xs)",
-                }}
-              >
+              <div className={styles.templateHelperText}>
                 Widget layout will be copied from template (without data)
               </div>
             )}
@@ -259,33 +244,18 @@ export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModa
 
           {/* Color Settings */}
           <div>
-            <div
-              className="game-flex game-flex-between"
-              style={{ marginBottom: "var(--space-sm)" }}
-            >
-              <label className="game-heading-3" style={{ margin: 0 }}>
-                Colors
-              </label>
+            <div className={`game-flex game-flex-between ${styles.colorHeader}`}>
+              <label className={`game-heading-3 ${styles.colorLabel}`}>Colors</label>
               <button
-                className="game-button"
+                className={`game-button ${styles.randomizeButton}`}
                 onClick={generateRandomColors}
-                style={{
-                  fontSize: "var(--font-size-xs)",
-                  padding: "var(--space-xs) var(--space-sm)",
-                }}
               >
-                <i className="hn hn-shuffle-solid" style={{ marginRight: "var(--space-xs)" }} />
+                <i className={`hn hn-shuffle-solid ${styles.randomizeIcon}`} />
                 RANDOMIZE
               </button>
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--space-sm)",
-              }}
-            >
+            <div className={styles.colorList}>
               {[
                 { key: "primary", label: "Primary" },
                 { key: "secondary", label: "Secondary" },
@@ -299,37 +269,16 @@ export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModa
                 const displayHex = hexInputs[key] ?? derivedHex;
 
                 return (
-                  <div
-                    key={key}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "var(--space-md)",
-                    }}
-                  >
+                  <div key={key} className={styles.colorRow}>
                     <div
-                      style={{
-                        width: "3rem",
-                        height: "1.5rem",
-                        background: currentHsl,
-                        border: "var(--border-width-md) solid var(--game-border)",
-                        borderRadius: "var(--radius-sm)",
-                        cursor: "pointer",
-                      }}
+                      className={styles.colorSwatch}
+                      style={{ "--color-swatch-bg": currentHsl } as React.CSSProperties}
                       onClick={() => {
                         setSelectedColor(key as typeof selectedColor);
                         setShowColorPicker(true);
                       }}
                     />
-                    <div
-                      style={{
-                        fontSize: "var(--font-size-xs)",
-                        color: "var(--text)",
-                        width: "5rem",
-                      }}
-                    >
-                      {label}
-                    </div>
+                    <div className={styles.colorLabelText}>{label}</div>
                     <input
                       type="text"
                       value={displayHex}
@@ -364,16 +313,7 @@ export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModa
                           });
                         }
                       }}
-                      style={{
-                        width: "5.5rem",
-                        padding: "var(--space-xs)",
-                        fontSize: "var(--font-size-xs)",
-                        fontFamily: "monospace",
-                        background: "var(--bg)",
-                        border: "var(--border-width-md) solid var(--game-border)",
-                        borderRadius: "var(--radius-sm)",
-                        color: "var(--text)",
-                      }}
+                      className={styles.hexInput}
                       placeholder="#000000"
                     />
                   </div>
@@ -382,14 +322,7 @@ export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModa
             </div>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "var(--space-md)",
-              justifyContent: "flex-end",
-              marginTop: "var(--space-md)",
-            }}
-          >
+          <div className={styles.buttonRow}>
             <button className="game-button" onClick={handleClose}>
               CANCEL
             </button>

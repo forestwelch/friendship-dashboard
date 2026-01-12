@@ -1,0 +1,55 @@
+.errorMessage {
+  color: var(--accent);
+  margin-bottom: var(--space-md);
+}
+
+.createButton {
+  margin-bottom: var(--space-lg);
+  background: var(--primary);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.emptyState {
+  opacity: 0.7;
+}
+
+.palettesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-md);
+}
+
+.paletteCard {
+  cursor: pointer;
+  padding: var(--space-md);
+  border: var(--border-width-md) solid var(--accent);
+}
+
+.colorSwatches {
+  display: flex;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+}
+
+.colorSwatch {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--game-border);
+  border-radius: var(--radius-sm);
+}
+
+.paletteDate {
+  font-size: var(--font-size-xs);
+  opacity: 0.7;
+  margin-bottom: var(--space-sm);
+}
+
+.deleteButton {
+  width: 100%;
+  background: var(--secondary);
+  color: var(--bg);
+  border-color: var(--accent);
+  font-size: var(--font-size-xs);
+  padding: var(--space-xs);
+}

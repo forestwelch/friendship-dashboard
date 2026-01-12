@@ -55,11 +55,7 @@ export function Navigation(
             addFriendAction.onClick();
             playSound("click");
           }}
-          className={clsx("game-nav-link", styles.navLink)}
-          style={{
-            cursor: "pointer",
-            fontFamily: "inherit",
-          }}
+          className={clsx("game-nav-link", styles.navLink, "cursor-pointer")}
         >
           ADD FRIEND
         </button>
@@ -69,13 +65,7 @@ export function Navigation(
       {adminActions && adminActions.length > 0 && (
         <>
           {adminActions.map((action, index) => (
-            <div
-              key={index}
-              style={{
-                position: "relative",
-                display: "inline-block",
-              }}
-            >
+            <div key={index} className={styles.navDropdownContainer}>
               <button
                 onClick={() => {
                   if (!action.disabled) {
@@ -90,33 +80,15 @@ export function Navigation(
                   "game-nav-link",
                   styles.navLink,
                   styles.subAction,
-                  action.isActive && "active"
+                  action.isActive && "active",
+                  action.disabled && styles.navButtonDisabled,
+                  !action.disabled && "cursor-pointer"
                 )}
-                style={{
-                  cursor: action.disabled ? "not-allowed" : "pointer",
-                  fontFamily: "inherit",
-                  opacity: action.disabled ? 0.5 : 1,
-                }}
               >
                 {action.label}
               </button>
               {action.hasDropdown && action.dropdownItems && action.dropdownItems.length > 0 && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "100%",
-                    left: 0,
-                    marginTop: "var(--space-xs)",
-                    background: "var(--game-surface)",
-                    border: "var(--border-width-md) solid var(--game-border)",
-                    borderRadius: "var(--radius-sm)",
-                    padding: "var(--space-xs)",
-                    zIndex: 1000,
-                    minWidth: "12rem",
-                    maxHeight: "20rem",
-                    overflowY: "auto",
-                  }}
-                >
+                <div className={styles.navDropdown}>
                   {action.dropdownItems.map((item, itemIndex) => (
                     <button
                       key={itemIndex}
@@ -124,17 +96,7 @@ export function Navigation(
                         item.onClick();
                         playSound("click");
                       }}
-                      style={{
-                        width: "100%",
-                        padding: "var(--space-xs) var(--space-sm)",
-                        textAlign: "left",
-                        background: "transparent",
-                        border: "none",
-                        color: "var(--text)",
-                        cursor: "pointer",
-                        fontSize: "var(--font-size-sm)",
-                        fontFamily: "inherit",
-                      }}
+                      className={styles.navDropdownItem}
                     >
                       {item.label}
                     </button>

@@ -6,18 +6,7 @@ export default function AdminInboxPage() {
   return (
     <>
       <Navigation />
-      <div
-        className="admin-page"
-        style={{
-          paddingTop: `calc(var(--height-button) + var(--space-md))`,
-          width: "100%",
-          maxWidth: "100%",
-          minHeight: "100vh",
-          background: "var(--admin-bg)",
-          color: "var(--admin-text)",
-          overflowX: "hidden",
-        }}
-      >
+      <div className={`admin-page ${styles.pageContainer}`}>
         <InboxManager />
       </div>
     </>

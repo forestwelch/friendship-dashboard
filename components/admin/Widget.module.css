@@ -1,0 +1,11 @@
+.editableWidgetContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.editableWidgetContent {
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}

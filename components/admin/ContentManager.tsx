@@ -6,6 +6,7 @@ import { SongManager } from "./SongManager";
 import { ImageManager } from "./ImageManager";
 import { usePathname } from "next/navigation";
 import { AddContentNav } from "@/app/admin/content/AddContentNav";
+import styles from "./ContentManager.module.css";
 
 interface ImageItem {
   id: string;
@@ -175,41 +176,16 @@ export function ContentManager() {
         albums={albums}
         saving={saving}
       />
-      <div
-        className="admin-page"
-        style={{
-          paddingTop: `calc(var(--height-button) + var(--space-md))`,
-          width: "100%",
-          maxWidth: "100%",
-          minHeight: "100vh",
-          background: "var(--admin-bg)",
-          color: "var(--admin-text)",
-          overflowX: "hidden",
-        }}
-      >
-        <div
-          className="game-container"
-          style={{
-            paddingTop: "var(--space-3xl)",
-            paddingBottom: "var(--space-3xl)",
-          }}
-        >
-          <h1
-            className="game-heading-1"
-            style={{
-              marginBottom: "var(--space-3xl)",
-              fontSize: "var(--font-size-3xl)",
-            }}
-          >
+      <div className={`admin-page ${styles.pageContainer}`}>
+        <div className={`game-container ${styles.contentContainer}`}>
+          <h1 className={`game-heading-1 ${styles.title}`}>
             {activeTab === "songs" ? "MANAGE SONGS" : "MANAGE IMAGES"}
           </h1>
 
           {loading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "var(--admin-text)" }}>
-              Loading...
-            </div>
+            <div className={styles.loadingMessage}>Loading...</div>
           ) : error ? (
-            <div style={{ padding: "2rem", color: "var(--admin-accent)" }}>Error: {error}</div>
+            <div className={styles.errorMessage}>Error: {error}</div>
           ) : activeTab === "songs" ? (
             <SongManager
               initialSongs={topSongs}

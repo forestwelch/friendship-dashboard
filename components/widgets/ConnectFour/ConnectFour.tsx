@@ -121,8 +121,12 @@ export function ConnectFour({
 
               return (
                 <div key={colIdx} className={styles.boardCell}>
+                  {/* CSS custom property is set inline because piece color is dynamic (from database) */}
                   {pieceColor ? (
-                    <div className={styles.piecePreview} style={{ backgroundColor: pieceColor }} />
+                    <div
+                      className={styles.piecePreview}
+                      style={{ "--piece-color": pieceColor } as React.CSSProperties}
+                    />
                   ) : null}
                 </div>
               );

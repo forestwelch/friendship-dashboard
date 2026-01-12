@@ -6,6 +6,7 @@ import { playSound } from "@/lib/sounds";
 import { ColorPicker } from "./ColorPicker";
 import { DEFAULT_THEME_COLORS } from "@/lib/theme-defaults";
 import { FriendCard } from "@/components/FriendCard";
+import styles from "./FriendManager.module.css";
 
 export function FriendManager() {
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -183,52 +184,12 @@ export function FriendManager() {
   }, []);
 
   return (
-    <div
-      className="admin-page"
-      style={{
-        paddingTop: `calc(var(--height-button) + var(--space-md))`,
-        width: "100%",
-        maxWidth: "100%",
-        minHeight: "100vh",
-        background: "var(--admin-bg)",
-        color: "var(--admin-text)",
-        overflowX: "hidden",
-      }}
-    >
-      <div
-        className="game-container"
-        style={{
-          paddingTop: "var(--space-3xl)",
-          paddingBottom: "var(--space-3xl)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "var(--space-3xl)",
-          }}
-        >
-          <h1
-            className="game-heading-1"
-            style={{
-              margin: 0,
-              fontSize: "var(--font-size-3xl)",
-            }}
-          >
-            MANAGE FRIENDS
-          </h1>
+    <div className={`admin-page ${styles.pageContainer}`}>
+      <div className={`game-container ${styles.contentContainer}`}>
+        <div className={styles.header}>
+          <h1 className={`game-heading-1 ${styles.title}`}>MANAGE FRIENDS</h1>
           {friends.length > 0 && (
-            <button
-              className="game-button"
-              onClick={handleDeleteAll}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "var(--space-xs)",
-              }}
-            >
+            <button className={`game-button ${styles.deleteAllButton}`} onClick={handleDeleteAll}>
               <i className="hn hn-trash-alt-solid" />
               DELETE ALL
             </button>
@@ -237,31 +198,12 @@ export function FriendManager() {
 
         {/* Add Friend Form - shown when triggered from nav */}
         {showAddForm && (
-          <div
-            className="game-card"
-            style={{
-              marginBottom: "var(--space-xl)",
-              padding: "var(--space-lg)",
-            }}
-          >
-            <h2 className="game-heading-2" style={{ marginBottom: "var(--space-md)" }}>
-              Add New Friend
-            </h2>
+          <div className={`game-card ${styles.addFormCard}`}>
+            <h2 className={`game-heading-2 ${styles.addFormTitle}`}>Add New Friend</h2>
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--space-md)",
-              }}
-            >
+            <div className={styles.formContainer}>
               <div>
-                <label
-                  className="game-heading-3"
-                  style={{ marginBottom: "var(--space-xs)", display: "block" }}
-                >
-                  Name
-                </label>
+                <label className={`game-heading-3 ${styles.nameLabel}`}>Name</label>
                 <input
                   className="game-input"
                   type="text"
@@ -278,33 +220,18 @@ export function FriendManager() {
 
               {/* Color Settings */}
               <div>
-                <div
-                  className="game-flex game-flex-between"
-                  style={{ marginBottom: "var(--space-sm)" }}
-                >
-                  <label className="game-heading-3" style={{ margin: 0 }}>
-                    Colors
-                  </label>
+                <div className={`game-flex game-flex-between ${styles.colorHeader}`}>
+                  <label className={`game-heading-3 ${styles.colorLabel}`}>Colors</label>
                   <button
-                    className="game-button"
+                    className={`game-button ${styles.randomizeButton}`}
                     onClick={generateRandomColors}
-                    style={{
-                      fontSize: "var(--font-size-xs)",
-                      padding: "var(--space-xs) var(--space-sm)",
-                    }}
                   >
-                    <i className="hn hn-shuffle-solid" style={{ marginRight: "var(--space-xs)" }} />
+                    <i className={`hn hn-shuffle-solid ${styles.randomizeIcon}`} />
                     RANDOMIZE
                   </button>
                 </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "var(--space-sm)",
-                  }}
-                >
+                <div className={styles.colorList}>
                   {[
                     { key: "primary", label: "Primary" },
                     { key: "secondary", label: "Secondary" },
@@ -312,43 +239,22 @@ export function FriendManager() {
                     { key: "bg", label: "Background" },
                     { key: "text", label: "Text" },
                   ].map(({ key, label }) => (
-                    <div
-                      key={key}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "var(--space-md)",
-                      }}
-                    >
+                    <div key={key} className={styles.colorRow}>
                       <div
-                        style={{
-                          width: "3rem",
-                          height: "1.5rem",
-                          background: newFriend[key as keyof typeof newFriend],
-                          border: "var(--border-width-md) solid var(--game-border)",
-                          borderRadius: "var(--radius-sm)",
-                          cursor: "pointer",
-                        }}
+                        className={styles.colorSwatch}
+                        style={
+                          {
+                            "--color-swatch-bg": newFriend[key as keyof typeof newFriend],
+                          } as React.CSSProperties
+                        }
                         onClick={() => {
                           setSelectedColor(key as typeof selectedColor);
                           setShowColorPicker(true);
                         }}
                       />
-                      <div style={{ flex: 1 }}>
-                        <div
-                          style={{
-                            fontSize: "var(--font-size-xs)",
-                            color: "var(--text)",
-                          }}
-                        >
-                          {label}
-                        </div>
-                        <div
-                          style={{
-                            fontSize: "var(--font-size-xs)",
-                            color: "var(--text)",
-                          }}
-                        >
+                      <div className={styles.colorInfo}>
+                        <div className={styles.colorInfoText}>{label}</div>
+                        <div className={styles.colorInfoText}>
                           {newFriend[key as keyof typeof newFriend]}
                         </div>
                       </div>
@@ -357,13 +263,7 @@ export function FriendManager() {
                 </div>
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  gap: "var(--space-md)",
-                  justifyContent: "flex-end",
-                }}
-              >
+              <div className={styles.buttonRow}>
                 <button
                   className="game-button"
                   onClick={() => {
@@ -382,33 +282,11 @@ export function FriendManager() {
         )}
 
         {/* Friends Grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(17.5rem, 1fr))",
-            gap: "var(--space-xl)",
-            marginBottom: "var(--space-3xl)",
-          }}
-        >
+        <div className={styles.friendsGrid}>
           {loading ? (
-            <div
-              style={{
-                gridColumn: "1 / -1",
-                padding: "var(--space-xl)",
-                textAlign: "center",
-              }}
-            >
-              Loading friends...
-            </div>
+            <div className={styles.loadingGridItem}>Loading friends...</div>
           ) : friends.length === 0 ? (
-            <div
-              style={{
-                gridColumn: "1 / -1",
-                padding: "var(--space-xl)",
-                textAlign: "center",
-                color: "var(--text)",
-              }}
-            >
+            <div className={styles.emptyGridItem}>
               No friends yet. Add one using the button above!
             </div>
           ) : (
