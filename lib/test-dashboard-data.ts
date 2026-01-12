@@ -42,6 +42,8 @@ export const testDashboardWidgets: FriendWidget[] = [
     position_x: 0,
     position_y: 0,
     config: {},
+    // Recent update - should show as new content
+    last_updated_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
   },
   {
     id: "w2",
@@ -61,6 +63,8 @@ export const testDashboardWidgets: FriendWidget[] = [
         },
       ],
     },
+    // Old update - should show as already seen (if interacted)
+    last_updated_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(), // 2 days ago
   },
   {
     id: "w3",
@@ -79,6 +83,8 @@ export const testDashboardWidgets: FriendWidget[] = [
         },
       ],
     },
+    // Very recent update - should show as new content
+    last_updated_at: new Date(Date.now() - 1000 * 60 * 5).toISOString(), // 5 minutes ago
   },
   {
     id: "w4",
@@ -98,6 +104,8 @@ export const testDashboardWidgets: FriendWidget[] = [
         },
       ],
     },
+    // No update timestamp - should not show as new
+    last_updated_at: null,
   },
   {
     id: "w5",
@@ -110,6 +118,8 @@ export const testDashboardWidgets: FriendWidget[] = [
     config: {
       recommendations: [{ id: "m1", title: "Inception", type: "Movie", rating: 5 }],
     },
+    // Recent update - should show as new content
+    last_updated_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15 minutes ago
   },
   {
     id: "w6",
@@ -120,5 +130,7 @@ export const testDashboardWidgets: FriendWidget[] = [
     position_x: 4,
     position_y: 2,
     config: {},
+    // Old update - should show as already seen (if interacted)
+    last_updated_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
   },
 ];

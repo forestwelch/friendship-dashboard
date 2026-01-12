@@ -10,6 +10,7 @@ export interface FriendWidget {
   position_x: number;
   position_y: number;
   config: WidgetConfig;
+  last_updated_at?: string | null; // ISO timestamp when widget content was last updated
 }
 
 export interface FriendPageData {
@@ -25,6 +26,50 @@ export interface FriendPageData {
 
 // Re-export common functions
 export { getInboxItems, updateInboxItemStatus, createInboxItem } from "./queries-inbox";
+
+/**
+ * Get widget interactions for a viewer friend
+ * Returns a map of friend_widget_id -> { last_interacted_at: string }
+ */
+export async function getWidgetInteractions(
+  viewerFriendId: string,
+  friendWidgetIds?: string[]
+): Promise<Record<string, { last_interacted_at: string }>> {
+  if (!isSupabaseConfigured()) {
+    return {};
+  }
+
+  try {
+    let query = supabase
+      .from("widget_interactions")
+      .select("friend_widget_id, last_interacted_at")
+      .eq("viewer_friend_id", viewerFriendId);
+
+    if (friendWidgetIds && friendWidgetIds.length > 0) {
+      query = query.in("friend_widget_id", friendWidgetIds);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error fetching widget interactions:", error);
+      return {};
+    }
+
+    // Transform to a map for easier lookup
+    const interactionsMap: Record<string, { last_interacted_at: string }> = {};
+    (data || []).forEach((interaction) => {
+      interactionsMap[interaction.friend_widget_id] = {
+        last_interacted_at: interaction.last_interacted_at,
+      };
+    });
+
+    return interactionsMap;
+  } catch (error) {
+    console.error("Error in getWidgetInteractions:", error);
+    return {};
+  }
+}
 
 /**
  * Get all friends
@@ -108,6 +153,7 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
           position_x,
           position_y,
           config,
+          last_updated_at,
           widgets:widget_id (
             type,
             name
@@ -172,6 +218,7 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
         position_x: Number(w.position_x),
         position_y: Number(w.position_y),
         config: (w.config || {}) as WidgetConfig,
+        last_updated_at: w.last_updated_at ? String(w.last_updated_at) : null,
       };
     });
 
