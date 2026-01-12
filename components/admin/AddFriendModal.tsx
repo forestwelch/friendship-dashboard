@@ -404,15 +404,13 @@ export function AddFriendModal({ isOpen, onClose, onFriendAdded }: AddFriendModa
       {showColorPicker && (
         <ColorPicker
           currentColor={
-            selectedColor === "text"
-              ? newFriend.color_text
-              : selectedColor === "primary"
-                ? newFriend.color_primary
-                : selectedColor === "secondary"
-                  ? newFriend.color_secondary
-                  : selectedColor === "accent"
-                    ? newFriend.color_accent
-                    : newFriend.color_bg
+            {
+              text: newFriend.color_text,
+              primary: newFriend.color_primary,
+              secondary: newFriend.color_secondary,
+              accent: newFriend.color_accent,
+              bg: newFriend.color_bg,
+            }[selectedColor]
           }
           onColorChange={(color) => {
             handleColorChange(`color_${selectedColor}`, color);
