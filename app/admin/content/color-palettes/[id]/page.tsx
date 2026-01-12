@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { playSound } from "@/lib/sounds";
 import { Navigation } from "@/components/Navigation";
 import { FriendPageClient } from "@/app/[friend]/FriendPageClient";
-import { Friend, Song } from "@/lib/types";
+import { Friend } from "@/lib/types";
 import { FriendWidget } from "@/lib/queries";
 import { ColorPalette } from "@/lib/queries-color-palettes";
 import { ColorSettings } from "@/components/admin/ColorSettings";
@@ -36,12 +36,10 @@ function PreviewPanel({
   draftColors,
   previewFriend,
   mockWidgets,
-  mockSongs,
 }: {
   draftColors: typeof DEFAULT_COLORS;
   previewFriend: Friend;
   mockWidgets: FriendWidget[];
-  mockSongs: Song[];
 }) {
   const { setTheme } = useThemeContext();
 
@@ -67,7 +65,6 @@ function PreviewPanel({
       <FriendPageClient
         friend={previewFriend}
         initialWidgets={mockWidgets}
-        songs={mockSongs}
         pixelArtMap={new Map()}
         pixelArtBySize={new Map()}
         forceViewMode={true}
@@ -103,7 +100,6 @@ export default function ColorPaletteEditPage() {
   const [testFriendData, setTestFriendData] = useState<{
     friend: Friend;
     widgets: FriendWidget[];
-    songs: Song[];
   } | null>(null);
   const [previewWidgets, setPreviewWidgets] = useState<FriendWidget[]>([]);
 
@@ -119,14 +115,9 @@ export default function ColorPaletteEditPage() {
         }
         const friendData = await friendResponse.json();
 
-        // Fetch songs (global content)
-        const songsResponse = await fetch("/api/content/top_10_songs");
-        const songsData = await songsResponse.json();
-
         setTestFriendData({
           friend: friendData.friend,
           widgets: friendData.widgets || [],
-          songs: songsData.songs || [],
         });
         setPreviewWidgets(friendData.widgets || []);
       } catch (err) {
@@ -510,7 +501,6 @@ export default function ColorPaletteEditPage() {
           draftColors={draftColors}
           previewFriend={previewFriend}
           mockWidgets={previewWidgets}
-          mockSongs={testFriendData.songs}
         />
       </div>
     </ThemeProvider>

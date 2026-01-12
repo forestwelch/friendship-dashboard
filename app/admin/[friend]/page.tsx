@@ -1,7 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { getFriendPage, getTop10Songs } from "@/lib/queries";
-import { Song } from "@/lib/types";
+import { getFriendPage } from "@/lib/queries";
 import { FriendPageClient } from "@/app/[friend]/FriendPageClient";
 import { AdminNavigation } from "./AdminNavigation";
 
@@ -29,10 +28,6 @@ export default async function AdminFriendPage({ params }: AdminFriendPageProps) 
 
   const { friend, widgets, pixelArtImages } = pageData;
 
-  // Fetch global content (e.g., top 10 songs)
-  const songsData = await getTop10Songs();
-  const songs: Song[] = songsData?.songs || [];
-
   // Create a map of pixel art images by widget_id for quick lookup
   // Also create a fallback map by size for images without widget_id
   const pixelArtMap = new Map<string, string>();
@@ -58,7 +53,6 @@ export default async function AdminFriendPage({ params }: AdminFriendPageProps) 
       <FriendPageClient
         friend={friend}
         initialWidgets={widgets}
-        songs={songs}
         pixelArtMap={pixelArtMap}
         pixelArtBySize={pixelArtBySize}
       />

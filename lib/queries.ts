@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from "./supabase";
-import { Friend, WidgetSize, WidgetConfig, Song } from "./types";
+import { Friend, WidgetSize, WidgetConfig } from "./types";
 
 export interface FriendWidget {
   id: string;
@@ -280,24 +280,6 @@ export async function getGlobalContent(contentType: string): Promise<unknown> {
     console.error("Error in getGlobalContent:", error);
     return null;
   }
-}
-
-export async function getTop10Songs(): Promise<{ songs: Song[] }> {
-  const data = await getGlobalContent("top_10_songs");
-  if (data && typeof data === "object" && "songs" in data) {
-    const songs = (data as { songs: unknown[] }).songs;
-    // Filter out invalid songs - only return songs with mp3Url
-    const validSongs = songs.filter(
-      (song: unknown): song is Song =>
-        typeof song === "object" &&
-        song !== null &&
-        "mp3Url" in song &&
-        typeof (song as { mp3Url: unknown }).mp3Url === "string"
-    );
-    return { songs: validSongs };
-  }
-  // Return empty array if no data
-  return { songs: [] };
 }
 
 /**
@@ -631,10 +613,6 @@ function getMockFriendPage(slug: string): FriendPageData | null {
   };
 }
 
-function getMockGlobalContent(contentType: string): unknown {
-  if (contentType === "top_10_songs") {
-    // Return empty array - no mock data
-    return { songs: [] };
-  }
+function getMockGlobalContent(_contentType: string): unknown {
   return null;
 }

@@ -515,7 +515,7 @@ export function WidgetManager({ friend, initialWidgets }: WidgetManagerProps) {
                       pointerEvents: "none",
                     }}
                   >
-                    <WidgetRenderer widget={movingWidget} songs={[]} />
+                    <WidgetRenderer widget={movingWidget} />
                   </GridItem>
                 )}
               </>

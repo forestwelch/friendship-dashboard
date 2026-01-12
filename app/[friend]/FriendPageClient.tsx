@@ -7,7 +7,7 @@ import { AdminOverlay } from "@/components/admin/AdminOverlay";
 import { ColorSettings } from "@/components/admin/ColorSettings";
 import { WidgetLibrary } from "@/components/admin/WidgetLibrary";
 import { WidgetConfigModal } from "@/components/admin/WidgetConfigModal";
-import { Friend, WidgetSize, WidgetPosition, Song } from "@/lib/types";
+import { Friend, WidgetSize, WidgetPosition } from "@/lib/types";
 import { ThemeColors } from "@/lib/theme-context";
 import { FriendWidget, getWidgetInteractions } from "@/lib/queries";
 import { canPlaceWidget, findAvailablePosition } from "@/lib/widget-utils";
@@ -20,7 +20,6 @@ import { hasNewContent } from "@/lib/widget-notifications";
 interface FriendPageClientProps {
   friend: Friend;
   initialWidgets: FriendWidget[];
-  songs: Song[];
   pixelArtMap: Map<string, string>;
   pixelArtBySize: Map<string, string>;
   forceViewMode?: boolean; // If true, always use view mode regardless of admin route
@@ -29,7 +28,6 @@ interface FriendPageClientProps {
 export function FriendPageClient({
   friend,
   initialWidgets,
-  songs,
   pixelArtMap: initialPixelArtMap,
   pixelArtBySize,
   forceViewMode = false,
@@ -695,7 +693,6 @@ export function FriendPageClient({
                   >
                     <WidgetRenderer
                       widget={widget}
-                      songs={songs}
                       pixelArtImageUrl={pixelArtImageUrl}
                       onUploadImage={(file) => handleUploadImage(file, widget.id)}
                       friendId={friend.id}
@@ -861,7 +858,6 @@ export function FriendPageClient({
                     >
                       <WidgetRenderer
                         widget={movingWidget}
-                        songs={songs}
                         pixelArtImageUrl={
                           pixelArtMap.get(movingWidget.id) || pixelArtBySize.get(movingWidget.size)
                         }

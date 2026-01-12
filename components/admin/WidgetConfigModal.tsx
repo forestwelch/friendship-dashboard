@@ -211,7 +211,7 @@ export function WidgetConfigModal({
   useEffect(() => {
     if (widget?.widget_type === "music_player") {
       setLoadingSongs(true);
-      fetch("/api/content/top_10_songs")
+      fetch("/api/content/songs")
         .then((res) => res.json())
         .then((data) => {
           if (data.songs && Array.isArray(data.songs)) {

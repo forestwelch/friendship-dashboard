@@ -184,7 +184,7 @@ export function SongManager({
       formData.append("title", newSong.title || "");
       formData.append("artist", newSong.artist || "");
 
-      const response = await fetch("/api/content/top_10_songs/upload", {
+      const response = await fetch("/api/content/songs/upload", {
         method: "POST",
         body: formData,
       });
