@@ -243,71 +243,8 @@ export function useMakeMove(friendId: string, _widgetId: string, currentUserId: 
       }).catch(() => {});
       // #endregion
 
-      // Also update friend_widgets.last_updated_at for the Connect4 widget
-      // Find the Connect4 widget for this friend
-      const { data: connectFourWidgetType } = await supabase
-        .from("widgets")
-        .select("id")
-        .eq("type", "connect_four")
-        .single();
-
-      if (connectFourWidgetType?.id) {
-        const { data: widgetData, error: widgetError } = await supabase
-          .from("friend_widgets")
-          .select("id")
-          .eq("friend_id", friendId)
-          .eq("widget_id", connectFourWidgetType.id)
-          .maybeSingle();
-
-        // #region agent log
-        fetch("http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            location: "lib/queries-connect-four.ts:232",
-            message: "Finding Connect4 widget",
-            data: {
-              friendId,
-              connectFourWidgetTypeId: connectFourWidgetType.id,
-              foundWidgetId: widgetData?.id || null,
-              widgetError: widgetError?.message || null,
-            },
-            timestamp: Date.now(),
-            sessionId: "debug-session",
-            runId: "run1",
-            hypothesisId: "C",
-          }),
-        }).catch(() => {});
-        // #endregion
-
-        if (widgetData?.id) {
-          const updateResult = await supabase
-            .from("friend_widgets")
-            .update({ last_updated_at: new Date().toISOString() })
-            .eq("id", widgetData.id)
-            .select();
-
-          // #region agent log
-          fetch("http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              location: "lib/queries-connect-four.ts:242",
-              message: "Updated friend_widgets.last_updated_at",
-              data: {
-                widgetId: widgetData.id,
-                updateSuccess: !!updateResult.data,
-                updateError: updateResult.error?.message || null,
-              },
-              timestamp: Date.now(),
-              sessionId: "debug-session",
-              runId: "run1",
-              hypothesisId: "C",
-            }),
-          }).catch(() => {});
-          // #endregion
-        }
-      }
+      // Database trigger automatically updates friend_widgets.last_updated_at
+      // when connect_four_games table changes (see migration 036)
 
       return convertLegacyGame(data.config as Partial<ConnectFourData>, friendId);
     },
