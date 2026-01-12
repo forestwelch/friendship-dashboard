@@ -670,11 +670,11 @@ export function FriendPageClient({
                         width: "100%",
                         height: "100%",
                         // Add glow effect for new content widgets using inline style
-                        ...(widgetHasNewContent
-                          ? {
-                              boxShadow: `0 0 8px ${themeColors.secondary}40`, // 40 = ~25% opacity in hex
-                            }
-                          : {}),
+                        // ...(widgetHasNewContent
+                        //   ? {
+                        //       boxShadow: `0 0 8px ${themeColors.secondary}40`, // 40 = ~25% opacity in hex
+                        //     }
+                        //   : {}),
                       } as React.CSSProperties
                     }
                     onMouseEnter={() => {
@@ -703,11 +703,11 @@ export function FriendPageClient({
                       onUpdateWidgetConfig={handleUpdateWidgetConfig}
                     />
                     {/* Star icon for new content widgets */}
-                    {widgetHasNewContent && (
+                    {/*{widgetHasNewContent && (
                       <div className="widget-new-content-indicator">
                         <i className="hn hn-star-solid" />
                       </div>
-                    )}
+                    )}*/}
                     {isHovered && (
                       <AdminOverlay
                         widgetId={widget.id}
