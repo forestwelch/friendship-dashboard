@@ -10,7 +10,7 @@ export interface FriendWidget {
   position_x: number;
   position_y: number;
   config: WidgetConfig;
-  last_updated_at?: string | null; // ISO timestamp when widget content was last updated
+  last_updated_at?: string | null; // ISO timestamp
 }
 
 export interface FriendPageData {
@@ -23,8 +23,6 @@ export interface FriendPageData {
     image_data: string;
   }>;
 }
-
-// Re-export common functions
 
 /**
  * Get widget interactions for a viewer friend
@@ -74,32 +72,7 @@ export async function getWidgetInteractions(
  * Get all friends
  */
 export async function getAllFriends(): Promise<Friend[]> {
-  if (!isSupabaseConfigured()) {
-    return [
-      {
-        id: "mock-daniel",
-        name: "daniel",
-        slug: "daniel",
-        display_name: "Daniel",
-        color_primary: "#2a52be",
-        color_secondary: "#7cb9e8",
-        color_accent: "#00308f",
-        color_bg: "#e6f2ff",
-        color_text: "#001f3f",
-      },
-      {
-        id: "mock-max",
-        name: "max",
-        slug: "max",
-        display_name: "Max",
-        color_primary: "#dc143c",
-        color_secondary: "#ff6b6b",
-        color_accent: "#8b0000",
-        color_bg: "#ffe6e6",
-        color_text: "#2d0000",
-      },
-    ];
-  }
+  if (!isSupabaseConfigured()) return [];
 
   try {
     const { data, error } = await supabase.from("friends").select("*").order("display_name");
@@ -121,8 +94,7 @@ export async function getAllFriends(): Promise<Friend[]> {
  */
 export async function getFriendPage(slug: string): Promise<FriendPageData | null> {
   if (!isSupabaseConfigured()) {
-    // Return mock data if Supabase not configured
-    return getMockFriendPage(slug);
+    return null;
   }
 
   try {
@@ -257,7 +229,7 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
  */
 export async function getGlobalContent(contentType: string): Promise<unknown> {
   if (!isSupabaseConfigured()) {
-    return getMockGlobalContent(contentType);
+    return null;
   }
 
   try {
@@ -316,8 +288,7 @@ export async function savePixelArtImage(
   preview: string // Required: base64 PNG preview
 ): Promise<string | null> {
   if (!isSupabaseConfigured()) {
-    // Mock: Would save pixel art image
-    return "mock-id";
+    return null;
   }
 
   try {
@@ -543,75 +514,4 @@ export async function updateImageAlbums(
     console.error("Error in updateImageAlbums:", error);
     return 0;
   }
-}
-
-// Mock data functions for development without Supabase
-function getMockFriendPage(slug: string): FriendPageData | null {
-  const themes: Record<string, Record<string, unknown>> = {
-    daniel: {
-      id: "mock-daniel",
-      name: "daniel",
-      slug: "daniel",
-      display_name: "Daniel",
-      color_primary: "#2a52be",
-      color_secondary: "#7cb9e8",
-      color_accent: "#00308f",
-      color_bg: "#e6f2ff",
-      color_text: "#001f3f",
-    },
-    max: {
-      id: "mock-max",
-      name: "max",
-      slug: "max",
-      display_name: "Max",
-      color_primary: "#dc143c",
-      color_secondary: "#ff6b6b",
-      color_accent: "#8b0000",
-      color_bg: "#ffe6e6",
-      color_text: "#2d0000",
-    },
-  };
-
-  const friend = themes[slug.toLowerCase()];
-  if (!friend) return null;
-
-  return {
-    friend: friend as unknown as Friend,
-    widgets: [
-      {
-        id: "mock-1",
-        widget_id: "mock-music",
-        widget_type: "music_player",
-        widget_name: "Music Player",
-        size: "1x1",
-        position_x: 0,
-        position_y: 0,
-        config: {},
-      },
-      {
-        id: "mock-2",
-        widget_id: "mock-music",
-        widget_type: "music_player",
-        widget_name: "Music Player",
-        size: "2x2",
-        position_x: 2,
-        position_y: 0,
-        config: {},
-      },
-      {
-        id: "mock-3",
-        widget_id: "mock-music",
-        widget_type: "music_player",
-        widget_name: "Music Player",
-        size: "3x3",
-        position_x: 0,
-        position_y: 2,
-        config: {},
-      },
-    ],
-  };
-}
-
-function getMockGlobalContent(_contentType: string): unknown {
-  return null;
 }
