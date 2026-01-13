@@ -8,9 +8,9 @@ import { FriendPageClient } from "@/app/[friend]/FriendPageClient";
 import { Friend } from "@/lib/types";
 import { FriendWidget } from "@/lib/queries";
 import { ColorPalette } from "@/lib/queries/color-palettes";
-import { ColorSettings } from "@/components/admin/ColorSettings";
-import { ThemeProvider, useThemeContext } from "@/lib/theme-context";
-import { hexToHsl, hslToHex } from "@/lib/color-utils";
+import { ColorSettings } from "@/components/admin/tools/ColorSettings";
+import { ThemeProvider, useThemeContext } from "@/lib/contexts/theme-context";
+import { hexToHsl, hslToHex } from "@/lib/utils/color-utils";
 import "@/styles/content-page.css";
 import styles from "./page.module.css";
 

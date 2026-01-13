@@ -14,7 +14,7 @@ import {
 import { PersonalityQuiz } from "@/components/widgets/_unused/PersonalityQuiz";
 import { FriendWidget } from "@/lib/queries";
 import { ConnectFourData } from "@/components/widgets";
-import { useTheme } from "@/lib/theme-context";
+import { useTheme } from "@/lib/contexts/theme-context";
 
 interface WidgetRendererProps {
   widget: FriendWidget;

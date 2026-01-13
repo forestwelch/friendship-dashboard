@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter, useParams } from "next/navigation";
 import { WidgetSize } from "@/lib/types";
-import { WidgetLibrary } from "@/components/admin/WidgetLibrary";
+import { WidgetLibrary } from "@/components/admin/widgets/WidgetLibrary";
 import { playSound } from "@/lib/sounds";
 import { Navigation } from "@/components/shared";
 import styles from "./page.module.css";

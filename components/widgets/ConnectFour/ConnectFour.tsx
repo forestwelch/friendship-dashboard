@@ -9,8 +9,8 @@ import { ConnectFourModal } from "./ConnectFourModal";
 import { createEmptyBoard, BOARD_ROWS, BOARD_COLS } from "./logic";
 import { ConnectFourData, useConnectFourGame } from "./queries";
 import { ADMIN_USER_ID } from "@/lib/constants";
-import { getUserColor } from "@/lib/color-utils";
-import { useUserContext, getUserIdForFriend, getUserDisplayName } from "@/lib/use-user-context";
+import { getUserColor } from "@/lib/utils/color-utils";
+import { useUserContext, getUserIdForFriend, getUserDisplayName } from "@/lib/hooks/useUserContext";
 import styles from "./ConnectFour.module.css";
 
 interface ConnectFourProps {

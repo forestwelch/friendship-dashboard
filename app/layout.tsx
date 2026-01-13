@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Press_Start_2P } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/lib/theme-context";
+import { ThemeProvider } from "@/lib/contexts/theme-context";
 import { QueryProvider } from "@/lib/providers";
 import { WebVitals } from "@/components/WebVitals";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { ADMIN_NAME, ADMIN_USER_ID } from "./constants";
+import { ADMIN_NAME, ADMIN_USER_ID } from "../constants";
 
 export type UserType = "admin" | "friend";
 

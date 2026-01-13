@@ -2,10 +2,10 @@
 
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { playSound } from "@/lib/sounds";
-import { ColorPicker } from "./ColorPicker";
+import { ColorPicker } from "../modals/ColorPicker";
 import clsx from "clsx";
 import styles from "./ColorSettings.module.css";
-import { hslToHex, hexToHsl, isValidHex } from "@/lib/color-utils";
+import { hslToHex, hexToHsl, isValidHex } from "@/lib/utils/color-utils";
 
 interface ColorSettingsProps {
   friendId: string;

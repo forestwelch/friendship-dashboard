@@ -8,7 +8,7 @@ import {
   ThemeColors,
   PIXEL_GRID_SIZE,
   mapIntensityToThemeColor,
-} from "@/lib/pixel-data-processing";
+} from "@/lib/utils/pixel-data-processing";
 import { GRID_TILE_SIZE_REM, GRID_GAP_REM } from "@/lib/constants";
 import styles from "./PixelArt.module.css";
 

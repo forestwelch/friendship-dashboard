@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Friend } from "@/lib/types";
 import { playSound } from "@/lib/sounds";
-import { ColorPicker } from "./ColorPicker";
+import { ColorPicker } from "../modals/ColorPicker";
 import { DEFAULT_THEME_COLORS } from "@/lib/theme-defaults";
 import { FriendCard } from "@/components/FriendCard";
 import styles from "./FriendManager.module.css";

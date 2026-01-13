@@ -12,7 +12,7 @@ import React, {
   ReactNode,
 } from "react";
 import { usePathname } from "next/navigation";
-import { DEFAULT_THEME_COLORS } from "./theme-defaults";
+import { DEFAULT_THEME_COLORS } from "../theme-defaults";
 
 export interface ThemeColors {
   primary: string;

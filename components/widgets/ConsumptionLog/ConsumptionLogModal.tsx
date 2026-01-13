@@ -8,10 +8,10 @@ import {
   useCreateConsumptionEntry,
   useMarkConsumptionEntryAsRead,
 } from "./queries";
-import { useIdentity } from "@/lib/identity-utils";
+import { useIdentity } from "@/lib/hooks/useIdentity";
 import { FormField, Input, Textarea } from "@/components/shared";
-import { formatDateCompact } from "@/lib/date-utils";
-import { getUserColorVar } from "@/lib/color-utils";
+import { formatDateCompact } from "@/lib/utils/date-utils";
+import { getUserColorVar } from "@/lib/utils/color-utils";
 import styles from "./ConsumptionLogModal.module.css";
 
 interface ConsumptionLogModalProps {

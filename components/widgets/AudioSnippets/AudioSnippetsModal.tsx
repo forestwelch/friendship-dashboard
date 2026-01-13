@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { Modal } from "@/components/shared";
 import { useUIStore } from "@/lib/store/ui-store";
 import { useAudioSnippets, useDeleteAudioSnippet } from "./queries";
-import { useIdentity } from "@/lib/identity-utils";
+import { useIdentity } from "@/lib/hooks/useIdentity";
 import { playSound } from "@/lib/sounds";
 import { Z_INDEX } from "@/lib/constants";
 import styles from "./AudioSnippetsModal.module.css";

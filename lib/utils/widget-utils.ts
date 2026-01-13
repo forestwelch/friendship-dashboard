@@ -1,8 +1,8 @@
 // Utility functions for widget positioning and collision detection
 
-import { WidgetSize, WidgetPosition } from "./types";
-import { FriendWidget } from "./queries";
-import { GRID_COLS, GRID_ROWS } from "./constants";
+import { WidgetSize, WidgetPosition } from "../types";
+import { FriendWidget } from "../queries";
+import { GRID_COLS, GRID_ROWS } from "../constants";
 
 /**
  * Get all grid positions occupied by a widget

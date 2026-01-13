@@ -4,10 +4,10 @@ import React, { useState } from "react";
 import { Modal } from "@/components/shared";
 import { useUIStore } from "@/lib/store/ui-store";
 import { useQuestionJarEntries, useCreateQuestion, useAnswerQuestion } from "./queries";
-import { useIdentity } from "@/lib/identity-utils";
+import { useIdentity } from "@/lib/hooks/useIdentity";
 import { FormField, Textarea } from "@/components/shared";
-import { formatDateCompact } from "@/lib/date-utils";
-import { getUserColorVar } from "@/lib/color-utils";
+import { formatDateCompact } from "@/lib/utils/date-utils";
+import { getUserColorVar } from "@/lib/utils/color-utils";
 import styles from "./QuestionJarModal.module.css";
 
 interface QuestionJarModalProps {

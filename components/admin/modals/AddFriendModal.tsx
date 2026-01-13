@@ -7,7 +7,7 @@ import { DEFAULT_THEME_COLORS } from "@/lib/theme-defaults";
 import { Modal } from "@/components/shared";
 import { FormField, Input } from "@/components/shared";
 import { useUIStore } from "@/lib/store/ui-store";
-import { hslToHex, hexToHsl, isValidHex } from "@/lib/color-utils";
+import { hslToHex, hexToHsl, isValidHex } from "@/lib/utils/color-utils";
 import { Friend } from "@/lib/types";
 import styles from "./AddFriendModal.module.css";
 

@@ -6,7 +6,7 @@ import { WidgetSize } from "@/lib/types";
 import { useUIStore } from "@/lib/store/ui-store";
 import { AudioSnippetsModal } from "./AudioSnippetsModal";
 import { useAudioSnippets, useUploadAudioSnippet } from "./queries";
-import { useIdentity } from "@/lib/identity-utils";
+import { useIdentity } from "@/lib/hooks/useIdentity";
 import { startRecording, recordForDuration } from "@/lib/audio-recorder";
 import { playSound } from "@/lib/sounds";
 import { Button } from "@/components/shared";

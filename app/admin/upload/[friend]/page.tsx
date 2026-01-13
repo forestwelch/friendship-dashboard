@@ -4,14 +4,14 @@ import React, { useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { Navigation } from "@/components/shared";
 import Link from "next/link";
-import { getThemePalette, ColorPalette } from "@/lib/image-processing";
+import { getThemePalette, ColorPalette } from "@/lib/utils/image-processing";
 import { WidgetSize } from "@/lib/types";
 import { savePixelArtImage } from "@/lib/queries";
 import {
   processImageToPixelData,
   pixelDataToBase64,
   generatePreview,
-} from "@/lib/pixel-data-processing";
+} from "@/lib/utils/pixel-data-processing";
 import styles from "./page.module.css";
 
 // Get theme class helper (same as friend page)

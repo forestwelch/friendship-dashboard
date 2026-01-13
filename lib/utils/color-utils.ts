@@ -1,4 +1,4 @@
-import { ADMIN_USER_ID } from "./constants";
+import { ADMIN_USER_ID } from "../constants";
 
 /**
  * Convert HSL string to hex color

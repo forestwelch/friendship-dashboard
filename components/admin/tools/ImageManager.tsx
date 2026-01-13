@@ -8,7 +8,7 @@ import {
   processImageToPixelData,
   pixelDataToBase64,
   generatePreview,
-} from "@/lib/pixel-data-processing";
+} from "@/lib/utils/pixel-data-processing";
 import clsx from "clsx";
 import styles from "./ImageManager.module.css";
 

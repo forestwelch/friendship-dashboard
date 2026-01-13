@@ -20,9 +20,9 @@ import {
   useResetGame,
   ConnectFourData,
 } from "./queries";
-import { useUserContext, getUserIdForFriend, getUserDisplayName } from "@/lib/use-user-context";
+import { useUserContext, getUserIdForFriend, getUserDisplayName } from "@/lib/hooks/useUserContext";
 import { ADMIN_USER_ID } from "@/lib/constants";
-import { getUserColor } from "@/lib/color-utils";
+import { getUserColor } from "@/lib/utils/color-utils";
 import styles from "./ConnectFourModal.module.css";
 
 interface ConnectFourModalProps {

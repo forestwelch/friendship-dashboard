@@ -16,7 +16,8 @@ interface NavigationProps {
     dropdownItems?: Array<{ label: string; onClick: () => void }>;
   }[];
   addFriendAction?: {
-    onClick: () => void;
+    onClick?: () => void;
+    href?: string;
   };
   className?: string;
 }
@@ -49,17 +50,26 @@ export function Navigation(
       })}
 
       {/* Add Friend button - shown on manage friends page */}
-      {addFriendAction && (
-        <button
-          onClick={() => {
-            addFriendAction.onClick();
-            playSound("click");
-          }}
-          className={clsx("game-nav-link", styles.navLink, "cursor-pointer")}
-        >
-          ADD FRIEND
-        </button>
-      )}
+      {addFriendAction &&
+        (addFriendAction.href ? (
+          <Link
+            href={addFriendAction.href}
+            className={clsx("game-nav-link", styles.navLink, "cursor-pointer")}
+            onClick={() => playSound("click")}
+          >
+            ADD FRIEND
+          </Link>
+        ) : (
+          <button
+            onClick={() => {
+              addFriendAction.onClick?.();
+              playSound("click");
+            }}
+            className={clsx("game-nav-link", styles.navLink, "cursor-pointer")}
+          >
+            ADD FRIEND
+          </button>
+        ))}
 
       {/* Admin Actions as Links - styled as sub-actions (smaller, underlined) */}
       {adminActions && adminActions.length > 0 && (

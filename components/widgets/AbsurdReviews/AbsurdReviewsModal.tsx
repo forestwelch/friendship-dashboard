@@ -11,10 +11,10 @@ import {
   submitReview,
 } from "./queries";
 import { useQueryClient } from "@tanstack/react-query";
-import { useIdentity } from "@/lib/identity-utils";
+import { useIdentity } from "@/lib/hooks/useIdentity";
 import { FormField, Input, Textarea, Button, Card } from "@/components/shared";
-import { formatDateCompact } from "@/lib/date-utils";
-import { getUserColorVar } from "@/lib/color-utils";
+import { formatDateCompact } from "@/lib/utils/date-utils";
+import { getUserColorVar } from "@/lib/utils/color-utils";
 import { playSound } from "@/lib/sounds";
 import styles from "./AbsurdReviewsModal.module.css";
 

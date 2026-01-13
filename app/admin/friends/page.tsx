@@ -1,11 +1,15 @@
 import React from "react";
-import { FriendManager } from "@/components/admin/FriendManager";
-import { AddFriendNav } from "./AddFriendNav";
+import { Navigation } from "@/components/shared";
+import { FriendManager } from "@/components/admin/tools/FriendManager";
 
 export default async function AdminFriendsPage() {
   return (
     <>
-      <AddFriendNav />
+      <Navigation
+        addFriendAction={{
+          href: "/admin/friends/add",
+        }}
+      />
       <FriendManager />
     </>
   );

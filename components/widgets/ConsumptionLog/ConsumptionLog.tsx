@@ -6,7 +6,7 @@ import { WidgetSize } from "@/lib/types";
 import { useUIStore } from "@/lib/store/ui-store";
 import { ConsumptionLogModal } from "./ConsumptionLogModal";
 import { useConsumptionEntries } from "./queries";
-import { useIdentity } from "@/lib/identity-utils";
+import { useIdentity } from "@/lib/hooks/useIdentity";
 import styles from "./ConsumptionLog.module.css";
 
 interface ConsumptionLogProps {
