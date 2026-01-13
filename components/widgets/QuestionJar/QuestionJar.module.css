@@ -9,7 +9,7 @@
 }
 
 .displayText {
-  word-break: break-word;
+  overflow-wrap: break-word;
   text-align: center;
   /* Dynamic font size based on widget size */
   font-size: var(--display-font-size, var(--font-size-xs));

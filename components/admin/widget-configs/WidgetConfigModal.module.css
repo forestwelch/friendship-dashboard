@@ -214,10 +214,6 @@
   flex-shrink: 0;
 }
 
-.helperText {
-  font-size: var(--font-size-xs);
-}
-
 .sizeLabel {
   margin: 0;
 }
@@ -251,10 +247,6 @@
 .sizePreview {
   min-width: 2rem;
   min-height: 2rem;
-}
-
-.configSection {
-  margin-bottom: var(--space-lg);
 }
 
 .configSectionTitle {

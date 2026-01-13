@@ -106,17 +106,8 @@
 
   /* Transitions */
   /* Transitions removed for performance */
-}
 
-/* Base font size - ensures rem calculations are consistent */
-html {
-  font-size: 16px; /* Base for rem calculations */
-}
-
-/* ============================================
-   ADMIN COLOR MAPPING - Uses Theme Colors
-   ============================================ */
-:root {
+  /* Admin Color Mapping - Uses Theme Colors */
   --admin-bg: var(--bg);
   --admin-surface: var(--secondary);
   --admin-surface-hover: var(--primary);
@@ -126,6 +117,11 @@ html {
   --admin-primary: var(--primary);
   --admin-secondary: var(--secondary);
   --admin-accent: var(--accent);
+}
+
+/* Base font size - ensures rem calculations are consistent */
+html {
+  font-size: 16px; /* Base for rem calculations */
 }
 
 /* ============================================
@@ -326,7 +322,6 @@ body {
   border-radius: var(--radius-sm);
   box-shadow: inset calc(var(--border-width-md) * 1) calc(var(--border-width-md) * 1) 0
     rgba(0, 0, 0, 0.3);
-  min-height: var(--height-input);
   height: var(--height-input);
   /* Improve mobile typing performance */
   -webkit-appearance: none;
@@ -368,9 +363,6 @@ textarea.game-input {
   box-shadow:
     calc(var(--border-width-md) * 1) calc(var(--border-width-md) * 1) 0 var(--accent),
     inset calc(var(--border-width) * -1) calc(var(--border-width) * -1) 0 rgba(0, 0, 0, 0.2);
-}
-
-.game-card-hover {
 }
 
 .game-card-hover:hover {
@@ -852,7 +844,7 @@ textarea.game-input {
 
 /* Text Utilities */
 .word-break {
-  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .font-bold {
@@ -1056,10 +1048,6 @@ textarea.game-input {
   gap: var(--space-md);
 }
 
-.text-center {
-  text-align: center;
-}
-
 .snippets-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -1229,7 +1217,6 @@ textarea.game-input {
 }
 
 .fridge-bank {
-  width: 100%;
   max-width: 100%;
   height: calc(
     4 * 34px + 3 * 1px + var(--space-xs) * 2

@@ -14,6 +14,7 @@
 }
 
 .title {
+  margin: 0;
   margin-bottom: var(--space-3xl);
   font-size: var(--font-size-3xl);
 }
@@ -125,11 +126,6 @@
   margin-bottom: var(--space-3xl);
 }
 
-.title {
-  margin: 0;
-  font-size: var(--font-size-3xl);
-}
-
 .deleteAllButton {
   display: flex;
   align-items: center;
@@ -139,10 +135,6 @@
 .addFormCard {
   margin-bottom: var(--space-xl);
   padding: var(--space-lg);
-}
-
-.addFormTitle {
-  margin-bottom: var(--space-md);
 }
 
 .formContainer {
@@ -156,44 +148,6 @@
   display: block;
 }
 
-.colorHeader {
-  margin-bottom: var(--space-sm);
-}
-
-.colorLabel {
-  margin: 0;
-}
-
-.randomizeButton {
-  font-size: var(--font-size-xs);
-  padding: var(--space-xs) var(--space-sm);
-}
-
-.randomizeIcon {
-  margin-right: var(--space-xs);
-}
-
-.colorList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.colorRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-}
-
-.colorSwatch {
-  width: 3rem;
-  height: 1.5rem;
-  background: var(--color-swatch-bg, var(--primary));
-  border: var(--border-width-md) solid var(--game-border);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-}
-
 .colorInfo {
   flex: 1;
 }
@@ -201,12 +155,6 @@
 .colorInfoText {
   font-size: var(--font-size-xs);
   color: var(--text);
-}
-
-.buttonRow {
-  display: flex;
-  gap: var(--space-md);
-  justify-content: flex-end;
 }
 
 .loadingGridItem {

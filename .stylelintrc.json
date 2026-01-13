@@ -1,0 +1,45 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "selector-class-pattern": null,
+    "custom-property-pattern": null,
+    "keyframes-name-pattern": null,
+    "function-name-case": null,
+    "value-keyword-case": null,
+    "declaration-block-no-duplicate-properties": [
+      true,
+      {
+        "ignore": ["consecutive-duplicates-with-different-values"]
+      }
+    ],
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": ["global"]
+      }
+    ],
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": ["tailwind", "apply", "variants", "responsive", "screen", "layer"]
+      }
+    ],
+    "import-notation": null,
+    "font-family-name-quotes": null,
+    "color-hex-length": null,
+    "number-max-precision": null,
+    "comment-empty-line-before": null,
+    "value-no-vendor-prefix": null,
+    "property-no-vendor-prefix": null,
+    "selector-pseudo-element-colon-notation": null,
+    "declaration-block-no-redundant-longhand-properties": null,
+    "color-function-notation": null,
+    "alpha-value-notation": null,
+    "color-function-alias-notation": null,
+    "declaration-empty-line-before": null,
+    "rule-empty-line-before": null,
+    "comment-whitespace-inside": null,
+    "media-feature-range-notation": null
+  },
+  "ignoreFiles": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "node_modules/**"]
+}

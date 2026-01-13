@@ -1,8 +1,7 @@
 /* Personality Quiz Widget Styles */
 
-.tile1x1,
-.tile2x2,
-.tile3x3 {
+/* 1x1 Tile */
+.tile1x1 {
   width: 100%;
   height: 100%;
   display: flex;
@@ -10,24 +9,17 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-
   padding: var(--space-sm);
   background: var(--bg);
   border: 2px solid var(--secondary);
   border-radius: var(--radius-sm);
+  gap: var(--space-xs);
 }
 
-.tile1x1:hover,
-.tile2x2:hover,
-.tile3x3:hover {
+.tile1x1:hover {
   border-color: var(--primary);
   box-shadow: var(--game-glow-primary);
   background: var(--secondary);
-}
-
-/* 1x1 Tile */
-.tile1x1 {
-  gap: var(--space-xs);
 }
 
 .emojiRow {
@@ -43,8 +35,24 @@
 
 /* 2x2 Tile */
 .tile2x2 {
-  gap: var(--space-md);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: space-around;
+  cursor: pointer;
+  padding: var(--space-sm);
+  background: var(--bg);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  gap: var(--space-md);
+}
+
+.tile2x2:hover {
+  border-color: var(--primary);
+  box-shadow: var(--game-glow-primary);
+  background: var(--secondary);
 }
 
 .vibeSection {
@@ -68,8 +76,24 @@
 
 /* 3x3 Tile */
 .tile3x3 {
-  gap: var(--space-sm);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: flex-start;
+  cursor: pointer;
+  padding: var(--space-sm);
+  background: var(--bg);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  gap: var(--space-sm);
+}
+
+.tile3x3:hover {
+  border-color: var(--primary);
+  box-shadow: var(--game-glow-primary);
+  background: var(--secondary);
 }
 
 .header {

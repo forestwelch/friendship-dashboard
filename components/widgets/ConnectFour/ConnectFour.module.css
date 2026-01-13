@@ -1,57 +1,26 @@
 /* Connect Four Widget Styles */
 
-.tile2x1,
-.tile2x2,
-.tile3x3 {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-
-  padding: var(--space-sm);
-  background: var(--bg);
-  border: 2px solid var(--secondary);
-  border-radius: var(--radius-sm);
-}
-
-.tile2x1:hover,
-.tile2x2:hover,
-.tile3x3:hover {
-  border-color: var(--primary);
-  box-shadow: var(--game-glow-primary);
-  background: var(--secondary);
-}
-
-/* Support larger sizes - use same styles */
-.tile4x4,
-.tile5x5 {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: var(--space-sm);
-  background: var(--bg);
-  border: 2px solid var(--secondary);
-  border-radius: var(--radius-sm);
-}
-
-.tile4x4:hover,
-.tile5x5:hover {
-  border-color: var(--primary);
-  box-shadow: var(--game-glow-primary);
-  background: var(--secondary);
-}
-
 /* 2x1 Tile - Marquee */
 .tile2x1 {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: var(--space-sm);
+  background: var(--bg);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
   overflow: hidden;
   position: relative;
+}
+
+.tile2x1:hover {
+  border-color: var(--primary);
+  box-shadow: var(--game-glow-primary);
+  background: var(--secondary);
 }
 
 .marquee {
@@ -107,8 +76,24 @@
 
 /* 2x2 Tile */
 .tile2x2 {
-  gap: var(--space-sm);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: space-between;
+  cursor: pointer;
+  padding: var(--space-sm);
+  background: var(--bg);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  gap: var(--space-sm);
+}
+
+.tile2x2:hover {
+  border-color: var(--primary);
+  box-shadow: var(--game-glow-primary);
+  background: var(--secondary);
 }
 
 .title {
@@ -215,6 +200,45 @@
 
 /* 3x3 Tile */
 .tile3x3 {
-  gap: var(--space-sm);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: flex-start;
+  cursor: pointer;
+  padding: var(--space-sm);
+  background: var(--bg);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  gap: var(--space-sm);
+}
+
+.tile3x3:hover {
+  border-color: var(--primary);
+  box-shadow: var(--game-glow-primary);
+  background: var(--secondary);
+}
+
+/* Support larger sizes - use same styles */
+.tile4x4,
+.tile5x5 {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: var(--space-sm);
+  background: var(--bg);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+}
+
+.tile4x4:hover,
+.tile5x5:hover {
+  border-color: var(--primary);
+  box-shadow: var(--game-glow-primary);
+  background: var(--secondary);
 }

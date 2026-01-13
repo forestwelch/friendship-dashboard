@@ -48,6 +48,7 @@
 
 .songArtist {
   margin-bottom: var(--space-xs);
+  font-size: var(--font-size-xs);
 }
 
 .songMeta {
@@ -58,6 +59,7 @@
 .songActions {
   display: flex;
   gap: var(--space-xs);
+  font-size: var(--font-size-xs);
 }
 
 .actionButton {
@@ -195,20 +197,7 @@
   flex: 1;
 }
 
-.songTitle {
-  margin-bottom: var(--space-xs);
-  font-size: var(--font-size-sm);
-}
-
-.songArtist {
-  margin-bottom: var(--space-xs);
-}
-
 .songUrl {
   font-size: var(--font-size-xs);
   margin-top: var(--space-xs);
-}
-
-.songActions {
-  font-size: var(--font-size-xs);
 }

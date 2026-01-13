@@ -136,13 +136,6 @@
   background: var(--randomize-bg, var(--primary));
   color: var(--randomize-color, var(--bg));
   border-color: var(--randomize-border, var(--accent));
-}
-
-.randomizeAllIcon {
-  margin-right: var(--space-xs);
-}
-
-.randomizeAllButton {
   margin-top: var(--space-md);
   padding: var(--space-md);
   width: 100%;
@@ -150,4 +143,8 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
+}
+
+.randomizeAllIcon {
+  margin-right: var(--space-xs);
 }

@@ -171,9 +171,6 @@
   -moz-osx-font-smoothing: unset;
 }
 
-.cell.animating {
-}
-
 .gameStatus {
   display: flex;
   flex-direction: column;

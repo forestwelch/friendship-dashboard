@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "lint:css": "stylelint \"**/*.{css,module.css}\"",
+    "lint:css:fix": "stylelint \"**/*.{css,module.css}\" --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "jest",
@@ -54,11 +56,17 @@
     "lint-staged": "^16.2.7",
     "playwright": "^1.56.1",
     "prettier": "^3.6.2",
+    "stylelint": "^16.26.1",
+    "stylelint-config-standard": "^39.0.1",
     "typescript": "5.9.3"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,css,md}": [
+    "*.{js,jsx,ts,tsx,json,md}": [
       "prettier --write"
+    ],
+    "*.{css,module.css}": [
+      "prettier --write",
+      "stylelint --fix"
     ]
   }
 }
