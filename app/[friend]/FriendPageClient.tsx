@@ -14,6 +14,7 @@ import { canPlaceWidget, findAvailablePosition } from "@/lib/utils/widget-utils"
 import { playSound } from "@/lib/sounds";
 import { useThemeContext } from "@/lib/contexts/theme-context";
 import { useUserContext } from "@/lib/hooks/useUserContext";
+import { useGridScale } from "@/lib/hooks/useGridScale";
 import { GRID_COLS, GRID_ROWS } from "@/lib/constants";
 import { hasNewContent } from "@/lib/widget-notifications";
 import clsx from "clsx";
@@ -577,6 +578,10 @@ export function FriendPageClient({
     if (!userContext.isAdmin) return;
     window.dispatchEvent(new CustomEvent("admin-edit-mode-changed", { detail: isEditMode }));
   }, [isEditMode, userContext.isAdmin]);
+
+  // Calculate scale factor dynamically for browsers that don't support CSS min()
+  // This fixes scaling issues on older Firefox (e.g., Android 11)
+  useGridScale(gridRef);
 
   return (
     <div

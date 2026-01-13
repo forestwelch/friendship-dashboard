@@ -16,17 +16,8 @@ body {
 
 /* Grid scaling - unified approach for desktop and mobile using scale */
 /* Target using data attribute since Grid component uses CSS modules (camelCase) */
+/* JavaScript hook (useGridScale) will handle the actual transform for maximum compatibility */
 [data-grid-container] {
-  /* Calculate scale factors for width and height */
-  /* Account for navigation bar height: --height-button + --space-md */
-  /* Use slightly less than available space to ensure no edge case overflow */
-  --nav-height: calc(var(--height-button) + var(--space-md));
-  --scale-width: calc((100vw - 2rem) / var(--grid-width));
-  --scale-height: calc((100vh - var(--nav-height) - 2rem) / var(--grid-height));
-  
-  /* Fallback for browsers that don't support min() - use scale-height */
-  /* This ensures the grid fits vertically, which is usually the limiting factor on mobile */
-  transform: scale(var(--scale-height)) !important;
   transform-origin: center center;
   will-change: transform;
   
@@ -36,22 +27,10 @@ body {
   box-sizing: border-box;
   overflow: visible;
   margin: 0 auto;
-}
-
-/* Modern browsers: use min() to take the smaller of width/height, capped at 1 */
-/* This provides optimal scaling for both portrait and landscape orientations */
-/* 
- * Browser support for CSS min() function:
- * - Safari 15.4+ (iOS 15.4+) - March 2022
- * - Chrome 79+ - December 2019
- * - Firefox 75+ - April 2020
- * - Edge 79+ - January 2020
- */
-@supports (width: min(1px, 2px)) {
-  [data-grid-container] {
-    --scale-factor: min(var(--scale-width), var(--scale-height), 1);
-    transform: scale(var(--scale-factor)) !important;
-  }
+  
+  /* JavaScript will set transform inline, but provide CSS fallback */
+  /* This ensures scaling works even if JS hasn't run yet */
+  transform: scale(var(--scale-factor-js, 1));
 }
 
 /* Grid container - unified approach */

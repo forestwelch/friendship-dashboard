@@ -131,7 +131,7 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
   if (!isOpen || !shouldRender) return null;
 
   const modalContent = (
-    <div className={`${styles.backdrop} pointer-events-auto`}>
+    <div className={styles.modalContainer}>
       <div
         className={`${styles.modal} pointer-events-auto`}
         ref={modalRef}
