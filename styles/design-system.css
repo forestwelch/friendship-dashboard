@@ -863,11 +863,6 @@ textarea.game-input {
   font-weight: normal;
 }
 
-/* Transform */
-.transform-center {
-  transform: translateY(-50%);
-}
-
 /* ============================================
    SCROLLBAR STYLING
    ============================================ */
@@ -1155,12 +1150,6 @@ textarea.game-input {
 
 .snippet-delete-button:active {
   opacity: 0.8;
-}
-
-.undo-button {
-  position: absolute;
-  bottom: var(--space-sm);
-  right: var(--space-sm);
 }
 
 .fridge-canvas {
