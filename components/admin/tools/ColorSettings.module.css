@@ -1,0 +1,153 @@
+.panel {
+  position: fixed;
+  bottom: var(--space-md);
+  right: var(--space-md);
+  width: 320px;
+  max-width: calc(100vw - var(--space-md) * 2);
+  max-height: calc(100vh - var(--space-md) * 2);
+  background: var(--panel-bg, var(--bg));
+  border: var(--border-width-md) solid var(--panel-border-color, var(--accent));
+  border-radius: var(--radius-sm);
+  box-shadow: var(--game-shadow-lg);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  cursor: var(--panel-cursor, default);
+}
+
+.panelHeader {
+  padding: var(--space-md);
+  border-bottom: var(--border-width-md) solid var(--panel-border-color, var(--accent));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: grab;
+}
+
+.panelTitle {
+  color: var(--panel-text-color, var(--text));
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  color: var(--panel-text-color, var(--text));
+  cursor: pointer;
+  padding: var(--space-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+}
+
+.closeButton:hover {
+  opacity: 0.7;
+}
+
+.panelContent {
+  padding: var(--space-md);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.colorList {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-md) var(--space-md);
+  padding: var(--space-md);
+  align-items: center;
+}
+
+.colorRow {
+  display: contents;
+}
+
+.colorSwatch {
+  width: 3rem;
+  height: 1.5rem;
+  background: var(--color-swatch-bg, var(--primary));
+  border: var(--border-width-md) solid var(--game-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  justify-self: start;
+}
+
+.colorLabel {
+  color: var(--panel-text-color, var(--text));
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+.colorInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.colorName {
+  font-size: var(--font-size-sm);
+  color: var(--panel-text-color, var(--text));
+}
+
+.colorValue {
+  font-size: var(--font-size-xs);
+  color: var(--panel-text-color, var(--text));
+  opacity: 0.8;
+}
+
+.hexInput {
+  width: 5.5rem;
+  padding: var(--space-xs);
+  font-size: var(--font-size-xs);
+  font-family: monospace;
+  background: var(--panel-bg, var(--bg));
+  border: var(--border-width-md) solid var(--game-border);
+  border-radius: var(--radius-sm);
+  color: var(--panel-text-color, var(--text));
+}
+
+.randomizeButton {
+  width: 100%;
+  margin-top: var(--space-md);
+}
+
+.colorItem {
+  display: contents;
+}
+
+.colorInput {
+  width: 6rem;
+  height: 32px;
+  padding: var(--space-xs);
+  font-size: var(--font-size-sm);
+  font-family: monospace;
+  background: var(--panel-bg, var(--bg));
+  border: var(--border-width-md) solid var(--panel-border-color, var(--accent));
+  border-radius: var(--radius-sm);
+  color: var(--panel-text-color, var(--text));
+  box-sizing: border-box;
+  justify-self: start;
+}
+
+.randomizeAllButton {
+  background: var(--randomize-bg, var(--primary));
+  color: var(--randomize-color, var(--bg));
+  border-color: var(--randomize-border, var(--accent));
+}
+
+.randomizeAllIcon {
+  margin-right: var(--space-xs);
+}
+
+.randomizeAllButton {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+}

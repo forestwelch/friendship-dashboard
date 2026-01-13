@@ -9,7 +9,7 @@
 /* eslint-disable no-console */
 import { createClient } from "@supabase/supabase-js";
 import * as dotenv from "dotenv";
-import { base64ToPixelData, QUANTIZATION_LEVELS } from "../lib/pixel-data-processing";
+import { base64ToPixelData, QUANTIZATION_LEVELS } from "../lib/utils/pixel-data-processing";
 
 // Load environment variables
 dotenv.config({ path: ".env.local" });

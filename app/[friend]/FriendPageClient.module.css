@@ -1,0 +1,128 @@
+.pageContainer {
+  padding-top: 0; /* No padding - nav is fixed and doesn't affect layout */
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.gridWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height: 100vh;
+  min-height: 100vh;
+}
+
+.widgetContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.moveableTile {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-sm);
+  touch-action: manipulation;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.moveableTileValid {
+  border: 2px dashed var(--accent);
+  background: var(--game-overlay-secondary-10);
+  opacity: 0.4;
+  cursor: pointer;
+}
+
+.moveableTileInvalid {
+  border: 1px dashed var(--game-border);
+  background: transparent;
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
+.moveableTileHovered {
+  border: 3px solid var(--primary);
+  background: var(--game-overlay-primary-20);
+  opacity: 1;
+  box-shadow: var(--game-glow-blue);
+}
+
+.moveableTileHoverArea {
+  border: 2px solid var(--primary);
+  background: var(--game-overlay-secondary-10);
+}
+
+.movingWidgetPreview {
+  z-index: 15;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.cancelMoveButton {
+  position: absolute;
+  top: var(--space-md);
+  left: var(--space-md);
+  z-index: 100;
+}
+
+.cancelIcon {
+  margin-right: var(--space-xs);
+}
+
+.emptyStateContainer {
+  padding: var(--space-xl);
+}
+
+.emptyStateTitle {
+  margin-bottom: var(--space-lg);
+}
+
+.emptyStateText {
+  margin-bottom: var(--space-md);
+}
+
+.emptyStateButton {
+  margin-top: var(--space-md);
+}
+
+.widgetLibraryOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2000;
+  overflow: auto;
+}
+
+.widgetLibraryContent {
+  padding: var(--space-xl);
+}
+
+.widgetLibraryHeader {
+  margin-bottom: var(--space-lg);
+}
+
+.backButton {
+  background: var(--theme-secondary, var(--secondary));
+  border-color: var(--theme-accent, var(--accent));
+  color: var(--theme-bg, var(--bg));
+}
+
+.backIcon {
+  font-size: var(--font-size-xs);
+  margin-right: var(--space-xs);
+}
+
+.widgetLibraryTitle {
+  margin-bottom: var(--space-xl);
+  color: var(--theme-text, var(--text));
+}
+
+.editModeOverlay {
+  z-index: 5;
+}

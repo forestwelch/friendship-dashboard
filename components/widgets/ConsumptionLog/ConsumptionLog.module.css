@@ -1,0 +1,17 @@
+.widgetClickableBadge {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-sm);
+}
+
+.badgeText {
+  word-break: break-word;
+  text-align: center;
+  font-weight: bold;
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  color: var(--text);
+}

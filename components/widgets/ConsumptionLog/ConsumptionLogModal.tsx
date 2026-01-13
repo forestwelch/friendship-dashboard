@@ -8,10 +8,11 @@ import {
   useCreateConsumptionEntry,
   useMarkConsumptionEntryAsRead,
 } from "./queries";
-import { useIdentity } from "@/lib/identity-utils";
+import { useIdentity } from "@/lib/hooks/useIdentity";
 import { FormField, Input, Textarea } from "@/components/shared";
-import { formatDateCompact } from "@/lib/date-utils";
-import { getUserColorVar } from "@/lib/color-utils";
+import { formatDateCompact } from "@/lib/utils/date-utils";
+import { getUserColorVar } from "@/lib/utils/color-utils";
+import styles from "./ConsumptionLogModal.module.css";
 
 interface ConsumptionLogModalProps {
   friendId: string;
@@ -76,7 +77,7 @@ export function ConsumptionLogModal({
     <Modal id={modalId} title="Shared Consumption Log" onClose={() => setOpenModal(null)}>
       <div className="modal-content">
         {/* Add Entry Form */}
-        <form onSubmit={handleSubmit} className="form" style={{ width: "100%" }}>
+        <form onSubmit={handleSubmit} className={`form ${styles.formFullWidth}`}>
           <FormField label="Title" required={false}>
             <Input
               type="text"
@@ -84,7 +85,7 @@ export function ConsumptionLogModal({
               onChange={(e) => setTitle(e.target.value)}
               required
               maxLength={200}
-              style={{ width: "100%" }}
+              className={styles.formFieldFullWidth}
             />
           </FormField>
           <FormField label="Link (optional)">
@@ -93,7 +94,7 @@ export function ConsumptionLogModal({
               value={link}
               onChange={(e) => setLink(e.target.value)}
               placeholder="https://..."
-              style={{ width: "100%" }}
+              className={styles.formFieldFullWidth}
             />
           </FormField>
           <FormField label="Thoughts" required={false}>
@@ -104,7 +105,7 @@ export function ConsumptionLogModal({
               rows={4}
               maxLength={280}
               showCharCount
-              style={{ width: "100%" }}
+              className={styles.formFieldFullWidth}
             />
           </FormField>
           <button
@@ -125,13 +126,16 @@ export function ConsumptionLogModal({
               return (
                 <div key={entry.id} className="entry">
                   <div className="entry-header">
-                    <div className="entry-title" style={{ color: entryColor }}>
+                    <div
+                      className={`entry-title ${styles.entryTitle}`}
+                      style={{ "--entry-color": entryColor } as React.CSSProperties}
+                    >
                       {entry.link ? (
                         <a
                           href={entry.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ color: entryColor, textDecoration: "underline" }}
+                          className={styles.entryLink}
                         >
                           {entry.title}
                         </a>
@@ -141,7 +145,10 @@ export function ConsumptionLogModal({
                     </div>
                     <div className="entry-date">{formatDateCompact(entry.created_at)}</div>
                   </div>
-                  <div className="entry-content" style={{ color: entryColor }}>
+                  <div
+                    className={`entry-content ${styles.entryContent}`}
+                    style={{ "--entry-color": entryColor } as React.CSSProperties}
+                  >
                     {entry.thought}
                   </div>
                 </div>

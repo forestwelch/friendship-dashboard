@@ -1,0 +1,179 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  gap: var(--space-md);
+}
+
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-md);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.imageItem {
+  aspect-ratio: 1;
+  border: var(--border-width-md) solid var(--game-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  overflow: hidden;
+  background: var(--bg);
+  position: relative;
+}
+
+.imageItemSelected {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+.imagePreviewInner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.imagePreviewImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--space-2xl);
+  color: var(--admin-text);
+  opacity: 0.6;
+}
+
+.container {
+  width: 100%;
+}
+
+.albumSection {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  align-items: center;
+}
+
+.albumInput {
+  flex: 1;
+  padding: var(--space-sm);
+  font-size: var(--font-size-sm);
+  border: var(--border-width-md) solid var(--game-border);
+  border-radius: var(--radius-sm);
+  background: var(--game-surface);
+  color: var(--text);
+}
+
+.createButton {
+  opacity: var(--button-opacity, 1);
+}
+
+.createButtonDisabled {
+  opacity: 0.5;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm);
+}
+
+.paginationButton {
+  opacity: var(--button-opacity, 1);
+}
+
+.paginationButtonDisabled {
+  opacity: 0.5;
+}
+
+.paginationText {
+  font-size: var(--font-size-sm);
+  color: var(--text);
+}
+
+.imageItemRelative {
+  position: relative;
+}
+
+.imageInfo {
+  font-size: var(--font-size-xs);
+}
+
+.selectedIndicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--primary);
+  color: var(--bg);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+}
+
+.imageItemRelative {
+  position: relative;
+}
+
+.imagePreviewError {
+  font-size: var(--font-size-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--text);
+}
+
+.checkmark {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  background: var(--primary);
+  color: var(--bg);
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: var(--game-shadow-sm);
+}
+
+.checkmark i {
+  font-size: var(--font-size-xs);
+}
+
+.albumBadge {
+  position: absolute;
+  bottom: 0.25rem;
+  left: 0.25rem;
+  background: var(--game-overlay-bg-50);
+  color: var(--text);
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-xs);
+  max-width: calc(100% - 0.5rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hiddenInput {
+  display: none;
+}

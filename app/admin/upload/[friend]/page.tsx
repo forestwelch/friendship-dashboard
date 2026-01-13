@@ -4,14 +4,15 @@ import React, { useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { Navigation } from "@/components/shared";
 import Link from "next/link";
-import { getThemePalette, ColorPalette } from "@/lib/image-processing";
+import { getThemePalette, ColorPalette } from "@/lib/utils/image-processing";
 import { WidgetSize } from "@/lib/types";
 import { savePixelArtImage } from "@/lib/queries";
 import {
   processImageToPixelData,
   pixelDataToBase64,
   generatePreview,
-} from "@/lib/pixel-data-processing";
+} from "@/lib/utils/pixel-data-processing";
+import styles from "./page.module.css";
 
 // Get theme class helper (same as friend page)
 function getThemeClass(slug: string): string {
@@ -193,49 +194,23 @@ export default function AdminUploadPage() {
   return (
     <>
       <Navigation />
-      <div
-        className="admin-page"
-        style={{
-          paddingTop: `calc(var(--height-button) + var(--space-md))`,
-          width: "100%",
-          maxWidth: "100%",
-          minHeight: "100vh",
-          background: "var(--admin-bg)",
-          color: "var(--admin-text)",
-          overflowX: "hidden",
-        }}
-      >
-        <div
-          className="game-container"
-          style={{ paddingTop: "var(--space-2xl)", paddingBottom: "var(--space-2xl)" }}
-        >
-          <div className="game-breadcrumb" style={{ marginBottom: "var(--space-xl)" }}>
+      <div className={`admin-page ${styles.pageContainer}`}>
+        <div className={`game-container ${styles.container}`}>
+          <div className={`game-breadcrumb ${styles.breadcrumb}`}>
             <Link href="/" className="game-link">
               Home
             </Link>
             <span className="game-breadcrumb-separator">/</span>
             <span className="game-breadcrumb-current">Upload Pixel Art</span>
-            <span style={{ marginLeft: "auto" }}>
+            <span className={styles.breadcrumbLink}>
               <Link href={`/${friend}`} className="game-link">
                 View {friend}&apos;s page →
               </Link>
             </span>
           </div>
-          <h1 className="game-heading-1" style={{ marginBottom: "var(--space-xl)" }}>
-            Upload Pixel Art for {friend}
-          </h1>
+          <h1 className={`game-heading-1 ${styles.heading}`}>Upload Pixel Art for {friend}</h1>
 
-          <div
-            className="game-card"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--space-lg)",
-              maxWidth: "37.5rem",
-              width: "100%",
-              margin: "0 auto",
-            }}
-          >
+          <div className={`game-card ${styles.uploadCard}`}>
             {/* File input */}
             <div>
               <input
@@ -243,13 +218,12 @@ export default function AdminUploadPage() {
                 type="file"
                 accept="image/*,.heic,.heif"
                 onChange={handleFileSelect}
-                style={{ display: "none" }}
+                className={styles.fileInput}
               />
               <button
-                className="game-button game-button-primary"
+                className={`game-button game-button-primary ${styles.chooseButton}`}
                 onClick={() => fileInputRef.current?.click()}
                 disabled={processing}
-                style={{ width: "100%" }}
               >
                 {processing ? "Processing..." : "Choose Image (PNG, JPG, HEIC)"}
               </button>
@@ -260,11 +234,8 @@ export default function AdminUploadPage() {
               {(["1x1", "2x2", "3x3"] as WidgetSize[]).map((size) => (
                 <button
                   key={size}
-                  className={`game-button ${selectedSize === size ? "game-button-primary" : ""}`}
+                  className={`game-button ${selectedSize === size ? "game-button-primary" : ""} ${styles.sizeButton}`}
                   onClick={() => handleSizeChange(size)}
-                  style={{
-                    flex: 1,
-                  }}
                 >
                   {size}
                 </button>
@@ -273,41 +244,22 @@ export default function AdminUploadPage() {
 
             {/* Preview */}
             {preview && (
-              <div
-                className="game-card"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "var(--space-lg)",
-                  alignItems: "center",
-                }}
-              >
-                <div className="game-heading-3" style={{ margin: 0 }}>
+              <div className={`game-card ${styles.previewCard}`}>
+                <div className={`game-heading-3 ${styles.previewTitle}`}>
                   Preview ({selectedSize})
                 </div>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={preview}
-                  alt="Pixel art preview"
-                  style={{
-                    maxWidth: "100%",
-                    imageRendering: "pixelated",
-                    border: "var(--border-width-lg) solid var(--admin-accent)",
-                    borderRadius: "var(--radius-sm)",
-                  }}
-                />
+                <img src={preview} alt="Pixel art preview" className={styles.previewImage} />
                 <button
-                  className="game-button game-button-success"
+                  className={`game-button game-button-success ${styles.saveButton}`}
                   onClick={handleSave}
                   disabled={processing}
-                  style={{ width: "100%" }}
                 >
                   {processing ? (
                     "Processing..."
                   ) : (
                     <>
-                      <i className="hn hn-save-solid" style={{ marginRight: "var(--space-xs)" }} />{" "}
-                      Save Pixel Art
+                      <i className={`hn hn-save-solid ${styles.saveIcon}`} /> Save Pixel Art
                     </>
                   )}
                 </button>
@@ -316,35 +268,13 @@ export default function AdminUploadPage() {
 
             {/* Color palette display */}
             {palette && (
-              <div
-                className="game-card"
-                style={{
-                  marginTop: "var(--space-lg)",
-                }}
-              >
-                <div className="game-heading-3" style={{ marginBottom: "var(--space-md)" }}>
-                  Theme Palette
-                </div>
-                <div className="game-flex game-flex-gap-md" style={{ flexWrap: "wrap" }}>
+              <div className={`game-card ${styles.paletteCard}`}>
+                <div className={`game-heading-3 ${styles.paletteTitle}`}>Theme Palette</div>
+                <div className={`game-flex game-flex-gap-md ${styles.paletteContainer}`}>
                   {Object.entries(palette).map(([name, color]) => (
-                    <div
-                      key={name}
-                      className="game-flex game-flex-gap-sm"
-                      style={{ alignItems: "center" }}
-                    >
-                      <div
-                        style={{
-                          width: "2rem",
-                          height: "2rem",
-                          backgroundColor: color,
-                          border: "var(--border-width-md) solid var(--admin-accent)",
-                          borderRadius: "var(--radius-sm)",
-                          boxShadow: "var(--game-shadow-sm)",
-                        }}
-                      />
-                      <span className="game-text-muted" style={{ textTransform: "capitalize" }}>
-                        {name}
-                      </span>
+                    <div key={name} className={`game-flex game-flex-gap-sm ${styles.paletteItem}`}>
+                      <div className={styles.colorSwatch} style={{ backgroundColor: color }} />
+                      <span className={`game-text-muted ${styles.paletteLabel}`}>{name}</span>
                     </div>
                   ))}
                 </div>

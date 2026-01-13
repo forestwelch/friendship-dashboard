@@ -5,9 +5,10 @@ import { createPortal } from "react-dom";
 import { Modal } from "@/components/shared";
 import { useUIStore } from "@/lib/store/ui-store";
 import { useAudioSnippets, useDeleteAudioSnippet } from "./queries";
-import { useIdentity } from "@/lib/identity-utils";
+import { useIdentity } from "@/lib/hooks/useIdentity";
 import { playSound } from "@/lib/sounds";
 import { Z_INDEX } from "@/lib/constants";
+import styles from "./AudioSnippetsModal.module.css";
 
 interface AudioSnippetsModalProps {
   friendId: string;
@@ -122,42 +123,17 @@ export function AudioSnippetsModal({ friendId }: AudioSnippetsModalProps) {
         typeof document !== "undefined" &&
         createPortal(
           <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: "var(--game-overlay-bg-80)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: Z_INDEX.MODAL_OVERLAY,
-            }}
+            className={styles.deleteOverlay}
+            style={{ zIndex: Z_INDEX.MODAL_OVERLAY }}
             onClick={handleCancelDelete}
           >
             <div
-              className="game-card"
+              className={`game-card ${styles.deleteDialog}`}
               onClick={(e) => e.stopPropagation()}
-              style={{
-                padding: "var(--space-xl)",
-                maxWidth: "20rem",
-                width: "90%",
-              }}
             >
-              <h3 className="game-heading-3" style={{ marginTop: 0 }}>
-                Delete audio snippet?
-              </h3>
-              <p className="game-text" style={{ marginBottom: "var(--space-lg)" }}>
-                This action cannot be undone.
-              </p>
-              <div
-                style={{
-                  display: "flex",
-                  gap: "var(--space-md)",
-                  justifyContent: "flex-end",
-                }}
-              >
+              <h3 className={`game-heading-3 ${styles.deleteTitle}`}>Delete audio snippet?</h3>
+              <p className={`game-text ${styles.deleteMessage}`}>This action cannot be undone.</p>
+              <div className={styles.deleteButtons}>
                 <button className="game-button" onClick={handleCancelDelete}>
                   Cancel
                 </button>

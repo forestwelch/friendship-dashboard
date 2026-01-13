@@ -1,0 +1,20 @@
+.widgetClickableColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-sm);
+}
+
+.displayText {
+  font-weight: bold;
+  word-break: break-word;
+  text-align: center;
+  width: 100%;
+  overflow: visible;
+  font-size: var(--font-size-sm);
+  color: var(--text);
+  text-overflow: clip;
+  white-space: normal;
+}

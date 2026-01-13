@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Widget } from "@/components/Widget";
 import { WidgetSize, Song } from "@/lib/types";
+import styles from "./MusicPlayer.module.css";
 
 interface MusicPlayerProps {
   size: WidgetSize;
@@ -355,133 +356,44 @@ export function MusicPlayer({ size, playlistSongIds, selectedSongId }: MusicPlay
   if (size === "3x1") {
     return (
       <Widget size={size}>
-        <div
-          style={{
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "var(--space-sm)",
-            height: "100%",
-            width: "100%",
-            overflow: "hidden",
-          }}
-        >
+        <div className={styles.musicPlayerContainer}>
           {/* Play/Pause button - Left column (absolutely positioned) */}
           <div
-            className="widget-clickable"
+            className={`widget-clickable ${styles.playButtonContainer}`}
             onClick={handleTogglePlayPause}
-            style={{
-              position: "absolute",
-              left: "var(--space-sm)",
-              top: "50%",
-              transform: "translateY(-50%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              width: "2rem",
-              zIndex: 1,
-            }}
           >
             <i
-              className={
+              className={`${
                 isPlaying && currentSongId === currentSong?.id
                   ? "hn hn-pause-solid"
                   : "hn hn-play-solid"
-              }
-              style={{ fontSize: "20px" }}
+              } ${styles.iconSmall}`}
             />
           </div>
 
           {/* Song info - Middle column (centered, constrained by button positions) */}
           {currentSong ? (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "flex-start",
-                overflow: "hidden",
-                paddingLeft: "2.5rem",
-                paddingRight: "2.5rem",
-                width: "100%",
-                minWidth: 0,
-                maxWidth: "100%",
-              }}
-            >
-              <div
-                className="widget-title"
-                style={{
-                  marginBottom: "var(--space-xs)",
-                  textAlign: "left",
-                  width: "100%",
-                  overflow: "hidden",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                  lineHeight: "1.3",
-                  fontSize: "calc(var(--font-size-sm) * 0.9)",
-                  wordBreak: "break-word",
-                  hyphens: "auto",
-                }}
-              >
+            <div className={styles.songInfoContainer}>
+              <div className={`widget-title ${styles.songTitle}`}>
                 {currentSong.title || "Untitled"}
               </div>
-              <div
-                className="widget-content"
-                style={{
-                  fontSize: "var(--font-size-xs)",
-                  textAlign: "left",
-                  width: "100%",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  maxWidth: "100%",
-                }}
-              >
+              <div className={`widget-content ${styles.songArtist}`}>
                 {currentSong.artist || "Unknown Artist"}
               </div>
             </div>
           ) : (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "var(--text)",
-                opacity: 0.6,
-                fontSize: "var(--font-size-xs)",
-                paddingLeft: "2.5rem",
-                paddingRight: "2.5rem",
-                width: "100%",
-              }}
-            >
-              No song selected
-            </div>
+            <div className={styles.noSongContainer}>No song selected</div>
           )}
 
           {/* Next button - Right column (absolutely positioned) */}
           <div
-            className="widget-clickable"
+            className={`widget-clickable ${styles.nextButtonContainer}`}
             onClick={(e) => {
               e.stopPropagation();
               handleNext();
             }}
-            style={{
-              position: "absolute",
-              right: "var(--space-sm)",
-              top: "50%",
-              transform: "translateY(-50%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              width: "2rem",
-              zIndex: 1,
-            }}
           >
-            <i className="hn hn-shuffle-solid" style={{ fontSize: "20px" }} />
+            <i className={`hn hn-shuffle-solid ${styles.iconSmall}`} />
           </div>
         </div>
       </Widget>
@@ -491,77 +403,20 @@ export function MusicPlayer({ size, playlistSongIds, selectedSongId }: MusicPlay
   // 4x2: Original layout (play button + song info)
   return (
     <Widget size={size}>
-      <div
-        className="widget-clickable"
-        onClick={handleTogglePlayPause}
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          gap: "var(--space-md)",
-          padding: "var(--space-sm)",
-          height: "100%",
-          width: "100%",
-        }}
-      >
-        <div
-          style={{
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minWidth: "fit-content",
-            paddingLeft: "var(--space-sm)",
-          }}
-        >
+      <div className={`widget-clickable ${styles.musicPlayerRow}`} onClick={handleTogglePlayPause}>
+        <div className={styles.iconContainer}>
           <i
-            className={
+            className={`${
               isPlaying && currentSongId === currentSong?.id
                 ? "hn hn-pause-solid"
                 : "hn hn-play-solid"
-            }
-            style={{ fontSize: "3rem" }}
+            } ${styles.iconLarge}`}
           />
         </div>
         {currentSong && (
-          <div
-            style={{
-              flex: 1,
-              minWidth: 0,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "flex-start",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              className="widget-title"
-              style={{
-                marginBottom: "var(--space-xs)",
-                textAlign: "left",
-                width: "100%",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {currentSong.title}
-            </div>
-            <div
-              className="widget-content"
-              style={{
-                fontSize: "var(--font-size-xs)",
-                textAlign: "left",
-                width: "100%",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {currentSong.artist}
-            </div>
+          <div className={styles.songInfoFlex}>
+            <div className={`widget-title ${styles.songTitleRow}`}>{currentSong.title}</div>
+            <div className={`widget-content ${styles.songArtistRow}`}>{currentSong.artist}</div>
           </div>
         )}
       </div>

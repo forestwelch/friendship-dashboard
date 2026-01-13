@@ -116,7 +116,7 @@
 .piece {
   width: 80%;
   height: 80%;
-  background: var(--primary);
+  background: var(--piece-color, var(--primary));
   border-radius: 0;
   display: flex;
   align-items: center;
@@ -131,9 +131,26 @@
   -moz-osx-font-smoothing: unset;
 }
 
+.pieceIcon {
+  font-size: 1.5rem;
+  color: var(--text);
+}
+
 .winningPiece {
   border: 3px solid var(--accent);
   box-shadow: 0 0 8px var(--accent);
+}
+
+.trophyIcon {
+  font-size: 2rem;
+}
+
+.timesIcon {
+  font-size: 2rem;
+}
+
+.dividerIcon {
+  font-size: 2rem;
 }
 
 .winningCell {
@@ -237,6 +254,7 @@
   font-size: var(--font-size-md);
   font-weight: bold;
   cursor: pointer;
+  min-height: 44px;
 
   display: flex;
   align-items: center;

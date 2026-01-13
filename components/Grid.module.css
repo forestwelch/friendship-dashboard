@@ -1,22 +1,44 @@
-/* Mobile Grid Styles */
-.mobileGrid {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-  width: 100%;
-  max-width: 100%;
-  padding: var(--space-md);
-  overflow-y: auto;
-  overflow-x: hidden;
+/* Grid Layout Styles */
+
+.gridLayout {
+  display: grid;
+  gap: var(--grid-gap);
+  width: var(--grid-width);
+  height: var(--grid-height);
+  position: relative;
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
+  overflow: visible;
 }
 
-.mobileItem {
-  width: 100%;
-  max-width: 100%;
-  min-height: 200px;
-  margin-bottom: var(--space-md);
-  box-sizing: border-box;
+.gridLayout[data-cols][data-rows] {
+  grid-template-columns: repeat(var(--grid-cols), var(--grid-tile-size));
+  grid-template-rows: repeat(var(--grid-rows), var(--grid-tile-size));
 }
 
-/* Desktop grid styles use inline styles for dynamic positioning */
+.gridTileBg {
+  width: var(--grid-tile-size);
+  height: var(--grid-tile-size);
+  pointer-events: none;
+  z-index: 0;
+  position: relative;
+  background-color: var(--grid-tile-bg);
+  /* Dynamic positioning via CSS custom properties */
+  grid-column: var(--grid-col);
+  grid-row: var(--grid-row);
+}
+
+/* Grid item positioning using CSS custom properties */
+.gridItem {
+  position: relative;
+  z-index: var(--widget-z-index, 1);
+  grid-column: var(--grid-col) / span var(--grid-cols-span);
+  grid-row: var(--grid-row) / span var(--grid-rows-span);
+  width: calc(
+    var(--grid-cols-span) * var(--grid-tile-size) + (var(--grid-cols-span) - 1) * var(--grid-gap)
+  );
+  height: calc(
+    var(--grid-rows-span) * var(--grid-tile-size) + (var(--grid-rows-span) - 1) * var(--grid-gap)
+  );
+}

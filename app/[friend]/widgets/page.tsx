@@ -3,9 +3,10 @@
 import React from "react";
 import { useRouter, useParams } from "next/navigation";
 import { WidgetSize } from "@/lib/types";
-import { WidgetLibrary } from "@/components/admin/WidgetLibrary";
+import { WidgetLibrary } from "@/components/admin/widgets/WidgetLibrary";
 import { playSound } from "@/lib/sounds";
 import { Navigation } from "@/components/shared";
+import styles from "./page.module.css";
 
 export default function WidgetLibraryPage() {
   const router = useRouter();
@@ -21,35 +22,22 @@ export default function WidgetLibraryPage() {
   return (
     <>
       <Navigation />
-      <div
-        style={{
-          paddingTop: "2.25rem",
-          width: "100%",
-          maxWidth: "100%",
-          minHeight: "100vh",
-          background: "var(--bg)",
-          color: "var(--text)",
-          overflowX: "hidden",
-        }}
-      >
-        <div className="game-container" style={{ padding: "var(--space-xl)" }}>
-          <div className="game-breadcrumb" style={{ marginBottom: "var(--space-lg)" }}>
+      <div className={styles.pageContainer}>
+        <div className={`game-container ${styles.contentContainer}`}>
+          <div className={`game-breadcrumb ${styles.breadcrumb}`}>
             <button
               onClick={() => {
                 playSound("close");
                 router.back();
               }}
-              className="game-link"
-              style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+              className={`game-link ${styles.backButton}`}
             >
               ← Back
             </button>
             <span className="game-breadcrumb-separator">/</span>
             <span className="game-breadcrumb-current">Widget Library</span>
           </div>
-          <h1 className="game-heading-1" style={{ marginBottom: "var(--space-xl)" }}>
-            WIDGET LIBRARY
-          </h1>
+          <h1 className={`game-heading-1 ${styles.title}`}>WIDGET LIBRARY</h1>
           <WidgetLibrary onSelectWidget={handleSelectWidget} />
         </div>
       </div>

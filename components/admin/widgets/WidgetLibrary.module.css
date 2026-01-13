@@ -1,0 +1,47 @@
+/* WidgetLibrary Styles */
+
+.title {
+  margin-bottom: var(--space-md);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-md);
+}
+
+.card {
+  cursor: pointer;
+  padding: var(--space-md);
+}
+
+.header {
+  margin-bottom: var(--space-sm);
+  align-items: center;
+}
+
+.icon {
+  font-size: 1.5rem;
+}
+
+.name {
+  margin: 0;
+}
+
+.description {
+  margin-bottom: var(--space-sm);
+}
+
+.sizeSelector {
+  margin-top: var(--space-md);
+}
+
+.sizeTitle {
+  margin-bottom: var(--space-sm);
+  font-size: 11px;
+}
+
+.sizeButton {
+  font-size: 11px;
+  padding: var(--space-xs) var(--space-sm);
+}

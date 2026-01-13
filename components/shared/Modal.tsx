@@ -131,15 +131,14 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
   if (!isOpen || !shouldRender) return null;
 
   const modalContent = (
-    <div className={styles.backdrop} style={{ pointerEvents: "auto" }}>
+    <div className={`${styles.backdrop} pointer-events-auto`}>
       <div
-        className={styles.modal}
+        className={`${styles.modal} pointer-events-auto`}
         ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? `${id}-title` : undefined}
         onClick={(e) => e.stopPropagation()}
-        style={{ pointerEvents: "auto" }}
       >
         <div className={styles.header}>
           {title && (

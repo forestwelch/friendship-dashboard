@@ -37,3 +37,40 @@
   text-decoration: underline;
   text-underline-offset: 0.2em;
 }
+
+.navDropdownContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.navDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: var(--space-xs);
+  background: var(--game-surface);
+  border: var(--border-width-md) solid var(--game-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs);
+  z-index: 1000;
+  min-width: 12rem;
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+.navDropdownItem {
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+}
+
+.navButtonDisabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

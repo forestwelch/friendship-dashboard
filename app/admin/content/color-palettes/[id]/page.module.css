@@ -1,0 +1,82 @@
+.container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.leftPanel {
+  width: 400px;
+  flex-shrink: 0;
+  background: var(--bg);
+  border-right: var(--border-width-lg) solid var(--accent);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-top: calc(var(--space-xl) + 60px);
+}
+
+.leftPanelContent {
+  padding: var(--space-lg);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: var(--font-size-xl);
+  padding: var(--space-xs);
+}
+
+.errorMessage {
+  color: var(--accent);
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm);
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
+}
+
+.shuffleButton {
+  width: 100%;
+  margin-top: var(--space-md);
+  background: var(--secondary);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+.cloneButton {
+  flex: 1;
+  background: var(--secondary);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.saveButton {
+  flex: 1;
+  background: var(--primary);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.deleteButton {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.previewPanel {
+  flex: 1;
+  overflow: auto;
+}

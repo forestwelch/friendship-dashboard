@@ -15,14 +15,26 @@ interface CardProps {
 export function Card({ variant = "default", children, className, onClick, style }: CardProps) {
   const variantClass = variant !== "default" ? styles[`card-${variant}`] : "";
 
+  // Extract borderColor from style if present, use CSS custom property
+  const borderColor = style?.borderColor;
+  const otherStyles = style ? { ...style } : {};
+  if (borderColor && typeof borderColor === "string") {
+    delete otherStyles.borderColor;
+  }
+
   return (
     <div
-      className={clsx(styles.card, variantClass, className)}
+      className={clsx(styles.card, variantClass, borderColor && styles.cardBorderColor, className)}
       onClick={onClick}
-      style={{
-        ...style,
-        ...(onClick ? { cursor: "pointer" } : undefined),
-      }}
+      style={
+        borderColor
+          ? ({
+              "--card-border-color": borderColor,
+              cursor: onClick ? "pointer" : undefined,
+              ...otherStyles,
+            } as React.CSSProperties)
+          : { ...style, cursor: onClick ? "pointer" : undefined }
+      }
     >
       {children}
     </div>

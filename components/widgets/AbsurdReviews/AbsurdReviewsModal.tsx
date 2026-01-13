@@ -11,11 +11,12 @@ import {
   submitReview,
 } from "./queries";
 import { useQueryClient } from "@tanstack/react-query";
-import { useIdentity } from "@/lib/identity-utils";
+import { useIdentity } from "@/lib/hooks/useIdentity";
 import { FormField, Input, Textarea, Button, Card } from "@/components/shared";
-import { formatDateCompact } from "@/lib/date-utils";
-import { getUserColorVar } from "@/lib/color-utils";
+import { formatDateCompact } from "@/lib/utils/date-utils";
+import { getUserColorVar } from "@/lib/utils/color-utils";
 import { playSound } from "@/lib/sounds";
+import styles from "./AbsurdReviewsModal.module.css";
 
 interface AbsurdReviewsModalProps {
   friendId: string;
@@ -85,7 +86,7 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
         {!topic ? (
           // Set Topic Form (Forest only)
           identity === "admin" && (
-            <form onSubmit={handleSetTopic} className="form" style={{ width: "100%" }}>
+            <form onSubmit={handleSetTopic} className={`form ${styles.formFullWidth}`}>
               <div className="form-title">Set New Topic:</div>
               <FormField label="Topic name" required>
                 <Input
@@ -94,7 +95,7 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
                   onChange={(e) => setNewTopicName(e.target.value)}
                   placeholder="e.g., 'The concept of Tuesday'"
                   required
-                  style={{ width: "100%" }}
+                  className={styles.formFieldFullWidth}
                 />
               </FormField>
               <Button
@@ -109,17 +110,15 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
         ) : (
           <>
             {/* Topic Display */}
-            <div className="text-center">
-              <div className="form-title" style={{ fontSize: "var(--font-size-lg)" }}>
-                {topic.topic_name}
-              </div>
+            <div className={styles.textCentered}>
+              <div className={`form-title ${styles.formTitleLarge}`}>{topic.topic_name}</div>
             </div>
 
             {/* Submit Review Form */}
             {!myReview && (
-              <form onSubmit={handleSubmitReview} className="form" style={{ width: "100%" }}>
+              <form onSubmit={handleSubmitReview} className={`form ${styles.formFullWidth}`}>
                 <FormField label="" required={false}>
-                  <div className="star-rating-buttons" style={{ justifyContent: "center" }}>
+                  <div className={`star-rating-buttons ${styles.starRatingButtons}`}>
                     {[1, 2, 3, 4, 5].map((num) => (
                       <Button
                         key={num}
@@ -127,7 +126,7 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
                         onClick={() => setStars(num)}
                         className={stars === num ? "star-selected" : ""}
                       >
-                        {num} <i className="hn hn-star-solid" style={{ fontSize: "0.8rem" }} />
+                        {num} <i className={`hn hn-star-solid ${styles.starIcon}`} />
                       </Button>
                     ))}
                   </div>
@@ -141,7 +140,7 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
                     maxLength={200}
                     showCharCount
                     required
-                    style={{ width: "100%" }}
+                    className={styles.formFieldFullWidth}
                   />
                 </FormField>
                 <div className="checkbox-field">
@@ -172,7 +171,10 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
                     const reviewColor = getUserColorVar(review.reviewer, friendId);
                     return (
                       <Card key={idx} style={{ borderColor: reviewColor }}>
-                        <div className="entry-title" style={{ color: reviewColor }}>
+                        <div
+                          className={`entry-title ${styles.entryTitle}`}
+                          style={{ "--entry-color": reviewColor } as React.CSSProperties}
+                        >
                           {review.reviewer === identity
                             ? "You"
                             : review.reviewer === "admin"
@@ -184,7 +186,10 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
                             <i key={i} className="hn hn-star-solid" />
                           ))}
                         </div>
-                        <div className="entry-content" style={{ color: reviewColor }}>
+                        <div
+                          className={`entry-content ${styles.entryContent}`}
+                          style={{ "--entry-color": reviewColor } as React.CSSProperties}
+                        >
                           {review.review_text}
                         </div>
                         {review.recommend && (
@@ -201,7 +206,7 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
 
             {/* Set Next Topic (Forest only) */}
             {hasBothReviews && identity === "admin" && (
-              <form onSubmit={handleSetTopic} className="form" style={{ width: "100%" }}>
+              <form onSubmit={handleSetTopic} className={`form ${styles.formFullWidth}`}>
                 <div className="form-title">Set Next Topic:</div>
                 <FormField label="Topic name" required>
                   <Input
@@ -210,7 +215,7 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
                     onChange={(e) => setNewTopicName(e.target.value)}
                     placeholder="e.g., 'The concept of Tuesday'"
                     required
-                    style={{ width: "100%" }}
+                    className={styles.formFieldFullWidth}
                   />
                 </FormField>
                 <Button
@@ -238,13 +243,16 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
                 <div key={archivedTopic.id} className="entry">
                   <div className="entry-title">{archivedTopic.topic_name}</div>
                   {myArchivedReview && otherArchivedReview && (
-                    <div className="reviews-grid" style={{ marginTop: "var(--space-sm)" }}>
+                    <div className={`reviews-grid ${styles.reviewsGridWithMargin}`}>
                       {[myArchivedReview, otherArchivedReview].map((review, idx) => {
                         if (!review) return null;
                         const reviewColor = getUserColorVar(review.reviewer, friendId);
                         return (
                           <Card key={idx} style={{ borderColor: reviewColor }}>
-                            <div className="entry-title" style={{ color: reviewColor }}>
+                            <div
+                              className={`entry-title ${styles.entryTitle}`}
+                              style={{ "--entry-color": reviewColor } as React.CSSProperties}
+                            >
                               {review.reviewer === identity
                                 ? "You"
                                 : review.reviewer === "admin"
@@ -256,7 +264,10 @@ export function AbsurdReviewsModal({ friendId, friendName }: AbsurdReviewsModalP
                                 <i key={i} className="hn hn-star-solid" />
                               ))}
                             </div>
-                            <div className="entry-content" style={{ color: reviewColor }}>
+                            <div
+                              className={`entry-content ${styles.entryContent}`}
+                              style={{ "--entry-color": reviewColor } as React.CSSProperties}
+                            >
                               {review.review_text}
                             </div>
                             {review.recommend && (

@@ -1,0 +1,141 @@
+.musicPlayerContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm);
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.playButtonContainer {
+  position: absolute;
+  left: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  width: 2rem;
+  z-index: 1;
+}
+
+.nextButtonContainer {
+  position: absolute;
+  right: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  width: 2rem;
+  z-index: 1;
+}
+
+.songInfoContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: hidden;
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.songTitle {
+  margin-bottom: var(--space-xs);
+  text-align: left;
+  width: 100%;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.3;
+  font-size: calc(var(--font-size-sm) * 0.9);
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.songArtist {
+  font-size: var(--font-size-xs);
+  text-align: left;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.noSongContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  opacity: 0.6;
+  font-size: var(--font-size-xs);
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+  width: 100%;
+}
+
+.musicPlayerRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-sm);
+  height: 100%;
+  width: 100%;
+}
+
+.iconContainer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: fit-content;
+  padding-left: var(--space-sm);
+}
+
+.songInfoFlex {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: hidden;
+}
+
+.songTitleRow {
+  margin-bottom: var(--space-xs);
+  text-align: left;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.songArtistRow {
+  font-size: var(--font-size-xs);
+  text-align: left;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.iconSmall {
+  font-size: 20px;
+}
+
+.iconLarge {
+  font-size: 3rem;
+}

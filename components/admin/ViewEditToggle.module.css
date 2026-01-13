@@ -1,0 +1,44 @@
+.toggleContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: transparent;
+  border: var(--border-width-md) solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.toggleButton {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-transform: uppercase;
+  height: var(--height-button);
+  min-height: var(--height-button);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggleButtonView {
+  background: var(--toggle-view-bg, transparent);
+  color: var(--toggle-view-color, var(--text));
+}
+
+.toggleButtonViewActive {
+  background: var(--primary);
+  color: var(--bg);
+}
+
+.toggleButtonEdit {
+  background: var(--toggle-edit-bg, transparent);
+  color: var(--text);
+}
+
+.toggleButtonEditActive {
+  background: var(--secondary);
+  color: var(--text);
+}

@@ -1,0 +1,35 @@
+.formFullWidth {
+  width: 100%;
+}
+
+.formFieldFullWidth {
+  width: 100%;
+}
+
+.textCentered {
+  text-align: center;
+}
+
+.formTitleLarge {
+  font-size: var(--font-size-lg);
+}
+
+.starIcon {
+  font-size: 0.8rem;
+}
+
+.entryTitle {
+  color: var(--entry-color, var(--text));
+}
+
+.entryContent {
+  color: var(--entry-color, var(--text));
+}
+
+.reviewsGridWithMargin {
+  margin-top: var(--space-sm);
+}
+
+.starRatingButtons {
+  justify-content: center;
+}

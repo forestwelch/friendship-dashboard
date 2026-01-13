@@ -6,7 +6,8 @@ import { WidgetSize } from "@/lib/types";
 import { useUIStore } from "@/lib/store/ui-store";
 import { QuestionJarModal } from "./QuestionJarModal";
 import { useQuestionJarEntries } from "./queries";
-import { useIdentity } from "@/lib/identity-utils";
+import { useIdentity } from "@/lib/hooks/useIdentity";
+import styles from "./QuestionJar.module.css";
 
 interface QuestionJarProps {
   size: WidgetSize;
@@ -59,26 +60,14 @@ export function QuestionJar({ size, friendId, friendName }: QuestionJarProps) {
   return (
     <>
       <Widget size={size}>
-        <div
-          onClick={handleClick}
-          className="widget-clickable"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            padding: "var(--space-sm)",
-            width: "100%",
-            height: "100%",
-          }}
-        >
+        <div onClick={handleClick} className={`widget-clickable ${styles.widgetClickableCentered}`}>
           <div
-            style={{
-              wordBreak: "break-word",
-              textAlign: "center",
-              fontSize: cols >= 4 ? "var(--font-size-sm)" : "var(--font-size-xs)",
-              lineHeight: 1.4,
-            }}
+            className={styles.displayText}
+            style={
+              {
+                "--display-font-size": cols >= 4 ? "var(--font-size-sm)" : "var(--font-size-xs)",
+              } as React.CSSProperties
+            }
           >
             {displayText}
           </div>

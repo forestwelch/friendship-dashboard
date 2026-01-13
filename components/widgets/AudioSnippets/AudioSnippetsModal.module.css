@@ -1,0 +1,32 @@
+.deleteOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--game-overlay-bg-80);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.deleteDialog {
+  padding: var(--space-xl);
+  max-width: 20rem;
+  width: 90%;
+}
+
+.deleteTitle {
+  margin-top: 0;
+}
+
+.deleteMessage {
+  margin-bottom: var(--space-lg);
+}
+
+.deleteButtons {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: flex-end;
+}

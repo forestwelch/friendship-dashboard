@@ -1,7 +1,7 @@
 "use client";
 
 import { Navigation } from "@/components/shared";
-import { useUserContext } from "@/lib/use-user-context";
+import { useUserContext } from "@/lib/hooks/useUserContext";
 import { useState, useCallback, useEffect } from "react";
 import { playSound } from "@/lib/sounds";
 

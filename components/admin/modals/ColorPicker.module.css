@@ -1,0 +1,51 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.canvasWrapper {
+  position: relative;
+  border: var(--border-width-md) solid var(--game-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--game-shadow-sm);
+  overflow: hidden;
+  cursor: crosshair;
+  background: var(--bg);
+  display: flex;
+}
+
+.canvas {
+  width: 256px;
+  height: 256px;
+  image-rendering: pixelated;
+}
+
+.crosshairOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: transparent;
+}
+
+.previewContainer {
+  display: flex;
+  gap: var(--space-xs);
+  font-size: var(--font-size-xs);
+  font-family: monospace;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.colorSwatch {
+  width: 32px;
+  height: 32px;
+  background: var(--color-swatch-bg, var(--primary));
+  border: var(--border-width-md) solid var(--game-border);
+  border-radius: var(--radius-sm);
+}

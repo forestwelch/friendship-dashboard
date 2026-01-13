@@ -20,9 +20,9 @@ import {
   useResetGame,
   ConnectFourData,
 } from "./queries";
-import { useUserContext, getUserIdForFriend, getUserDisplayName } from "@/lib/use-user-context";
+import { useUserContext, getUserIdForFriend, getUserDisplayName } from "@/lib/hooks/useUserContext";
 import { ADMIN_USER_ID } from "@/lib/constants";
-import { getUserColor } from "@/lib/color-utils";
+import { getUserColor } from "@/lib/utils/color-utils";
 import styles from "./ConnectFourModal.module.css";
 
 interface ConnectFourModalProps {
@@ -231,13 +231,10 @@ export function ConnectFourModal({
                           {pieceColor ? (
                             <div
                               className={`${styles.piece} ${isWinning ? styles.winningPiece : ""}`}
-                              style={{ backgroundColor: pieceColor }}
+                              style={{ "--piece-color": pieceColor } as React.CSSProperties}
                             >
                               {isLastMove && (
-                                <i
-                                  className="hn hn-face-thinking-solid"
-                                  style={{ fontSize: "1.5rem", color: "var(--text)" }}
-                                />
+                                <i className={`hn hn-face-thinking-solid ${styles.pieceIcon}`} />
                               )}
                             </div>
                           ) : null}
@@ -254,7 +251,7 @@ export function ConnectFourModal({
               {iWon && (
                 <>
                   <div className={styles.resultIcon}>
-                    <i className="hn hn-trophy-solid" style={{ fontSize: "2rem" }} />
+                    <i className={`hn hn-trophy-solid ${styles.trophyIcon}`} />
                   </div>
                   <h2 className={styles.resultTitle}>YOU WON!</h2>
                 </>
@@ -262,7 +259,7 @@ export function ConnectFourModal({
               {iLost && (
                 <>
                   <div className={styles.resultIcon}>
-                    <i className="hn hn-times-circle-solid" style={{ fontSize: "2rem" }} />
+                    <i className={`hn hn-times-circle-solid ${styles.timesIcon}`} />
                   </div>
                   <h2 className={styles.resultTitle}>YOU LOST :(</h2>
                 </>
@@ -270,16 +267,12 @@ export function ConnectFourModal({
               {status === "draw" && (
                 <>
                   <div className={styles.resultIcon}>
-                    <i className="hn hn-divider-solid" style={{ fontSize: "2rem" }} />
+                    <i className={`hn hn-divider-solid ${styles.dividerIcon}`} />
                   </div>
                   <h2 className={styles.resultTitle}>DRAW</h2>
                 </>
               )}
-              <button
-                className={styles.playAgainButton}
-                onClick={handlePlayAgain}
-                style={{ minHeight: "44px" }}
-              >
+              <button className={styles.playAgainButton} onClick={handlePlayAgain}>
                 PLAY AGAIN
               </button>
             </div>
@@ -408,13 +401,10 @@ export function ConnectFourModal({
                           return (
                             <div
                               className={`${styles.piece} ${isWinning ? styles.winningPiece : ""}`}
-                              style={{ backgroundColor: pieceColor }}
+                              style={{ "--piece-color": pieceColor } as React.CSSProperties}
                             >
                               {isLastMove && (
-                                <i
-                                  className="hn hn-face-thinking-solid"
-                                  style={{ fontSize: "1.5rem", color: "var(--text)" }}
-                                />
+                                <i className={`hn hn-face-thinking-solid ${styles.pieceIcon}`} />
                               )}
                             </div>
                           );

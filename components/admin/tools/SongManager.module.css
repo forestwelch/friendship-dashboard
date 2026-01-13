@@ -1,0 +1,214 @@
+.playButton {
+  font-size: var(--font-size-xs);
+}
+
+.hidden {
+  display: none;
+}
+
+.formContainer {
+  margin-bottom: var(--space-md);
+  color: var(--admin-text);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.formField {
+  width: 100%;
+}
+
+.songList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.songItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm);
+  border: var(--border-width-md) solid var(--game-border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+
+.songItemContent {
+  flex: 1;
+}
+
+.songTitle {
+  margin-bottom: var(--space-xs);
+  font-size: var(--font-size-sm);
+}
+
+.songArtist {
+  margin-bottom: var(--space-xs);
+}
+
+.songMeta {
+  font-size: var(--font-size-xs);
+  margin-top: var(--space-xs);
+}
+
+.songActions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.actionButton {
+  font-size: var(--font-size-xs);
+  padding: var(--space-sm);
+}
+
+.helperText {
+  font-size: var(--font-size-xs);
+}
+
+.songInfo {
+  font-size: var(--font-size-xs);
+}
+
+.songInfoSmall {
+  font-size: var(--font-size-xs);
+}
+
+.songInfoLabel {
+  margin-bottom: var(--space-xs);
+  font-size: var(--font-size-sm);
+}
+
+.songInfoText {
+  margin-bottom: var(--space-xs);
+}
+
+.songInfoMeta {
+  font-size: var(--font-size-xs);
+  margin-top: var(--space-xs);
+}
+
+.songInfoActions {
+  font-size: var(--font-size-xs);
+}
+
+.songInfoDelete {
+  font-size: var(--font-size-xs);
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  gap: var(--space-md);
+}
+
+.addFormCard {
+  flex-shrink: 0;
+  background: var(--admin-surface);
+  border-color: var(--admin-accent);
+}
+
+.addFormTitle {
+  margin-bottom: var(--space-md);
+  color: var(--admin-text);
+}
+
+.formInput {
+  background: var(--admin-bg);
+  border-color: var(--admin-accent);
+  color: var(--admin-text);
+}
+
+.submitButton {
+  background: var(--admin-primary);
+  border-color: var(--admin-accent);
+  color: var(--admin-text);
+  grid-column: 1 / -1;
+}
+
+.submitButtonUploading {
+  background: var(--admin-accent);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submitButtonDisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.songsCard {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--admin-surface);
+  border-color: var(--admin-accent);
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--space-2xl);
+  color: var(--admin-text);
+  opacity: 0.6;
+}
+
+.songsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.songCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md);
+  background: var(--admin-bg);
+  border-color: var(--admin-accent);
+}
+
+.editForm {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.editInput {
+  font-size: var(--font-size-xs);
+  padding: var(--space-sm);
+}
+
+.editActions {
+  font-size: var(--font-size-xs);
+}
+
+.songDisplay {
+  flex: 1;
+}
+
+.songTitle {
+  margin-bottom: var(--space-xs);
+  font-size: var(--font-size-sm);
+}
+
+.songArtist {
+  margin-bottom: var(--space-xs);
+}
+
+.songUrl {
+  font-size: var(--font-size-xs);
+  margin-top: var(--space-xs);
+}
+
+.songActions {
+  font-size: var(--font-size-xs);
+}

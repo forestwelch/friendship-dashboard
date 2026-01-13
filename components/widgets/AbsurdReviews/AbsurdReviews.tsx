@@ -6,7 +6,8 @@ import { WidgetSize } from "@/lib/types";
 import { useUIStore } from "@/lib/store/ui-store";
 import { AbsurdReviewsModal } from "./AbsurdReviewsModal";
 import { useCurrentTopic, useReviewsForTopic } from "./queries";
-import { useIdentity } from "@/lib/identity-utils";
+import { useIdentity } from "@/lib/hooks/useIdentity";
+import styles from "./AbsurdReviews.module.css";
 
 interface AbsurdReviewsProps {
   size: WidgetSize;
@@ -58,33 +59,8 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
   return (
     <>
       <Widget size={size}>
-        <div
-          onClick={handleClick}
-          className="widget-clickable"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            padding: "var(--space-sm)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "var(--font-size-sm)",
-              fontWeight: "bold",
-              color: "var(--text)",
-              width: "100%",
-              textAlign: "center",
-              overflow: "visible",
-              textOverflow: "clip",
-              whiteSpace: "normal",
-              wordBreak: "break-word",
-            }}
-          >
-            {displayText}
-          </div>
+        <div onClick={handleClick} className={`widget-clickable ${styles.widgetClickableColumn}`}>
+          <div className={styles.displayText}>{displayText}</div>
         </div>
       </Widget>
       <AbsurdReviewsModal friendId={friendId} friendName={friendName} />

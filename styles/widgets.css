@@ -19,6 +19,16 @@
   margin: 0;
   padding: 0;
   border-radius: var(--radius-sm);
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.widget-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
 }
 
 .widget:hover {
@@ -201,7 +211,11 @@
 
 .magnet-preview {
   position: absolute;
-  color: var(--text);
+  left: var(--magnet-left);
+  top: var(--magnet-top);
+  font-size: var(--magnet-font-size);
+  color: var(--magnet-color);
+  transform: rotate(var(--magnet-rotation));
   font-family: "Dogica", monospace;
   font-weight: bold;
   font-style: normal; /* Prevent icons from being italicized */
