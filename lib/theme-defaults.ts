@@ -9,15 +9,3 @@ export const DEFAULT_THEME_COLORS = {
   bg: "#0a0a0a", // Near black background
   text: "#e8e8e8", // Soft white text
 } as const;
-
-/**
- * Alternative default theme colors (for ImageManager preview)
- * These match the "daniel" theme from the database seed data
- */
-export const DEFAULT_THEME_COLORS_ALT = {
-  primary: "#2a52be",
-  secondary: "#7cb9e8",
-  accent: "#00308f",
-  bg: "#e6f2ff",
-  text: "#001f3f",
-} as const;

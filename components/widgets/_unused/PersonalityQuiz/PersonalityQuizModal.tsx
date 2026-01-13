@@ -5,7 +5,7 @@ import { playSound } from "@/lib/sounds";
 import { useUIStore } from "@/lib/store/ui-store";
 import { ThemeColors } from "@/lib/types";
 import { Modal } from "@/components/shared";
-import { QUIZ_QUESTIONS, calculateResult, calculateCompatibility } from "@/lib/quiz-questions";
+import { QUIZ_QUESTIONS, calculateResult, calculateCompatibility } from "./quiz-questions";
 import { usePersonalityQuizWidget, useSubmitQuizAnswers } from "./queries";
 import styles from "./PersonalityQuizModal.module.css";
 

@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { playSound } from "@/lib/sounds";
-import { calculateCompatibility, QuizResult } from "@/lib/quiz-questions";
+import { calculateCompatibility, QuizResult } from "./quiz-questions";
 
 interface QuizResultData {
   emoji: string;
