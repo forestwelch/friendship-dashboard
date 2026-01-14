@@ -1,0 +1,198 @@
+.shimmer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
+}
+
+.shimmer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: shimmer 1.5s infinite;
+  z-index: 2;
+  pointer-events: none; /* Allow clicks through */
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Default variant */
+.shimmerBar {
+  width: 100%;
+  height: 100%;
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
+  position: relative;
+  z-index: 0;
+}
+
+/* Horizontal variant */
+.horizontal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm);
+}
+
+.shimmerLine {
+  width: 80%;
+  height: 60%;
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
+  position: relative;
+  z-index: 0;
+}
+
+/* Grid variant */
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px;
+  background: var(--secondary);
+}
+
+.gridRow {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+}
+
+.gridCell {
+  flex: 1;
+  background: var(--bg);
+  min-height: 20px;
+  position: relative;
+  z-index: 0;
+}
+
+/* Board variant (for Connect Four) */
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+}
+
+.boardTitle {
+  width: 40%;
+  height: 16px;
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
+  position: relative;
+  z-index: 0;
+}
+
+.boardGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-height: 0;
+  background: var(--secondary);
+  padding: 2px;
+}
+
+.boardRow {
+  display: flex;
+  gap: 1px;
+  flex: 1;
+}
+
+.boardCell {
+  flex: 1;
+  aspect-ratio: 1;
+  background: var(--bg);
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  z-index: 0;
+}
+
+/* 8-Bit Gameboy-Style Animations */
+
+/* Override default ::before for animation variants */
+.animation-blockfill::before,
+.animation-verticalwipe::before {
+  /* Reset default animation */
+  animation: none;
+  left: 0;
+  background: none;
+  pointer-events: none; /* Allow clicks through */
+}
+
+/* Block Fill Loading Bar */
+.animation-blockfill {
+  overflow: hidden;
+  background: var(--secondary);
+}
+
+.animation-blockfill::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: rgba(255, 255, 255, 0.4);
+  animation: blockFill 2.4s steps(8) infinite;
+  z-index: 1;
+}
+
+@keyframes blockFill {
+  0% {
+    width: 0%;
+  }
+  80% {
+    width: 100%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* Vertical Wipe with Pixel Steps */
+.animation-verticalwipe {
+  background: var(--secondary);
+}
+
+.animation-verticalwipe::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.4) 25%,
+    transparent 25%,
+    transparent 100%
+  );
+  background-size: 100% 200%;
+  animation: verticalWipe 4s steps(6) infinite;
+  z-index: 1;
+}
+
+@keyframes verticalWipe {
+  0% {
+    background-position: 0 100%;
+  }
+  50% {
+    background-position: 0 0%;
+  }
+  100% {
+    background-position: 0 -100%;
+  }
+}

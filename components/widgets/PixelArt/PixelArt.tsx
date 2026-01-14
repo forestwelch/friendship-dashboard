@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Widget } from "@/components/Widget";
 import { WidgetSize } from "@/lib/types";
+import { Shimmer } from "@/components/shared";
 import {
   base64ToPixelData,
   ThemeColors,
@@ -86,7 +87,7 @@ export function PixelArt({
   // Reset image index when images array changes (but not on every render)
   useEffect(() => {
     const imagesChanged = JSON.stringify(prevImagesRef.current) !== JSON.stringify(images);
-    if (imagesChanged && images.length > 0) {
+    if (imagesChanged) {
       // Use setTimeout to avoid synchronous setState in effect
       setTimeout(() => {
         setCurrentImageIndex(0);
@@ -212,6 +213,22 @@ export function PixelArt({
       }
     }
   }, [useProgrammaticRendering, currentPixelData, themeColors, gridSize, svgPixelSize, canvasSize]);
+
+  // Show shimmer while loading
+  // For programmatic: need pixelData and themeColors
+  // For image-based: need image URL and it to be loaded
+  // Always show shimmer if no images/pixelData available, or if images exist but haven't loaded yet
+  const isLoading = useProgrammaticRendering
+    ? !currentPixelData || !themeColors
+    : images.length === 0 || (images.length > 0 && !imageLoaded);
+
+  if (isLoading) {
+    return (
+      <Widget size={size}>
+        <Shimmer animation="verticalwipe" />
+      </Widget>
+    );
+  }
 
   // Render programmatic Canvas (optimized, no complex animations)
   if (useProgrammaticRendering && currentPixelData && themeColors) {

@@ -1,14 +1,11 @@
 /* Mobile Responsiveness Foundation */
 
-/* Prevent all scrolling globally - native app feel */
 html {
-  overflow: hidden; /* No scrolling anywhere - native app feel */
   height: 100%;
   width: 100%;
 }
 
 body {
-  overflow: hidden; /* No scrolling anywhere - native app feel */
   max-width: 100%;
   height: 100vh;
   width: 100%;
@@ -35,12 +32,6 @@ body {
 
 /* Grid container - unified approach */
 .grid-container-wrapper {
-  /* When grid is scaled down (mobile), it fits perfectly - no scroll needed */
-  /* When grid is natural size (desktop), allow scroll if needed */
-  /* Since we scale to fit both dimensions, if either dimension requires scaling, */
-  /* the scaled grid will fit, so we can use hidden. Only use auto when scale = 1 */
-  overflow-y: hidden;
-  overflow-x: hidden;
   position: relative;
   height: 100vh;
   min-height: 100vh;

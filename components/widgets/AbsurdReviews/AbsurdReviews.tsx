@@ -7,6 +7,7 @@ import { useUIStore } from "@/lib/store/ui-store";
 import { AbsurdReviewsModal } from "./AbsurdReviewsModal";
 import { useCurrentTopic, useReviewsForTopic } from "./queries";
 import { useIdentity } from "@/lib/hooks/useIdentity";
+import { Shimmer } from "@/components/shared";
 import styles from "./AbsurdReviews.module.css";
 
 interface AbsurdReviewsProps {
@@ -20,8 +21,19 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
   const identity = useIdentity();
   const modalId = `anthropocenereviewed-${friendId}`;
 
-  const { data: topic } = useCurrentTopic(friendId);
-  const { data: reviews = [] } = useReviewsForTopic(topic?.id || null);
+  const {
+    data: topic,
+    isLoading: topicLoading,
+    isPending: topicPending,
+  } = useCurrentTopic(friendId);
+  const {
+    data: reviews = [],
+    isLoading: reviewsLoading,
+    isPending: reviewsPending,
+  } = useReviewsForTopic(topic?.id || null);
+
+  const isLoadingState =
+    topicLoading || topicPending || (topic?.id && (reviewsLoading || reviewsPending));
 
   const handleClick = () => {
     setOpenModal(modalId);
@@ -37,6 +49,15 @@ export function AbsurdReviews({ size, friendId, friendName }: AbsurdReviewsProps
         <div className="widget-error-message">
           Anthropocene Reviewed supports 2×1, 3×1, and 4×1 sizes
         </div>
+      </Widget>
+    );
+  }
+
+  // Show shimmer while loading
+  if (isLoadingState) {
+    return (
+      <Widget size={size}>
+        <Shimmer animation="verticalwipe" className={styles.widgetClickableColumn} />
       </Widget>
     );
   }

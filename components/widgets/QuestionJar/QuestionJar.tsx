@@ -7,6 +7,7 @@ import { useUIStore } from "@/lib/store/ui-store";
 import { QuestionJarModal } from "./QuestionJarModal";
 import { useQuestionJarEntries } from "./queries";
 import { useIdentity } from "@/lib/hooks/useIdentity";
+import { Shimmer } from "@/components/shared";
 import styles from "./QuestionJar.module.css";
 
 interface QuestionJarProps {
@@ -20,7 +21,8 @@ export function QuestionJar({ size, friendId, friendName }: QuestionJarProps) {
   const identity = useIdentity();
   const modalId = `questionjar-${friendId}`;
 
-  const { data: entries = [] } = useQuestionJarEntries(friendId);
+  const { data: entries = [], isLoading, isPending } = useQuestionJarEntries(friendId);
+  const isLoadingState = isLoading || isPending;
 
   const handleClick = () => {
     setOpenModal(modalId);
@@ -34,6 +36,15 @@ export function QuestionJar({ size, friendId, friendName }: QuestionJarProps) {
     return (
       <Widget size={size}>
         <div className="widget-error-message">Question Jar supports 2×2, 3×2, and 4×2 sizes</div>
+      </Widget>
+    );
+  }
+
+  // Show shimmer while loading
+  if (isLoadingState) {
+    return (
+      <Widget size={size}>
+        <Shimmer animation="verticalwipe" className={styles.widgetClickableCentered} />
       </Widget>
     );
   }

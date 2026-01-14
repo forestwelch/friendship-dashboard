@@ -63,7 +63,6 @@ body {
   letter-spacing: 0.03125rem;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* No scrolling - native app feel */
   height: 100vh;
   /* Force pixel-perfect rendering */
   -webkit-font-smoothing: none;

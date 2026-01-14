@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect, useLayoutEffect } from "react";
 import { Grid, GridItem } from "@/components/Grid";
 import { WidgetRenderer } from "@/components/WidgetRenderer";
 import { AdminOverlay } from "@/components/admin/AdminOverlay";
@@ -51,8 +51,8 @@ export function FriendPageClient({
   const gridRef = useRef<HTMLDivElement>(null);
   const { colors: themeColors, setTheme } = useThemeContext();
 
-  // Initialize theme with friend's colors on mount
-  useEffect(() => {
+  // Initialize theme with friend's colors synchronously on mount (useLayoutEffect runs before paint)
+  useLayoutEffect(() => {
     const friendTheme: ThemeColors = {
       primary: friend.color_primary,
       secondary: friend.color_secondary,

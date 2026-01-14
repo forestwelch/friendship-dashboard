@@ -7,6 +7,7 @@ import { useUIStore } from "@/lib/store/ui-store";
 import { FridgeMagnetsModal } from "./FridgeMagnetsModal";
 import { useFridgeState, getCanvasDimensions } from "./queries";
 import { GRID_TILE_SIZE_REM, GRID_GAP_REM } from "@/lib/constants";
+import { Shimmer } from "@/components/shared";
 
 interface FridgeMagnetsProps {
   size: WidgetSize;
@@ -18,8 +19,9 @@ export function FridgeMagnets({ size, friendId }: FridgeMagnetsProps) {
   const modalId = `fridgemagnets-${friendId}-${size}`;
   const previewRef = React.useRef<HTMLDivElement>(null);
 
-  const { data: fridgeState } = useFridgeState(friendId);
+  const { data: fridgeState, isLoading, isPending } = useFridgeState(friendId);
   const magnets = fridgeState?.magnets || [];
+  const isLoadingState = isLoading || isPending;
 
   const { width: CANVAS_WIDTH, height: CANVAS_HEIGHT } = getCanvasDimensions(size);
 
@@ -52,6 +54,15 @@ export function FridgeMagnets({ size, friendId }: FridgeMagnetsProps) {
     return (
       <Widget size={size}>
         <div className="widget-error-message">Fridge Magnets supports sizes from 2×3 to 4×6</div>
+      </Widget>
+    );
+  }
+
+  // Show shimmer while loading
+  if (isLoadingState) {
+    return (
+      <Widget size={size}>
+        <Shimmer animation="verticalwipe" className="fridge-preview" />
       </Widget>
     );
   }

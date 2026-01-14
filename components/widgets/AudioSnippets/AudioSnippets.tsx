@@ -10,6 +10,7 @@ import { useIdentity } from "@/lib/hooks/useIdentity";
 import { startRecording, recordForDuration } from "./audio-recorder";
 import { playSound } from "@/lib/sounds";
 import { Button } from "@/components/shared";
+import { Shimmer } from "@/components/shared";
 
 interface AudioSnippetsProps {
   size: WidgetSize;
@@ -25,9 +26,10 @@ export function AudioSnippets({ size, friendId }: AudioSnippetsProps) {
   const identity = useIdentity();
   const modalId = `audiosnippets-${friendId}`;
 
-  const { data: snippets = [] } = useAudioSnippets(friendId);
+  const { data: snippets = [], isLoading, isPending } = useAudioSnippets(friendId);
   const uploadMutation = useUploadAudioSnippet(friendId);
   const [recordingDots, setRecordingDots] = useState(1);
+  const isLoadingState = isLoading || isPending;
 
   // Animate dots while recording (1, 2, 3, repeat)
   useEffect(() => {
@@ -178,6 +180,15 @@ export function AudioSnippets({ size, friendId }: AudioSnippetsProps) {
         <div className="widget-error-message">
           Audio Snippets only supports 1×2, 1×3, 2×1, and 3×1 sizes
         </div>
+      </Widget>
+    );
+  }
+
+  // Show shimmer while loading
+  if (isLoadingState) {
+    return (
+      <Widget size={size}>
+        <Shimmer animation="verticalwipe" />
       </Widget>
     );
   }

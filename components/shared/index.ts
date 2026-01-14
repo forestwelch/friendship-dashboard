@@ -5,3 +5,4 @@ export { Button } from "./Button";
 export { Card } from "./Card";
 export { Modal } from "./Modal";
 export { Navigation } from "./Navigation";
+export { Shimmer } from "./Shimmer";

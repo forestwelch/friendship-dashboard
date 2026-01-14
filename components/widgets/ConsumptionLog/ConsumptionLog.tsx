@@ -7,6 +7,7 @@ import { useUIStore } from "@/lib/store/ui-store";
 import { ConsumptionLogModal } from "./ConsumptionLogModal";
 import { useConsumptionEntries } from "./queries";
 import { useIdentity } from "@/lib/hooks/useIdentity";
+import { Shimmer } from "@/components/shared";
 import styles from "./ConsumptionLog.module.css";
 
 interface ConsumptionLogProps {
@@ -18,7 +19,8 @@ interface ConsumptionLogProps {
 export function ConsumptionLog({ size, friendId, friendName }: ConsumptionLogProps) {
   const { setOpenModal } = useUIStore();
   const identity = useIdentity();
-  const { data: entries = [] } = useConsumptionEntries(friendId);
+  const { data: entries = [], isLoading, isPending } = useConsumptionEntries(friendId);
+  const isLoadingState = isLoading || isPending;
 
   // Count unread entries
   const unreadCount = entries.filter((entry) => {
@@ -38,6 +40,15 @@ export function ConsumptionLog({ size, friendId, friendName }: ConsumptionLogPro
     return (
       <Widget size={size}>
         <div className="widget-error-message">Consumption Log only supports 3×1 size</div>
+      </Widget>
+    );
+  }
+
+  // Show shimmer while loading
+  if (isLoadingState) {
+    return (
+      <Widget size={size}>
+        <Shimmer animation="verticalwipe" />
       </Widget>
     );
   }

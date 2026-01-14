@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Widget } from "@/components/Widget";
 import { WidgetSize, Song } from "@/lib/types";
+import { Shimmer } from "@/components/shared";
 import styles from "./MusicPlayer.module.css";
 
 interface MusicPlayerProps {
@@ -331,6 +332,17 @@ export function MusicPlayer({ size, playlistSongIds, selectedSongId }: MusicPlay
     return (
       <Widget size={size}>
         <div className="widget-error-message">Music Player supports 1×1, 3×1, and 4×2 sizes</div>
+      </Widget>
+    );
+  }
+
+  // Show shimmer while loading songs
+  const isLoading = loadedSongs.length === 0 || shuffledPlaylist.length === 0;
+
+  if (isLoading) {
+    return (
+      <Widget size={size}>
+        <Shimmer animation="verticalwipe" />
       </Widget>
     );
   }

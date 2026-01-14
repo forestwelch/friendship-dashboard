@@ -11,6 +11,7 @@ import { ConnectFourData, useConnectFourGame } from "./queries";
 import { ADMIN_USER_ID } from "@/lib/constants";
 import { getUserColor } from "@/lib/utils/color-utils";
 import { useUserContext, getUserIdForFriend, getUserDisplayName } from "@/lib/hooks/useUserContext";
+import { Shimmer } from "@/components/shared";
 import styles from "./ConnectFour.module.css";
 
 interface ConnectFourProps {
@@ -33,9 +34,16 @@ export function ConnectFour({
   const { setOpenModal } = useUIStore();
 
   // Use polling for widget updates (cheap, every 5 seconds)
-  const { data: gameData } = useConnectFourGame(friendId, widgetId, {
+  const {
+    data: gameData,
+    isLoading,
+    isPending,
+  } = useConnectFourGame(friendId, widgetId, {
     refetchInterval: 5000, // Poll every 5 seconds
   });
+
+  // Show shimmer while loading - always show when data isn't available
+  const isLoadingState = isLoading || isPending || !gameData;
 
   // Use live data from query, fallback to config prop
   const game = gameData || config;
@@ -136,6 +144,34 @@ export function ConnectFour({
       </div>
     );
   };
+
+  // Show shimmer while loading
+  if (isLoadingState) {
+    if (size === "2x1") {
+      return (
+        <Widget size={size}>
+          <Shimmer animation="verticalwipe" className={styles.tile2x1} />
+        </Widget>
+      );
+    }
+
+    // For 2x2 and larger sizes
+    const [cols, rows] = size.split("x").map(Number);
+    const tileClass =
+      cols >= 3 && rows >= 3
+        ? cols === 4 && rows === 4
+          ? styles.tile4x4
+          : cols === 5 && rows === 5
+            ? styles.tile5x5
+            : styles.tile3x3
+        : styles.tile2x2;
+
+    return (
+      <Widget size={size}>
+        <Shimmer animation="verticalwipe" className={tileClass} />
+      </Widget>
+    );
+  }
 
   // 2x1 Tile: Scrolling marquee
   if (size === "2x1") {
