@@ -90,6 +90,23 @@ export function FriendPageClient({
     Record<string, { last_interacted_at: string }>
   >({});
 
+  // Prevent body scrolling on friend page (mobile-friendly)
+  useEffect(() => {
+    // Store original overflow values
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+
+    // Prevent scrolling
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    // Cleanup: restore scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+    };
+  }, []);
+
   // Fetch widget interactions on mount
   useEffect(() => {
     const fetchInteractions = async () => {
