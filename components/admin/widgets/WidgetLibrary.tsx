@@ -13,6 +13,14 @@ interface WidgetLibraryProps {
   widgets?: FriendWidget[];
 }
 
+interface WidgetTypeDefinition {
+  type: string;
+  name: string;
+  description: string;
+  icon: string;
+  sizes: WidgetSize[];
+}
+
 export function WidgetLibrary({ onSelectWidget, widgets = [] }: WidgetLibraryProps) {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [previewSize, _setPreviewSize] = useState<WidgetSize>("2x2");
@@ -33,7 +41,7 @@ export function WidgetLibrary({ onSelectWidget, widgets = [] }: WidgetLibraryPro
     [widgets]
   );
 
-  const widgetTypes = [
+  const widgetTypes: WidgetTypeDefinition[] = [
     {
       type: "music_player",
       name: "Music Player",
@@ -46,49 +54,49 @@ export function WidgetLibrary({ onSelectWidget, widgets = [] }: WidgetLibraryPro
       name: "Pixel Art",
       description: "Display pixelated animations",
       icon: "hn-image-solid",
-      sizes: ["1x1", "2x2", "3x3"],
+      sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
     },
     {
       type: "personality_quiz",
       name: "Personality Quiz",
       description: "Discover your vibe together",
       icon: "hn-star-solid",
-      sizes: ["1x1", "2x2", "3x3"],
+      sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
     },
     {
       type: "connect_four",
       name: "Connect Four",
       description: "Play async turn-based game",
       icon: "hn-gaming", // gaming not available
-      sizes: ["2x1", "2x2", "3x3"],
+      sizes: ["2x1", "2x2", "3x3"] as WidgetSize[],
     },
     {
       type: "consumption_log",
       name: "Shared Consumption Log",
       description: "Running diary of media consumption",
       icon: "hn-bookmark-solid", // book-solid not available
-      sizes: ["3x1"],
+      sizes: ["3x1"] as WidgetSize[],
     },
     {
       type: "question_jar",
       name: "Question Jar",
       description: "Alternating Q&A conversation",
       icon: "hn-question-solid", // question-circle-solid not available
-      sizes: ["2x2"],
+      sizes: ["2x2"] as WidgetSize[],
     },
     {
       type: "audio_snippets",
       name: "Audio Snippets",
       description: "Shared soundboard of 5-second clips",
       icon: "hn-sound-on-solid", // microphone-solid not available
-      sizes: ["1x2", "1x3", "2x1", "3x1"],
+      sizes: ["1x2", "1x3", "2x1", "3x1"] as WidgetSize[],
     },
     {
       type: "absurd_reviews",
       name: "Anthropocene Reviewed",
       description: "Rate mundane concepts together",
       icon: "hn-star-solid",
-      sizes: ["2x1"],
+      sizes: ["2x1"] as WidgetSize[],
     },
     {
       type: "fridge_magnets",
