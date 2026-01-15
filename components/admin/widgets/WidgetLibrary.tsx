@@ -57,13 +57,6 @@ export function WidgetLibrary({ onSelectWidget, widgets = [] }: WidgetLibraryPro
       sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
     },
     {
-      type: "personality_quiz",
-      name: "Personality Quiz",
-      description: "Discover your vibe together",
-      icon: "hn-star-solid",
-      sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
-    },
-    {
       type: "connect_four",
       name: "Connect Four",
       description: "Play async turn-based game",

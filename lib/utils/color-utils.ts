@@ -129,15 +129,6 @@ export function getUserColor(
 }
 
 /**
- * Check if a user ID is the friend (not admin)
- * @param userId - The user ID to check
- * @returns true if the user is the friend, false if admin
- */
-export function isFriendUser(userId: string): boolean {
-  return userId !== ADMIN_USER_ID;
-}
-
-/**
  * Get CSS variable for user color
  * @param userId - The user ID ("admin" or friend ID)
  * @param friendId - The friend's ID (to determine if userId is the friend)

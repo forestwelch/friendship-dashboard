@@ -11,7 +11,6 @@ import {
   AbsurdReviews,
   FridgeMagnets,
 } from "@/components/widgets";
-import { PersonalityQuiz } from "@/components/widgets/_unused/PersonalityQuiz";
 import { FriendWidget } from "@/lib/queries";
 import { ConnectFourData } from "@/components/widgets";
 import { useTheme } from "@/lib/contexts/theme-context";
@@ -115,18 +114,6 @@ export const WidgetRenderer = memo(function WidgetRenderer({
           transitionType={
             (widget.config.transitionType as "scanline" | "dissolve" | "boot-up") || "scanline"
           }
-        />
-      );
-
-    case "personality_quiz":
-      const quizSize = parseInt(widget.size.split("x")[0]) as 1 | 2 | 3;
-      return (
-        <PersonalityQuiz
-          size={quizSize}
-          friendId={friendId || ""}
-          widgetId={widget.id}
-          themeColors={themeColors}
-          config={widget.config as Record<string, unknown>}
         />
       );
 

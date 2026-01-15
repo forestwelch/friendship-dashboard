@@ -40,14 +40,6 @@ export interface WidgetData {
   [key: string]: unknown;
 }
 
-export interface Widget {
-  id: string;
-  name: string;
-  sizes: WidgetSize[];
-  render: (size: WidgetSize, data: WidgetData) => React.ReactNode;
-  onInteraction?: (action: string, payload: unknown) => void;
-}
-
 export interface Friend {
   id: string;
   name: string;
@@ -77,44 +69,10 @@ export interface ThemeColors {
   text: string;
 }
 
-export interface Top10SongsData {
-  songs: Song[];
-}
-
-export interface CalendarEvent {
-  id: string;
-  title: string;
-  date: string;
-  time?: string;
-  type?: string;
-}
-
-export interface LinkItem {
-  id: string;
-  url: string;
-  title: string;
-  description?: string;
-  icon?: string;
-}
-
-export interface MediaItem {
-  id: string;
-  title: string;
-  type: "movie" | "show" | "book" | "music" | "game" | string;
-  createdAt?: string;
-  watched?: boolean;
-  description?: string;
-  thumbnail?: string;
-  rating?: number;
-}
-
 export interface WidgetConfig {
-  recommendations?: MediaItem[];
   pixelData?: string[];
   imageUrls?: string[];
   imageIds?: string[];
   notes?: Array<string | { id: string; content: string; created_at: string }>;
-  events?: CalendarEvent[];
-  links?: LinkItem[];
   [key: string]: unknown;
 }

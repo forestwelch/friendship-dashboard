@@ -1,6 +1,5 @@
 export { MusicPlayer } from "./MusicPlayer";
-export { PixelArt, PixelArtMemo } from "./PixelArt";
-export { PersonalityQuiz } from "./_unused/PersonalityQuiz";
+export { PixelArt } from "./PixelArt";
 export { ConnectFour } from "./ConnectFour";
 export type { ConnectFourData } from "./ConnectFour";
 export { ConsumptionLog } from "./ConsumptionLog";

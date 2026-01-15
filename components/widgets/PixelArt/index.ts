@@ -1,2 +1,2 @@
-export { PixelArt, PixelArtMemo } from "./PixelArt";
+export { PixelArt } from "./PixelArt";
 export type { TransitionType } from "./PixelArt";
