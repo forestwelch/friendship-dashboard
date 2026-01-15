@@ -1,18 +1,37 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { WidgetSize } from "@/lib/types";
+import { FriendWidget } from "@/lib/queries";
 import { playSound } from "@/lib/sounds";
+import { findAvailablePosition } from "@/lib/utils/widget-utils";
 import clsx from "clsx";
 import styles from "./WidgetLibrary.module.css";
 
 interface WidgetLibraryProps {
   onSelectWidget: (type: string, size: WidgetSize) => void;
+  widgets?: FriendWidget[];
 }
 
-export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
+export function WidgetLibrary({ onSelectWidget, widgets = [] }: WidgetLibraryProps) {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [previewSize, _setPreviewSize] = useState<WidgetSize>("2x2");
+
+  // Check if a widget type can be added
+  const canAddWidget = useMemo(
+    () =>
+      (widgetType: string, sizes: WidgetSize[]): boolean => {
+        // Check for duplicate widget types (except pixel_art which allows multiple)
+        const existingWidgetsOfType = widgets.filter((w) => w.widget_type === widgetType);
+        if (widgetType !== "pixel_art" && existingWidgetsOfType.length > 0) {
+          return false;
+        }
+
+        // Check if there's space for at least one size
+        return sizes.some((size) => findAvailablePosition(widgets, size) !== null);
+      },
+    [widgets]
+  );
 
   const widgetTypes = [
     {
@@ -84,47 +103,73 @@ export function WidgetLibrary({ onSelectWidget }: WidgetLibraryProps) {
     <div>
       <h3 className={clsx("game-heading-3", styles.title)}>Widget Library</h3>
       <div className={styles.grid}>
-        {widgetTypes.map((widget) => (
-          <div
-            key={widget.type}
-            className={clsx("game-card", "game-card-hover", styles.card)}
-            onClick={() => {
-              setSelectedType(widget.type);
-              playSound("click");
-            }}
-          >
-            <div className={clsx("game-flex", "game-flex-gap-sm", styles.header)}>
-              <i className={`hn ${widget.icon} ${styles.icon}`} />
-              <div className={clsx("game-heading-3", styles.name)}>{widget.name}</div>
-            </div>
-            <div className={clsx("game-text-muted", styles.description)}>{widget.description}</div>
-            {selectedType === widget.type && (
-              <div className={clsx("game-animate-slide-in", styles.sizeSelector)}>
-                <div className={clsx("game-heading-3", styles.sizeTitle)}>Select Size:</div>
-                <div className="game-flex game-flex-gap-sm">
-                  {widget.sizes.map((size) => (
-                    <button
-                      key={size}
-                      className={clsx(
-                        "game-button",
-                        previewSize === size && "game-button-primary",
-                        styles.sizeButton
-                      )}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectWidget(widget.type, size as WidgetSize);
-                        setSelectedType(null);
-                        playSound("success");
-                      }}
-                    >
-                      {size}
-                    </button>
-                  ))}
+        {widgetTypes.map((widget) => {
+          const isDisabled = !canAddWidget(widget.type, widget.sizes);
+          return (
+            <div
+              key={widget.type}
+              className={clsx(
+                "game-card",
+                !isDisabled && "game-card-hover",
+                styles.card,
+                isDisabled && styles.cardDisabled
+              )}
+              onClick={() => {
+                if (isDisabled) return;
+                setSelectedType(widget.type);
+                playSound("click");
+              }}
+            >
+              <div className={clsx("game-flex", "game-flex-gap-sm", styles.header)}>
+                <i
+                  className={clsx(
+                    `hn ${widget.icon} ${styles.icon}`,
+                    isDisabled && styles.iconDisabled
+                  )}
+                />
+                <div
+                  className={clsx("game-heading-3", styles.name, isDisabled && styles.nameDisabled)}
+                >
+                  {widget.name}
                 </div>
               </div>
-            )}
-          </div>
-        ))}
+              <div
+                className={clsx(
+                  "game-text-muted",
+                  styles.description,
+                  isDisabled && styles.descriptionDisabled
+                )}
+              >
+                {widget.description}
+              </div>
+              {selectedType === widget.type && !isDisabled && (
+                <div className={clsx("game-animate-slide-in", styles.sizeSelector)}>
+                  <div className={clsx("game-heading-3", styles.sizeTitle)}>Select Size:</div>
+                  <div className="game-flex game-flex-gap-sm">
+                    {widget.sizes.map((size) => (
+                      <button
+                        key={size}
+                        className={clsx(
+                          "game-button",
+                          previewSize === size && "game-button-primary",
+                          styles.sizeButton
+                        )}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectWidget(widget.type, size as WidgetSize);
+                          setSelectedType(null);
+                          playSound("success");
+                        }}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

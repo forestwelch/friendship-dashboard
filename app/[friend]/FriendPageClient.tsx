@@ -954,7 +954,7 @@ export function FriendPageClient({
               </button>
             </div>
             <h1 className={`game-heading-1 ${styles.widgetLibraryTitle}`}>WIDGET LIBRARY</h1>
-            <WidgetLibrary onSelectWidget={handleAddWidget} />
+            <WidgetLibrary onSelectWidget={handleAddWidget} widgets={widgets} />
           </div>
         </div>
       )}
