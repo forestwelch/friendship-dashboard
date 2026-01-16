@@ -31,13 +31,18 @@ export function Modal({ id, title, children, onClose }: ModalProps) {
   }, []);
 
   // Close modal on navigation to prevent DOM errors
+  const prevPathnameRef = useRef(pathname);
   useEffect(() => {
-    if (isOpen) {
+    const didPathnameChange = prevPathnameRef.current !== pathname;
+
+    if (didPathnameChange && isOpen) {
       setOpenModal(null);
       onClose?.();
       // Delay hiding to allow cleanup to complete
       setShouldRender(false);
     }
+
+    prevPathnameRef.current = pathname;
     // Only react to pathname changes, not other dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);

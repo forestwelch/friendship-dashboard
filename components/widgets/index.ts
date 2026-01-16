@@ -12,3 +12,5 @@ export { AbsurdReviews } from "./AbsurdReviews";
 export type { ReviewTopic, Review } from "./AbsurdReviews";
 export { FridgeMagnets } from "./FridgeMagnets";
 export type { Magnet, FridgeState } from "./FridgeMagnets";
+export { TicTacToe } from "./TicTacToe/TicTacToe";
+export type { TicTacToeData } from "./TicTacToe/queries";

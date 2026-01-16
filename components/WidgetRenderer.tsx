@@ -10,9 +10,10 @@ import {
   AudioSnippets,
   AbsurdReviews,
   FridgeMagnets,
+  TicTacToe,
 } from "@/components/widgets";
 import { FriendWidget } from "@/lib/queries";
-import { ConnectFourData } from "@/components/widgets";
+import { ConnectFourData, TicTacToeData } from "@/components/widgets";
 import { useTheme } from "@/lib/contexts/theme-context";
 import { WIDGET_TYPES } from "@/lib/widget-types";
 
@@ -119,6 +120,19 @@ export const WidgetRenderer = memo(function WidgetRenderer({
 
     case WIDGET_TYPES.FRIDGE_MAGNETS:
       return <FridgeMagnets size={widget.size} friendId={friendId || ""} />;
+
+    case WIDGET_TYPES.TIC_TAC_TOE:
+      return (
+        <TicTacToe
+          size={widget.size}
+          friendId={friendId || ""}
+          friendName={friendName}
+          widgetId={widget.id}
+          themeColors={themeColors}
+          config={widget.config as unknown as TicTacToeData}
+          isEditMode={isEditMode}
+        />
+      );
 
     default:
       return (

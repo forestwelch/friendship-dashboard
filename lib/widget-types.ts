@@ -12,6 +12,7 @@ export const WIDGET_TYPES = {
   AUDIO_SNIPPETS: "audio_snippets",
   ABSURD_REVIEWS: "absurd_reviews",
   FRIDGE_MAGNETS: "fridge_magnets",
+  TIC_TAC_TOE: "tic_tac_toe",
 } as const;
 
 // Type for widget type values

@@ -99,6 +99,13 @@ export function WidgetLibrary({ onSelectWidget, widgets = [] }: WidgetLibraryPro
       icon: "hn-paperclip-solid", // magnet-solid not available
       sizes: ["2x3", "3x4", "4x6"] as WidgetSize[],
     },
+    {
+      type: WIDGET_TYPES.TIC_TAC_TOE,
+      name: "Tic Tac Toe",
+      description: "Play infinite tic-tac-toe",
+      icon: "hn-gaming", // gaming icon
+      sizes: ["2x2", "3x3"] as WidgetSize[],
+    },
   ];
 
   return (

@@ -42,7 +42,7 @@ export function ConnectFour({
     isLoading,
     isPending,
   } = useConnectFourGame(friendId, widgetId, {
-    refetchInterval: isEditMode ? false : 5000, // Poll every 5 seconds in view mode, disabled in edit mode
+    refetchInterval: isEditMode ? undefined : 5000, // Poll every 5 seconds in view mode, disabled in edit mode
   });
 
   // Show shimmer while loading - always show when data isn't available

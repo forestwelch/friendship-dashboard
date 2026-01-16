@@ -1,0 +1,457 @@
+/* Tic Tac Toe Widget Styles */
+
+/* 2x2 Tile */
+.tile2x2 {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--space-sm);
+  background: var(--bg);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  gap: var(--space-sm);
+  cursor: pointer;
+}
+
+/* 3x3 Tile */
+.tile3x3 {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--space-sm);
+  background: var(--bg);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  gap: var(--space-sm);
+  cursor: pointer;
+}
+
+.title {
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Board Grid (3x3) */
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 2px;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  background: var(--secondary);
+  padding: 2px;
+  border-radius: 0;
+  /* pointer-events: none removed - was blocking clicks to parent tile */
+}
+
+.cell {
+  aspect-ratio: 1;
+  background: var(--bg);
+  border: 1px solid var(--secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.cell:not(.hasPiece):hover {
+  background: var(--accent);
+  opacity: 0.3;
+}
+
+.cell.hasPiece {
+  opacity: 1;
+  cursor: default;
+}
+
+.cell.oldestPiece {
+  opacity: 0.5;
+}
+
+.cell.winningCell {
+  border: 3px solid var(--primary);
+  box-shadow: var(--game-glow-primary);
+}
+
+.cellNumber {
+  font-size: var(--font-size-xs);
+  color: var(--text);
+  opacity: 0.5;
+  font-weight: bold;
+}
+
+.iconDisplay {
+  font-size: 1.5rem;
+  color: var(--icon-color);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+}
+
+.iconDisplay.oldestIcon {
+  opacity: 0.5;
+}
+
+/* Status Bar */
+.statusBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg);
+  border-top: 1px solid var(--secondary);
+}
+
+.statusText {
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  color: var(--status-color, var(--text));
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.settingsButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-xs);
+  color: var(--text);
+  font-size: var(--font-size-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: var(--space-sm);
+}
+
+.settingsButton:hover {
+  color: var(--primary);
+}
+
+/* Pre-Game State */
+.preGame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  width: 100%;
+  height: 100%;
+  padding: var(--space-md);
+}
+
+.preGameTitle {
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+.playButton {
+  padding: var(--space-md) var(--space-lg);
+  background: var(--primary);
+  color: var(--bg);
+  border: 2px solid var(--primary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.playButton:hover {
+  background: var(--secondary);
+  border-color: var(--secondary);
+  box-shadow: var(--game-glow-primary);
+}
+
+/* Waiting State */
+.waitingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  width: 100%;
+  height: 100%;
+  padding: var(--space-md);
+}
+
+.waitingText {
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+/* Icon Selector */
+.iconSelector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  padding: var(--space-md);
+}
+
+.iconSelectorTitle {
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+.iconGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: var(--space-md);
+  width: 100%;
+  max-width: 450px;
+}
+
+.iconButton {
+  aspect-ratio: 1;
+  background: var(--bg);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm);
+  transition: all 0.2s;
+}
+
+.iconButton:hover {
+  border-color: var(--primary);
+  background: var(--accent);
+}
+
+.iconButtonSelected {
+  border-color: var(--primary);
+  background: var(--primary);
+  box-shadow: var(--game-glow-primary);
+}
+
+.iconSelectorFooter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+}
+
+.selectedIconDisplay {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.selectedLabel {
+  font-size: var(--font-size-sm);
+  color: var(--text);
+  font-weight: bold;
+}
+
+.selectedIcon {
+  font-size: var(--font-size-lg);
+  color: var(--icon-color);
+}
+
+.iconSelectorActions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.confirmButton,
+.cancelButton {
+  padding: var(--space-sm) var(--space-md);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.confirmButton {
+  background: var(--primary);
+  color: var(--bg);
+  border-color: var(--primary);
+}
+
+.confirmButton:hover {
+  background: var(--secondary);
+  border-color: var(--secondary);
+  box-shadow: var(--game-glow-primary);
+}
+
+.cancelButton {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.cancelButton:hover {
+  border-color: var(--primary);
+  background: var(--accent);
+}
+
+/* Game Over State */
+.gameOver {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  width: 100%;
+  padding: var(--space-md);
+}
+
+.resultTitle {
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+.playAgainButton {
+  padding: var(--space-md) var(--space-lg);
+  background: var(--primary);
+  color: var(--bg);
+  border: 2px solid var(--primary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.playAgainButton:hover {
+  background: var(--secondary);
+  border-color: var(--secondary);
+  box-shadow: var(--game-glow-primary);
+}
+
+/* Modal-specific styles */
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding-top: var(--space-md);
+  width: 100%;
+}
+
+.boardContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+}
+
+.modalBoard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 4px;
+  width: 100%;
+  max-width: 400px;
+  background: var(--secondary);
+  padding: 4px;
+  border-radius: 0;
+}
+
+.modalCell {
+  aspect-ratio: 1;
+  min-width: 60px;
+  min-height: 60px;
+  background: var(--bg);
+  border: 2px solid var(--secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-size: var(--font-size-sm);
+}
+
+.modalCell.clickable {
+  cursor: pointer;
+}
+
+.modalCell.clickable:hover {
+  background: var(--accent);
+  border-color: var(--primary);
+}
+
+.modalCell.hasPiece {
+  opacity: 1;
+  cursor: default;
+}
+
+.modalCell.oldestPiece {
+  opacity: 0.5;
+}
+
+.modalCell.winningCell {
+  border: 3px solid var(--primary);
+  box-shadow: var(--game-glow-primary);
+}
+
+.modalIcon {
+  font-size: 2.5rem;
+  color: var(--icon-color);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+}
+
+.modalIcon.oldestIcon {
+  opacity: 0.5;
+}
+
+.gameHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: var(--space-sm);
+}
+
+.gameFooter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: var(--space-md);
+}
