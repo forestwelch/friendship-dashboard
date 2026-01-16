@@ -25,6 +25,7 @@ export function getWidgetPositions(position: WidgetPosition, size: WidgetSize): 
 
 /**
  * Check if two widgets overlap
+ * Uses Set-based lookup for O(n) instead of O(n²) complexity
  */
 export function widgetsOverlap(
   widget1: { position: WidgetPosition; size: WidgetSize },
@@ -33,12 +34,13 @@ export function widgetsOverlap(
   const pos1 = getWidgetPositions(widget1.position, widget1.size);
   const pos2 = getWidgetPositions(widget2.position, widget2.size);
 
-  // Check if any positions overlap
-  for (const p1 of pos1) {
-    for (const p2 of pos2) {
-      if (p1.x === p2.x && p1.y === p2.y) {
-        return true;
-      }
+  // Create a Set of position keys for O(1) lookup
+  const pos1Set = new Set(pos1.map((p) => `${p.x},${p.y}`));
+
+  // Single loop with Set lookup instead of nested loop
+  for (const p of pos2) {
+    if (pos1Set.has(`${p.x},${p.y}`)) {
+      return true;
     }
   }
 
