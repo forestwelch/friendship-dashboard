@@ -7,7 +7,7 @@ export async function GET() {
   }
 
   try {
-    // Fetch all albums with image counts
+    // Fetch all albums
     const { data: albums, error: albumsError } = await supabase
       .from("albums")
       .select("id, name, created_at")
@@ -18,20 +18,30 @@ export async function GET() {
       return NextResponse.json({ error: "Failed to fetch albums" }, { status: 500 });
     }
 
-    // Get image counts for each album
-    const albumsWithCounts = await Promise.all(
-      (albums || []).map(async (album) => {
-        const { count } = await supabase
-          .from("pixel_art_images")
-          .select("*", { count: "exact", head: true })
-          .eq("album_id", album.id);
+    // Get image counts for all albums in a single query (fixes N+1 problem)
+    const { data: imageCounts, error: countsError } = await supabase
+      .from("pixel_art_images")
+      .select("album_id")
+      .not("album_id", "is", null);
 
-        return {
-          ...album,
-          imageCount: count || 0,
-        };
-      })
-    );
+    if (countsError) {
+      console.error("[API] Error fetching image counts:", countsError);
+      return NextResponse.json({ error: "Failed to fetch image counts" }, { status: 500 });
+    }
+
+    // Build a map of album_id -> count
+    const countMap = new Map<string, number>();
+    (imageCounts || []).forEach((img) => {
+      if (img.album_id) {
+        countMap.set(img.album_id, (countMap.get(img.album_id) || 0) + 1);
+      }
+    });
+
+    // Attach counts to albums
+    const albumsWithCounts = (albums || []).map((album) => ({
+      ...album,
+      imageCount: countMap.get(album.id) || 0,
+    }));
 
     return NextResponse.json({ albums: albumsWithCounts });
   } catch (error) {

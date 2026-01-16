@@ -41,34 +41,20 @@ export function PixelArtConfigModal({ widget, onClose, onSave }: PixelArtConfigM
   const [selectedFilter, setSelectedFilter] = useState<"all" | "uncategorized" | string>("all");
   const imagesFetchedRef = useRef(false);
 
-  // Fetch albums
-  useEffect(() => {
-    const fetchAlbums = async () => {
-      try {
-        const response = await fetch("/api/albums");
-        if (response.ok) {
-          const data = await response.json();
-          setAlbums(data.albums || []);
-        }
-      } catch (err) {
-        console.error("Failed to fetch albums:", err);
-      }
-    };
-    fetchAlbums();
-  }, []);
-
-  // Fetch available images
+  // Fetch images and albums in a single request (batch optimization)
   useEffect(() => {
     if (!imagesFetchedRef.current) {
       imagesFetchedRef.current = true;
       setLoadingImages(true);
-      fetch("/api/images")
+      fetch("/api/images?includeAlbums=true")
         .then((res) => res.json())
         .then((data) => {
           setAvailableImages(data.images || []);
+          setAlbums(data.albums || []);
           setLoadingImages(false);
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error("Failed to fetch images and albums:", err);
           setLoadingImages(false);
         });
     }

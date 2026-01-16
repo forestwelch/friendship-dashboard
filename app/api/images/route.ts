@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const albumId = searchParams.get("albumId"); // Filter by album (null for uncategorized)
+    const includeAlbums = searchParams.get("includeAlbums") === "true"; // Batch request optimization
 
     // Fetching global images
     let query = supabase
@@ -45,7 +46,40 @@ export async function GET(request: NextRequest) {
       created_at: img.created_at,
     }));
 
-    const response = NextResponse.json({ images });
+    // Optionally include albums data (batch request optimization)
+    let albums = undefined;
+    if (includeAlbums) {
+      // Fetch albums
+      const { data: albumsData, error: albumsError } = await supabase
+        .from("albums")
+        .select("id, name, created_at")
+        .order("name", { ascending: true });
+
+      if (!albumsError && albumsData) {
+        // Get image counts for all albums in a single query
+        const { data: imageCounts } = await supabase
+          .from("pixel_art_images")
+          .select("album_id")
+          .not("album_id", "is", null);
+
+        // Build a map of album_id -> count
+        const countMap = new Map<string, number>();
+        (imageCounts || []).forEach((img) => {
+          if (img.album_id) {
+            countMap.set(img.album_id, (countMap.get(img.album_id) || 0) + 1);
+          }
+        });
+
+        // Attach counts to albums
+        albums = albumsData.map((album) => ({
+          ...album,
+          imageCount: countMap.get(album.id) || 0,
+        }));
+      }
+    }
+
+    const responseData = includeAlbums ? { images, albums } : { images };
+    const response = NextResponse.json(responseData);
 
     // Add caching headers for better performance
     response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
