@@ -245,7 +245,12 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-sm);
-  transition: all 0.2s;
+}
+
+.iconButton i {
+  color: var(--icon-color);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
 }
 
 .iconButton:hover {
