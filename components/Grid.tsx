@@ -9,15 +9,14 @@ interface GridProps {
   children: React.ReactNode;
 }
 
-export function Grid({ children }: GridProps) {
-  // Create array of all grid positions for background tiles
-  const allTiles: Array<{ x: number; y: number }> = [];
-  for (let y = 0; y < GRID_ROWS; y++) {
-    for (let x = 0; x < GRID_COLS; x++) {
-      allTiles.push({ x, y });
-    }
-  }
+// Memoize grid tiles since they're derived from constants and never change
+// Computed once when module loads instead of on every render
+const GRID_TILES = Array.from({ length: GRID_ROWS * GRID_COLS }, (_, i) => ({
+  x: i % GRID_COLS,
+  y: Math.floor(i / GRID_COLS),
+}));
 
+export function Grid({ children }: GridProps) {
   return (
     <div
       data-grid-container
@@ -29,7 +28,7 @@ export function Grid({ children }: GridProps) {
     >
       {/* Background grid tiles - muted squares using theme colors */}
       {/* CSS custom properties are set inline because each tile's position is dynamic */}
-      {allTiles.map((tile) => (
+      {GRID_TILES.map((tile) => (
         <div
           key={`bg-${tile.x}-${tile.y}`}
           className={styles.gridTileBg}
