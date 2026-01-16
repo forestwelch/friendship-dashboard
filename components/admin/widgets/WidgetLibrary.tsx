@@ -5,6 +5,7 @@ import { WidgetSize } from "@/lib/types";
 import { FriendWidget } from "@/lib/queries";
 import { playSound } from "@/lib/sounds";
 import { findAvailablePosition } from "@/lib/utils/widget-utils";
+import { WIDGET_TYPES, allowsMultipleInstances } from "@/lib/widget-types";
 import clsx from "clsx";
 import styles from "./WidgetLibrary.module.css";
 
@@ -29,9 +30,9 @@ export function WidgetLibrary({ onSelectWidget, widgets = [] }: WidgetLibraryPro
   const canAddWidget = useMemo(
     () =>
       (widgetType: string, sizes: WidgetSize[]): boolean => {
-        // Check for duplicate widget types (except pixel_art which allows multiple)
+        // Check for duplicate widget types (except those that allow multiple instances)
         const existingWidgetsOfType = widgets.filter((w) => w.widget_type === widgetType);
-        if (widgetType !== "pixel_art" && existingWidgetsOfType.length > 0) {
+        if (!allowsMultipleInstances(widgetType) && existingWidgetsOfType.length > 0) {
           return false;
         }
 
@@ -43,56 +44,56 @@ export function WidgetLibrary({ onSelectWidget, widgets = [] }: WidgetLibraryPro
 
   const widgetTypes: WidgetTypeDefinition[] = [
     {
-      type: "music_player",
+      type: WIDGET_TYPES.MUSIC_PLAYER,
       name: "Music Player",
       description: "Play MP3 songs (upload your own)",
       icon: "hn-music-solid",
       sizes: ["1x1", "3x1", "4x2"] as WidgetSize[],
     },
     {
-      type: "pixel_art",
+      type: WIDGET_TYPES.PIXEL_ART,
       name: "Pixel Art",
       description: "Display pixelated animations",
       icon: "hn-image-solid",
       sizes: ["1x1", "2x2", "3x3"] as WidgetSize[],
     },
     {
-      type: "connect_four",
+      type: WIDGET_TYPES.CONNECT_FOUR,
       name: "Connect Four",
       description: "Play async turn-based game",
       icon: "hn-gaming", // gaming not available
       sizes: ["2x1", "2x2", "3x3"] as WidgetSize[],
     },
     {
-      type: "consumption_log",
+      type: WIDGET_TYPES.CONSUMPTION_LOG,
       name: "Shared Consumption Log",
       description: "Running diary of media consumption",
       icon: "hn-bookmark-solid", // book-solid not available
       sizes: ["3x1"] as WidgetSize[],
     },
     {
-      type: "question_jar",
+      type: WIDGET_TYPES.QUESTION_JAR,
       name: "Question Jar",
       description: "Alternating Q&A conversation",
       icon: "hn-question-solid", // question-circle-solid not available
       sizes: ["2x2"] as WidgetSize[],
     },
     {
-      type: "audio_snippets",
+      type: WIDGET_TYPES.AUDIO_SNIPPETS,
       name: "Audio Snippets",
       description: "Shared soundboard of 5-second clips",
       icon: "hn-sound-on-solid", // microphone-solid not available
       sizes: ["1x2", "1x3", "2x1", "3x1"] as WidgetSize[],
     },
     {
-      type: "absurd_reviews",
+      type: WIDGET_TYPES.ABSURD_REVIEWS,
       name: "Anthropocene Reviewed",
       description: "Rate mundane concepts together",
       icon: "hn-star-solid",
       sizes: ["2x1"] as WidgetSize[],
     },
     {
-      type: "fridge_magnets",
+      type: WIDGET_TYPES.FRIDGE_MAGNETS,
       name: "Fridge Magnets",
       description: "Virtual fridge with magnetic letters",
       icon: "hn-paperclip-solid", // magnet-solid not available

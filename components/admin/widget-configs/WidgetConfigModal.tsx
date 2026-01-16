@@ -3,6 +3,7 @@
 import React from "react";
 import { FriendWidget } from "@/lib/queries";
 import { WidgetConfig, WidgetSize } from "@/lib/types";
+import { WIDGET_TYPES } from "@/lib/widget-types";
 import { PixelArtConfigModal } from "./PixelArtConfigModal";
 import { MusicPlayerConfigModal } from "./MusicPlayerConfigModal";
 import { DefaultWidgetConfigModal } from "./DefaultWidgetConfigModal";
@@ -17,10 +18,10 @@ export function WidgetConfigModal({ widget, onClose, onSave }: WidgetConfigModal
   if (!widget) return null;
 
   switch (widget.widget_type) {
-    case "pixel_art":
+    case WIDGET_TYPES.PIXEL_ART:
       return <PixelArtConfigModal widget={widget} onClose={onClose} onSave={onSave} />;
 
-    case "music_player":
+    case WIDGET_TYPES.MUSIC_PLAYER:
       return <MusicPlayerConfigModal widget={widget} onClose={onClose} onSave={onSave} />;
 
     default:

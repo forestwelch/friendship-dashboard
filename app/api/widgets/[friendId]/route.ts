@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
 import { WidgetSize } from "@/lib/types";
+import { WIDGET_TYPES } from "@/lib/widget-types";
 
 interface FriendWidgetRow {
   id: string;
@@ -210,7 +211,7 @@ export async function PUT(
         // Match by widget_type (for non-pixel_art, there's only one)
         // For pixel_art, match by position
         const widgetsOfType = existingWidgetsByType.get(w.widget_type) || [];
-        if (w.widget_type === "pixel_art") {
+        if (w.widget_type === WIDGET_TYPES.PIXEL_ART) {
           // For pixel_art, match by position
           existingWidget =
             widgetsOfType.find(

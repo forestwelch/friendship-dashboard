@@ -18,6 +18,7 @@ import { useUserContext } from "@/lib/hooks/useUserContext";
 import { useGridScale } from "@/lib/hooks/useGridScale";
 import { GRID_COLS, GRID_ROWS } from "@/lib/constants";
 import { hasNewContent } from "@/lib/widget-notifications";
+import { WIDGET_TYPES, allowsMultipleInstances } from "@/lib/widget-types";
 import clsx from "clsx";
 import styles from "./FriendPageClient.module.css";
 
@@ -245,9 +246,9 @@ export function FriendPageClient({
 
   const handleAddWidget = useCallback(
     (widgetType: string, size: WidgetSize) => {
-      // Check for duplicate widget types (except pixel_art which allows multiple)
+      // Check for duplicate widget types (except those that allow multiple instances)
       const existingWidgetsOfType = widgets.filter((w) => w.widget_type === widgetType);
-      if (widgetType !== "pixel_art" && existingWidgetsOfType.length > 0) {
+      if (!allowsMultipleInstances(widgetType) && existingWidgetsOfType.length > 0) {
         playSound("error");
         alert(`You can only have one ${widgetType.replace(/_/g, " ")} widget per friend.`);
         return;
@@ -663,8 +664,8 @@ export function FriendPageClient({
             .filter((w) => w.id !== movingWidgetId)
             .map((widget) => {
               let pixelArtImageUrl: string | undefined;
-              // Handle both pixel_art and image widgets for the image URL
-              if (widget.widget_type === "pixel_art" || widget.widget_type === "image") {
+              // Handle pixel_art widgets for the image URL
+              if (widget.widget_type === WIDGET_TYPES.PIXEL_ART) {
                 pixelArtImageUrl = pixelArtMap.get(widget.id) || pixelArtBySize.get(widget.size);
               }
 

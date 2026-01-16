@@ -14,6 +14,7 @@ import {
 import { FriendWidget } from "@/lib/queries";
 import { ConnectFourData } from "@/components/widgets";
 import { useTheme } from "@/lib/contexts/theme-context";
+import { WIDGET_TYPES } from "@/lib/widget-types";
 
 interface WidgetRendererProps {
   widget: FriendWidget;
@@ -41,7 +42,7 @@ export const WidgetRenderer = memo(function WidgetRenderer({
 
   // Debug logging removed - was causing lint errors (Date.now() in render)
   switch (widget.widget_type) {
-    case "music_player":
+    case WIDGET_TYPES.MUSIC_PLAYER:
       return (
         <MusicPlayer
           size={widget.size}
@@ -50,7 +51,7 @@ export const WidgetRenderer = memo(function WidgetRenderer({
         />
       );
 
-    case "pixel_art":
+    case WIDGET_TYPES.PIXEL_ART:
       // Check if widget config has pixelData (new programmatic approach) or imageUrls (backward compatibility)
       const pixelData = widget.config?.pixelData;
       const imageUrls = widget.config?.imageUrls;
@@ -89,37 +90,7 @@ export const WidgetRenderer = memo(function WidgetRenderer({
         />
       );
 
-    case "image":
-      // Route "image" widgets to PixelArt for backward compatibility
-      const imageImageUrls = widget.config?.imageUrls;
-      const imagePixelData = widget.config?.pixelData;
-
-      // Use programmatic rendering if pixelData is available
-      if (imagePixelData && imagePixelData.length > 0 && themeColors) {
-        return (
-          <PixelArt
-            size={widget.size}
-            pixelData={imagePixelData}
-            themeColors={themeColors}
-            transitionType={
-              (widget.config.transitionType as "scanline" | "dissolve" | "boot-up") || "scanline"
-            }
-          />
-        );
-      }
-
-      return (
-        <PixelArt
-          size={widget.size}
-          imageUrl={imageImageUrls ? undefined : pixelArtImageUrl}
-          imageUrls={imageImageUrls}
-          transitionType={
-            (widget.config.transitionType as "scanline" | "dissolve" | "boot-up") || "scanline"
-          }
-        />
-      );
-
-    case "connect_four":
+    case WIDGET_TYPES.CONNECT_FOUR:
       return (
         <ConnectFour
           size={widget.size}
@@ -132,21 +103,21 @@ export const WidgetRenderer = memo(function WidgetRenderer({
         />
       );
 
-    case "consumption_log":
+    case WIDGET_TYPES.CONSUMPTION_LOG:
       return (
         <ConsumptionLog size={widget.size} friendId={friendId || ""} friendName={friendName} />
       );
 
-    case "question_jar":
+    case WIDGET_TYPES.QUESTION_JAR:
       return <QuestionJar size={widget.size} friendId={friendId || ""} friendName={friendName} />;
 
-    case "audio_snippets":
+    case WIDGET_TYPES.AUDIO_SNIPPETS:
       return <AudioSnippets size={widget.size} friendId={friendId || ""} />;
 
-    case "absurd_reviews":
+    case WIDGET_TYPES.ABSURD_REVIEWS:
       return <AbsurdReviews size={widget.size} friendId={friendId || ""} friendName={friendName} />;
 
-    case "fridge_magnets":
+    case WIDGET_TYPES.FRIDGE_MAGNETS:
       return <FridgeMagnets size={widget.size} friendId={friendId || ""} />;
 
     default:
