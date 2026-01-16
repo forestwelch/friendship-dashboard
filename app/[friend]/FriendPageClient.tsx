@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useRef, useEffect, useLayoutEffect } from "react";
 import { Grid, GridItem } from "@/components/Grid";
 import { WidgetRenderer } from "@/components/WidgetRenderer";
+import { WidgetErrorBoundary } from "@/components/WidgetErrorBoundary";
 import { AdminOverlay } from "@/components/admin/AdminOverlay";
 import { ColorSettings } from "@/components/admin/tools/ColorSettings";
 import { WidgetLibrary } from "@/components/admin/widgets/WidgetLibrary";
@@ -678,15 +679,22 @@ export function FriendPageClient({
                       }
                     }}
                   >
-                    <WidgetRenderer
-                      widget={widget}
-                      pixelArtImageUrl={pixelArtImageUrl}
-                      onUploadImage={(file) => handleUploadImage(file, widget.id)}
-                      friendId={friend.id}
-                      friendName={friend.display_name}
-                      onUpdateWidgetConfig={handleUpdateWidgetConfig}
+                    <WidgetErrorBoundary
+                      widgetId={widget.id}
+                      widgetType={widget.widget_type}
+                      onDelete={handleDelete}
                       isEditMode={isEditMode}
-                    />
+                    >
+                      <WidgetRenderer
+                        widget={widget}
+                        pixelArtImageUrl={pixelArtImageUrl}
+                        onUploadImage={(file) => handleUploadImage(file, widget.id)}
+                        friendId={friend.id}
+                        friendName={friend.display_name}
+                        onUpdateWidgetConfig={handleUpdateWidgetConfig}
+                        isEditMode={isEditMode}
+                      />
+                    </WidgetErrorBoundary>
                     {/* Star icon for new content widgets */}
                     {/*{widgetHasNewContent && (
                       <div className="widget-new-content-indicator">
@@ -829,15 +837,23 @@ export function FriendPageClient({
                       size={movingWidget.size}
                       className={styles.movingWidgetPreview}
                     >
-                      <WidgetRenderer
-                        widget={movingWidget}
-                        pixelArtImageUrl={
-                          pixelArtMap.get(movingWidget.id) || pixelArtBySize.get(movingWidget.size)
-                        }
-                        friendId={friend.id}
-                        friendName={friend.display_name}
+                      <WidgetErrorBoundary
+                        widgetId={movingWidget.id}
+                        widgetType={movingWidget.widget_type}
+                        onDelete={handleDelete}
                         isEditMode={isEditMode}
-                      />
+                      >
+                        <WidgetRenderer
+                          widget={movingWidget}
+                          pixelArtImageUrl={
+                            pixelArtMap.get(movingWidget.id) ||
+                            pixelArtBySize.get(movingWidget.size)
+                          }
+                          friendId={friend.id}
+                          friendName={friend.display_name}
+                          isEditMode={isEditMode}
+                        />
+                      </WidgetErrorBoundary>
                     </GridItem>
                   )}
                 </>
