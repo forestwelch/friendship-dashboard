@@ -22,6 +22,7 @@ interface WidgetRendererProps {
   friendId?: string;
   friendName?: string;
   onUpdateWidgetConfig?: (widgetId: string, config: Record<string, unknown>) => Promise<void>;
+  isEditMode?: boolean;
 }
 
 /**
@@ -34,6 +35,7 @@ export const WidgetRenderer = memo(function WidgetRenderer({
   friendId,
   friendName = "Friend",
   onUpdateWidgetConfig: _onUpdateWidgetConfig,
+  isEditMode = false,
 }: WidgetRendererProps) {
   const themeColors = useTheme();
 
@@ -126,6 +128,7 @@ export const WidgetRenderer = memo(function WidgetRenderer({
           widgetId={widget.id}
           themeColors={themeColors}
           config={widget.config as unknown as ConnectFourData}
+          isEditMode={isEditMode}
         />
       );
 

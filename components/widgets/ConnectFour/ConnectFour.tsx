@@ -21,6 +21,7 @@ interface ConnectFourProps {
   widgetId: string;
   themeColors: ThemeColors;
   config?: ConnectFourData;
+  isEditMode?: boolean;
 }
 
 export function ConnectFour({
@@ -30,16 +31,18 @@ export function ConnectFour({
   widgetId,
   themeColors,
   config,
+  isEditMode = false,
 }: ConnectFourProps) {
   const { setOpenModal } = useUIStore();
 
-  // Use polling for widget updates (cheap, every 5 seconds)
+  // Use polling for widget updates in view mode only (cheap, every 5 seconds)
+  // Disable polling in edit mode to reduce unnecessary API calls
   const {
     data: gameData,
     isLoading,
     isPending,
   } = useConnectFourGame(friendId, widgetId, {
-    refetchInterval: 5000, // Poll every 5 seconds
+    refetchInterval: isEditMode ? false : 5000, // Poll every 5 seconds in view mode, disabled in edit mode
   });
 
   // Show shimmer while loading - always show when data isn't available

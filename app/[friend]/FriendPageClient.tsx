@@ -107,8 +107,11 @@ export function FriendPageClient({
     };
   }, []);
 
-  // Fetch widget interactions on mount
+  // Fetch widget interactions on mount and periodically (only in view mode)
   useEffect(() => {
+    // Don't fetch interaction data in edit mode - it's not displayed
+    if (isEditMode) return;
+
     const fetchInteractions = async () => {
       // For now, use the dashboard's friend ID as the viewer
       // In a multi-user system, this would be the logged-in user's friend ID
@@ -117,8 +120,15 @@ export function FriendPageClient({
       const interactions = await getWidgetInteractions(viewerFriendId, widgetIds);
       setWidgetInteractions(interactions);
     };
+
+    // Initial fetch
     fetchInteractions();
-  }, [friend.id, widgets]);
+
+    // Poll for updates every 30 seconds in view mode
+    const interval = setInterval(fetchInteractions, 30000);
+
+    return () => clearInterval(interval);
+  }, [friend.id, isEditMode, widgets]);
 
   // Update widget interaction when user hovers or taps
   const handleWidgetInteraction = useCallback(
@@ -675,6 +685,7 @@ export function FriendPageClient({
                       friendId={friend.id}
                       friendName={friend.display_name}
                       onUpdateWidgetConfig={handleUpdateWidgetConfig}
+                      isEditMode={isEditMode}
                     />
                     {/* Star icon for new content widgets */}
                     {/*{widgetHasNewContent && (
@@ -825,6 +836,7 @@ export function FriendPageClient({
                         }
                         friendId={friend.id}
                         friendName={friend.display_name}
+                        isEditMode={isEditMode}
                       />
                     </GridItem>
                   )}
