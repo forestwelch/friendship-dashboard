@@ -50,6 +50,7 @@ export function FriendPageClient({
   const [configuringWidget, setConfiguringWidget] = useState<FriendWidget | null>(null);
   const [showColorSettings, setShowColorSettings] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
+  const updateConfigAbortControllerRef = useRef<AbortController | null>(null);
   const { colors: themeColors, setTheme } = useThemeContext();
 
   // Initialize theme with friend's colors synchronously on mount (useLayoutEffect runs before paint)
@@ -536,11 +537,23 @@ export function FriendPageClient({
   // Define onUpdateWidgetConfig callback at component level (not inside map)
   const handleUpdateWidgetConfig = useCallback(
     async (widgetId: string, config: Record<string, unknown>) => {
+      // Cancel any previous pending request to prevent race conditions
+      if (updateConfigAbortControllerRef.current) {
+        updateConfigAbortControllerRef.current.abort();
+      }
+
+      // Create new AbortController for this request
+      updateConfigAbortControllerRef.current = new AbortController();
+
+      // Update local state optimistically
+      setWidgets((prev) => prev.map((w) => (w.id === widgetId ? { ...w, config } : w)));
+
       // Update widget config in database
       try {
         const response = await fetch(`/api/widgets/${friend.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
+          signal: updateConfigAbortControllerRef.current.signal,
           body: JSON.stringify({
             widgets: widgets
               .map((w) => (w.id === widgetId ? { ...w, config } : w))
@@ -553,15 +566,32 @@ export function FriendPageClient({
               })),
           }),
         });
-        if (response.ok) {
-          setWidgets((prev) => prev.map((w) => (w.id === widgetId ? { ...w, config } : w)));
+
+        if (!response.ok) {
+          console.error("Failed to update widget config");
+          // Optionally revert optimistic update on error
+          // setWidgets((prev) => prev); // Could re-fetch from server here
         }
       } catch (error) {
+        // Ignore AbortError - request was intentionally cancelled
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
         console.error("Failed to update widget config:", error);
+        // Optionally revert optimistic update on real errors
       }
     },
     [friend.id, widgets]
   );
+
+  // Cleanup: Abort any pending config update requests on unmount
+  useEffect(() => {
+    return () => {
+      if (updateConfigAbortControllerRef.current) {
+        updateConfigAbortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   // Listen for admin navigation events (only in admin mode)
   useEffect(() => {
