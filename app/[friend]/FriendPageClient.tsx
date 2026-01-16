@@ -636,30 +636,6 @@ export function FriendPageClient({
                 !isEditMode &&
                 hasNewContent(widget.last_updated_at, widgetInteraction?.last_interacted_at);
 
-              // #region agent log
-              if (!isEditMode) {
-                fetch("http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    location: "app/[friend]/FriendPageClient.tsx:625",
-                    message: "Widget notification check",
-                    data: {
-                      widgetId: widget.id,
-                      widgetType: widget.widget_type,
-                      lastUpdatedAt: widget.last_updated_at,
-                      lastInteractedAt: widgetInteraction?.last_interacted_at || null,
-                      hasNewContent: widgetHasNewContent,
-                    },
-                    timestamp: Date.now(),
-                    sessionId: "debug-session",
-                    runId: "run1",
-                    hypothesisId: "B",
-                  }),
-                }).catch(() => {});
-              }
-              // #endregion
-
               // Build container class names - only add "has-new-content" if there's actually new content
               const containerClasses = ["widget-container"];
               if (widgetHasNewContent) {

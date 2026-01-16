@@ -95,26 +95,6 @@ export async function PUT(
     const body = await request.json();
     const { widgets } = body;
 
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        location: "app/api/widgets/[friendId]/route.ts:100",
-        message: "Received widgets from frontend",
-        data: {
-          widgetCount: widgets?.length || 0,
-          sampleWidget: widgets?.[0] || null,
-          widgetIds: widgets?.map((w: { id?: string }) => w.id).filter(Boolean) || [],
-        },
-        timestamp: Date.now(),
-        sessionId: "debug-session",
-        runId: "run1",
-        hypothesisId: "A",
-      }),
-    }).catch(() => {});
-    // #endregion
-
     if (!friendId) {
       return NextResponse.json({ error: "Friend ID is required" }, { status: 400 });
     }
@@ -174,26 +154,6 @@ export async function PUT(
       .from("friend_widgets")
       .select("id, widget_id, position_x, position_y, size, config, last_updated_at")
       .eq("friend_id", friendId);
-
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        location: "app/api/widgets/[friendId]/route.ts:156",
-        message: "Widget save started",
-        data: {
-          friendId,
-          widgetCount: widgets.length,
-          existingCount: existingWidgets?.length || 0,
-        },
-        timestamp: Date.now(),
-        sessionId: "debug-session",
-        runId: "run1",
-        hypothesisId: "A",
-      }),
-    }).catch(() => {});
-    // #endregion
 
     // Type for existing widget row
     type ExistingWidgetRow = {
@@ -274,32 +234,6 @@ export async function PUT(
 
         const hasChanged = positionChanged || sizeChanged || configChanged;
 
-        // #region agent log
-        fetch("http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            location: "app/api/widgets/[friendId]/route.ts:200",
-            message: "Widget update check",
-            data: {
-              widgetId: existingWidget.id,
-              widgetType: w.widget_type,
-              position: `${w.position_x},${w.position_y}`,
-              size: w.size,
-              hasChanged,
-              positionChanged,
-              sizeChanged,
-              configChanged,
-              existingLastUpdated: existingWidget.last_updated_at || null,
-            },
-            timestamp: Date.now(),
-            sessionId: "debug-session",
-            runId: "run1",
-            hypothesisId: "A",
-          }),
-        }).catch(() => {});
-        // #endregion
-
         // Prepare update data
         const updateData: Record<string, unknown> = {
           widget_id: widgetId,
@@ -318,25 +252,6 @@ export async function PUT(
         widgetsToUpdate.push({ id: existingWidget.id, data: updateData });
       } else {
         // New widget - insert it
-        // #region agent log
-        fetch("http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            location: "app/api/widgets/[friendId]/route.ts:230",
-            message: "Widget insert (new)",
-            data: {
-              widgetType: w.widget_type,
-              position: `${w.position_x},${w.position_y}`,
-              size: w.size,
-            },
-            timestamp: Date.now(),
-            sessionId: "debug-session",
-            runId: "run1",
-            hypothesisId: "A",
-          }),
-        }).catch(() => {});
-        // #endregion
         widgetsToInsert.push({
           friend_id: friendId,
           widget_id: widgetId,
@@ -384,21 +299,6 @@ export async function PUT(
     // Insert new widgets
     let insertedWidgets: FriendWidgetRow[] = [];
     if (widgetsToInsert.length > 0) {
-      // #region agent log
-      fetch("http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          location: "app/api/widgets/[friendId]/route.ts:270",
-          message: "About to insert new widgets",
-          data: { count: widgetsToInsert.length },
-          timestamp: Date.now(),
-          sessionId: "debug-session",
-          runId: "run1",
-          hypothesisId: "A",
-        }),
-      }).catch(() => {});
-      // #endregion
       const { data: inserted, error: insertError } = await adminClient
         .from("friend_widgets")
         .insert(widgetsToInsert)
@@ -435,21 +335,6 @@ export async function PUT(
     );
 
     if (widgetIdsToDelete.length > 0) {
-      // #region agent log
-      fetch("http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          location: "app/api/widgets/[friendId]/route.ts:275",
-          message: "About to delete removed widgets",
-          data: { count: widgetIdsToDelete.length, ids: widgetIdsToDelete },
-          timestamp: Date.now(),
-          sessionId: "debug-session",
-          runId: "run1",
-          hypothesisId: "A",
-        }),
-      }).catch(() => {});
-      // #endregion
       const { error: deleteError } = await adminClient
         .from("friend_widgets")
         .delete()
@@ -479,27 +364,6 @@ export async function PUT(
       config: fw.config || {},
       last_updated_at: fw.last_updated_at || null,
     }));
-
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        location: "app/api/widgets/[friendId]/route.ts:305",
-        message: "Widget save completed",
-        data: {
-          updatedCount: updatedWidgets.length,
-          insertedCount: insertedWidgets.length,
-          deletedCount: widgetIdsToDelete.length,
-          totalCount: result.length,
-        },
-        timestamp: Date.now(),
-        sessionId: "debug-session",
-        runId: "run1",
-        hypothesisId: "A",
-      }),
-    }).catch(() => {});
-    // #endregion
 
     return NextResponse.json({ widgets: result });
   } catch (error) {

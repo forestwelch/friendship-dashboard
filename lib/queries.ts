@@ -148,32 +148,6 @@ export async function getFriendPage(slug: string): Promise<FriendPageData | null
 
     // Transform widgets data
     const transformedWidgets: FriendWidget[] = (widgets || []).map((w: Record<string, unknown>) => {
-      // #region agent log
-      fetch("http://127.0.0.1:7242/ingest/08ba6ecb-f05f-479b-b2cd-50cb668f1262", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          location: "queries.ts:142",
-          message: "Transforming widget",
-          data: {
-            widgetId: w.id,
-            widgetType:
-              w.widgets && typeof w.widgets === "object" && "type" in w.widgets
-                ? String((w.widgets as { type: string }).type)
-                : undefined,
-            widgetName:
-              w.widgets && typeof w.widgets === "object" && "name" in w.widgets
-                ? String((w.widgets as { name: string }).name)
-                : undefined,
-            hasWidgets: !!w.widgets,
-          },
-          timestamp: Date.now(),
-          sessionId: "debug-session",
-          runId: "run1",
-          hypothesisId: "A",
-        }),
-      }).catch(() => {});
-      // #endregion
       return {
         id: String(w.id),
         widget_id: String(w.widget_id),
