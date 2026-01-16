@@ -59,8 +59,8 @@ export function TicTacToe({
     return getUserDisplayName(otherPlayerId, friendName);
   }, [currentUserId, player1Id, player2Id, friendName]);
 
-  // Check if there's no active game (board is empty and not completed)
-  const hasNoActiveGame = board.every((cell) => cell === null) && status !== "completed";
+  // Check if there's no game at all
+  const hasNoActiveGame = !game;
 
   const getTurnText = () => {
     if (hasNoActiveGame) {

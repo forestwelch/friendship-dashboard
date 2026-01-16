@@ -1,0 +1,69 @@
+# Friendship Dashboard - Code Quality Rules
+
+## BUILD QUALITY REQUIREMENTS
+
+1. **NO SLOP CODE**
+   - No placeholder comments like "TODO: implement this"
+   - No console.logs left in production code
+   - No unused imports or variables
+   - No `any` types unless absolutely necessary
+
+2. **BUILD MUST PASS**
+   - After every change, verify `npm run build` would pass
+   - Fix TypeScript errors as you write, not after
+   - If unsure about types, ask first
+
+3. **LINT MUST PASS**
+   - Follow existing ESLint rules
+   - No exhaustive-deps violations (fix the issue, don't disable)
+   - No unused variables
+   - Proper React hooks usage
+
+4. **MATCH EXISTING PATTERNS**
+   - Before writing new code, examine 2-3 similar existing files
+   - Match these patterns:
+     - Import structure
+     - Component patterns (functional components, hooks)
+     - Styling approach (CSS modules, classnames)
+     - Data fetching (TanStack Query)
+     - File organization
+
+5. **START SIMPLE, ITERATE LATER**
+   - Build minimal working version first
+   - No animations, transitions, or polish until requested
+   - No "nice to have" features
+   - Just core functionality
+
+6. **VERIFY BEFORE CLAIMING DONE**
+   - [ ] `npm run build` passes
+   - [ ] `npm run lint` passes
+   - [ ] Component renders without errors
+   - [ ] No console errors in browser
+   - [ ] Matches existing code style
+   - [ ] No placeholder/TODO code
+
+## IMPLEMENTATION APPROACH
+
+- Read full spec before writing code
+- Ask clarifying questions if ambiguous
+- Show component structure plan before implementing
+- Implement in small, testable chunks
+- Test each chunk before moving forward
+
+## COMMUNICATION
+
+If spec conflicts with existing code or doesn't make sense:
+
+- STOP and ask before proceeding
+- Don't make assumptions
+- Don't add unrequested features
+- Don't remove existing functionality
+
+## WIDGET-SPECIFIC PATTERNS
+
+- Widgets render directly in tiles (no modals unless explicitly specified)
+- Use TanStack Query for data fetching
+- Optimistic updates for all mutations
+- Real-time sync via Supabase Realtime where needed
+- No confirmation dialogs anywhere
+- Mobile-first, touch-friendly interactions

@@ -74,15 +74,15 @@ export function TicTacToeModal({
 
   const myColor = getUserColor(currentUserId, friendId, themeColors);
 
-  // Determine if there's no active game (board is empty and not completed)
-  const hasNoActiveGame = useMemo(() => {
-    if (!game) return true;
-    if (status === "completed") return false;
-    return board.every((cell) => cell === null);
-  }, [game, status, board]);
+  // Determine if there's no game at all (null from DB)
+  const hasNoActiveGame = !game;
 
   const handlePlayClick = useCallback(() => {
-    createGameMutation.mutate();
+    createGameMutation.mutate(undefined, {
+      onError: (error) => {
+        console.error("[TicTacToe] Failed to create game:", error);
+      },
+    });
     playSound("click");
   }, [createGameMutation]);
 
