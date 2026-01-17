@@ -47,8 +47,8 @@
   grid-template-rows: repeat(3, 1fr);
   gap: 0;
   width: 100%;
-  max-width: 90%;
-  max-height: 90%;
+  max-width: 80%;
+  max-height: 80%;
   aspect-ratio: 1;
   border: 2px solid var(--secondary);
   flex-shrink: 1;
