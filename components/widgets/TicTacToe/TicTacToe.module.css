@@ -140,7 +140,7 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   text-align: center;
-  flex: 1;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -161,7 +161,10 @@
   min-width: 2.5rem;
   min-height: 2.5rem;
   transition: color 0.2s;
-  flex-shrink: 0;
+  position: absolute;
+  right: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .settingsButton:hover {
@@ -506,9 +509,8 @@
 
 .gameStatus {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  gap: var(--space-md);
   width: 100%;
   padding: var(--space-sm);
   position: relative;
