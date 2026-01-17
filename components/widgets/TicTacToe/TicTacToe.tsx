@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { playSound } from "@/lib/sounds";
 import { useUIStore } from "@/lib/store/ui-store";
 import { ThemeColors, WidgetSize } from "@/lib/types";
@@ -9,7 +8,7 @@ import { createEmptyBoard } from "./logic";
 import { TicTacToeData, useTicTacToeGame } from "./queries";
 import { ADMIN_USER_ID } from "@/lib/constants";
 import { getUserColor } from "@/lib/utils/color-utils";
-import { useUserContext, getUserIdForFriend, getUserDisplayName } from "@/lib/hooks/useUserContext";
+import { useUserContext, getUserIdForFriend } from "@/lib/hooks/useUserContext";
 import { Shimmer } from "@/components/shared";
 import styles from "./TicTacToe.module.css";
 
@@ -54,11 +53,6 @@ export function TicTacToe({
   const status = game?.status || "active";
   const isMyTurn = currentTurnId === currentUserId;
 
-  const theirDisplayName = useMemo(() => {
-    const otherPlayerId = currentUserId === player1Id ? player2Id : player1Id;
-    return getUserDisplayName(otherPlayerId, friendName);
-  }, [currentUserId, player1Id, player2Id, friendName]);
-
   // Check if there's no game at all
   const hasNoActiveGame = !game;
 
@@ -72,7 +66,7 @@ export function TicTacToe({
     if (isMyTurn) {
       return "My turn";
     }
-    return `${theirDisplayName}'s turn`;
+    return "Waiting...";
   };
 
   const handleClick = () => {
