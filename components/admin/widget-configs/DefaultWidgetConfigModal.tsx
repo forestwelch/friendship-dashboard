@@ -20,6 +20,7 @@ const WIDGET_SIZES: Record<string, WidgetSize[]> = {
   audio_snippets: ["1x2", "1x3", "2x1", "3x1", "4x1"],
   absurd_reviews: ["2x1", "3x1", "4x1"],
   fridge_magnets: ["2x3", "3x4", "4x6"],
+  tic_tac_toe: ["2x2", "3x3"],
 };
 
 export function DefaultWidgetConfigModal({

@@ -122,7 +122,7 @@ export function TicTacToeModal({
     playSound("open");
   }, [resetGameMutation]);
 
-  const getStatusText = () => {
+  const getStatusText = useCallback(() => {
     if (status === "completed") {
       const winnerId = game?.winner_id;
       if (winnerId === currentUserId) {
@@ -136,25 +136,7 @@ export function TicTacToeModal({
       return "YOUR TURN";
     }
     return `${theirDisplayName.toUpperCase()}'S TURN`;
-  };
-
-  const getStatusColor = () => {
-    if (status === "completed") {
-      const winnerId = game?.winner_id;
-      if (winnerId === currentUserId) {
-        return getUserColor(currentUserId, friendId, themeColors);
-      }
-      return getUserColor(
-        player1Id === currentUserId ? player2Id : player1Id,
-        friendId,
-        themeColors
-      );
-    }
-    if (isMyTurn && status === "active") {
-      return getUserColor(currentUserId, friendId, themeColors);
-    }
-    return themeColors.text;
-  };
+  }, [status, game?.winner_id, currentUserId, isMyTurn, theirDisplayName]);
 
   const winningCells = useMemo(() => {
     if (status !== "completed" || !game?.winner_id) return [];
@@ -178,9 +160,15 @@ export function TicTacToeModal({
       <div className={styles.modalBoard}>
         {Array.from({ length: 9 }).map((_, index) => {
           const cellValue = board[index];
+          // Only mark as oldest if player has 3 pieces (meaning 4th will remove it)
           const isOldest =
             (cellValue === player1Id && index === oldestPlayer1Move) ||
             (cellValue === player2Id && index === oldestPlayer2Move);
+          // Only show oldest styling if player has 3+ pieces
+          const showOldestStyling =
+            isOldest &&
+            ((cellValue === player1Id && player1Moves.length >= 3) ||
+              (cellValue === player2Id && player2Moves.length >= 3));
           const isWinning = isWinningCell(index);
           const isClickable = status === "active" && isMyTurn && cellValue === null;
 
@@ -198,21 +186,19 @@ export function TicTacToeModal({
           return (
             <div
               key={index}
-              className={`${styles.modalCell} ${cellValue ? styles.hasPiece : ""} ${isOldest ? styles.oldestPiece : ""} ${isWinning ? styles.winningCell : ""} ${isClickable ? styles.clickable : ""}`}
+              className={`${styles.modalCell} ${cellValue ? styles.hasPiece : ""} ${isWinning ? styles.winningCell : ""} ${isClickable ? styles.clickable : ""}`}
               onClick={() => handleCellClick(index)}
             >
               {iconClass && iconColor ? (
                 <i
-                  className={`hn ${iconClass} ${styles.modalIcon} ${isOldest ? styles.oldestIcon : ""}`}
+                  className={`hn ${iconClass} ${styles.modalIcon} ${showOldestStyling ? styles.oldestIcon : ""}`}
                   style={
                     {
                       "--icon-color": iconColor,
                     } as React.CSSProperties
                   }
                 />
-              ) : (
-                <span className={styles.cellNumber}>{index + 1}</span>
-              )}
+              ) : null}
             </div>
           );
         })}
@@ -234,12 +220,41 @@ export function TicTacToeModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, setOpenModal]);
 
+  // Determine status text
+  const statusText = useMemo(() => {
+    if (status === "active" && !isMyTurn) {
+      return `Waiting for ${theirDisplayName}...`;
+    }
+    return getStatusText();
+  }, [status, isMyTurn, theirDisplayName, getStatusText]);
+
+  const handleClose = () => setOpenModal(null);
+
   if (!isOpen) return null;
 
-  // State 1: No Active Game - Show PLAY button
+  // Show icon picker if needed
+  if (needsIconSelection || showIconSelector) {
+    const opponentIcon = currentUserId === player1Id ? game?.player2_icon : game?.player1_icon;
+    return (
+      <Modal id={modalId} title="TIC-TAC-TOE" onClose={handleClose}>
+        <div className={styles.modalContent}>
+          <IconPicker
+            onConfirm={handleIconConfirm}
+            onCancel={showIconSelector ? () => setShowIconSelector(false) : undefined}
+            userColor={myColor}
+            themeColors={themeColors}
+            showCancel={showIconSelector}
+            opponentIcon={opponentIcon || null}
+          />
+        </div>
+      </Modal>
+    );
+  }
+
+  // Show PLAY button if no game exists
   if (hasNoActiveGame) {
     return (
-      <Modal id={modalId} title="TIC-TAC-TOE" onClose={() => setOpenModal(null)}>
+      <Modal id={modalId} title="TIC-TAC-TOE" onClose={handleClose}>
         <div className={styles.modalContent}>
           <div className={styles.preGame}>
             <button className={styles.playButton} onClick={handlePlayClick} type="button">
@@ -251,87 +266,24 @@ export function TicTacToeModal({
     );
   }
 
-  // State 2: Icon Selection - Show icon picker
-  if (needsIconSelection || showIconSelector) {
-    return (
-      <Modal id={modalId} title="TIC-TAC-TOE" onClose={() => setOpenModal(null)}>
-        <div className={styles.modalContent}>
-          <IconPicker
-            onConfirm={handleIconConfirm}
-            onCancel={showIconSelector ? () => setShowIconSelector(false) : undefined}
-            userColor={myColor}
-            themeColors={themeColors}
-            showCancel={showIconSelector}
-          />
+  // All game states: status bar + board + optional footer
+  return (
+    <Modal id={modalId} title="TIC-TAC-TOE" onClose={handleClose}>
+      <div className={styles.modalContent}>
+        <div className={styles.gameStatus}>
+          <div className={styles.statusText}>{statusText}</div>
+          <button className={styles.settingsButton} onClick={handleSettingsClick} type="button">
+            <i className="hn hn-cog-solid" />
+          </button>
         </div>
-      </Modal>
-    );
-  }
-
-  // State 3: Waiting for opponent (not your turn)
-  if (status === "active" && !isMyTurn) {
-    return (
-      <Modal id={modalId} title="TIC-TAC-TOE" onClose={() => setOpenModal(null)}>
-        <div className={styles.modalContent}>
-          <div className={styles.waitingState}>
-            <div className={styles.waitingText}>Waiting for {theirDisplayName}...</div>
-          </div>
-          <div className={styles.boardContainer}>{renderBoard()}</div>
-        </div>
-      </Modal>
-    );
-  }
-
-  // State 4: Game Over - Show winner and PLAY AGAIN button
-  if (status === "completed") {
-    return (
-      <Modal id={modalId} title="TIC-TAC-TOE" onClose={() => setOpenModal(null)}>
-        <div className={styles.modalContent}>
-          <div className={styles.gameStatus}>
-            <div
-              className={styles.statusText}
-              style={
-                {
-                  "--status-color": getStatusColor(),
-                } as React.CSSProperties
-              }
-            >
-              {getStatusText()}
-            </div>
-          </div>
-          <div className={styles.boardContainer}>{renderBoard()}</div>
+        <div className={styles.boardContainer}>{renderBoard()}</div>
+        {status === "completed" && (
           <div className={styles.gameFooter}>
             <button className={styles.playAgainButton} onClick={handlePlayAgain} type="button">
               PLAY AGAIN
             </button>
           </div>
-        </div>
-      </Modal>
-    );
-  }
-
-  // State 5: Active Game (Your Turn) - Show board with settings cog
-  return (
-    <Modal id={modalId} title="TIC-TAC-TOE" onClose={() => setOpenModal(null)}>
-      <div className={styles.modalContent}>
-        <div className={styles.gameStatus}>
-          <div
-            className={styles.statusText}
-            style={
-              {
-                "--status-color": getStatusColor(),
-              } as React.CSSProperties
-            }
-          >
-            {getStatusText()}
-          </div>
-          {status === "active" && (
-            <button className={styles.settingsButton} onClick={handleSettingsClick} type="button">
-              ⚙️
-            </button>
-          )}
-        </div>
-        <div className={styles.boardContainer}>{renderBoard()}</div>
+        )}
       </div>
     </Modal>
   );

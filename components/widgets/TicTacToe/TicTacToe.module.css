@@ -40,25 +40,25 @@
   letter-spacing: 0.1em;
 }
 
-/* Board Grid (3x3) */
+/* Board Grid (3x3) - Preview in tile */
 .board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: 2px;
+  gap: 0;
   width: 100%;
-  flex: 1;
-  min-height: 0;
-  background: var(--secondary);
-  padding: 2px;
-  border-radius: 0;
+  max-width: 90%;
+  max-height: 90%;
+  aspect-ratio: 1;
+  border: 2px solid var(--secondary);
+  flex-shrink: 1;
+  box-sizing: border-box;
   /* pointer-events: none removed - was blocking clicks to parent tile */
 }
 
 .cell {
   aspect-ratio: 1;
-  background: var(--bg);
-  border: 1px solid var(--secondary);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -67,13 +67,24 @@
   min-height: 0;
   font-size: var(--font-size-xs);
   color: var(--text);
-  opacity: 0.5;
   pointer-events: none;
+  /* Add borders only on specific edges to create clean grid */
+  border-right: 2px solid var(--secondary);
+  border-bottom: 2px solid var(--secondary);
 }
 
-.cell:not(.hasPiece):hover {
-  background: var(--accent);
-  opacity: 0.3;
+/* Remove right border on rightmost cells */
+.cell:nth-child(3),
+.cell:nth-child(6),
+.cell:nth-child(9) {
+  border-right: none;
+}
+
+/* Remove bottom border on bottom row */
+.cell:nth-child(7),
+.cell:nth-child(8),
+.cell:nth-child(9) {
+  border-bottom: none;
 }
 
 .cell.hasPiece {
@@ -81,9 +92,7 @@
   cursor: default;
 }
 
-.cell.oldestPiece {
-  opacity: 0.5;
-}
+/* Removed .cell.oldestPiece - opacity only applies to icon now */
 
 .cell.winningCell {
   border: 3px solid var(--primary);
@@ -98,10 +107,15 @@
 }
 
 .iconDisplay {
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
   color: var(--icon-color);
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: unset;
+  width: 90%;
+  height: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .iconDisplay.oldestIcon {
@@ -122,9 +136,17 @@
 .statusText {
   font-size: var(--font-size-md);
   font-weight: bold;
-  color: var(--status-color, var(--text));
+  color: var(--text);
   text-transform: uppercase;
   letter-spacing: 0.1em;
+  text-align: center;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.5rem;
+  height: 1.5rem;
+  line-height: 1.2;
 }
 
 .settingsButton {
@@ -133,16 +155,24 @@
   cursor: pointer;
   padding: var(--space-xs);
   color: var(--text);
-  font-size: var(--font-size-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  position: absolute;
-  right: var(--space-sm);
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  transition: color 0.2s;
+  flex-shrink: 0;
 }
 
 .settingsButton:hover {
   color: var(--primary);
+}
+
+.settingsButton i {
+  font-size: 1.75rem;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  color: inherit;
 }
 
 /* Pre-Game State */
@@ -253,7 +283,12 @@
   -moz-osx-font-smoothing: unset;
 }
 
-.iconButton:hover {
+.iconButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.iconButton:hover:not(:disabled) {
   border-color: var(--primary);
   background: var(--accent);
 }
@@ -382,33 +417,54 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--space-md);
   width: 100%;
+  min-height: 0;
+  flex-shrink: 0;
 }
 
 .modalBoard {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: 4px;
-  width: 100%;
-  max-width: 400px;
-  background: var(--secondary);
-  padding: 4px;
+  gap: 0;
+  width: 300px;
+  height: 300px;
+  background: transparent;
+  border: 2px solid var(--secondary);
   border-radius: 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .modalCell {
   aspect-ratio: 1;
-  min-width: 60px;
-  min-height: 60px;
-  background: var(--bg);
-  border: 2px solid var(--secondary);
+  width: 100%;
+  height: 100%;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   font-size: var(--font-size-sm);
+  /* Add borders only on specific edges to create clean grid */
+  border-right: 2px solid var(--secondary);
+  border-bottom: 2px solid var(--secondary);
+}
+
+/* Remove right border on rightmost cells */
+.modalCell:nth-child(3),
+.modalCell:nth-child(6),
+.modalCell:nth-child(9) {
+  border-right: none;
+}
+
+/* Remove bottom border on bottom row */
+.modalCell:nth-child(7),
+.modalCell:nth-child(8),
+.modalCell:nth-child(9) {
+  border-bottom: none;
 }
 
 .modalCell.clickable {
@@ -425,9 +481,7 @@
   cursor: default;
 }
 
-.modalCell.oldestPiece {
-  opacity: 0.5;
-}
+/* Removed .modalCell.oldestPiece - opacity only applies to icon now */
 
 .modalCell.winningCell {
   border: 3px solid var(--primary);
@@ -435,14 +489,31 @@
 }
 
 .modalIcon {
-  font-size: 2.5rem;
+  font-size: clamp(1.5rem, 6vw, 2.5rem);
   color: var(--icon-color);
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: unset;
+  width: 80%;
+  height: 80%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modalIcon.oldestIcon {
   opacity: 0.5;
+}
+
+.gameStatus {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  padding: var(--space-sm);
+  position: relative;
+  min-height: 3rem;
+  height: 3rem;
 }
 
 .gameHeader {

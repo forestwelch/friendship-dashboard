@@ -92,9 +92,10 @@ export function TicTacToe({
       <div className={styles.board}>
         {Array.from({ length: 9 }).map((_, index) => {
           const cellValue = displayBoard[index];
+          // Only mark as oldest if player has 3 pieces (meaning 4th will remove it)
           const isOldest =
-            (cellValue === player1Id && index === oldestPlayer1Move) ||
-            (cellValue === player2Id && index === oldestPlayer2Move);
+            (cellValue === player1Id && player1Moves.length >= 3 && index === oldestPlayer1Move) ||
+            (cellValue === player2Id && player2Moves.length >= 3 && index === oldestPlayer2Move);
 
           let iconColor: string | null = null;
           let iconClass: string | null = null;
@@ -107,23 +108,24 @@ export function TicTacToe({
             iconClass = game.player2_icon;
           }
 
+          // Only show oldest styling if player has 3+ pieces
+          const showOldestStyling =
+            isOldest &&
+            ((cellValue === player1Id && player1Moves.length >= 3) ||
+              (cellValue === player2Id && player2Moves.length >= 3));
+
           return (
-            <div
-              key={index}
-              className={`${styles.cell} ${cellValue ? styles.hasPiece : ""} ${isOldest ? styles.oldestPiece : ""}`}
-            >
+            <div key={index} className={`${styles.cell} ${cellValue ? styles.hasPiece : ""}`}>
               {iconClass && iconColor ? (
                 <i
-                  className={`hn ${iconClass} ${styles.iconDisplay} ${isOldest ? styles.oldestIcon : ""}`}
+                  className={`hn ${iconClass} ${styles.iconDisplay} ${showOldestStyling ? styles.oldestIcon : ""}`}
                   style={
                     {
                       "--icon-color": iconColor,
                     } as React.CSSProperties
                   }
                 />
-              ) : (
-                <span className={styles.cellNumber}>{index + 1}</span>
-              )}
+              ) : null}
             </div>
           );
         })}

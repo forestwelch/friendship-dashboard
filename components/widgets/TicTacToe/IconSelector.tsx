@@ -11,6 +11,7 @@ interface IconSelectorProps {
   friendId: string;
   themeColors: ThemeColors;
   currentIcon: string | null;
+  opponentIcon?: string | null;
   onConfirm: (icon: string) => void;
   onCancel?: () => void;
 }
@@ -33,6 +34,7 @@ export function IconSelector({
   friendId,
   themeColors,
   currentIcon,
+  opponentIcon,
   onConfirm,
   onCancel,
 }: IconSelectorProps) {
@@ -57,11 +59,13 @@ export function IconSelector({
       <div className={styles.iconGrid}>
         {AVAILABLE_ICONS.map((icon) => {
           const isSelected = selectedIcon === icon;
+          const isOpponentIcon = opponentIcon === icon;
           return (
             <button
               key={icon}
-              className={`${styles.iconButton} ${isSelected ? styles.iconButtonSelected : ""}`}
-              onClick={() => handleIconClick(icon)}
+              className={`${styles.iconButton} ${isSelected ? styles.iconButtonSelected : ""} ${isOpponentIcon ? styles.iconButtonDisabled : ""}`}
+              onClick={() => !isOpponentIcon && handleIconClick(icon)}
+              disabled={isOpponentIcon}
               style={
                 {
                   "--icon-color": iconColor,

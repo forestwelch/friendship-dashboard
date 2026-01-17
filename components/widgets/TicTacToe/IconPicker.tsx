@@ -10,6 +10,7 @@ interface IconPickerProps {
   userColor: string;
   themeColors: ThemeColors;
   showCancel?: boolean;
+  opponentIcon?: string | null;
 }
 
 const AVAILABLE_ICONS = [
@@ -30,6 +31,7 @@ export function IconPicker({
   onCancel,
   userColor,
   showCancel = false,
+  opponentIcon,
 }: IconPickerProps) {
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
 
@@ -44,24 +46,28 @@ export function IconPicker({
       <div className={styles.iconSelectorTitle}>CHOOSE YOUR ICON</div>
 
       <div className={styles.iconGrid}>
-        {AVAILABLE_ICONS.map((iconClass) => (
-          <button
-            key={iconClass}
-            type="button"
-            className={`${styles.iconButton} ${selectedIcon === iconClass ? styles.iconButtonSelected : ""}`}
-            onClick={() => setSelectedIcon(iconClass)}
-          >
-            <i
-              className={`hn ${iconClass}`}
-              style={
-                {
-                  "--icon-color": userColor,
-                  fontSize: "2rem",
-                } as React.CSSProperties
-              }
-            />
-          </button>
-        ))}
+        {AVAILABLE_ICONS.map((iconClass) => {
+          const isOpponentIcon = opponentIcon === iconClass;
+          return (
+            <button
+              key={iconClass}
+              type="button"
+              className={`${styles.iconButton} ${selectedIcon === iconClass ? styles.iconButtonSelected : ""} ${isOpponentIcon ? styles.iconButtonDisabled : ""}`}
+              onClick={() => !isOpponentIcon && setSelectedIcon(iconClass)}
+              disabled={isOpponentIcon}
+            >
+              <i
+                className={`hn ${iconClass}`}
+                style={
+                  {
+                    "--icon-color": userColor,
+                    fontSize: "2rem",
+                  } as React.CSSProperties
+                }
+              />
+            </button>
+          );
+        })}
       </div>
 
       <div className={styles.iconSelectorFooter}>

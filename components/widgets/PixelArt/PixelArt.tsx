@@ -214,13 +214,13 @@ export function PixelArt({
     }
   }, [useProgrammaticRendering, currentPixelData, themeColors, gridSize, svgPixelSize, canvasSize]);
 
-  // Show shimmer while loading
+  // Show shimmer while loading (only when images exist but haven't loaded yet)
   // For programmatic: need pixelData and themeColors
   // For image-based: need image URL and it to be loaded
-  // Always show shimmer if no images/pixelData available, or if images exist but haven't loaded yet
+  // Only show shimmer if images/pixelData exist but haven't loaded yet
   const isLoading = useProgrammaticRendering
-    ? !currentPixelData || !themeColors
-    : images.length === 0 || (images.length > 0 && !imageLoaded);
+    ? pixelData && pixelData.length > 0 && (!currentPixelData || !themeColors)
+    : images.length > 0 && !imageLoaded;
 
   if (isLoading) {
     return (
